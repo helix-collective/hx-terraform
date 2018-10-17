@@ -1,0 +1,185 @@
+/**
+ *   Miscellaneous functions for building AWS infrastructure.
+ *
+ *   These construct resources or groups of resource consistently within helix,
+ *   and should be used in preference to the lower level resource creation functions
+ *   in providers
+ */
+
+import * as _ from 'lodash';
+import * as TF from "../core/core"
+import * as AT from "../providers/aws-types";
+import * as AR from "../providers/aws-resources";
+import * as policies from "./aws-policies";
+import {SharedResources} from "./aws-shared";
+import {ingressOnPort, egress_all, contextTagsWithName, s3ConfigKey, Customize} from "./util";
+
+export interface InstanceWithEipParams {
+  instance_type: AT.InstanceType,
+  ami(region: AT.Region): AT.Ami;
+  security_group: AR.SecurityGroup;
+  key_name: AT.KeyName,
+  customize_instance?: Customize<AR.InstanceParams>;
+};
+
+/**
+ * Construct an EC2 instance with a public elastic IP Address
+ */
+export function createInstanceWithEip(tfgen: TF.Generator, name: string, sr: SharedResources, params0: InstanceWithEipParams): {eip: AR.Eip, ec2: AR.Instance}
+{
+  function createInstance() {
+    const instance_params : AR.InstanceParams = {
+      ami: params0.ami(sr.network.region),
+      instance_type: params0.instance_type,
+      key_name: params0.key_name,
+      subnet_id: TF.refAttribute(firstAzExternalSubnet(sr).id),
+      vpc_security_group_ids: [TF.refAttribute(params0.security_group.id)],
+      root_block_device: {
+        volume_size: 20
+      },
+      tags: contextTagsWithName(tfgen, name)
+    };
+
+    if (params0.customize_instance) {
+      params0.customize_instance(instance_params);
+    }
+
+    const ec2 = AR.createInstance(tfgen, name, instance_params);
+
+    // Prevent changes to user_data script tainting the instance, (as
+    // a developer convenience)
+    tfgen.ignoreChanges(ec2, "user_data");
+
+    return ec2;
+  }
+
+  function createElasticIp(ec2: AR.Instance) {
+    const params: AR.EipParams = {
+      vpc: true,
+      instance: TF.refAttribute(ec2.id),
+      tags: {
+        ...tfgen.tagsContext()
+      }
+    };
+
+    const eip = AR.createEip(tfgen, name, params);
+    return {eip,ec2};
+  }
+
+  const ec2 = createInstance();
+  const eip = createElasticIp(ec2);
+
+  return eip;
+}
+
+/**
+ * Create an EC2 Container Registry Repository, for storing docker images.
+ */
+export function createEcrRepository(tfgen: TF.Generator, name: string) {
+  return AR.createEcrRepository(tfgen, name.replace(/\//g, "_"), {
+    name: name
+  });
+}
+
+export interface DbInstance {
+  instance: AR.DbInstance,
+  config_json: {},
+  password_s3_key: string,
+  password_s3_path: string
+};
+
+/**  Selects the external subnet of the first availability zone */
+export function firstAzExternalSubnet(sr: SharedResources) : AR.Subnet {
+  return sr.network.azs[0].external_subnet;
+}
+
+/**
+ * Create an RDS postgres database, with suitable defaults for a uat helix environment.
+ * The defaults can be overridden via the customize parameter.
+ */
+export function createPostgresInstance(tfgen: TF.Generator, name: string, db_name: string, sr: SharedResources, db_instance_type: AT.DbInstanceType, customize: Customize<AR.DbInstanceParams>) : DbInstance {
+
+  const sname = tfgen.scopedName(name).join("_");
+
+  const security_group = AR.createSecurityGroup(tfgen, name, {
+    vpc_id: TF.refAttribute(sr.network.vpc.id),
+    ingress: [ingressOnPort(5432)],
+    egress: [egress_all],
+    tags: contextTagsWithName(tfgen, name)
+  });
+
+  const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
+    name: sname,
+    subnet_ids: sr.network.azs.map(az => TF.refAttribute(az.external_subnet.id))
+  });
+
+  const params: AR.DbInstanceParams = {
+    allocated_storage: 5,
+    engine: AT.postgres,
+    instance_class: db_instance_type,
+    username: "postgres",
+    password: "REPLACEME",
+    identifier: sname.replace(/_/g, "-"),
+    name: db_name,
+    engine_version: "9.4.15",
+    publicly_accessible: false,
+    backup_retention_period: 3,
+    vpc_security_group_ids: [TF.refAttribute(security_group.id)],
+    db_subnet_group_name: TF.refStringAttribute(db_subnet_group.name),
+    tags: tfgen.tagsContext(),
+    final_snapshot_identifier: sname.replace(/_/g, "-") + "-final",
+    skip_final_snapshot: false,
+  };
+
+  customize(params);
+  const db = AR.createDbInstance(tfgen, name, params);
+
+  const db_password_config_key = s3ConfigKey(tfgen, name) + '_password.json';
+  const password_s3_path = "s3://" + sr.deploy_bucket_name + "/" +  db_password_config_key;
+  const config_json = {
+    name: TF.refStringAttribute(db.name),
+    username: TF.refStringAttribute(db.username),
+    address: TF.refStringAttribute(db.address),
+    port: TF.refStringAttribute(db.port),
+  };
+
+  tfgen.localExecProvisioner(db, [
+    "# Generate a random password for the instance, and upload it to S3",
+    "cd generate",
+    `export AWS_REGION=${sr.network.region.value}`,
+    `hx-provisioning-tools generate-rds-password ${TF.refStringAttribute(db.id)} ${TF.refStringAttribute(sr.deploy_bucket.id)} ${db_password_config_key}`
+
+  ].join('\n'));
+
+  return {
+    instance: db,
+    config_json,
+    password_s3_key: db_password_config_key,
+    password_s3_path,
+  };
+}
+
+/**
+ * Create a security group within the shared VPC
+ */
+export function createSecurityGroupInVpc(tfgen: TF.Generator, name: string, sr: SharedResources, customize: Customize<AR.SecurityGroupParams> ): AR.SecurityGroup {
+  const params: AR.SecurityGroupParams = {
+    vpc_id: TF.refAttribute(sr.network.vpc.id),
+    tags: contextTagsWithName(tfgen, name),
+  };
+  customize(params);
+  return AR.createSecurityGroup(tfgen,name,params);
+}
+
+
+export function s3DeployBucketReadOnlyPolicy(sr: SharedResources) {
+  return policies.s3ReadonlyPolicy("reads3deploy", sr.deploy_bucket_name);
+}
+
+export function s3DeployBucketModifyPolicy(sr: SharedResources) {
+  return policies.s3ModifyPolicy("modifys3deploy", sr.deploy_bucket_name);
+}
+
+export function s3BackupBucketModifyPolicy(sr: SharedResources) {
+  return policies.s3ModifyPolicy("modifys3backup", sr.backup_bucket_name);
+}

@@ -170,6 +170,18 @@ export function createSecurityGroupInVpc(tfgen: TF.Generator, name: string, sr: 
   return AR.createSecurityGroup(tfgen,name,params);
 }
 
+/**
+ * Create an SQS Queue
+ */
+export function createSqsQueue(tfgen: TF.Generator, name: string, customize: Customize<AR.SqsQueueParams>): AR.SqsQueue {
+  const sname = tfgen.scopedName(name).join("_");
+  let params: AR.SqsQueueParams = {
+    name: sname,
+    tags: tfgen.tagsContext()
+  };
+  customize(params);
+  return AR.createSqsQueue(tfgen, name, params);
+}
 
 export function s3DeployBucketReadOnlyPolicy(sr: SharedResources) {
   return policies.s3ReadonlyPolicy("reads3deploy", sr.deploy_bucket_name);

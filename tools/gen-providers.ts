@@ -392,6 +392,32 @@ const iam_role_policy: RecordDecl = {
   ]
 }
 
+const sqs_queue: RecordDecl = {
+  name: "sqs_queue",
+  fields: [
+    optionalField("name", STRING),
+    optionalField("name_prefix", STRING),
+    optionalField("visibility_timeout_seconds", NUMBER),
+    optionalField("message_retention_seconds ", NUMBER),
+    optionalField("max_message_size", NUMBER),
+    optionalField("delay_seconds", NUMBER), 
+    optionalField("receive_wait_time_seconds", NUMBER),
+    optionalField("policy", STRING),
+    optionalField("redrive_policy", STRING),
+    optionalField("fifo_queue", BOOLEAN),
+    optionalField("content_based_deduplication", BOOLEAN),
+    optionalField('tags', TAGS_MAP)        
+  ]
+}
+
+const sqs_queue_policy: RecordDecl = {
+  name: "sqs_queue_policy",
+  fields: [
+    requiredField("queue_url", STRING),
+    requiredField("policy", STRING),      
+  ]
+} 
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -649,6 +675,23 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    "Provides an SQS queue.",
+    "https://www.terraform.io/docs/providers/aws/r/sqs_queue.html",
+    sqs_queue,
+    [
+      resourceIdAttr("id", sqs_queue),
+      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+    ]
+  )
+
+  gen.generateResource(
+    "Allows you to set a policy of an SQS Queue while referencing ARN of the queue within the policy.",
+    "https://www.terraform.io/docs/providers/aws/r/sqs_queue_policy.html",
+    sqs_queue_policy,
+    [
+    ]
+  )
   // Generate all of the parameter structures
   gen.generateParams(instance_root_block_device);
   gen.generateParams(instance);
@@ -683,6 +726,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_instance_profile);
   gen.generateParams(iam_role);
   gen.generateParams(iam_role_policy);
+  gen.generateParams(sqs_queue);
+  gen.generateParams(sqs_queue_policy);
 }
 
 function main() {

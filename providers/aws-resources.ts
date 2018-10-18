@@ -669,6 +669,52 @@ export interface IamInstanceProfile extends TF.Resource {
 type IamInstanceProfileId = {type:'IamInstanceProfileId',value:string};
 type IamInstanceProfileIdAttr = TF.Attribute<'IamInstanceProfileId'>;
 
+/**
+ *  Provides an SQS queue.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/sqs_queue.html
+ */
+export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQueueParams): SqsQueue {
+  const fields = fieldsFromSqsQueueParams(params);
+  const resource = tfgen.createResource('aws_sqs_queue', rname, fields);
+  const id: SqsQueueIdAttr = {...resource, field:'id', atype: 'SqsQueueId'};
+  const arn: AT.ArnAttr = {...resource, field:'arn', atype: 'Arn'};
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface SqsQueue extends TF.Resource {
+  id: SqsQueueIdAttr;
+  arn: AT.ArnAttr;
+}
+
+type SqsQueueId = {type:'SqsQueueId',value:string};
+type SqsQueueIdAttr = TF.Attribute<'SqsQueueId'>;
+
+/**
+ *  Allows you to set a policy of an SQS Queue while referencing ARN of the queue within the policy.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/sqs_queue_policy.html
+ */
+export function createSqsQueuePolicy(tfgen: TF.Generator, rname: string, params: SqsQueuePolicyParams): SqsQueuePolicy {
+  const fields = fieldsFromSqsQueuePolicyParams(params);
+  const resource = tfgen.createResource('aws_sqs_queue_policy', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface SqsQueuePolicy extends TF.Resource {
+}
+
+type SqsQueuePolicyId = {type:'SqsQueuePolicyId',value:string};
+type SqsQueuePolicyIdAttr = TF.Attribute<'SqsQueuePolicyId'>;
+
 export interface InstanceRootBlockDeviceParams {
   volume_type?: 'standard' | 'gp2' | 'io1';
   volume_size?: number;
@@ -1242,5 +1288,49 @@ export function fieldsFromIamRolePolicyParams(params: IamRolePolicyParams) : TF.
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "policy", params.policy, TF.stringValue);
   TF.addField(fields, "role", params.role, TF.resourceIdValue);
+  return fields;
+}
+
+export interface SqsQueueParams {
+  name?: string;
+  name_prefix?: string;
+  visibility_timeout_seconds?: number;
+  message_retention_seconds ?: number;
+  max_message_size?: number;
+  delay_seconds?: number;
+  receive_wait_time_seconds?: number;
+  policy?: string;
+  redrive_policy?: string;
+  fifo_queue?: boolean;
+  content_based_deduplication?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromSqsQueueParams(params: SqsQueueParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "visibility_timeout_seconds", params.visibility_timeout_seconds, TF.numberValue);
+  TF.addOptionalField(fields, "message_retention_seconds ", params.message_retention_seconds , TF.numberValue);
+  TF.addOptionalField(fields, "max_message_size", params.max_message_size, TF.numberValue);
+  TF.addOptionalField(fields, "delay_seconds", params.delay_seconds, TF.numberValue);
+  TF.addOptionalField(fields, "receive_wait_time_seconds", params.receive_wait_time_seconds, TF.numberValue);
+  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalField(fields, "redrive_policy", params.redrive_policy, TF.stringValue);
+  TF.addOptionalField(fields, "fifo_queue", params.fifo_queue, TF.booleanValue);
+  TF.addOptionalField(fields, "content_based_deduplication", params.content_based_deduplication, TF.booleanValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SqsQueuePolicyParams {
+  queue_url: string;
+  policy: string;
+}
+
+export function fieldsFromSqsQueuePolicyParams(params: SqsQueuePolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "queue_url", params.queue_url, TF.stringValue);
+  TF.addField(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }

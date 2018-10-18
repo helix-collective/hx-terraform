@@ -145,7 +145,6 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
 
   tfgen.localExecProvisioner(db, [
     "# Generate a random password for the instance, and upload it to S3",
-    "cd generate",
     `export AWS_REGION=${sr.network.region.value}`,
     `hx-provisioning-tools generate-rds-password ${TF.refStringAttribute(db.id)} ${TF.refStringAttribute(sr.deploy_bucket.id)} ${db_password_config_key}`
 

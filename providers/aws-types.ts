@@ -17,12 +17,12 @@ export function region(v: string): Region {
   return {type:'Region', value:v};
 };
 
-export const us_east_1 = region("us_east_1");
-export const us_east_2 = region("us_east_2");
-export const us_west_1 = region("us_west_1");
-export const us_west_2 = region("us_west_2");
-export const ap_southeast_1 = region("ap_southeast_1");
-export const ap_southeast_2 = region("ap_southeast_2");
+export const us_east_1 = region("us-east-1");
+export const us_east_2 = region("us-east-2");
+export const us_west_1 = region("us-west-1");
+export const us_west_2 = region("us-west-2");
+export const ap_southeast_1 = region("ap-southeast-1");
+export const ap_southeast_2 = region("ap-southeast-2");
 
 //----------------------------------------------------------------------
 

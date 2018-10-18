@@ -69,13 +69,13 @@ export function install(username: string, releases: s3.S3Ref, deploy_context: s3
     if(proxy.kind === 'none') {
         deployMode = "select";
     } else if(proxy.kind == 'local') {
-        let endpoints : {[key: string]: {}} = {};
+        let endPoints : {[key: string]: {}} = {};
         proxy.endpoints.forEach( ep => {
-            endpoints[ep.label] = ep.details;
+            endPoints[ep.label] = ep.details;
         })
         deployMode = {
             proxy: {
-                endpoints
+                endPoints
             }
         }
     }

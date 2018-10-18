@@ -166,7 +166,7 @@ export class BootScript {
         if (this.apt_packages.size > 0) {
             lines.push("apt-get update -y");
             this.apt_packages.forEach( pkg => {
-                lines.push(`apt=get install -y '${pkg}'`);
+                lines.push(`apt-get install -y '${pkg}'`);
             });            
         }
         lines.push("");

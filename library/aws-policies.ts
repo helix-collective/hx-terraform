@@ -149,21 +149,21 @@ export function route53ModifyZonePolicy(name:string, zone: AR.Route53Zone): Name
   }
 }
 
-// export function sqsQueueModifyPolicy(name:string, queue: AR.SqsQueue): NamedPolicy {
-//   return {
-//     name: name,
-//     policy: {
-//       "Version": "2012-10-17",
-//       "Statement": [
-//         {
-//           "Action": "sqs:*",
-//           "Effect": "Allow",
-//           "Resource": "${TF.refAttribute(queue.arn).value}"
-//         }
-//       ]
-//     }
-//   }
-// }
+export function sqsQueueModifyPolicy(name:string, queue: AR.SqsQueue): NamedPolicy {
+  return {
+    name: name,
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": "sqs:*",
+          "Effect": "Allow",
+          "Resource": TF.refAttribute(queue.arn).value
+        }
+      ]
+    }
+  }
+}
 
 
 export const ecr_readonly_policy: NamedPolicy = {

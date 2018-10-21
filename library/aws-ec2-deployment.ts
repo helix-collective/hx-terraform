@@ -31,13 +31,13 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
     const bs = bootscript.newBootscript();
     const app_user = params.app_user || "app";
     const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-    let context_files = [
-        {name:INFRASTRUCTURE_JSON, source_name: INFRASTRUCTURE_JSON},
-        {name:SECRETS_JSON, source_name: SECRETS_JSON },
-    ];
-    if (params.extra_context_files) {
-        context_files = context_files.concat(params.extra_context_files(params.config_s3));
+    let context_files : deploytool.ContextFile[];
+    if (params.context_files) {
+        context_files = params.context_files.map(ref => deploytool.contextFile(params.config_s3,ref));
+    } else {
+        context_files = [];
     }
+
     let endpoints = params.endpoints || [
         {name: "main", dnsname: params.dns_name},
         {name: "test", dnsname: params.dns_name + "-test"},
@@ -47,6 +47,9 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
     bs.createUserWithKeypairAccess(app_user);
     bs.addUserToGroup(app_user, "docker");
     bs.cloudwatchMetrics(app_user);
+    if (params.extra_bootscript) {
+        bs.include(params.extra_bootscript);
+    }
 
     const ssl_cert_dns_names = endpoints.map( ep => shared.fqdn(sr, ep.dnsname));
     const ssl_cert_dir = "/etc/letsencrypt/live/" + ssl_cert_dns_names[0];
@@ -88,19 +91,78 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
 }
 
 export interface Ec2DeploymentParams {
+  /** 
+   * The AWS keyname used for the EC2 instance.
+   */
   key_name: AT.KeyName,
+
+  /**
+   * The AWS instance type (ie mem and cores) for the EC2 instance.
+   */
   instance_type: AT.InstanceType;
+
+  /**
+   * The DNS name of the machine. This is a prefix to the shared primary DNS zone.
+   * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
+   * will be aaa.helix.com).
+   */
   dns_name: string,
+
+  /**
+   * The email address for SSL certificate admin and notification.
+   */
   ssl_cert_email: string,
+
+  /**
+   * The S3 location where hx-deploy-tool releases are stored.
+   */
   releases_s3 : s3.S3Ref,
+
+  /**
+   * The S3 location where hx-deploy-tool context files are stored.
+   */
   config_s3: s3.S3Ref,
 
+  /**
+   * The name of the unprivileged user used to run application code.
+   * Defaults to "app".
+   */
   app_user?: string,
+
+  /**
+   * The endpoints configured for http/https access. Defaults to
+   *    main:   ${dns_name}.${primary_dns_zone}
+   *    test:   ${dns_name}-test.${primary_dns_zone}
+   */
   endpoints? : EndPoint[],
+
+  /**
+   * Specifies the AMI for the EC2 instance. Defaults to an ubuntu 16.04 AMI
+   * for the appropriate region.
+   */
   ami?(region: AT.Region): AT.Ami,
+
+  /**
+   * The EC2 instance created is given an IAM profile with sufficient access policies to
+   * log metrics, run the deploy tool and create SSL certificates. Additional policies
+   * can be specified here.
+   */
   extra_policies?: policies.NamedPolicy[],
-  extra_context_files?: (ref:s3.S3Ref) => deploytool.ContextFile[],
+
+  /**
+   * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
+   * into the deployed application configuration.
+   */
+  context_files?: s3.S3Ref[],
+
+  /**
+   * Additional operations for the EC2 instances first boot can be passed vis the operation.
+   */
   extra_bootscript? : bootscript.BootScript,
+
+  /**
+   * Override the default docker config.
+   */
   docker_config?: docker.DockerConfig
 }
 
@@ -129,6 +191,3 @@ function getDefaultAmi(region: AT.Region): AT.Ami {
   }
   throw new Error("No AMI specified for region " + region.value);
 }
-
-export const INFRASTRUCTURE_JSON = "infrastructure.json";
-export const SECRETS_JSON = "secrets.json";

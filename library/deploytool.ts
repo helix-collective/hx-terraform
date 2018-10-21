@@ -1,12 +1,27 @@
 import * as s3 from "./aws-s3";
 import * as bootscript  from "./bootscript";
-import { createGunzip } from "zlib";
-import { ClientRequest } from "http";
+
 
 export interface ContextFile {
     name:string, 
     source_name:string
 };
+
+export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
+    if (base_s3.bucket != file_s3.bucket || !file_s3.key.startsWith(base_s3.key)) {
+        throw new Error("contextFile: base_s3 must be a prefix of file_s3");
+    }
+    let source_name: string = file_s3.key.substr(base_s3.key.length);
+    if (source_name.startsWith("/")) {
+        source_name = source_name.substr(1);
+    }
+    // The name is the characters after the last slash
+    const name = /[^/]*$/.exec(source_name);
+    if (!name) {
+        throw new Error("Invalid context file path");
+    }
+    return {name:name[0], source_name};
+}
 
 export interface ProxyEndPoint {
     label: string,

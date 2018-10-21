@@ -35,13 +35,6 @@ export function contextTagsWithName(tfgen: TF.Generator, name: string): TF.TagsM
   }
 }
 
-export function s3ConfigKey(tfgen: TF.Generator, name: string): string {
-  const sname = tfgen.scopedName(name);
-  const base = sname[0];
-  const rest = sname.slice(1).join('_');
-  return `${base}/config/${rest}`;
-}
-
 
 /**
  *   A function to customise a value via mutation.

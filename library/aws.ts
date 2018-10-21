@@ -11,8 +11,9 @@ import * as TF from "../core/core"
 import * as AT from "../providers/aws-types";
 import * as AR from "../providers/aws-resources";
 import * as policies from "./aws-policies";
+import * as s3 from "./aws-s3";
 import {SharedResources} from "./aws-shared";
-import {ingressOnPort, egress_all, contextTagsWithName, s3ConfigKey, Customize} from "./util";
+import {ingressOnPort, egress_all, contextTagsWithName, Customize} from "./util";
 
 export interface InstanceWithEipParams {
   instance_type: AT.InstanceType,
@@ -84,8 +85,7 @@ export function createEcrRepository(tfgen: TF.Generator, name: string) {
 export interface DbInstance {
   instance: AR.DbInstance,
   config_json: {},
-  password_s3_key: string,
-  password_s3_path: string
+  password_s3: s3.S3Ref
 };
 
 /**  Selects the external subnet of the first availability zone */
@@ -97,7 +97,7 @@ export function firstAzExternalSubnet(sr: SharedResources) : AR.Subnet {
  * Create an RDS postgres database, with suitable defaults for a uat helix environment.
  * The defaults can be overridden via the customize parameter.
  */
-export function createPostgresInstance(tfgen: TF.Generator, name: string, db_name: string, sr: SharedResources, db_instance_type: AT.DbInstanceType, customize: Customize<AR.DbInstanceParams>) : DbInstance {
+export function createPostgresInstance(tfgen: TF.Generator, name: string, db_name: string, sr: SharedResources, db_instance_type: AT.DbInstanceType, password_s3: s3.S3Ref, customize: Customize<AR.DbInstanceParams>) : DbInstance {
 
   const sname = tfgen.scopedName(name).join("_");
 
@@ -134,8 +134,6 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
   customize(params);
   const db = AR.createDbInstance(tfgen, name, params);
 
-  const db_password_config_key = s3ConfigKey(tfgen, name) + '_password.json';
-  const password_s3_path = "s3://" + sr.deploy_bucket_name + "/" +  db_password_config_key;
   const config_json = {
     name: TF.refStringAttribute(db.name),
     username: TF.refStringAttribute(db.username),
@@ -146,15 +144,14 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
   tfgen.localExecProvisioner(db, [
     "# Generate a random password for the instance, and upload it to S3",
     `export AWS_REGION=${sr.network.region.value}`,
-    `hx-provisioning-tools generate-rds-password ${TF.refStringAttribute(db.id)} ${TF.refStringAttribute(sr.deploy_bucket.id)} ${db_password_config_key}`
+    `hx-provisioning-tools generate-rds-password ${TF.refStringAttribute(db.id)} ${TF.refStringAttribute(sr.deploy_bucket.id)} ${password_s3.key}`
 
   ].join('\n'));
 
   return {
     instance: db,
     config_json,
-    password_s3_key: db_password_config_key,
-    password_s3_path,
+    password_s3,
   };
 }
 

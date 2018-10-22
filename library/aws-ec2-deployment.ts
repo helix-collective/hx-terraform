@@ -13,7 +13,6 @@ import * as s3 from "./aws-s3";
 import * as bootscript from "./bootscript";
 import * as docker from "./docker";
 import * as deploytool from "./deploytool";
-import { Transform } from 'stream';
 
 /**
  *  Creates a logical deployment on a single EC2 instance, including:

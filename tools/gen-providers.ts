@@ -418,6 +418,135 @@ const sqs_queue_policy: RecordDecl = {
   ]
 } 
 
+const lb_subnet_mapping = {
+  name: "lb_subnet_mapping",
+  fields: [
+    requiredField("subnet_id", resourceIdType('SubnetId')),
+    requiredField("allocation_id", resourceIdType('Eip'))
+  ]
+};
+
+const lb_access_logs = {
+  name: "lb_access_logs",
+  fields: [
+    requiredField("bucket", STRING),
+    optionalField("bucket_prefix", STRING),
+    optionalField("interval", NUMBER),
+    optionalField("enabled", BOOLEAN)
+  ]
+};
+
+const lb: RecordDecl = {
+  name: "lb",
+  fields: [
+    optionalField("name", STRING),
+    optionalField("name_prefix", STRING),
+    optionalField("internal", BOOLEAN),
+    optionalField("load_balancer_type", enumType(["application","network"])),
+    optionalField("security_groups",  listType(resourceIdType('SecurityGroupId'))),
+    optionalField("access_logs", recordType(lb_access_logs)),
+    optionalField("subnets", listType(resourceIdType('SubnetId'))),
+    optionalField("subnet_mapping", listType(recordType(lb_subnet_mapping))),
+    optionalField("idle_timeout",NUMBER),
+    optionalField("enable_deletion_protection",BOOLEAN),
+    optionalField("enable_cross_zone_load_balancing", BOOLEAN),
+    optionalField("enable_http2", BOOLEAN),
+    optionalField("ip_address_type", enumType(["ipv4","dualstack"])),
+    optionalField("tags", TAGS_MAP)
+  ]
+};
+
+const lb_listener_action: RecordDecl = {
+  name: "lb_listener_action",
+  fields: [
+    requiredField("target_group_arn", stringAliasType("AT.Arn")),
+    requiredField("type", enumType(["forward"]) )
+  ]
+}
+
+const lb_listener: RecordDecl = {
+  name: "lb_listener",
+  fields: [
+    requiredField("load_balancer_arn", stringAliasType('AT.Arn')),
+    requiredField("port", NUMBER),
+    optionalField("protocol", enumType(["TCP", "HTTP", "HTTPS"])),
+    optionalField("ssl_policy", STRING),
+    optionalField("certificate_arn", stringAliasType('AT.Arn')),
+    requiredField("default_action", recordType(lb_listener_action) )
+  ]
+};
+
+const lb_target_group_stickiness : RecordDecl = {
+  name: "lb_target_group_stickiness",
+  fields: [
+    requiredField("type", enumType(["lb_cookie"])),
+    optionalField("cookie_duration", NUMBER),
+    optionalField("enabled", BOOLEAN),
+  ]
+};
+
+const lb_target_group_health_check : RecordDecl = {
+  name: "lb_target_group_health_check",
+  fields: [
+    optionalField("interval", NUMBER),
+    optionalField("path", STRING),
+    optionalField("port", STRING),
+    optionalField("protocol",enumType(["TCP", "HTTP", "HTTPS"])),
+    optionalField("timeout", NUMBER),
+    optionalField("healthy_threshold",NUMBER),
+    optionalField("unhealthy_threshold", NUMBER),
+    optionalField("matcher", STRING),
+  ]
+}
+
+const lb_target_group: RecordDecl = {
+  name: "lb_target_group",
+  fields: [
+    optionalField("name", STRING),
+    optionalField("name_prefix", STRING),
+    requiredField("port", NUMBER),
+    requiredField("protocol", enumType(["TCP","HTTP", "HTTPS"])),
+    requiredField("vpc_id",  resourceIdType('VpcId')),
+    optionalField("deregistration_delay", NUMBER),
+    optionalField("slow_start", NUMBER),
+    optionalField("proxy_protocol_v2", BOOLEAN),
+    optionalField("stickiness", recordType(lb_target_group_stickiness)),
+    optionalField("health_check", recordType(lb_target_group_health_check)),
+    optionalField("target_type", enumType(["instance", "ip"])),
+    optionalField("tags", TAGS_MAP),
+  ]
+};
+
+
+const lb_target_group_attachment: RecordDecl = {
+  name: "lb_target_group_attachment",
+  fields: [
+    requiredField("target_group_arn", stringAliasType('AT.Arn')),
+    requiredField("target_id", STRING),
+    optionalField("port", NUMBER),
+    optionalField("availability_zone",stringAliasType('AT.AvailabilityZone')),
+  ]
+};
+
+
+const lb_listener_rule_condition: RecordDecl = {
+  name: "lb_listener_rule_condition",
+  fields: [
+    requiredField("field",enumType(["path-pattern","host-header"])),
+    requiredField("values", listType(STRING)),
+  ]
+};
+
+const lb_listener_rule: RecordDecl = {
+  name: "lb_listener_rule",
+  fields: [
+    requiredField("listener_arn", stringAliasType('AT.Arn')),
+    optionalField("priority", NUMBER),
+    requiredField("action", recordType(lb_listener_action)),
+    requiredField("condition", recordType(lb_listener_rule_condition)),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -692,6 +821,60 @@ function generateAws(gen: Generator) {
     [
     ]
   )
+
+  gen.generateResource(
+    "Provides a Load Balancer resource.",
+    "https://www.terraform.io/docs/providers/aws/r/lb.html",
+    lb,
+    [
+      resourceIdAttr("id", lb),
+      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAttr('dns_name'),
+      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneIdAttr')
+    ]
+  )
+
+  gen.generateResource(
+    "Provides a Load Balancer Listener resource.",
+    "https://www.terraform.io/docs/providers/aws/r/lb_listener.html",
+    lb_listener,
+    [
+      resourceIdAttr("id", lb_listener),
+      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+    ]
+  )
+
+  gen.generateResource(
+    "Provides a Target Group resource for use with Load Balancer resources.",
+    "https://www.terraform.io/docs/providers/aws/r/lb_target_group.html",
+    lb_target_group,
+    [
+      resourceIdAttr("id", lb_target_group),
+      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAttr('arn_suffix'),
+      stringAttr('name'),
+    ]
+  )
+
+  gen.generateResource(
+    "Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group. ",
+    "https://www.terraform.io/docs/providers/aws/r/lb_target_group_attachment.html",
+    lb_target_group_attachment,
+    [
+      resourceIdAttr("id", lb_target_group_attachment),
+    ]
+  )
+
+  gen.generateResource(
+    "Provides a Load Balancer Listener Rule resource.",
+    "https://www.terraform.io/docs/providers/aws/r/lb_listener_rule.html",
+    lb_listener_rule,
+    [
+      resourceIdAttr("id", lb_listener_rule),
+      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+    ]
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(instance_root_block_device);
   gen.generateParams(instance);
@@ -728,6 +911,17 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_role_policy);
   gen.generateParams(sqs_queue);
   gen.generateParams(sqs_queue_policy);
+  gen.generateParams(lb);
+  gen.generateParams(lb_access_logs);
+  gen.generateParams(lb_subnet_mapping);
+  gen.generateParams(lb_listener);
+  gen.generateParams(lb_listener_action);
+  gen.generateParams(lb_target_group);
+  gen.generateParams(lb_target_group_health_check);
+  gen.generateParams(lb_target_group_stickiness);
+  gen.generateParams(lb_target_group_attachment);
+  gen.generateParams(lb_listener_rule);
+  gen.generateParams(lb_listener_rule_condition);
 }
 
 function main() {

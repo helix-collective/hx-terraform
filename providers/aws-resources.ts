@@ -715,6 +715,145 @@ export interface SqsQueuePolicy extends TF.Resource {
 type SqsQueuePolicyId = {type:'SqsQueuePolicyId',value:string};
 type SqsQueuePolicyIdAttr = TF.Attribute<'SqsQueuePolicyId'>;
 
+/**
+ *  Provides a Load Balancer resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb.html
+ */
+export function createLb(tfgen: TF.Generator, rname: string, params: LbParams): Lb {
+  const fields = fieldsFromLbParams(params);
+  const resource = tfgen.createResource('aws_lb', rname, fields);
+  const id: LbIdAttr = {...resource, field:'id', atype: 'LbId'};
+  const arn: AT.ArnAttr = {...resource, field:'arn', atype: 'Arn'};
+  const dns_name: AT.StringAttr = {...resource, field:'dns_name', atype: 'string'};
+  const zone_id: AT.HostedZoneIdAttr = {...resource, field:'zone_id', atype: 'HostedZoneId'};
+
+  return {
+    ...resource,
+    id,
+    arn,
+    dns_name,
+    zone_id,
+  };
+}
+
+export interface Lb extends TF.Resource {
+  id: LbIdAttr;
+  arn: AT.ArnAttr;
+  dns_name: AT.StringAttr;
+  zone_id: AT.HostedZoneIdAttr;
+}
+
+type LbId = {type:'LbId',value:string};
+type LbIdAttr = TF.Attribute<'LbId'>;
+
+/**
+ *  Provides a Load Balancer Listener resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb_listener.html
+ */
+export function createLbListener(tfgen: TF.Generator, rname: string, params: LbListenerParams): LbListener {
+  const fields = fieldsFromLbListenerParams(params);
+  const resource = tfgen.createResource('aws_lb_listener', rname, fields);
+  const id: LbListenerIdAttr = {...resource, field:'id', atype: 'LbListenerId'};
+  const arn: AT.ArnAttr = {...resource, field:'arn', atype: 'Arn'};
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface LbListener extends TF.Resource {
+  id: LbListenerIdAttr;
+  arn: AT.ArnAttr;
+}
+
+type LbListenerId = {type:'LbListenerId',value:string};
+type LbListenerIdAttr = TF.Attribute<'LbListenerId'>;
+
+/**
+ *  Provides a Target Group resource for use with Load Balancer resources.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb_target_group.html
+ */
+export function createLbTargetGroup(tfgen: TF.Generator, rname: string, params: LbTargetGroupParams): LbTargetGroup {
+  const fields = fieldsFromLbTargetGroupParams(params);
+  const resource = tfgen.createResource('aws_lb_target_group', rname, fields);
+  const id: LbTargetGroupIdAttr = {...resource, field:'id', atype: 'LbTargetGroupId'};
+  const arn: AT.ArnAttr = {...resource, field:'arn', atype: 'Arn'};
+  const arn_suffix: AT.StringAttr = {...resource, field:'arn_suffix', atype: 'string'};
+  const name: AT.StringAttr = {...resource, field:'name', atype: 'string'};
+
+  return {
+    ...resource,
+    id,
+    arn,
+    arn_suffix,
+    name,
+  };
+}
+
+export interface LbTargetGroup extends TF.Resource {
+  id: LbTargetGroupIdAttr;
+  arn: AT.ArnAttr;
+  arn_suffix: AT.StringAttr;
+  name: AT.StringAttr;
+}
+
+type LbTargetGroupId = {type:'LbTargetGroupId',value:string};
+type LbTargetGroupIdAttr = TF.Attribute<'LbTargetGroupId'>;
+
+/**
+ *  Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group. 
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb_target_group_attachment.html
+ */
+export function createLbTargetGroupAttachment(tfgen: TF.Generator, rname: string, params: LbTargetGroupAttachmentParams): LbTargetGroupAttachment {
+  const fields = fieldsFromLbTargetGroupAttachmentParams(params);
+  const resource = tfgen.createResource('aws_lb_target_group_attachment', rname, fields);
+  const id: LbTargetGroupAttachmentIdAttr = {...resource, field:'id', atype: 'LbTargetGroupAttachmentId'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface LbTargetGroupAttachment extends TF.Resource {
+  id: LbTargetGroupAttachmentIdAttr;
+}
+
+type LbTargetGroupAttachmentId = {type:'LbTargetGroupAttachmentId',value:string};
+type LbTargetGroupAttachmentIdAttr = TF.Attribute<'LbTargetGroupAttachmentId'>;
+
+/**
+ *  Provides a Load Balancer Listener Rule resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb_listener_rule.html
+ */
+export function createLbListenerRule(tfgen: TF.Generator, rname: string, params: LbListenerRuleParams): LbListenerRule {
+  const fields = fieldsFromLbListenerRuleParams(params);
+  const resource = tfgen.createResource('aws_lb_listener_rule', rname, fields);
+  const id: LbListenerRuleIdAttr = {...resource, field:'id', atype: 'LbListenerRuleId'};
+  const arn: AT.ArnAttr = {...resource, field:'arn', atype: 'Arn'};
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface LbListenerRule extends TF.Resource {
+  id: LbListenerRuleIdAttr;
+  arn: AT.ArnAttr;
+}
+
+type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
+type LbListenerRuleIdAttr = TF.Attribute<'LbListenerRuleId'>;
+
 export interface InstanceRootBlockDeviceParams {
   volume_type?: 'standard' | 'gp2' | 'io1';
   volume_size?: number;
@@ -1332,5 +1471,215 @@ export function fieldsFromSqsQueuePolicyParams(params: SqsQueuePolicyParams) : T
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "queue_url", params.queue_url, TF.stringValue);
   TF.addField(fields, "policy", params.policy, TF.stringValue);
+  return fields;
+}
+
+export interface LbParams {
+  name?: string;
+  name_prefix?: string;
+  internal?: boolean;
+  load_balancer_type?: 'application' | 'network';
+  security_groups?: SecurityGroupId[];
+  access_logs?: LbAccessLogsParams;
+  subnets?: SubnetId[];
+  subnet_mapping?: LbSubnetMappingParams[];
+  idle_timeout?: number;
+  enable_deletion_protection?: boolean;
+  enable_cross_zone_load_balancing?: boolean;
+  enable_http2?: boolean;
+  ip_address_type?: 'ipv4' | 'dualstack';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromLbParams(params: LbParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "internal", params.internal, TF.booleanValue);
+  TF.addOptionalField(fields, "load_balancer_type", params.load_balancer_type, TF.stringValue);
+  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "access_logs", params.access_logs, (v) => TF.mapValue(fieldsFromLbAccessLogsParams(v)));
+  TF.addOptionalField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_mapping", params.subnet_mapping, TF.listValue((v) => TF.mapValue(fieldsFromLbSubnetMappingParams(v))));
+  TF.addOptionalField(fields, "idle_timeout", params.idle_timeout, TF.numberValue);
+  TF.addOptionalField(fields, "enable_deletion_protection", params.enable_deletion_protection, TF.booleanValue);
+  TF.addOptionalField(fields, "enable_cross_zone_load_balancing", params.enable_cross_zone_load_balancing, TF.booleanValue);
+  TF.addOptionalField(fields, "enable_http2", params.enable_http2, TF.booleanValue);
+  TF.addOptionalField(fields, "ip_address_type", params.ip_address_type, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface LbAccessLogsParams {
+  bucket: string;
+  bucket_prefix?: string;
+  interval?: number;
+  enabled?: boolean;
+}
+
+export function fieldsFromLbAccessLogsParams(params: LbAccessLogsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "bucket_prefix", params.bucket_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "interval", params.interval, TF.numberValue);
+  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface LbSubnetMappingParams {
+  subnet_id: SubnetId;
+  allocation_id: Eip;
+}
+
+export function fieldsFromLbSubnetMappingParams(params: LbSubnetMappingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
+  TF.addField(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
+  return fields;
+}
+
+export interface LbListenerParams {
+  load_balancer_arn: AT.Arn;
+  port: number;
+  protocol?: 'TCP' | 'HTTP' | 'HTTPS';
+  ssl_policy?: string;
+  certificate_arn?: AT.Arn;
+  default_action: LbListenerActionParams;
+}
+
+export function fieldsFromLbListenerParams(params: LbListenerParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "load_balancer_arn", params.load_balancer_arn, TF.stringAliasValue);
+  TF.addField(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalField(fields, "ssl_policy", params.ssl_policy, TF.stringValue);
+  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.stringAliasValue);
+  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
+  return fields;
+}
+
+export interface LbListenerActionParams {
+  target_group_arn: AT.Arn;
+  type: 'forward';
+}
+
+export function fieldsFromLbListenerActionParams(params: LbListenerActionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.stringAliasValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface LbTargetGroupParams {
+  name?: string;
+  name_prefix?: string;
+  port: number;
+  protocol: 'TCP' | 'HTTP' | 'HTTPS';
+  vpc_id: VpcId;
+  deregistration_delay?: number;
+  slow_start?: number;
+  proxy_protocol_v2?: boolean;
+  stickiness?: LbTargetGroupStickinessParams;
+  health_check?: LbTargetGroupHealthCheckParams;
+  target_type?: 'instance' | 'ip';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromLbTargetGroupParams(params: LbTargetGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addField(fields, "port", params.port, TF.numberValue);
+  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
+  TF.addOptionalField(fields, "slow_start", params.slow_start, TF.numberValue);
+  TF.addOptionalField(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
+  TF.addOptionalField(fields, "stickiness", params.stickiness, (v) => TF.mapValue(fieldsFromLbTargetGroupStickinessParams(v)));
+  TF.addOptionalField(fields, "health_check", params.health_check, (v) => TF.mapValue(fieldsFromLbTargetGroupHealthCheckParams(v)));
+  TF.addOptionalField(fields, "target_type", params.target_type, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface LbTargetGroupHealthCheckParams {
+  interval?: number;
+  path?: string;
+  port?: string;
+  protocol?: 'TCP' | 'HTTP' | 'HTTPS';
+  timeout?: number;
+  healthy_threshold?: number;
+  unhealthy_threshold?: number;
+  matcher?: string;
+}
+
+export function fieldsFromLbTargetGroupHealthCheckParams(params: LbTargetGroupHealthCheckParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "interval", params.interval, TF.numberValue);
+  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalField(fields, "port", params.port, TF.stringValue);
+  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalField(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalField(fields, "healthy_threshold", params.healthy_threshold, TF.numberValue);
+  TF.addOptionalField(fields, "unhealthy_threshold", params.unhealthy_threshold, TF.numberValue);
+  TF.addOptionalField(fields, "matcher", params.matcher, TF.stringValue);
+  return fields;
+}
+
+export interface LbTargetGroupStickinessParams {
+  type: 'lb_cookie';
+  cookie_duration?: number;
+  enabled?: boolean;
+}
+
+export function fieldsFromLbTargetGroupStickinessParams(params: LbTargetGroupStickinessParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "cookie_duration", params.cookie_duration, TF.numberValue);
+  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface LbTargetGroupAttachmentParams {
+  target_group_arn: AT.Arn;
+  target_id: string;
+  port?: number;
+  availability_zone?: AT.AvailabilityZone;
+}
+
+export function fieldsFromLbTargetGroupAttachmentParams(params: LbTargetGroupAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.stringAliasValue);
+  TF.addField(fields, "target_id", params.target_id, TF.stringValue);
+  TF.addOptionalField(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  return fields;
+}
+
+export interface LbListenerRuleParams {
+  listener_arn: AT.Arn;
+  priority?: number;
+  action: LbListenerActionParams;
+  condition: LbListenerRuleConditionParams;
+}
+
+export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "listener_arn", params.listener_arn, TF.stringAliasValue);
+  TF.addOptionalField(fields, "priority", params.priority, TF.numberValue);
+  TF.addField(fields, "action", params.action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
+  TF.addField(fields, "condition", params.condition, (v) => TF.mapValue(fieldsFromLbListenerRuleConditionParams(v)));
+  return fields;
+}
+
+export interface LbListenerRuleConditionParams {
+  field: 'path-pattern' | 'host-header';
+  values: string[];
+}
+
+export function fieldsFromLbListenerRuleConditionParams(params: LbListenerRuleConditionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "field", params.field, TF.stringValue);
+  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
   return fields;
 }

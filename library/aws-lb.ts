@@ -9,29 +9,38 @@ import * as shared from "./aws-shared";
  * terminates https connections using a specified SSL certificate.
  */
 
-export function sslTerminator(tfgen: TF.Generator, name: string, sr: shared.SharedResources, eip: AR.Eip, certificate_arn: AT.Arn) : AR.Lb {
-  const lb = AR.createLb(tfgen, name, {});
+export function sslTerminator(tfgen: TF.Generator, name: string, sr: shared.SharedResources, ec2: AR.Instance, certificate_arns: AT.Arn[]) : AR.Lb {
+  const tags = tfgen.tagsContext();
+
+  const lb = AR.createLb(tfgen, name, {
+    subnets: sr.network.azs.map( az => az.external_subnet.id),
+    tags
+  });
 
   const target_group = AR.createLbTargetGroup(tfgen, name, {
     port: 80,
     protocol: 'HTTP',
-    vpc_id: sr.network.vpc.id
-  });
-  AR.createLbTargetGroupAttachment(tfgen, name, {
-    target_group_arn: target_group.arn,
-    target_id: eip.id.value
+    vpc_id: sr.network.vpc.id,
+    tags
   });
 
-  const listener = AR.createLbListener(tfgen, name, {
+  AR.createLbTargetGroupAttachment(tfgen, name, {
+    target_group_arn: target_group.arn,
+    target_id: ec2.id.value
+  });
+
+  certificate_arns.map( (arn,i) => 
+    AR.createLbListener(tfgen, name + "_" + (i+1), {
     load_balancer_arn: lb.arn,
     port: 443,
     protocol: 'HTTPS',
-    certificate_arn,
+    certificate_arn: arn,
     default_action: {
       target_group_arn:target_group.arn,
       type: 'forward'
     }
-  });
+  })
+  );
 
   return lb;
 }

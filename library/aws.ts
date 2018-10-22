@@ -33,8 +33,8 @@ export function createInstanceWithEip(tfgen: TF.Generator, name: string, sr: Sha
       ami: params0.ami(sr.network.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
-      subnet_id: TF.refAttribute(firstAzExternalSubnet(sr).id),
-      vpc_security_group_ids: [TF.refAttribute(params0.security_group.id)],
+      subnet_id: firstAzExternalSubnet(sr).id,
+      vpc_security_group_ids: [params0.security_group.id],
       root_block_device: {
         volume_size: 20
       },
@@ -57,7 +57,7 @@ export function createInstanceWithEip(tfgen: TF.Generator, name: string, sr: Sha
   function createElasticIp(ec2: AR.Instance) {
     const params: AR.EipParams = {
       vpc: true,
-      instance: TF.refAttribute(ec2.id),
+      instance: ec2.id,
       tags: {
         ...tfgen.tagsContext()
       }
@@ -102,7 +102,7 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
   const sname = tfgen.scopedName(name).join("_");
 
   const security_group = AR.createSecurityGroup(tfgen, name, {
-    vpc_id: TF.refAttribute(sr.network.vpc.id),
+    vpc_id: sr.network.vpc.id,
     ingress: [ingressOnPort(5432)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, name)
@@ -110,7 +110,7 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
 
   const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
     name: sname,
-    subnet_ids: sr.network.azs.map(az => TF.refAttribute(az.external_subnet.id))
+    subnet_ids: sr.network.azs.map(az => az.external_subnet.id)
   });
 
   const params: AR.DbInstanceParams = {
@@ -124,8 +124,8 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
     engine_version: "9.4.15",
     publicly_accessible: false,
     backup_retention_period: 3,
-    vpc_security_group_ids: [TF.refAttribute(security_group.id)],
-    db_subnet_group_name: TF.refStringAttribute(db_subnet_group.name),
+    vpc_security_group_ids: [security_group.id],
+    db_subnet_group_name: db_subnet_group.name,
     tags: tfgen.tagsContext(),
     final_snapshot_identifier: sname.replace(/_/g, "-") + "-final",
     skip_final_snapshot: false,
@@ -135,16 +135,16 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
   const db = AR.createDbInstance(tfgen, name, params);
 
   const config_json = {
-    name: TF.refStringAttribute(db.name),
-    username: TF.refStringAttribute(db.username),
-    address: TF.refStringAttribute(db.address),
-    port: TF.refStringAttribute(db.port),
+    name: db.name,
+    username: db.username,
+    address:db.address,
+    port:db.port,
   };
 
   tfgen.localExecProvisioner(db, [
     "# Generate a random password for the instance, and upload it to S3",
     `export AWS_REGION=${sr.network.region.value}`,
-    `hx-provisioning-tools generate-rds-password ${TF.refStringAttribute(db.id)} ${TF.refStringAttribute(sr.deploy_bucket.id)} ${password_s3.key}`
+    `hx-provisioning-tools generate-rds-password ${db.id.value} ${sr.deploy_bucket.id} ${password_s3.key}`
 
   ].join('\n'));
 
@@ -160,7 +160,7 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
  */
 export function createSecurityGroupInVpc(tfgen: TF.Generator, name: string, sr: SharedResources, customize: Customize<AR.SecurityGroupParams> ): AR.SecurityGroup {
   const params: AR.SecurityGroupParams = {
-    vpc_id: TF.refAttribute(sr.network.vpc.id),
+    vpc_id: sr.network.vpc.id,
     tags: contextTagsWithName(tfgen, name),
   };
   customize(params);

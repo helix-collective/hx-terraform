@@ -14,7 +14,7 @@ export function createIamRolePolicy(tfgen:TF.Generator, role: AR.IamRole, policy
   return AR.createIamRolePolicy(tfgen, policy.name, {
     name: sname,
     policy: JSON.stringify(policy.policy, null, 2),
-    role: TF.refAttribute(role.id)
+    role: role.id
   })
 }
 
@@ -49,7 +49,7 @@ export function createInstanceProfileWithPolicies(tfgen: TF.Generator, name: str
   const iamr = createIamRoleWithPolicies(tfgen, name, policies);
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     return AR.createIamInstanceProfile(tfgen, name, {
-      role: TF.refStringAttribute(iamr.name)
+      role: iamr.name
     } )
   })
 }

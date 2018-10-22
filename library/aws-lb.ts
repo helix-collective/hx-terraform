@@ -15,20 +15,20 @@ export function sslTerminator(tfgen: TF.Generator, name: string, sr: shared.Shar
   const target_group = AR.createLbTargetGroup(tfgen, name, {
     port: 80,
     protocol: 'HTTP',
-    vpc_id: TF.refAttribute(sr.network.vpc.id)
+    vpc_id: sr.network.vpc.id
   });
   AR.createLbTargetGroupAttachment(tfgen, name, {
-    target_group_arn: TF.refAttribute(target_group.arn),
-    target_id: TF.refAttribute(eip.id).value
+    target_group_arn: target_group.arn,
+    target_id: eip.id.value
   });
 
   const listener = AR.createLbListener(tfgen, name, {
-    load_balancer_arn: TF.refAttribute(lb.arn),
+    load_balancer_arn: lb.arn,
     port: 443,
     protocol: 'HTTPS',
     certificate_arn,
     default_action: {
-      target_group_arn:TF.refAttribute(target_group.arn),
+      target_group_arn:target_group.arn,
       type: 'forward'
     }
   });

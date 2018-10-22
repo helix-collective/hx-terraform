@@ -34,12 +34,12 @@ export function createHighDiskAlarm(tfgen: TF.Generator, topic: AR.SnsTopic, ec2
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      "InstanceId" : TF.refAttribute(ec2.id).value,
+      "InstanceId" : ec2.id.value,
       "Filesystem" : "/dev/xvda1",
       "MountPath" : "/",
     },
     alarm_description: "Sustained high disk usage for application server",
-    alarm_actions: [TF.refAttribute(topic.arn)]
+    alarm_actions: [topic.arn]
   });
 }
 
@@ -55,10 +55,10 @@ export function createHighCpuAlarm(tfgen: TF.Generator, topic: AR.SnsTopic, ec2:
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      "InstanceId" : TF.refAttribute(ec2.id).value
+      "InstanceId" : ec2.id.value
     },
     alarm_description: "Sustained high cpu usage for application server",
-    alarm_actions: [TF.refAttribute(topic.arn)]
+    alarm_actions: [topic.arn]
   });
 }
 
@@ -74,10 +74,10 @@ export function createHighMemAlarm(tfgen: TF.Generator, topic: AR.SnsTopic, ec2:
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      "InstanceId" : TF.refAttribute(ec2.id).value
+      "InstanceId" : ec2.id.value
     },
     alarm_description: "Sustained high memory for application server",
-    alarm_actions: [TF.refAttribute(topic.arn)]
+    alarm_actions: [topic.arn]
   });
 }
 
@@ -94,10 +94,10 @@ export function createLowDbSpaceAlarm(tfgen: TF.Generator, topic: AR.SnsTopic, d
     statistic: 'Average',
     threshold: 1000000000,
     dimensions: {
-      "DBInstanceIdentifier" : TF.refAttribute(db.id).value
+      "DBInstanceIdentifier" : db.id.value
     },
     alarm_description: "Low free space in RDS db",
-    alarm_actions: [TF.refAttribute(topic.arn)]
+    alarm_actions: [topic.arn]
   });
 }
 
@@ -113,9 +113,9 @@ export function createHighDbCpuAlarm(tfgen: TF.Generator, topic: AR.SnsTopic, db
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      "DBInstanceIdentifier" : TF.refAttribute(db.id).value
+      "DBInstanceIdentifier" : db.id.value
     },
     alarm_description: "Sustained high cpu usage in RDS db",
-    alarm_actions: [TF.refAttribute(topic.arn)]
+    alarm_actions: [topic.arn]
   });
 }

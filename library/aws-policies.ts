@@ -131,7 +131,7 @@ export function route53ModifyZonePolicy(name:string, zone: AR.Route53Zone): Name
            ],
            "Effect":"Allow",
            "Resource":[
-              `arn:aws:route53:::hostedzone/${TF.refAttribute(zone.zone_id).value}`
+              `arn:aws:route53:::hostedzone/${zone.zone_id.value}`
            ]
         },
         {
@@ -158,7 +158,7 @@ export function sqsQueueModifyPolicy(name:string, queue: AR.SqsQueue): NamedPoli
         {
           "Action": "sqs:*",
           "Effect": "Allow",
-          "Resource": TF.refAttribute(queue.arn).value
+          "Resource": queue.arn.value
         }
       ]
     }

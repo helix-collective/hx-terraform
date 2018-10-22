@@ -99,7 +99,7 @@ type AttributeType
   | {kind: 'resourceid', resource: string}
 
 export function stringAttr(name:string): AttributeDecl {
-  return {name, type:{kind: 'string', type:'AT.StringAttr', typelabel: 'string'}};
+  return {name, type:{kind: 'string', type:'string', typelabel: 'string'}};
 }
 
 export function stringAliasAttr(name:string, typelabel:string, type:string): AttributeDecl {
@@ -139,7 +139,7 @@ function genType(type: Type): string {
 function genAttrType(type: AttributeType): string {
   switch (type.kind) {
   case 'string': return type.type;
-  case 'resourceid': return `${camelFromSnake(type.resource)}IdAttr`;
+  case 'resourceid': return `${camelFromSnake(type.resource)}Id`;
   }
 }
 
@@ -186,7 +186,11 @@ export function fileGenerator(provider: string, headerLines: string[]) : FileGen
     lines.push(`  const fields = fieldsFrom${paramsName}(params);`);
     lines.push(`  const resource = tfgen.createResource('${resourceType}', rname, fields);`);
     for(const attr of attributes) {
-      lines.push(`  const ${attr.name}: ${genAttrType(attr.type)} = {...resource, field:'${attr.name}', atype: '${genAttrTypeLabel(attr.type)}'};`);
+      if (attr.type.kind == 'string' && attr.type.type == 'string') {
+        lines.push(`  const ${attr.name}: string =  '\$\{' + TF.resourceName(resource) + '.${attr.name}}';`);
+       } else {
+        lines.push(`  const ${attr.name}: ${ genAttrType(attr.type)} =  {type: '${genAttrTypeLabel(attr.type)}', value: '\$\{' + TF.resourceName(resource) + '.${attr.name}}'};`);
+      }
     }
     lines.push('');
     lines.push('  return {');
@@ -204,7 +208,6 @@ export function fileGenerator(provider: string, headerLines: string[]) : FileGen
     lines.push('}');
     lines.push('');
     lines.push(`type ${name}Id = {type:'${name}Id',value:string};`);
-    lines.push(`type ${name}IdAttr = TF.Attribute<'${name}Id'>;`);
     lines.push('');
   }
 

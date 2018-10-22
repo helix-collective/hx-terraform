@@ -98,21 +98,21 @@ export function createResources(tfgen: TF.Generator, domain_name: string, s3_buc
   });
 
   const bastion_security_group = AR.createSecurityGroup(tfgen, "bastion", {
-    vpc_id: TF.refAttribute(network.vpc.id),
+    vpc_id: network.vpc.id,
     ingress: [ingressOnPort(22)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, "bastion")
   });
 
   const appserver_security_group = AR.createSecurityGroup(tfgen, "appserver", {
-    vpc_id: TF.refAttribute(network.vpc.id),
+    vpc_id: network.vpc.id,
     ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, "appserver")
   });
 
   const load_balancer_security_group = AR.createSecurityGroup(tfgen, "lb", {
-    vpc_id: TF.refAttribute(network.vpc.id),
+    vpc_id: network.vpc.id,
     ingress: [ingressOnPort(80), ingressOnPort(443)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, "lb")
@@ -127,17 +127,17 @@ export function createResources(tfgen: TF.Generator, domain_name: string, s3_buc
   AR.createIamUserPolicy(tfgen, "modifys3deploy", {
     name: tfgen.scopedName("modifys3deploy").join('_'),
     policy: JSON.stringify(modifys3deploy.policy, null, 2),
-    user: TF.refStringAttribute(buildbot_user.name)
+    user: buildbot_user.name
   });
 
   AR.createIamUserPolicy(tfgen, "ecrmodifyall", {
     name: tfgen.scopedName("ecrmodifyall").join('_'),
     policy: JSON.stringify(ecr_modify_all_policy.policy, null, 2),
-    user: TF.refStringAttribute(buildbot_user.name)
+    user: buildbot_user.name
   });
 
   AR.createIamUserPolicyAttachment(tfgen, "readonly", {
-    user: TF.refStringAttribute(buildbot_user.name),
+    user: buildbot_user.name,
     policy_arn: AT.arn("arn:aws:iam::aws:policy/ReadOnlyAccess")
   });
 
@@ -173,26 +173,26 @@ function createNetworkResources(tfgen: TF.Generator, network_config:NetworkConfi
   });
 
   const internet_gateway = AR.createInternetGateway(tfgen, "gw", {
-    vpc_id: TF.refAttribute(vpc.id),
+    vpc_id: vpc.id,
     tags: contextTagsWithName(tfgen, "gw")
   });
 
   const rtexternal = AR.createRouteTable(tfgen, "rtexternal", {
-    vpc_id: TF.refAttribute(vpc.id),
+    vpc_id: vpc.id,
     tags: contextTagsWithName(tfgen, "rtexternal")
   });
 
   AR.createRoute(tfgen, "r", {
-    route_table_id: TF.refAttribute(rtexternal.id),
+    route_table_id: rtexternal.id,
     destination_cidr_block: AT.cidrBlock("0.0.0.0/0"),
-    gateway_id: TF.refAttribute(internet_gateway.id),
+    gateway_id: internet_gateway.id,
   });
 
   const azs = network_config.azs.map( az => {
     return TF.withLocalNameScope( tfgen, az.azname, tfgen => {
 
       const external_subnet = AR.createSubnet(tfgen, "external", {
-        vpc_id: TF.refAttribute(vpc.id),
+        vpc_id: vpc.id,
         cidr_block: az.external_cidr_block,
         availability_zone: az.availability_zone,
         tags: contextTagsWithName(tfgen, "external")
@@ -203,37 +203,37 @@ function createNetworkResources(tfgen: TF.Generator, network_config:NetworkConfi
       });
 
       const nat_gateway = AR.createNatGateway(tfgen, "ng", {
-        allocation_id: TF.refAttribute(eip.id),
-        subnet_id: TF.refAttribute(external_subnet.id),
+        allocation_id: eip.id,
+        subnet_id: external_subnet.id,
       });
       tfgen.dependsOn(nat_gateway, internet_gateway);
 
       AR.createRouteTableAssociation(tfgen, "raexternal", {
-        subnet_id: TF.refAttribute(external_subnet.id),
-        route_table_id: TF.refAttribute(rtexternal.id)
+        subnet_id: external_subnet.id,
+        route_table_id: rtexternal.id
       });
 
       const rtinternal = AR.createRouteTable(tfgen, "rtinternal", {
-        vpc_id: TF.refAttribute(vpc.id),
+        vpc_id: vpc.id,
         tags: contextTagsWithName(tfgen, "rtinternal")
       });
 
       AR.createRoute(tfgen, "r1", {
-        route_table_id: TF.refAttribute(rtinternal.id),
+        route_table_id: rtinternal.id,
         destination_cidr_block: AT.cidrBlock("0.0.0.0/0"),
-        nat_gateway_id: TF.refAttribute(nat_gateway.id),
+        nat_gateway_id: nat_gateway.id,
       });
 
       const internal_subnet = AR.createSubnet(tfgen, "internal", {
-        vpc_id: TF.refAttribute(vpc.id),
+        vpc_id: vpc.id,
         cidr_block: az.internal_cidr_block,
         availability_zone: az.availability_zone,
         tags: contextTagsWithName(tfgen, "internal")
       });
 
       AR.createRouteTableAssociation(tfgen, "rtainternal", {
-        subnet_id: TF.refAttribute(internal_subnet.id),
-        route_table_id: TF.refAttribute(rtinternal.id)
+        subnet_id: internal_subnet.id,
+        route_table_id: rtinternal.id
       });
 
       return {
@@ -253,7 +253,7 @@ function createNetworkResources(tfgen: TF.Generator, network_config:NetworkConfi
  */
 export function dnsARecord(tfgen: TF.Generator, name: string, sr: SharedResources, dnsname: string, ipaddresses:AT.IpAddress[], ttl: string ) {
   AR.createRoute53Record(tfgen, name, {
-      zone_id: TF.refAttribute(sr.primary_dns_zone.zone_id),
+      zone_id: sr.primary_dns_zone.zone_id,
       name: dnsname,
       type: "A",
       ttl: ttl,

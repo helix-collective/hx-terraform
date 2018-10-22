@@ -555,8 +555,8 @@ function generateAws(gen: Generator) {
     instance,
     [
       resourceIdAttr('id', instance),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
-      stringAliasAttr('availability_zone', 'AvailabilityZone', 'AT.AvailabilityZoneAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
+      stringAliasAttr('availability_zone', 'AvailabilityZone', 'AT.AvailabilityZone'),
     ]
   );
 
@@ -566,7 +566,7 @@ function generateAws(gen: Generator) {
     db_instance,
     [
       resourceIdAttr('id', db_instance),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('username'),
       stringAttr('address'),
@@ -580,8 +580,8 @@ function generateAws(gen: Generator) {
     eip,
     [
       resourceIdAttr('id', eip),
-      stringAliasAttr('public_ip', 'IpAddress', 'AT.IpAddressAttr'),
-      stringAliasAttr('private_ip', 'IpAddress', 'AT.IpAddressAttr'),
+      stringAliasAttr('public_ip', 'IpAddress', 'AT.IpAddress'),
+      stringAliasAttr('private_ip', 'IpAddress', 'AT.IpAddress'),
     ]
   );
 
@@ -662,7 +662,7 @@ function generateAws(gen: Generator) {
     "https://www.terraform.io/docs/providers/aws/r/route53_zone.html",
     route53_zone,
     [
-      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneIdAttr'),
+      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
     ]
   );
 
@@ -702,7 +702,7 @@ function generateAws(gen: Generator) {
     sns_topic,
     [
       resourceIdAttr('id', sns_topic),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ]
   );
 
@@ -711,7 +711,7 @@ function generateAws(gen: Generator) {
     "https://www.terraform.io/docs/providers/aws/r/iam_user.html",
     iam_user,
     [
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('unique_id'),
     ]
@@ -738,7 +738,7 @@ function generateAws(gen: Generator) {
     "https://www.terraform.io/docs/providers/aws/r/ecr_repository.html",
     ecr_repository,
     [
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('registry_id'),
       stringAttr('repository_url'),
@@ -752,7 +752,7 @@ function generateAws(gen: Generator) {
     [
       resourceIdAttr('id', db_subnet_group),
       stringAttr('name'),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ]
   )
 
@@ -771,7 +771,7 @@ function generateAws(gen: Generator) {
     iam_role,
     [
       resourceIdAttr("id", iam_role),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr("name"),
       stringAttr("create_date"),
       stringAttr("unique_id"),
@@ -797,7 +797,7 @@ function generateAws(gen: Generator) {
     iam_instance_profile,
     [
       resourceIdAttr("id", iam_instance_profile),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr("name"),
       stringAttr("create_date"),
       stringAttr("unique_id"),
@@ -810,7 +810,7 @@ function generateAws(gen: Generator) {
     sqs_queue,
     [
       resourceIdAttr("id", sqs_queue),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ]
   )
 
@@ -828,9 +828,9 @@ function generateAws(gen: Generator) {
     lb,
     [
       resourceIdAttr("id", lb),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('dns_name'),
-      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneIdAttr')
+      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId')
     ]
   )
 
@@ -840,7 +840,7 @@ function generateAws(gen: Generator) {
     lb_listener,
     [
       resourceIdAttr("id", lb_listener),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ]
   )
 
@@ -850,7 +850,7 @@ function generateAws(gen: Generator) {
     lb_target_group,
     [
       resourceIdAttr("id", lb_target_group),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('arn_suffix'),
       stringAttr('name'),
     ]
@@ -871,7 +871,7 @@ function generateAws(gen: Generator) {
     lb_listener_rule,
     [
       resourceIdAttr("id", lb_listener_rule),
-      stringAliasAttr('arn', 'Arn', 'AT.ArnAttr'),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ]
   )
 

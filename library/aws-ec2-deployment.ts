@@ -78,12 +78,12 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
         key_name: params.key_name,
         customize_instance: (i:AR.InstanceParams) => {
             i.user_data = bs.compile();
-            i.iam_instance_profile = TF.refAttribute(instance_profile.id);
+            i.iam_instance_profile = instance_profile.id;
         }
     });
 
     endpoints.forEach( ep => {
-        shared.dnsARecord(tfgen, "appserver_" + ep.name, sr, ep.dnsname, [TF.refAttribute(appserver.eip.public_ip)], "3600");
+        shared.dnsARecord(tfgen, "appserver_" + ep.name, sr, ep.dnsname, [appserver.eip.public_ip], "3600");
     })
 
     return appserver;

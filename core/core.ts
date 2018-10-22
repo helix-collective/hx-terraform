@@ -53,7 +53,10 @@ export type ResourceType = string;
 export type ResourceName = string[];
 export type Resource = {tftype: ResourceType, tfname: ResourceName};
 
-export type Attribute<T> = Resource & {field: string, atype: T};
+export type StringAlias<T> = {
+  type: T,
+  value: string
+};
 
 export type ResourceValue = RFText | RFList | RFMap;
 export type RFText = { kind:'text', text:string };
@@ -117,21 +120,8 @@ export function addOptionalField<T>(fields: ResourceFieldMap, key: string, value
   }
 }
 
-function resourceName<T>(r: Resource): string {
+export function resourceName<T>(r: Resource): string {
   return r.tftype + "." + r.tfname.join('_');
-}
-
-export type StringAlias<T> = {
-  type: T,
-  value: string
-};
-
-export function refAttribute<T>(attribute: Attribute<T>): StringAlias<T> {
-  return {type:attribute.atype, value:'${' + resourceName(attribute) + '.' + attribute.field + '}'};
-}
-
-export function refStringAttribute(attribute: Attribute<string>): string {
-  return '${' + resourceName(attribute) + '.' + attribute.field + '}';
 }
 
 export function withLocalNameScope<T>(tfgen0: Generator, name: string, createfn: (tfgen:Generator) => T): T {

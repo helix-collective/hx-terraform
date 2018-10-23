@@ -14,6 +14,7 @@ export function sslTerminator(tfgen: TF.Generator, name: string, sr: shared.Shar
 
   const lb = AR.createLb(tfgen, name, {
     subnets: sr.network.azs.map( az => az.external_subnet.id),
+    security_groups: [sr.appserver_security_group.id],
     tags
   });
 

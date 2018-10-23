@@ -37,10 +37,17 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
         context_files = [];
     }
 
-    let endpoints = params.endpoints || [
-        {name: "main", dnsname: params.dns_name},
-        {name: "test", dnsname: params.dns_name + "-test"},
+    let endpoints : EndPoint[] = params.endpoints || [
+        {kind: 'https', name: "main", dnsname:params.dns_name},
+        {kind: 'https', name: "test", dnsname:params.dns_name + "-test"},
     ];
+    let https_endpoints : EndPointHttps[] = [];
+    endpoints.forEach( ep => {
+        if(ep.kind == 'https') {
+            https_endpoints.push(ep);
+        }
+    });
+
     bs.utf8Locale()
     bs.dockerWithConfig(docker_config);
     bs.createUserWithKeypairAccess(app_user);
@@ -50,10 +57,15 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
         bs.include(params.extra_bootscript);
     }
 
-    const ssl_cert_dns_names = endpoints.map( ep => shared.fqdn(sr, ep.dnsname));
+    const ssl_cert_dns_names = https_endpoints.map( ep => shared.fqdn(sr, ep.dnsname));
     const ssl_cert_dir = "/etc/letsencrypt/live/" + ssl_cert_dns_names[0];
-    const proxy_endpoints = endpoints.map(ep => 
-        deploytool.httpsProxyEndpoint(ep.name, shared.fqdn(sr, ep.dnsname), ssl_cert_dir)
+    const proxy_endpoints = endpoints.map(ep => {
+        if (ep.kind == 'https') {
+            return deploytool.httpsProxyEndpoint(ep.name, shared.fqdn(sr,ep.dnsname), ssl_cert_dir)
+        } else {
+            return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
+        }
+    }
     );
     bs.include(
         deploytool.install(app_user, params.releases_s3, params.config_s3, context_files, deploytool.localProxy(proxy_endpoints))
@@ -82,9 +94,9 @@ export function createEc2Deployment(tfgen: TF.Generator, name: string, sr: share
         }
     });
 
-    endpoints.forEach( ep => {
+    https_endpoints.forEach( ep => {
         shared.dnsARecord(tfgen, "appserver_" + ep.name, sr, ep.dnsname, [appserver.eip.public_ip], "3600");
-    })
+    });
 
     return appserver;
 }
@@ -165,10 +177,19 @@ export interface Ec2DeploymentParams {
   docker_config?: docker.DockerConfig
 }
 
-export interface EndPoint {
+export interface EndPointHttps {
+    kind: 'https'
     name: string, 
-    dnsname: string
+    dnsname: string,
 };
+
+export interface EndPointHttp {
+    kind: 'http'
+    name: string, 
+    fqdnsname: string,
+};
+
+export type EndPoint = EndPointHttps | EndPointHttp;
 
 interface Ec2Deployment  {
     eip: AR.Eip, 

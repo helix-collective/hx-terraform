@@ -22,6 +22,9 @@ export function sslTerminator(tfgen: TF.Generator, name: string, sr: shared.Shar
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
+    health_check: {
+      path: "/health-check"
+    },
     tags
   });
 

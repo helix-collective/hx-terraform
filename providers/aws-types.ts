@@ -26,15 +26,10 @@ export const ap_southeast_2 = region("ap-southeast-2");
 
 //----------------------------------------------------------------------
 
-export type StringAttr = TF.Attribute<'string'>;
-
-//----------------------------------------------------------------------
-
 export type Arn = {
   type: 'Arn',
   value: string
 }
-export type ArnAttr = TF.Attribute<'Arn'>;
 
 export function arn(v: string): Arn {
   return {type:'Arn', value:v};
@@ -46,7 +41,6 @@ export type AvailabilityZone = {
   type: 'AvailabilityZone',
   value: string
 }
-export type AvailabilityZoneAttr = TF.Attribute<'AvailabilityZone'>;
 
 export function availabilityZone(v: string): AvailabilityZone {
   return {type:'AvailabilityZone', value:v};
@@ -62,7 +56,6 @@ export type CidrBlock = {
   type: 'CidrBlock',
   value: string
 }
-export type CidrBlockAttr = TF.Attribute<'CidrBlock'>;
 
 export function cidrBlock(v: string): CidrBlock {
   return {type:'CidrBlock', value:v};
@@ -140,8 +133,6 @@ export function ipAddress(v: string): IpAddress {
   return {type:'IpAddress', value:v};
 };
 
-export type IpAddressAttr = TF.Attribute<'IpAddress'>;
-
 //----------------------------------------------------------------------
 
 export type HostedZoneId = {
@@ -152,8 +143,6 @@ export type HostedZoneId = {
 export function hostedZoneId(v: string): HostedZoneId {
   return {type:'HostedZoneId', value:v};
 };
-
-export type HostedZoneIdAttr = TF.Attribute<'HostedZoneId'>;
 
 //----------------------------------------------------------------------
 

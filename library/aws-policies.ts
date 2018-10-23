@@ -211,7 +211,7 @@ export const ecr_modify_all_policy: NamedPolicy = {
 //         "Action": [
 //           "es:*"
 //         ],
-//         "Resource": "${TF.refAttribute(esdomain.arn).value}"
+//         "Resource": "${esdomain.arn.value}"
 //       }]
 //     }
 //   }

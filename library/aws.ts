@@ -82,6 +82,32 @@ export function createEcrRepository(tfgen: TF.Generator, name: string) {
   });
 }
 
+/**
+ * Create an S3 bucket.
+ */
+ export function createS3Bucket(tfgen: TF.Generator, name: string, params0: AR.S3BucketParams): AR.S3Bucket {
+    const params = _.cloneDeep(params0);
+    params.tags = {
+      ...tfgen.tagsContext(),
+      ...params.tags
+    }
+    return AR.createS3Bucket(tfgen, name, params);
+ }
+
+ /**
+  * Create a security group in the shared VPC
+  */
+
+export function createSecurityGroupInVpc(tfgen: TF.Generator, name: string, sr: SharedResources, params0: AR.SecurityGroupParams): AR.SecurityGroup {
+  const params = _.cloneDeep(params0);
+  params.vpc_id = sr.network.vpc.id;
+  params.tags = {
+    ...contextTagsWithName(tfgen, name),
+    ...params.tags
+  }
+  return AR.createSecurityGroup(tfgen, name, params);
+}
+
 export interface DbInstance {
   instance: AR.DbInstance,
   config_json: {},
@@ -153,18 +179,6 @@ export function createPostgresInstance(tfgen: TF.Generator, name: string, db_nam
     config_json,
     password_s3,
   };
-}
-
-/**
- * Create a security group within the shared VPC
- */
-export function createSecurityGroupInVpc(tfgen: TF.Generator, name: string, sr: SharedResources, customize: Customize<AR.SecurityGroupParams> ): AR.SecurityGroup {
-  const params: AR.SecurityGroupParams = {
-    vpc_id: sr.network.vpc.id,
-    tags: contextTagsWithName(tfgen, name),
-  };
-  customize(params);
-  return AR.createSecurityGroup(tfgen,name,params);
 }
 
 /**

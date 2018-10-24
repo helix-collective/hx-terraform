@@ -27,3 +27,25 @@ export function createObjectFromJson(tfgen: TF.Generator, name: string, ref: S3R
     content: JSON.stringify(json, null, 2)
   });
 }
+
+/**
+ * Create an S3 text object inside the given bucket.
+ */
+export function createObjectFromText(tfgen: TF.Generator, name: string, ref: S3Ref, content: string): AR.S3BucketObject {
+  return AR.createS3BucketObject(tfgen, name, {
+    bucket: ref.bucket,
+    key: ref.key,
+    content
+  });
+}
+
+/**
+ * Create an S3 text object inside the given bucke, with content from a file.
+ */
+export function createObjectFromFile(tfgen: TF.Generator, name: string, ref: S3Ref, sourcePath: string): AR.S3BucketObject {
+  return AR.createS3BucketObject(tfgen, name, {
+    bucket: ref.bucket,
+    key: ref.key,
+    source: sourcePath
+  });
+}

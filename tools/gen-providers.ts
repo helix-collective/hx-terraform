@@ -547,6 +547,16 @@ const lb_listener_rule: RecordDecl = {
   ]
 }
 
+const cloudwatch_log_group: RecordDecl = {
+  name: 'cloudwatch_log_group',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    optionalField('retention_in_days', NUMBER),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -875,6 +885,15 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    "Provides a CloudWatch Log Group resource.",
+    "https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html",
+    cloudwatch_log_group,
+    [
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
+    ]
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(instance_root_block_device);
   gen.generateParams(instance);
@@ -922,6 +941,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_target_group_attachment);
   gen.generateParams(lb_listener_rule);
   gen.generateParams(lb_listener_rule_condition);
+  gen.generateParams(cloudwatch_log_group);
 }
 
 function main() {

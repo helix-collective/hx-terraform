@@ -822,6 +822,28 @@ export interface LbListenerRule extends TF.Resource {
 
 type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
 
+/**
+ *  Provides a CloudWatch Log Group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html
+ */
+export function createCloudwatchLogGroup(tfgen: TF.Generator, rname: string, params: CloudwatchLogGroupParams): CloudwatchLogGroup {
+  const fields = fieldsFromCloudwatchLogGroupParams(params);
+  const resource = tfgen.createResource('aws_cloudwatch_log_group', rname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface CloudwatchLogGroup extends TF.Resource {
+  arn: AT.Arn;
+}
+
+type CloudwatchLogGroupId = {type:'CloudwatchLogGroupId',value:string};
+
 export interface InstanceRootBlockDeviceParams {
   volume_type?: 'standard' | 'gp2' | 'io1';
   volume_size?: number;
@@ -1649,5 +1671,21 @@ export function fieldsFromLbListenerRuleConditionParams(params: LbListenerRuleCo
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "field", params.field, TF.stringValue);
   TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface CloudwatchLogGroupParams {
+  name?: string;
+  name_prefix?: string;
+  retention_in_days?: number;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromCloudwatchLogGroupParams(params: CloudwatchLogGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "retention_in_days", params.retention_in_days, TF.numberValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

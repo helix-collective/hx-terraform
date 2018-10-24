@@ -54,6 +54,7 @@ export interface SharedResources {
   load_balancer_security_group: AR.SecurityGroup,
   alert_topic: AR.SnsTopic,
   alarm_topic: AR.SnsTopic,
+  s3_bucket_prefix: string
 };
 
 export interface NetworkResources {
@@ -95,6 +96,19 @@ export function createResources(tfgen: TF.Generator, domain_name: string, s3_buc
       enabled: true
     },
     tags: tfgen.tagsContext()
+  });
+
+  // const config_bucket_name = s3_bucket_prefix + "-shared-config";
+  // const config_bucket = AR.createS3Bucket(tfgen, "config", {
+  //   bucket: config_bucket_name,
+  //   versioning: {
+  //     enabled: true
+  //   },
+  //   tags: tfgen.tagsContext()
+  // });
+
+  s3.createObjectFromJson(tfgen, "config", new s3.S3Ref(deploy_bucket_name, "shared/config/config.json"), {
+     "s3_deploy_bucket" : deploy_bucket.id 
   });
 
   const bastion_security_group = AR.createSecurityGroup(tfgen, "bastion", {
@@ -162,6 +176,7 @@ export function createResources(tfgen: TF.Generator, domain_name: string, s3_buc
     load_balancer_security_group,
     alert_topic,
     alarm_topic,
+    s3_bucket_prefix
   };
 }
 

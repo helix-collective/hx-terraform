@@ -95,28 +95,28 @@ export function s3ModifyPolicy(name:string, bucket:string) {
   }
 }
 
-// export function putLogsPolicy(name:string, log_group: AR.CloudwatchLogGroup) {
-//   return {
-//     name: name,
-//     policy: {
-//       "Version": "2012-10-17",
-//       "Statement": [
-//           {
-//               "Effect": "Allow",
-//               "Action": [
-//                   "logs:CreateLogGroup",
-//                   "logs:CreateLogStream",
-//                   "logs:DescribeLogStreams",
-//                   "logs:PutLogEvents"
-//               ],
-//               "Resource": [
-//                     `${log_group.arn}`
-//               ]
-//           }
-//       ]
-//     }
-//   }
-// }
+export function putLogsPolicy(name:string, log_group: AR.CloudwatchLogGroup) {
+  return {
+    name: name,
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:DescribeLogStreams",
+                  "logs:PutLogEvents"
+              ],
+              "Resource": [
+                    `${log_group.arn}`
+              ]
+          }
+      ]
+    }
+  }
+}
 
 
 export function route53ModifyZonePolicy(name:string, zone: AR.Route53Zone): NamedPolicy {

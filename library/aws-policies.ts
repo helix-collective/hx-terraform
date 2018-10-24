@@ -110,7 +110,7 @@ export function putLogsPolicy(name:string, log_group: AR.CloudwatchLogGroup) {
                   "logs:PutLogEvents"
               ],
               "Resource": [
-                    `${log_group.arn}`
+                    `${log_group.arn.value}`
               ]
           }
       ]

@@ -76,7 +76,7 @@ export function install(username: string, releases: s3.S3Ref, deploy_context: s3
     bs.sh(`chown -R ${username}:${username} /opt/config`);
     bs.sh(`chown -R ${username}:${username} /opt/releases`);
     bs.sh(`chown -R ${username}:${username} /opt/var/log`);
-    bs.sh("wget https://github.com/helix-collective/hx-deploy-tool/releases/download/0.8.2/hx-deploy-tool.x86_64-linux.gz -O /opt/bin/hx-deploy-tool.gz");
+    bs.sh("wget https://github.com/helix-collective/hx-deploy-tool/releases/download/0.8.3/hx-deploy-tool.x86_64-linux.gz -O /opt/bin/hx-deploy-tool.gz");
     bs.gunzip(["/opt/bin/hx-deploy-tool.gz"])
     bs.sh("chmod 755 /opt/bin/hx-deploy-tool");
 

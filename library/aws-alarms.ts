@@ -6,12 +6,29 @@ import {SharedResources} from "./aws-shared";
 
 
 /**
+ *  Create alarm resources on the given EC2 instance suitable for use in a Prod environment
+ */
+export function createProdAlarms(tfgen: TF.Generator, sr: SharedResources, ec2: AR.Instance) {
+  createHighCpuAlarm(tfgen, sr.alarm_topic, ec2);
+  createHighDiskAlarm(tfgen, sr.alarm_topic, ec2);
+  createHighMemAlarm(tfgen, sr.alarm_topic, ec2);
+}
+
+/**
  *  Create alarm resources on the given EC2 instance suitable for use in a UAT environment
  */
 export function createUatAlarms(tfgen: TF.Generator, sr: SharedResources, ec2: AR.Instance) {
   createHighCpuAlarm(tfgen, sr.alert_topic, ec2);
   createHighDiskAlarm(tfgen, sr.alert_topic, ec2);
   createHighMemAlarm(tfgen, sr.alert_topic, ec2);
+}
+
+/**
+ *  Create alarm resources on the given RDS instance suitable for use in a UAT environment
+ */
+export function createProdDbAlarms(tfgen: TF.Generator, sr: SharedResources, db: AR.DbInstance) {
+  createHighDbCpuAlarm(tfgen, sr.alert_topic, db);
+  createLowDbSpaceAlarm(tfgen, sr.alert_topic, db);
 }
 
 /**

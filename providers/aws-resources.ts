@@ -2399,7 +2399,7 @@ export function fieldsFromLbAccessLogsParams(
 
 export interface LbSubnetMappingParams {
   subnet_id: SubnetId;
-  allocation_id: Eip;
+  allocation_id: EipId;
 }
 
 export function fieldsFromLbSubnetMappingParams(

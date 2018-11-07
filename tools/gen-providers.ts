@@ -446,7 +446,7 @@ const lb_subnet_mapping = {
   name: 'lb_subnet_mapping',
   fields: [
     requiredField('subnet_id', resourceIdType('SubnetId')),
-    requiredField('allocation_id', resourceIdType('Eip')),
+    requiredField('allocation_id', resourceIdType('EipId')),
   ],
 };
 

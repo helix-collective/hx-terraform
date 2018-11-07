@@ -1,0 +1,10 @@
+{
+  "fileHeaderComment.template": {
+    "*": [
+      "// Copyright ${year} Helix Technologies Australia Pty. Ltd."
+    ]
+  },
+  "typescript.preferences.quoteStyle": "single",
+
+  "editor.formatOnSave": true,
+}

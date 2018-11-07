@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 /**
  * Generate the resource definitions for AWS
  *
@@ -1032,7 +1034,7 @@ function main() {
     '',
   ]);
   generateAws(gen);
-  gen.writeFile("./hx-terraform/providers/aws-resources.ts");
+  gen.writeFile(path.join(__dirname, '..', 'providers', 'aws-resources.ts'));
 }
 
 main()

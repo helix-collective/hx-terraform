@@ -87,7 +87,7 @@ export function createInstanceWithEip(
  */
 export function createEcrRepository(tfgen: TF.Generator, name: string) {
   return AR.createEcrRepository(tfgen, name.replace(/\//g, '_'), {
-    name: name,
+    name,
   });
 }
 
@@ -209,9 +209,9 @@ export function createPostgresInstance(
   );
 
   return {
-    instance: db,
     config_json,
     password_s3,
+    instance: db,
   };
 }
 
@@ -224,7 +224,7 @@ export function createSqsQueue(
   customize: Customize<AR.SqsQueueParams>
 ): AR.SqsQueue {
   const sname = tfgen.scopedName(name).join('_');
-  let params: AR.SqsQueueParams = {
+  const params: AR.SqsQueueParams = {
     name: sname,
     tags: tfgen.tagsContext(),
   };

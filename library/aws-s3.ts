@@ -45,9 +45,9 @@ export function createObjectFromText(
   content: string
 ): AR.S3BucketObject {
   return AR.createS3BucketObject(tfgen, name, {
+    content,
     bucket: ref.bucket,
     key: ref.key,
-    content,
   });
 }
 

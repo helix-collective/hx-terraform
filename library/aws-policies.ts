@@ -41,7 +41,7 @@ export const publish_metrics_policy = {
 
 export function s3ReadonlyPolicy(name: string, bucket: string) {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [
@@ -62,7 +62,7 @@ export function s3ReadonlyPolicy(name: string, bucket: string) {
 
 export function s3ModifyPolicy(name: string, bucket: string) {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [
@@ -89,7 +89,7 @@ export function s3ModifyPolicy(name: string, bucket: string) {
 
 export function putLogsPolicy(name: string, log_group: AR.CloudwatchLogGroup) {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [
@@ -113,7 +113,7 @@ export function route53ModifyZonePolicy(
   zone: AR.Route53Zone
 ): NamedPolicy {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [
@@ -137,7 +137,7 @@ export function sqsQueueModifyPolicy(
   queue: AR.SqsQueue
 ): NamedPolicy {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [
@@ -193,7 +193,7 @@ export function edModifyPolicy(
   esdomain: AR.ElasticsearchDomain
 ): NamedPolicy {
   return {
-    name: name,
+    name,
     policy: {
       Version: '2012-10-17',
       Statement: [

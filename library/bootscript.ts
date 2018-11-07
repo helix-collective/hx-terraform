@@ -159,7 +159,7 @@ export class BootScript {
     this.sh(
       "export AWS_DEFAULT_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | awk -F\\\" '/region/ {print $4}'`"
     );
-    if (retry_secs == 0) {
+    if (retry_secs === 0) {
       this.sh(`aws s3 cp ${s3ref.url()} ${topath}`);
     } else {
       this.sh(`until aws s3 cp ${s3ref.url()} ${topath}`);

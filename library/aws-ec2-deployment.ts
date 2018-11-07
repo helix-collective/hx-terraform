@@ -43,13 +43,13 @@ export function createEc2Deployment(
     context_files = [];
   }
 
-  let endpoints: EndPoint[] = params.endpoints || [
+  const endpoints: EndPoint[] = params.endpoints || [
     { kind: 'https', name: 'main', dnsname: params.dns_name },
     { kind: 'https', name: 'test', dnsname: params.dns_name + '-test' },
   ];
-  let https_endpoints: EndPointHttps[] = [];
+  const https_endpoints: EndPointHttps[] = [];
   endpoints.forEach(ep => {
-    if (ep.kind == 'https') {
+    if (ep.kind === 'https') {
       https_endpoints.push(ep);
     }
   });
@@ -68,15 +68,14 @@ export function createEc2Deployment(
   );
   const ssl_cert_dir = '/etc/letsencrypt/live/' + ssl_cert_dns_names[0];
   const proxy_endpoints = endpoints.map(ep => {
-    if (ep.kind == 'https') {
+    if (ep.kind === 'https') {
       return deploytool.httpsProxyEndpoint(
         ep.name,
         shared.fqdn(sr, ep.dnsname),
         ssl_cert_dir
       );
-    } else {
-      return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
     }
+    return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
   });
   bs.include(
     deploytool.install(
@@ -232,7 +231,8 @@ interface Ec2Deployment {
 function getDefaultAmi(region: AT.Region): AT.Ami {
   if (region.value === AT.ap_southeast_2.value) {
     return AT.ami('ami-47c21a25');
-  } else if (region.value === AT.us_east_1.value) {
+  }
+  if (region.value === AT.us_east_1.value) {
     return AT.ami('ami-759bc50a');
   }
   if (region.value === AT.us_east_2.value) {

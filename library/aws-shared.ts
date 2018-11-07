@@ -263,9 +263,9 @@ function createNetworkResources(
       });
 
       return {
-        azname: az.azname,
         external_subnet,
         internal_subnet,
+        azname: az.azname,
       };
     });
   });
@@ -285,10 +285,10 @@ export function dnsARecord(
   ttl: string
 ) {
   AR.createRoute53Record(tfgen, name, {
+    ttl,
     zone_id: sr.primary_dns_zone.zone_id,
     name: dnsname,
     type: 'A',
-    ttl: ttl,
     records: ipaddresses.map(a => a.value),
   });
 }

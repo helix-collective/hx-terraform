@@ -8,7 +8,7 @@ export interface ContextFile {
 
 export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
   if (
-    base_s3.bucket != file_s3.bucket ||
+    base_s3.bucket !== file_s3.bucket ||
     !file_s3.key.startsWith(base_s3.key)
   ) {
     throw new Error('contextFile: base_s3 must be a prefix of file_s3');
@@ -22,7 +22,7 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
   if (!name) {
     throw new Error('Invalid context file path');
   }
-  return { name: name[0], source_name };
+  return { source_name, name: name[0] };
 }
 
 export interface ProxyEndPoint {
@@ -66,7 +66,7 @@ export type ProxyConfig =
   | { kind: 'local'; endpoints: ProxyEndPoint[] };
 
 export function localProxy(endpoints: ProxyEndPoint[]): ProxyConfig {
-  return { kind: 'local', endpoints };
+  return { endpoints, kind: 'local' };
 }
 
 /**
@@ -99,8 +99,8 @@ export function install(
   let deployMode;
   if (proxy.kind === 'none') {
     deployMode = 'select';
-  } else if (proxy.kind == 'local') {
-    let endPoints: { [key: string]: {} } = {};
+  } else if (proxy.kind === 'local') {
+    const endPoints: { [key: string]: {} } = {};
     proxy.endpoints.forEach(ep => {
       endPoints[ep.label] = ep.details;
     });
@@ -115,6 +115,7 @@ export function install(
     '/opt/etc/hx-deploy-tool.json',
     JSON.stringify(
       {
+        deployMode,
         contextCache: '/opt/config',
         releases: { s3: releases.url() },
         deployContext: { s3: deploy_context.url() },
@@ -124,7 +125,6 @@ export function install(
             sourceName: cf.source_name,
           };
         }),
-        deployMode,
       },
       null,
       2

@@ -31,8 +31,8 @@ export function createIamRole(
 ): AR.IamRole {
   const sname = tfgen.scopedName(rname).join('_');
   return AR.createIamRole(tfgen, rname, {
-    name: sname,
     assume_role_policy,
+    name: sname,
   });
 }
 

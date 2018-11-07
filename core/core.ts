@@ -17,18 +17,18 @@ export interface Generator {
   ): Resource;
 
   /** Construct a terraform output */
-  createOutput(name: string, value: string);
+  createOutput(name: string, value: string): void;
 
   /** Mark a field of a resource to indicate that changes to that field should not
    cause the resource to be updated */
-  ignoreChanges(resource: Resource, fieldname: string);
+  ignoreChanges(resource: Resource, fieldname: string): void;
 
   /** Mark that resource1  depends on the existance of resource2, and hence implies a
    creation ordering */
-  dependsOn(resource1: Resource, resource2: Resource);
+  dependsOn(resource1: Resource, resource2: Resource): void;
 
   /** Add a local shell script provisioner */
-  localExecProvisioner(resource: Resource, script: string);
+  localExecProvisioner(resource: Resource, script: string): void;
 
   /** Generate a name for this resource based upon the current name scope */
   scopedName(name: string): ResourceName;
@@ -50,7 +50,7 @@ export interface Generator {
  *  A terraform generator that writes tf files to a given directory
  */
 interface FileGenerator extends Generator {
-  writeFiles(outdir: string);
+  writeFiles(outdir: string): void;
 }
 
 export type ResourceType = string;
@@ -94,7 +94,7 @@ export function resourceIdValue(value: { value: string }): ResourceValue {
 }
 
 export function listValue<T>(
-  conv: (T) => ResourceValue
+  conv: (t: T) => ResourceValue
 ): (values: T[]) => ResourceValue {
   function convList(values: T[]): ResourceValue {
     return { kind: 'list', values: values.map(conv) };
@@ -112,14 +112,14 @@ export function tagsValue(tags: TagsMap): ResourceValue {
 }
 
 export function mapValue(map: ResourceFieldMap): ResourceValue {
-  return { kind: 'map', map };
+  return { map, kind: 'map' };
 }
 
 export function addField<T>(
   fields: ResourceFieldMap,
   key: string,
   value: T,
-  valuefn: (T) => ResourceValue
+  valuefn: (t: T) => ResourceValue
 ) {
   fields.push({ key, value: valuefn(value) });
 }
@@ -128,9 +128,9 @@ export function addOptionalField<T>(
   fields: ResourceFieldMap,
   key: string,
   value: T | undefined,
-  valuefn: (T) => ResourceValue
+  valuefn: (t: T) => ResourceValue
 ) {
-  if (value != undefined) {
+  if (value !== undefined) {
     fields.push({ key, value: valuefn(value) });
   }
 }
@@ -217,7 +217,7 @@ export function fileGenerator(): FileGenerator {
     function localExecProvisioner(resource: Resource, script: string) {
       const details = generated.resourcesByName[resourceName(resource)];
       if (details) {
-        details.provisioners.push({ kind: 'local-exec', script });
+        details.provisioners.push({ script, kind: 'local-exec' });
       }
     }
 
@@ -287,14 +287,14 @@ export function fileGenerator(): FileGenerator {
     const result: { [file: string]: Generated } = {};
     for (const resource of generated.resources) {
       const file = resourceFile(resource.tfname);
-      if (result[file] == undefined) {
+      if (result[file] === undefined) {
         result[file] = emptyGenerated();
       }
       addResourceDetails(result[file], resource);
     }
     for (const output of generated.outputs) {
       const file = resourceFile(output.tfname);
-      if (result[file] == undefined) {
+      if (result[file] === undefined) {
         result[file] = emptyGenerated();
       }
       addOutput(result[file], output.tfname, output.value);
@@ -336,7 +336,7 @@ export function fileGenerator(): FileGenerator {
             switch (value0.kind) {
               case 'map':
                 for (const value of field.value.values) {
-                  if (value.kind == 'map') {
+                  if (value.kind === 'map') {
                     result = result.concat(
                       mapLines(indent + INDENT, prefix + ' = ', value.map)
                     );
@@ -346,7 +346,7 @@ export function fileGenerator(): FileGenerator {
               case 'text':
                 const items: string[] = [];
                 for (const value of field.value.values) {
-                  if (value.kind == 'text') {
+                  if (value.kind === 'text') {
                     items.push(value.text);
                   }
                 }
@@ -410,7 +410,7 @@ export function fileGenerator(): FileGenerator {
       }
       lines = lines.concat(mapLines(indent, prefix, fields, false));
       for (const provisioner of resource.provisioners) {
-        if (provisioner.kind == 'local-exec') {
+        if (provisioner.kind === 'local-exec') {
           lines.push('  provisioner "local-exec" {');
           lines.push('    command = <<EOF');
           lines.push(provisioner.script);
@@ -450,9 +450,8 @@ function quotedText(s: string) {
     const eof = getUniqueEof(s);
     const trailing = s.endsWith('\n') ? '' : '\n';
     return `<<${eof}\n${s}${trailing}${eof}`;
-  } else {
-    return JSON.stringify(s);
   }
+  return JSON.stringify(s);
 }
 
 function getUniqueEof(s: string): string {

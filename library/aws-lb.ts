@@ -19,19 +19,19 @@ export function sslTerminator(
   const tags = tfgen.tagsContext();
 
   const lb = AR.createLb(tfgen, name, {
+    tags,
     subnets: sr.network.azs.map(az => az.external_subnet.id),
     security_groups: [sr.appserver_security_group.id],
-    tags,
   });
 
   const target_group = AR.createLbTargetGroup(tfgen, name, {
+    tags,
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
     health_check: {
       path: '/health-check',
     },
-    tags,
   });
 
   AR.createLbTargetGroupAttachment(tfgen, name, {

@@ -43,7 +43,7 @@ interface ListType {
 }
 
 export function listType(type: Type): ListType {
-  return { kind: 'list', type };
+  return { type, kind: 'list' };
 }
 
 interface RecordType {
@@ -61,7 +61,7 @@ interface StringAliasType {
 }
 
 export function stringAliasType(name: string): StringAliasType {
-  return { kind: 'stringalias', name };
+  return { name, kind: 'stringalias' };
 }
 
 interface ResourceIdType {
@@ -70,7 +70,7 @@ interface ResourceIdType {
 }
 
 export function resourceIdType(name: string): ResourceIdType {
-  return { kind: 'resourceid', name };
+  return { name, kind: 'resourceid' };
 }
 
 interface EnumType {
@@ -79,7 +79,7 @@ interface EnumType {
 }
 
 export function enumType(values: string[]): EnumType {
-  return { kind: 'enum', values };
+  return { values, kind: 'enum' };
 }
 
 interface TagsMapType {
@@ -109,7 +109,7 @@ export function stringAliasAttr(
   typelabel: string,
   type: string
 ): AttributeDecl {
-  return { name, type: { kind: 'string', type, typelabel } };
+  return { name, type: { type, typelabel, kind: 'string' } };
 }
 
 export function resourceIdAttr(
@@ -121,8 +121,8 @@ export function resourceIdAttr(
 
 export interface Generator {
   generateResource(
-    title,
-    link,
+    title: string,
+    link: string,
     params: RecordDecl,
     attributes: AttributeDecl[]
   ): void;
@@ -130,7 +130,7 @@ export interface Generator {
 }
 
 export interface FileGenerator extends Generator {
-  writeFile(path: string);
+  writeFile(path: string): void;
 }
 
 function camelFromSnake(s: string): string {
@@ -213,8 +213,8 @@ export function fileGenerator(
   const lines: string[] = headerLines.concat([]);
 
   function generateResource(
-    comment,
-    link,
+    comment: string,
+    link: string,
     params: RecordDecl,
     attributes: AttributeDecl[]
   ) {
@@ -234,7 +234,7 @@ export function fileGenerator(
       `  const resource = tfgen.createResource('${resourceType}', rname, fields);`
     );
     for (const attr of attributes) {
-      if (attr.type.kind == 'string' && attr.type.type == 'string') {
+      if (attr.type.kind === 'string' && attr.type.type === 'string') {
         lines.push(
           `  const ${
             attr.name

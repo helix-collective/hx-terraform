@@ -143,9 +143,9 @@ export function createLoggingInfrastructure(
 
   function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
     return {
-      instance_type: AT.t2_small,
       ami,
       security_group,
+      instance_type: AT.t2_small,
       key_name: params.aggregator_key_name,
       customize_instance: p => {
         (p.iam_instance_profile = instance_profile.id),
@@ -228,11 +228,13 @@ function es_access_policy(
 // Ubuntu 16.04 AMIS (xenial, hvm:ebs-ssd)
 // see https://cloud-images.ubuntu.com/locator/ec2/
 function ami(region: AT.Region): AT.Ami {
-  if (region == AT.ap_southeast_2) {
+  if (region === AT.ap_southeast_2) {
     return AT.ami('ami-47c21a25');
-  } else if (region == AT.us_east_1) {
+  }
+  if (region === AT.us_east_1) {
     return AT.ami('ami-759bc50a');
-  } else if (region == AT.us_east_2) {
+  }
+  if (region === AT.us_east_2) {
     return AT.ami('ami-5e8bb23b');
   }
   throw new Error('No ami for region');

@@ -823,6 +823,59 @@ export interface LbListenerRule extends TF.Resource {
 type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
 
 /**
+ *  Provides an elasticsearch cluster
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticsearch_domain.html
+ */
+export function createElasticsearchDomain(tfgen: TF.Generator, rname: string, params: ElasticsearchDomainParams): ElasticsearchDomain {
+  const fields = fieldsFromElasticsearchDomainParams(params);
+  const resource = tfgen.createResource('aws_elasticsearch_domain', rname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const domain_id: string =  '${' + TF.resourceName(resource) + '.domain_id}';
+  const domain_name: string =  '${' + TF.resourceName(resource) + '.domain_name}';
+  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
+
+  return {
+    ...resource,
+    arn,
+    domain_id,
+    domain_name,
+    endpoint,
+  };
+}
+
+export interface ElasticsearchDomain extends TF.Resource {
+  arn: AT.Arn;
+  domain_id: string;
+  domain_name: string;
+  endpoint: string;
+}
+
+type ElasticsearchDomainId = {type:'ElasticsearchDomainId',value:string};
+
+/**
+ *  Allows setting policy to an Elasticsearch domain while referencing domain attributes (e.g. ARN)
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticsearch_domain_policy.html
+ */
+export function createElasticsearchDomainPolicy(tfgen: TF.Generator, rname: string, params: ElasticsearchDomainPolicyParams): ElasticsearchDomainPolicy {
+  const fields = fieldsFromElasticsearchDomainPolicyParams(params);
+  const resource = tfgen.createResource('aws_elasticsearch_domain_policy', rname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface ElasticsearchDomainPolicy extends TF.Resource {
+  arn: AT.Arn;
+}
+
+type ElasticsearchDomainPolicyId = {type:'ElasticsearchDomainPolicyId',value:string};
+
+/**
  *  Provides a CloudWatch Log Group resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html
@@ -1689,5 +1742,87 @@ export function fieldsFromCloudwatchLogGroupParams(params: CloudwatchLogGroupPar
   TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addOptionalField(fields, "retention_in_days", params.retention_in_days, TF.numberValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainParams {
+  domain_name: string;
+  access_policies?: string;
+  advanced_options?: TF.TagsMap;
+  ebs_options?: ElasticsearchDomainEbsOptionsParams;
+  cluster_config?: ElasticsearchDomainClusterConfigParams;
+  snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
+  elasticsearch_version?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalField(fields, "access_policies", params.access_policies, TF.stringValue);
+  TF.addOptionalField(fields, "advanced_options", params.advanced_options, TF.tagsValue);
+  TF.addOptionalField(fields, "ebs_options", params.ebs_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainEbsOptionsParams(v)));
+  TF.addOptionalField(fields, "cluster_config", params.cluster_config, (v) => TF.mapValue(fieldsFromElasticsearchDomainClusterConfigParams(v)));
+  TF.addOptionalField(fields, "snapshot_options", params.snapshot_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainSnapshotOptionsParams(v)));
+  TF.addOptionalField(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainClusterConfigParams {
+  instance_type?: AT.EsInstanceType;
+  instance_count?: number;
+  dedicated_master_enabled?: boolean;
+  dedicated_master_type?: AT.EsInstanceType;
+  dedicated_master_count?: number;
+  zone_awareness_enabled?: boolean;
+}
+
+export function fieldsFromElasticsearchDomainClusterConfigParams(params: ElasticsearchDomainClusterConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "instance_count", params.instance_count, TF.numberValue);
+  TF.addOptionalField(fields, "dedicated_master_enabled", params.dedicated_master_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "dedicated_master_type", params.dedicated_master_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "dedicated_master_count", params.dedicated_master_count, TF.numberValue);
+  TF.addOptionalField(fields, "zone_awareness_enabled", params.zone_awareness_enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainEbsOptionsParams {
+  ebs_enabled: boolean;
+  volume_type?: string;
+  volume_size?: number;
+  iops?: number;
+}
+
+export function fieldsFromElasticsearchDomainEbsOptionsParams(params: ElasticsearchDomainEbsOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "ebs_enabled", params.ebs_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainSnapshotOptionsParams {
+  automated_snapshot_start_hour: number;
+}
+
+export function fieldsFromElasticsearchDomainSnapshotOptionsParams(params: ElasticsearchDomainSnapshotOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "automated_snapshot_start_hour", params.automated_snapshot_start_hour, TF.numberValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainPolicyParams {
+  domain_name: string;
+  access_policies?: string;
+}
+
+export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchDomainPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalField(fields, "access_policies", params.access_policies, TF.stringValue);
   return fields;
 }

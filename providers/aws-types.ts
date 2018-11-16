@@ -217,3 +217,46 @@ export const db_t2_medium: DbInstanceType = dbInstanceType("db.t2.medium");
 export const db_t2_large: DbInstanceType = dbInstanceType("db.t2.large");
 export const db_t2_xlarge: DbInstanceType = dbInstanceType("db.t2.xlarge");
 export const db_t2_2xlarge: DbInstanceType = dbInstanceType("db.t2.2xlarge");
+
+
+//----------------------------------------------------------------------
+
+export type EsInstanceType = {
+  type: 'EsInstanceType',
+  value: string
+}
+
+export function esInstanceType(v: string): EsInstanceType {
+  return {type:'EsInstanceType', value:v};
+};
+
+export const t2_micro_elasticsearch = esInstanceType("t2.micro.elasticsearch");
+export const t2_small_elasticsearch = esInstanceType("t2.small.elasticsearch");
+export const t2_medium_elasticsearch = esInstanceType("t2.medium.elasticsearch");
+export const m4_large_elasticsearch = esInstanceType("m4.large.elasticsearch");
+export const m4_xlarge_elasticsearch = esInstanceType("m4.xlarge.elasticsearch");
+export const m4_2xlarge_elasticsearch = esInstanceType("m4.2xlarge.elasticsearch");
+export const m4_4xlarge_elasticsearch = esInstanceType("m4.4xlarge.elasticsearch");
+export const m4_10xlarge_elasticsearch = esInstanceType("m4.10xlarge.elasticsearch");
+export const c4_large_elasticsearch = esInstanceType("c4.large.elasticsearch");
+export const c4_xlarge_elasticsearch = esInstanceType("c4.xlarge.elasticsearch");
+export const c4_2xlarge_elasticsearch = esInstanceType("c4.2xlarge.elasticsearch");
+export const c4_4xlarge_elasticsearch = esInstanceType("c4.4xlarge.elasticsearch");
+export const c4_8xlarge_elasticsearch = esInstanceType("c4.8xlarge.elasticsearch");
+export const r4_large_elasticsearch = esInstanceType("r4.large.elasticsearch");
+export const r4_xlarge_elasticsearch = esInstanceType("r4.xlarge.elasticsearch");
+export const r4_2xlarge_elasticsearch = esInstanceType("r4.2xlarge.elasticsearch");
+export const r4_4xlarge_elasticsearch = esInstanceType("r4.4xlarge.elasticsearch");
+export const r4_8xlarge_elasticsearch = esInstanceType("r4.8xlarge.elasticsearch");
+export const r4_16xlarge_elasticsearch = esInstanceType("r4.16xlarge.elasticsearch");
+export const r3_large_elasticsearch = esInstanceType("r3.large.elasticsearch");
+export const r3_xlarge_elasticsearch = esInstanceType("r3.xlarge.elasticsearch");
+export const r3_2xlarge_elasticsearch = esInstanceType("r3.2xlarge.elasticsearch");
+export const r3_4xlarge_elasticsearch = esInstanceType("r3.4xlarge.elasticsearch");
+export const r3_8xlarge_elasticsearch = esInstanceType("r3.8xlarge.elasticsearch");
+export const i3_large_elasticsearch = esInstanceType("i3.large.elasticsearch");
+export const i3_xlarge_elasticsearch = esInstanceType("i3.xlarge.elasticsearch");
+export const i3_2xlarge_elasticsearch = esInstanceType("i3.2xlarge.elasticsearch");
+export const i3_4xlarge_elasticsearch = esInstanceType("i3.4xlarge.elasticsearch");
+export const i3_8xlarge_elasticsearch = esInstanceType("i3.8xlarge.elasticsearch");
+export const i3_16xlarge_elasticsearch = esInstanceType("i3.16xlarge.elasticsearch");

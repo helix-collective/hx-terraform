@@ -558,6 +558,57 @@ const cloudwatch_log_group: RecordDecl = {
   ]
 }
 
+const elasticsearch_domain_ebs_options: RecordDecl = {
+  name: 'elasticsearch_domain_ebs_options',
+  fields: [
+    requiredField('ebs_enabled', BOOLEAN),
+    optionalField('volume_type', STRING),
+    optionalField('volume_size', NUMBER),
+    optionalField('iops', NUMBER)
+  ]
+}
+
+const elasticsearch_domain_cluster_config: RecordDecl = {
+  name: 'elasticsearch_domain_cluster_config',
+  fields: [
+    optionalField("instance_type",  stringAliasType('AT.EsInstanceType')),
+    optionalField("instance_count", NUMBER),
+    optionalField("dedicated_master_enabled", BOOLEAN),
+    optionalField("dedicated_master_type",  stringAliasType('AT.EsInstanceType')),
+    optionalField("dedicated_master_count", NUMBER),
+    optionalField("zone_awareness_enabled", BOOLEAN)
+  ]
+}
+
+const elasticsearch_domain_snapshot_options: RecordDecl = {
+  name: 'elasticsearch_domain_snapshot_options',
+  fields: [
+    requiredField("automated_snapshot_start_hour", NUMBER)
+  ]
+}
+
+const elasticsearch_domain: RecordDecl = {
+  name: 'elasticsearch_domain',
+  fields: [
+    requiredField('domain_name', STRING),
+    optionalField('access_policies', STRING),
+    optionalField('advanced_options', TAGS_MAP),
+    optionalField('ebs_options', recordType(elasticsearch_domain_ebs_options)),
+    optionalField('cluster_config', recordType(elasticsearch_domain_cluster_config)),
+    optionalField('snapshot_options', recordType(elasticsearch_domain_snapshot_options)),
+    optionalField('elasticsearch_version', STRING),
+    optionalField('tags', TAGS_MAP)
+  ]
+}
+
+const elasticsearch_domain_policy: RecordDecl = {
+  name: 'elasticsearch_domain_policy',
+  fields: [
+    requiredField('domain_name', STRING),
+    optionalField('access_policies', STRING),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -887,6 +938,27 @@ function generateAws(gen: Generator) {
   )
 
   gen.generateResource(
+    "Provides an elasticsearch cluster",
+    "https://www.terraform.io/docs/providers/aws/r/elasticsearch_domain.html",
+    elasticsearch_domain,
+    [
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
+      stringAttr('domain_id'),
+      stringAttr('domain_name'),
+      stringAttr('endpoint'),
+    ]
+  )
+
+  gen.generateResource(
+    "Allows setting policy to an Elasticsearch domain while referencing domain attributes (e.g. ARN)",
+    "https://www.terraform.io/docs/providers/aws/r/elasticsearch_domain_policy.html",
+    elasticsearch_domain_policy,
+    [
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
+    ]
+  )
+
+  gen.generateResource(
     "Provides a CloudWatch Log Group resource.",
     "https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html",
     cloudwatch_log_group,
@@ -943,6 +1015,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_listener_rule);
   gen.generateParams(lb_listener_rule_condition);
   gen.generateParams(cloudwatch_log_group);
+  gen.generateParams(elasticsearch_domain);
+  gen.generateParams(elasticsearch_domain_cluster_config);
+  gen.generateParams(elasticsearch_domain_ebs_options);
+  gen.generateParams(elasticsearch_domain_snapshot_options);
+  gen.generateParams(elasticsearch_domain_policy);
 }
 
 function main() {

@@ -119,6 +119,11 @@ export function firstAzExternalSubnet(sr: SharedResources) : AR.Subnet {
   return sr.network.azs[0].external_subnet;
 }
 
+/**  Selects the external subnet of the second availability zone */
+export function secondAzExternalSubnet(sr: SharedResources) : AR.Subnet {
+  return sr.network.azs[1].external_subnet;
+}
+
 /**
  * Create an RDS postgres database, with suitable defaults for a uat helix environment.
  * The defaults can be overridden via the customize parameter.

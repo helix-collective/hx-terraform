@@ -201,18 +201,18 @@ export const ecr_modify_all_policy: NamedPolicy = {
   }
 }
 
-// export function edModifyPolicy(name: string, AR.ElasticsearchDomain): NamedPolicy {
-//   return {
-//     name: name,
-//     policy: {
-//       "Version": "2012-10-17",
-//       "Statement": [{
-//         "Effect": "Allow",
-//         "Action": [
-//           "es:*"
-//         ],
-//         "Resource": "${esdomain.arn.value}"
-//       }]
-//     }
-//   }
-// }
+export function edModifyPolicy(name: string, esdomain: AR.ElasticsearchDomain): NamedPolicy {
+  return {
+    name: name,
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "es:*"
+        ],
+        "Resource": `${esdomain.arn.value}`
+      }]
+    }
+  }
+}

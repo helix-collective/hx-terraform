@@ -1,5 +1,7 @@
 import * as docker from "./docker";
 import * as s3 from "./aws-s3";
+import * as path from "path";
+
 import * as deploytool from "./deploytool";
 import { listeners } from "cluster";
 import { listType } from "../tools/gen-helpers";
@@ -140,6 +142,22 @@ export class BootScript {
         this.sh("mkdir -p /etc/cron.d");
         this.catToFile(cronfile, crontext.join('\n'));
         this.sh(`chmod 444 ${cronfile}`)
+    }
+
+    s3Fetch(s3ref: s3.S3Ref, topath: string, retry_secs: number = 0) {
+        this.addAptPackage("awscli");
+        this.addAptPackage("curl");
+        this.mkdir(path.dirname(topath));
+        this.sh( "export AWS_DEFAULT_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | awk -F\\\" '/region/ {print $4}'`")
+        if (retry_secs == 0) {
+            this.sh(`aws s3 cp ${s3ref.url()} ${topath}`);
+        } else {
+            this.sh(`until aws s3 cp ${s3ref.url()} ${topath}`);
+            this.sh(`do`);
+            this.sh(`  sleep ${retry_secs}`);
+            this.sh(`  echo retying s3 fetch of ${s3ref.url()}`);
+            this.sh(`done`)
+        }
     }
 
     include(other: BootScript) {

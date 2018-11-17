@@ -77,7 +77,7 @@ export function createLoggingInfrastructure(tfgen: TF.Generator, sr: SharedResou
 
     const security_group = aws.createSecurityGroupInVpc(tfgen, "security_group", sr, {
         egress:[util.egress_all],
-        ingress:[util.ingressOnPort(22), util.ingressOnPort(80), util.ingressOnPort(443), util.ingressOnPort(24224)]    
+        ingress:[util.ingressOnPort(22), util.ingressOnPort(80), util.ingressOnPort(443), util.ingressOnPort(24224)]
     });
 
     // Create the two fluentd log aggregator instances, on the public
@@ -91,9 +91,8 @@ export function createLoggingInfrastructure(tfgen: TF.Generator, sr: SharedResou
     bs.mkdir("/opt/etc/secrets");
     bs.s3Fetch(params.secrets_s3_ref.extendKey("/fluentd-aggregator.key"), "/opt/etc/secrets/fluentd-aggregator.key", 10);
     bs.s3Fetch(params.secrets_s3_ref.extendKey("/fluentd-sender.crt"), "/opt/etc/secrets/fluentd-sender.crt", 10);
-    bs.catToFile("/opt/etc/fluentd.conf", FLUENTD_CONFIG_FILE);
+    bs.catToFile("/opt/etc/fluentd.conf", fluentdConfigFile(ed));
     bs.catToFile("/opt/etc/docker-compose.yml", DOCKER_COMPOSE_FILE);
-    bs.sh(dockerLoginCommand(sr.network.region))
     bs.sh("sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d")
 
     function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
@@ -157,7 +156,7 @@ function es_access_policy(domain: AR.ElasticsearchDomain, static_ip_whitelist: s
             "Resource": `${domain.arn.value}/*`
           }
         ]
-      };      
+      };
 }
 
 // Ubuntu 16.04 AMIS (xenial, hvm:ebs-ssd)
@@ -172,10 +171,6 @@ function ami(region: AT.Region): AT.Ami {
     }
     throw new Error("No ami for region");
   };
-
-function dockerLoginCommand(region:AT.Region): string {
-    return `sudo -H -u app \`(aws ecr get-login --region ${region.value} | sed -e 's/-e none//g')\``;
-}
 
 const DOCKER_COMPOSE_FILE: string = `\
 version: '2'
@@ -193,7 +188,8 @@ services:
       - FLUENTD_CONF=fluentd.conf
 `;
 
-const FLUENTD_CONFIG_FILE = `\
+function fluentdConfigFile(ed: AR.ElasticsearchDomain) {
+  return `\
 <source>
   @type forward
   port 24224
@@ -228,7 +224,7 @@ const FLUENTD_CONFIG_FILE = `\
     reload_connections false
     reload_on_failure false
     <endpoint>
-      url https://search-hx-logging-rdkz3jz7fl4xfcgnrz73ycljmm.ap-southeast-2.es.amazonaws.com
+      url https://${ed.endpoint}
       region ap-southeast-2
     </endpoint>
   </store>
@@ -237,3 +233,4 @@ const FLUENTD_CONFIG_FILE = `\
   </store>
 </match>
 `;
+}

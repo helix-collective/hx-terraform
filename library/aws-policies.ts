@@ -60,6 +60,23 @@ export function s3ReadonlyPolicy(name: string, bucket: string) {
   };
 }
 
+export function s3PublicReadonlyPolicy(name: string, bucket: string) {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: ['s3:GetObject'],
+          Effect: 'Allow',
+          Principal: '*',
+          Resource: [`arn:aws:s3:::${bucket}/*`],
+        },
+      ],
+    },
+  };
+}
+
 export function s3ModifyPolicy(name: string, bucket: string) {
   return {
     name,

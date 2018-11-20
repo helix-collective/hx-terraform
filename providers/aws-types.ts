@@ -6,154 +6,156 @@
  * avoid confusing them by giving them different types.
  */
 
-import * as TF from "../core/core";
+import * as TF from '../core/core';
 
 export type Region = {
-  type: 'Region',
-  value: string
-}
-
-export function region(v: string): Region {
-  return {type:'Region', value:v};
+  type: 'Region';
+  value: string;
 };
 
-export const us_east_1 = region("us-east-1");
-export const us_east_2 = region("us-east-2");
-export const us_west_1 = region("us-west-1");
-export const us_west_2 = region("us-west-2");
-export const ap_southeast_1 = region("ap-southeast-1");
-export const ap_southeast_2 = region("ap-southeast-2");
+export function region(v: string): Region {
+  return { type: 'Region', value: v };
+}
+
+export const us_east_1 = region('us-east-1');
+export const us_east_2 = region('us-east-2');
+export const us_west_1 = region('us-west-1');
+export const us_west_2 = region('us-west-2');
+export const ap_southeast_1 = region('ap-southeast-1');
+export const ap_southeast_2 = region('ap-southeast-2');
 
 //----------------------------------------------------------------------
 
 export type Arn = {
-  type: 'Arn',
-  value: string
-}
+  type: 'Arn';
+  value: string;
+};
 
 export function arn(v: string): Arn {
-  return {type:'Arn', value:v};
-};
+  return { type: 'Arn', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type AvailabilityZone = {
-  type: 'AvailabilityZone',
-  value: string
-}
-
-export function availabilityZone(v: string): AvailabilityZone {
-  return {type:'AvailabilityZone', value:v};
+  type: 'AvailabilityZone';
+  value: string;
 };
 
-export const ap_southeast_2a = availabilityZone("ap-southeast-2a");
-export const ap_southeast_2b = availabilityZone("ap-southeast-2b");
-export const ap_southeast_2c = availabilityZone("ap-southeast-2c");
+export function availabilityZone(v: string): AvailabilityZone {
+  return { type: 'AvailabilityZone', value: v };
+}
+
+export const ap_southeast_2a = availabilityZone('ap-southeast-2a');
+export const ap_southeast_2b = availabilityZone('ap-southeast-2b');
+export const ap_southeast_2c = availabilityZone('ap-southeast-2c');
 
 //----------------------------------------------------------------------
 
 export type CidrBlock = {
-  type: 'CidrBlock',
-  value: string
-}
+  type: 'CidrBlock';
+  value: string;
+};
 
 export function cidrBlock(v: string): CidrBlock {
-  return {type:'CidrBlock', value:v};
-};
+  return { type: 'CidrBlock', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type Ami = {
-  type: 'Ami',
-  value: string
-}
+  type: 'Ami';
+  value: string;
+};
 
 export function ami(v: string): Ami {
-  return {type:'Ami', value:v};
-};
+  return { type: 'Ami', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type InstanceType = {
-  type: 'InstanceType',
-  value: string
-}
-
-export function instanceType(v: string): InstanceType {
-  return {type:'InstanceType', value:v};
+  type: 'InstanceType';
+  value: string;
 };
 
-export const t2_nano = instanceType("t2.nano");
-export const t2_micro = instanceType("t2.micro");
-export const t2_small = instanceType("t2.small");
-export const t2_medium = instanceType("t2.medium");
-export const t2_large = instanceType("t2.large");
-export const t2_xlarge = instanceType("t2.xlarge");
-export const t2_2xlarge = instanceType("t2.2xlarge");
+export function instanceType(v: string): InstanceType {
+  return { type: 'InstanceType', value: v };
+}
+
+export const t2_nano = instanceType('t2.nano');
+export const t2_micro = instanceType('t2.micro');
+export const t2_small = instanceType('t2.small');
+export const t2_medium = instanceType('t2.medium');
+export const t2_large = instanceType('t2.large');
+export const t2_xlarge = instanceType('t2.xlarge');
+export const t2_2xlarge = instanceType('t2.2xlarge');
 
 //----------------------------------------------------------------------
 
 export type CannedAcl = {
-  type: 'CannedAcl',
-  value: string
-}
-
-export function cannedAcl(v: string): CannedAcl {
-  return {type:'CannedAcl', value:v};
+  type: 'CannedAcl';
+  value: string;
 };
 
-export const ca_private = cannedAcl("private");
-export const ca_public_read = cannedAcl("public-read");
-export const ca_public_read_write = cannedAcl("public-read-write");
-export const ca_aws_exec_read = cannedAcl("aws-exec-read");
-export const ca_authenticated_read = cannedAcl("authenticated-read");
-export const ca_bucket_owner_read = cannedAcl("bucket-owner-read");
-export const ca_bucket_owner_full_control = cannedAcl("bucket-owner-full-control");
-export const ca_log_delivery_write = cannedAcl("log-delivery-write");
+export function cannedAcl(v: string): CannedAcl {
+  return { type: 'CannedAcl', value: v };
+}
+
+export const ca_private = cannedAcl('private');
+export const ca_public_read = cannedAcl('public-read');
+export const ca_public_read_write = cannedAcl('public-read-write');
+export const ca_aws_exec_read = cannedAcl('aws-exec-read');
+export const ca_authenticated_read = cannedAcl('authenticated-read');
+export const ca_bucket_owner_read = cannedAcl('bucket-owner-read');
+export const ca_bucket_owner_full_control = cannedAcl(
+  'bucket-owner-full-control'
+);
+export const ca_log_delivery_write = cannedAcl('log-delivery-write');
 
 //----------------------------------------------------------------------
 
 export type KeyName = {
-  type: 'KeyName',
-  value: string
-}
+  type: 'KeyName';
+  value: string;
+};
 
 export function keyName(v: string): KeyName {
-  return {type:'KeyName', value:v};
-};
+  return { type: 'KeyName', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type IpAddress = {
-  type: 'IpAddress',
-  value: string
-}
+  type: 'IpAddress';
+  value: string;
+};
 
 export function ipAddress(v: string): IpAddress {
-  return {type:'IpAddress', value:v};
-};
+  return { type: 'IpAddress', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type HostedZoneId = {
-  type: 'HostedZoneId',
-  value: string
-}
+  type: 'HostedZoneId';
+  value: string;
+};
 
 export function hostedZoneId(v: string): HostedZoneId {
-  return {type:'HostedZoneId', value:v};
-};
+  return { type: 'HostedZoneId', value: v };
+}
 
 //----------------------------------------------------------------------
 
 export type DbEngine = {
-  type: 'DbEngine',
-  value: string
-}
+  type: 'DbEngine';
+  value: string;
+};
 
 export function dbEngine(v: string): DbEngine {
-  return {type:'DbEngine', value:v};
-};
+  return { type: 'DbEngine', value: v };
+}
 
 export const aurora: DbEngine = dbEngine('aurora');
 export const aurora_mysql: DbEngine = dbEngine('aurora-mysql');
@@ -173,90 +175,138 @@ export const sqlserver_web: DbEngine = dbEngine('sqlserver-web');
 //----------------------------------------------------------------------
 
 export type DbInstanceType = {
-  type: 'DbInstanceType',
-  value: string
-}
-
-export function dbInstanceType(v: string): DbInstanceType {
-  return {type:'DbInstanceType', value:v};
+  type: 'DbInstanceType';
+  value: string;
 };
 
+export function dbInstanceType(v: string): DbInstanceType {
+  return { type: 'DbInstanceType', value: v };
+}
 
-export const db_m4_large: DbInstanceType = dbInstanceType("db.m4.large");
-export const db_m4_xlarge: DbInstanceType = dbInstanceType("db.m4.xlarge");
-export const db_m4_2xlarge: DbInstanceType = dbInstanceType("db.m4.2xlarge");
-export const db_m4_4xlarge: DbInstanceType = dbInstanceType("db.m4.4xlarge");
-export const db_m4_10xlarge: DbInstanceType = dbInstanceType("db.m4.10xlarge");
-export const db_m4_16xlarge: DbInstanceType = dbInstanceType("db.m4.16xlarge");
-export const db_m3_medium: DbInstanceType = dbInstanceType("db.m3.medium");
-export const db_m3_large: DbInstanceType = dbInstanceType("db.m3.large");
-export const db_m3_xlarge: DbInstanceType = dbInstanceType("db.m3.xlarge");
-export const db_m3_2xlarge: DbInstanceType = dbInstanceType("db.m3.2xlarge");
-export const db_r4_large: DbInstanceType = dbInstanceType("db.r4.large");
-export const db_r4_xlarge: DbInstanceType = dbInstanceType("db.r4.xlarge");
-export const db_r4_2xlarge: DbInstanceType = dbInstanceType("db.r4.2xlarge");
-export const db_r4_4xlarge: DbInstanceType = dbInstanceType("db.r4.4xlarge");
-export const db_r4_8xlarge: DbInstanceType = dbInstanceType("db.r4.8xlarge");
-export const db_r4_16xlarge: DbInstanceType = dbInstanceType("db.r4.16xlarge");
-export const db_x1e_xlarge: DbInstanceType = dbInstanceType("db.x1e.xlarge");
-export const db_x1e_2xlarge: DbInstanceType = dbInstanceType("db.x1e.2xlarge");
-export const db_x1e_4xlarge: DbInstanceType = dbInstanceType("db.x1e.4xlarge");
-export const db_x1e_8xlarge: DbInstanceType = dbInstanceType("db.x1e.8xlarge");
-export const db_x1e_16xlarge: DbInstanceType = dbInstanceType("db.x1e.16xlarge");
-export const db_x1e_32xlarge: DbInstanceType = dbInstanceType("db.x1e.32xlarge");
-export const db_x1_16xlarge: DbInstanceType = dbInstanceType("db.x1.16xlarge");
-export const db_x1_32xlarge: DbInstanceType = dbInstanceType("db.x1.32xlarge");
-export const db_r3_large: DbInstanceType = dbInstanceType("db.r3.large");
-export const db_r3_xlarge: DbInstanceType = dbInstanceType("db.r3.xlarge");
-export const db_r3_2xlarge: DbInstanceType = dbInstanceType("db.r3.2xlarge");
-export const db_r3_4xlarge: DbInstanceType = dbInstanceType("db.r3.4xlarge");
-export const db_r3_8xlarge: DbInstanceType = dbInstanceType("db.r3.8xlarge");
-export const db_t2_micro: DbInstanceType = dbInstanceType("db.t2.micro");
-export const db_t2_small: DbInstanceType = dbInstanceType("db.t2.small");
-export const db_t2_medium: DbInstanceType = dbInstanceType("db.t2.medium");
-export const db_t2_large: DbInstanceType = dbInstanceType("db.t2.large");
-export const db_t2_xlarge: DbInstanceType = dbInstanceType("db.t2.xlarge");
-export const db_t2_2xlarge: DbInstanceType = dbInstanceType("db.t2.2xlarge");
-
+export const db_m4_large: DbInstanceType = dbInstanceType('db.m4.large');
+export const db_m4_xlarge: DbInstanceType = dbInstanceType('db.m4.xlarge');
+export const db_m4_2xlarge: DbInstanceType = dbInstanceType('db.m4.2xlarge');
+export const db_m4_4xlarge: DbInstanceType = dbInstanceType('db.m4.4xlarge');
+export const db_m4_10xlarge: DbInstanceType = dbInstanceType('db.m4.10xlarge');
+export const db_m4_16xlarge: DbInstanceType = dbInstanceType('db.m4.16xlarge');
+export const db_m3_medium: DbInstanceType = dbInstanceType('db.m3.medium');
+export const db_m3_large: DbInstanceType = dbInstanceType('db.m3.large');
+export const db_m3_xlarge: DbInstanceType = dbInstanceType('db.m3.xlarge');
+export const db_m3_2xlarge: DbInstanceType = dbInstanceType('db.m3.2xlarge');
+export const db_r4_large: DbInstanceType = dbInstanceType('db.r4.large');
+export const db_r4_xlarge: DbInstanceType = dbInstanceType('db.r4.xlarge');
+export const db_r4_2xlarge: DbInstanceType = dbInstanceType('db.r4.2xlarge');
+export const db_r4_4xlarge: DbInstanceType = dbInstanceType('db.r4.4xlarge');
+export const db_r4_8xlarge: DbInstanceType = dbInstanceType('db.r4.8xlarge');
+export const db_r4_16xlarge: DbInstanceType = dbInstanceType('db.r4.16xlarge');
+export const db_x1e_xlarge: DbInstanceType = dbInstanceType('db.x1e.xlarge');
+export const db_x1e_2xlarge: DbInstanceType = dbInstanceType('db.x1e.2xlarge');
+export const db_x1e_4xlarge: DbInstanceType = dbInstanceType('db.x1e.4xlarge');
+export const db_x1e_8xlarge: DbInstanceType = dbInstanceType('db.x1e.8xlarge');
+export const db_x1e_16xlarge: DbInstanceType = dbInstanceType(
+  'db.x1e.16xlarge'
+);
+export const db_x1e_32xlarge: DbInstanceType = dbInstanceType(
+  'db.x1e.32xlarge'
+);
+export const db_x1_16xlarge: DbInstanceType = dbInstanceType('db.x1.16xlarge');
+export const db_x1_32xlarge: DbInstanceType = dbInstanceType('db.x1.32xlarge');
+export const db_r3_large: DbInstanceType = dbInstanceType('db.r3.large');
+export const db_r3_xlarge: DbInstanceType = dbInstanceType('db.r3.xlarge');
+export const db_r3_2xlarge: DbInstanceType = dbInstanceType('db.r3.2xlarge');
+export const db_r3_4xlarge: DbInstanceType = dbInstanceType('db.r3.4xlarge');
+export const db_r3_8xlarge: DbInstanceType = dbInstanceType('db.r3.8xlarge');
+export const db_t2_micro: DbInstanceType = dbInstanceType('db.t2.micro');
+export const db_t2_small: DbInstanceType = dbInstanceType('db.t2.small');
+export const db_t2_medium: DbInstanceType = dbInstanceType('db.t2.medium');
+export const db_t2_large: DbInstanceType = dbInstanceType('db.t2.large');
+export const db_t2_xlarge: DbInstanceType = dbInstanceType('db.t2.xlarge');
+export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
 
 //----------------------------------------------------------------------
 
 export type EsInstanceType = {
-  type: 'EsInstanceType',
-  value: string
-}
-
-export function esInstanceType(v: string): EsInstanceType {
-  return {type:'EsInstanceType', value:v};
+  type: 'EsInstanceType';
+  value: string;
 };
 
-export const t2_micro_elasticsearch = esInstanceType("t2.micro.elasticsearch");
-export const t2_small_elasticsearch = esInstanceType("t2.small.elasticsearch");
-export const t2_medium_elasticsearch = esInstanceType("t2.medium.elasticsearch");
-export const m4_large_elasticsearch = esInstanceType("m4.large.elasticsearch");
-export const m4_xlarge_elasticsearch = esInstanceType("m4.xlarge.elasticsearch");
-export const m4_2xlarge_elasticsearch = esInstanceType("m4.2xlarge.elasticsearch");
-export const m4_4xlarge_elasticsearch = esInstanceType("m4.4xlarge.elasticsearch");
-export const m4_10xlarge_elasticsearch = esInstanceType("m4.10xlarge.elasticsearch");
-export const c4_large_elasticsearch = esInstanceType("c4.large.elasticsearch");
-export const c4_xlarge_elasticsearch = esInstanceType("c4.xlarge.elasticsearch");
-export const c4_2xlarge_elasticsearch = esInstanceType("c4.2xlarge.elasticsearch");
-export const c4_4xlarge_elasticsearch = esInstanceType("c4.4xlarge.elasticsearch");
-export const c4_8xlarge_elasticsearch = esInstanceType("c4.8xlarge.elasticsearch");
-export const r4_large_elasticsearch = esInstanceType("r4.large.elasticsearch");
-export const r4_xlarge_elasticsearch = esInstanceType("r4.xlarge.elasticsearch");
-export const r4_2xlarge_elasticsearch = esInstanceType("r4.2xlarge.elasticsearch");
-export const r4_4xlarge_elasticsearch = esInstanceType("r4.4xlarge.elasticsearch");
-export const r4_8xlarge_elasticsearch = esInstanceType("r4.8xlarge.elasticsearch");
-export const r4_16xlarge_elasticsearch = esInstanceType("r4.16xlarge.elasticsearch");
-export const r3_large_elasticsearch = esInstanceType("r3.large.elasticsearch");
-export const r3_xlarge_elasticsearch = esInstanceType("r3.xlarge.elasticsearch");
-export const r3_2xlarge_elasticsearch = esInstanceType("r3.2xlarge.elasticsearch");
-export const r3_4xlarge_elasticsearch = esInstanceType("r3.4xlarge.elasticsearch");
-export const r3_8xlarge_elasticsearch = esInstanceType("r3.8xlarge.elasticsearch");
-export const i3_large_elasticsearch = esInstanceType("i3.large.elasticsearch");
-export const i3_xlarge_elasticsearch = esInstanceType("i3.xlarge.elasticsearch");
-export const i3_2xlarge_elasticsearch = esInstanceType("i3.2xlarge.elasticsearch");
-export const i3_4xlarge_elasticsearch = esInstanceType("i3.4xlarge.elasticsearch");
-export const i3_8xlarge_elasticsearch = esInstanceType("i3.8xlarge.elasticsearch");
-export const i3_16xlarge_elasticsearch = esInstanceType("i3.16xlarge.elasticsearch");
+export function esInstanceType(v: string): EsInstanceType {
+  return { type: 'EsInstanceType', value: v };
+}
+
+export const t2_micro_elasticsearch = esInstanceType('t2.micro.elasticsearch');
+export const t2_small_elasticsearch = esInstanceType('t2.small.elasticsearch');
+export const t2_medium_elasticsearch = esInstanceType(
+  't2.medium.elasticsearch'
+);
+export const m4_large_elasticsearch = esInstanceType('m4.large.elasticsearch');
+export const m4_xlarge_elasticsearch = esInstanceType(
+  'm4.xlarge.elasticsearch'
+);
+export const m4_2xlarge_elasticsearch = esInstanceType(
+  'm4.2xlarge.elasticsearch'
+);
+export const m4_4xlarge_elasticsearch = esInstanceType(
+  'm4.4xlarge.elasticsearch'
+);
+export const m4_10xlarge_elasticsearch = esInstanceType(
+  'm4.10xlarge.elasticsearch'
+);
+export const c4_large_elasticsearch = esInstanceType('c4.large.elasticsearch');
+export const c4_xlarge_elasticsearch = esInstanceType(
+  'c4.xlarge.elasticsearch'
+);
+export const c4_2xlarge_elasticsearch = esInstanceType(
+  'c4.2xlarge.elasticsearch'
+);
+export const c4_4xlarge_elasticsearch = esInstanceType(
+  'c4.4xlarge.elasticsearch'
+);
+export const c4_8xlarge_elasticsearch = esInstanceType(
+  'c4.8xlarge.elasticsearch'
+);
+export const r4_large_elasticsearch = esInstanceType('r4.large.elasticsearch');
+export const r4_xlarge_elasticsearch = esInstanceType(
+  'r4.xlarge.elasticsearch'
+);
+export const r4_2xlarge_elasticsearch = esInstanceType(
+  'r4.2xlarge.elasticsearch'
+);
+export const r4_4xlarge_elasticsearch = esInstanceType(
+  'r4.4xlarge.elasticsearch'
+);
+export const r4_8xlarge_elasticsearch = esInstanceType(
+  'r4.8xlarge.elasticsearch'
+);
+export const r4_16xlarge_elasticsearch = esInstanceType(
+  'r4.16xlarge.elasticsearch'
+);
+export const r3_large_elasticsearch = esInstanceType('r3.large.elasticsearch');
+export const r3_xlarge_elasticsearch = esInstanceType(
+  'r3.xlarge.elasticsearch'
+);
+export const r3_2xlarge_elasticsearch = esInstanceType(
+  'r3.2xlarge.elasticsearch'
+);
+export const r3_4xlarge_elasticsearch = esInstanceType(
+  'r3.4xlarge.elasticsearch'
+);
+export const r3_8xlarge_elasticsearch = esInstanceType(
+  'r3.8xlarge.elasticsearch'
+);
+export const i3_large_elasticsearch = esInstanceType('i3.large.elasticsearch');
+export const i3_xlarge_elasticsearch = esInstanceType(
+  'i3.xlarge.elasticsearch'
+);
+export const i3_2xlarge_elasticsearch = esInstanceType(
+  'i3.2xlarge.elasticsearch'
+);
+export const i3_4xlarge_elasticsearch = esInstanceType(
+  'i3.4xlarge.elasticsearch'
+);
+export const i3_8xlarge_elasticsearch = esInstanceType(
+  'i3.8xlarge.elasticsearch'
+);
+export const i3_16xlarge_elasticsearch = esInstanceType(
+  'i3.16xlarge.elasticsearch'
+);

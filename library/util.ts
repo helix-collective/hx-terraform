@@ -1,14 +1,18 @@
-import * as TF from "../core/core";
-import * as AT from "../providers/aws-types";
-import * as AR from "../providers/aws-resources";
+import * as TF from '../core/core';
+import * as AT from '../providers/aws-types';
+import * as AR from '../providers/aws-resources';
 
 /**
  * Create resource for a subsystem in their own scope
  */
-export function inLocalSubSystem<T>(tfgen0: TF.Generator, system: string, createResources: (tfgen:TF.Generator) => T ): T {
-  const tfgen =  tfgen0.localNameScope(system).localTags(
-    {'tf-subsystem':system, "cost-center":system}
-  );
+export function inLocalSubSystem<T>(
+  tfgen0: TF.Generator,
+  system: string,
+  createResources: (tfgen: TF.Generator) => T
+): T {
+  const tfgen = tfgen0
+    .localNameScope(system)
+    .localTags({ 'tf-subsystem': system, 'cost-center': system });
   return createResources(tfgen);
 }
 
@@ -16,30 +20,31 @@ export function ingressOnPort(port: number): AR.IngressRuleParams {
   return {
     from_port: port,
     to_port: port,
-    protocol: "tcp",
-    cidr_blocks: [AT.cidrBlock("0.0.0.0/0")]
-  }
+    protocol: 'tcp',
+    cidr_blocks: [AT.cidrBlock('0.0.0.0/0')],
+  };
 }
 
 export const egress_all: AR.EgressRuleParams = {
   from_port: 0,
   to_port: 0,
-  protocol: "-1",
-  cidr_blocks: [AT.cidrBlock("0.0.0.0/0")]
-}
+  protocol: '-1',
+  cidr_blocks: [AT.cidrBlock('0.0.0.0/0')],
+};
 
-export function contextTagsWithName(tfgen: TF.Generator, name: string): TF.TagsMap {
+export function contextTagsWithName(
+  tfgen: TF.Generator,
+  name: string
+): TF.TagsMap {
   return {
     ...tfgen.tagsContext(),
-    Name: tfgen.scopedName(name).join("_")
-  }
+    Name: tfgen.scopedName(name).join('_'),
+  };
 }
-
 
 /**
  *   A function to customise a value via mutation.
  */
-export type Customize<T> = (v:T) => void;
+export type Customize<T> = (v: T) => void;
 
-export function noCustomize<T>(v: T) {
-}
+export function noCustomize<T>(v: T) {}

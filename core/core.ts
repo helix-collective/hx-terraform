@@ -9,6 +9,9 @@ import { EOF } from 'dns';
  * The interface for generating terraform
  */
 export interface Generator {
+  /** Construct a terraform provider */
+  createProvider(type: string, fields: ProviderFieldMap): Provider;
+
   /** Construct a terraform resource */
   createResource(
     type: string,
@@ -70,6 +73,13 @@ export type RFMap = { kind: 'map'; map: ResourceFieldMap };
 // we can't use a regular object map here, as repeated keys are allowed
 export type ResourceField = { key: string; value: ResourceValue };
 export type ResourceFieldMap = ResourceField[];
+
+export type ProviderType = string;
+export type Provider = { tftype: ProviderType };
+export type ProviderFieldMap = ResourceFieldMap;
+export type ProviderDetails = Provider & {
+  fields: ProviderFieldMap;
+};
 
 export type TagsMap = { [key: string]: string };
 
@@ -155,7 +165,6 @@ export function fileGenerator(): FileGenerator {
     provisioners: Provisioner[];
     createBeforeDestroy: boolean;
   }
-
   type Provisioner = { kind: 'local-exec'; script: string };
 
   interface OutputDetails {
@@ -164,6 +173,7 @@ export function fileGenerator(): FileGenerator {
   }
 
   interface Generated {
+    providers: ProviderDetails[];
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
     outputs: OutputDetails[];
@@ -175,6 +185,21 @@ export function fileGenerator(): FileGenerator {
     nameContext0: ResourceName,
     tagsContext0: TagsMap
   ): Generator {
+    function createProvider(
+      tftype: string,
+      fields: ProviderFieldMap
+    ): Provider {
+      const provider: Provider = {
+        tftype,
+      };
+      const providerDetails: ProviderDetails = {
+        ...provider,
+        fields,
+      };
+      addProviderDetails(generated, providerDetails);
+      return provider;
+    }
+
     function createResource(
       tftype: string,
       name: string,
@@ -246,6 +271,7 @@ export function fileGenerator(): FileGenerator {
     }
 
     return {
+      createProvider,
       createResource,
       createOutput,
       ignoreChanges,
@@ -266,8 +292,16 @@ export function fileGenerator(): FileGenerator {
     return 'root.tf';
   }
 
+  function providerFile(tftype: ProviderType): string {
+    return `${tftype}.tf`;
+  }
+
   function emptyGenerated(): Generated {
-    return { resources: [], resourcesByName: {}, outputs: [] };
+    return { providers: [], resources: [], resourcesByName: {}, outputs: [] };
+  }
+
+  function addProviderDetails(generated: Generated, provider: ProviderDetails) {
+    generated.providers.push(provider);
   }
 
   function addResourceDetails(generated: Generated, details: ResourceDetails) {
@@ -285,6 +319,7 @@ export function fileGenerator(): FileGenerator {
 
   function groupResourcesByFile(): { [file: string]: Generated } {
     const result: { [file: string]: Generated } = {};
+
     for (const resource of generated.resources) {
       const file = resourceFile(resource.tfname);
       if (result[file] === undefined) {
@@ -298,6 +333,18 @@ export function fileGenerator(): FileGenerator {
         result[file] = emptyGenerated();
       }
       addOutput(result[file], output.tfname, output.value);
+    }
+    return result;
+  }
+  function groupProvidersByFile(): { [file: string]: Generated } {
+    const result: { [file: string]: Generated } = {};
+
+    for (const provider of generated.providers) {
+      const file = providerFile(provider.tftype);
+      if (result[file] === undefined) {
+        result[file] = emptyGenerated();
+      }
+      result[file].providers.push(provider);
     }
     return result;
   }
@@ -376,6 +423,13 @@ export function fileGenerator(): FileGenerator {
   function writeGenerated(path: string, generated: Generated) {
     const indent = '';
     let lines: string[] = [];
+    for (const provider of generated.providers) {
+      const prefix = `provider "${provider.tftype}"`;
+      const fields = provider.fields.concat([]);
+      lines = lines.concat(mapLines(indent, prefix, fields, false));
+      lines.push('}');
+      lines.push('');
+    }
     for (const resource of generated.resources) {
       const prefix =
         'resource "' +
@@ -432,6 +486,10 @@ export function fileGenerator(): FileGenerator {
 
   function writeFiles(outdir: string) {
     const fileResources = groupResourcesByFile();
+    const fileProviders = groupProvidersByFile();
+    for (const path in fileProviders) {
+      writeGenerated(outdir + '/' + path, fileProviders[path]);
+    }
     for (const path in fileResources) {
       writeGenerated(outdir + '/' + path, fileResources[path]);
     }

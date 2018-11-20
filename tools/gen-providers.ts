@@ -582,6 +582,11 @@ const cloudwatch_log_group: RecordDecl = {
   ],
 };
 
+const aws_provider: RecordDecl = {
+  name: 'aws',
+  fields: [optionalField('region', stringAliasType('AT.Region'))],
+};
+
 const elasticsearch_domain_ebs_options: RecordDecl = {
   name: 'elasticsearch_domain_ebs_options',
   fields: [
@@ -1003,6 +1008,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_listener_rule);
   gen.generateParams(lb_listener_rule_condition);
   gen.generateParams(cloudwatch_log_group);
+  gen.generateParams(aws_provider);
   gen.generateParams(elasticsearch_domain);
   gen.generateParams(elasticsearch_domain_cluster_config);
   gen.generateParams(elasticsearch_domain_ebs_options);

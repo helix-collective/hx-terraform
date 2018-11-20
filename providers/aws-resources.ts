@@ -2838,3 +2838,13 @@ export function fieldsFromElasticsearchDomainPolicyParams(
   );
   return fields;
 }
+
+export interface AwsParams {
+  region?: AT.Region;
+}
+
+export function fieldsFromAwsParams(params: AwsParams): TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, 'region', params.region, TF.stringAliasValue);
+  return fields;
+}

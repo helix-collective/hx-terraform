@@ -29,6 +29,28 @@ export interface LoggingInfrastructure {
     aggregator_ipaddresses: AT.IpAddress[]
 };
 
+/**
+ * Create logging infrastructure, including an elasticsearch instance
+ * and a pair of EC2 machines running fluentd aggregators.
+ *
+ * The fluentd aggregators require a self signed SSL certificate,
+ * that must be manually created and uploaded to s3. Create the certificate
+ * with the command:
+ * 
+ * openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout fluentd-aggregator.key -out fluentd-sender.crt -subj "\
+ * /O=Helix\
+ * /C=AU\
+ * /L=Sydney\
+ * /OU=Technology\
+ * /ST=New South Wales\
+ * /CN=LOGGING_FQDN"
+ * 
+ * where LOGGING_FQDN is logging.${main.domain_name} (eg logging.aws.helixta.com.au)
+ * 
+ * Then manually upload the two files to params.secrets_s3_ref.
+ * 
+ * (Ideally this process would be automated via a terraform local provisioner)
+ */
 export function createLoggingInfrastructure(tfgen: TF.Generator, sr: SharedResources, params: LoggingInfrastructureParams): LoggingInfrastructure {
 
     // An S3 bucket for longer-term storage
@@ -108,14 +130,14 @@ export function createLoggingInfrastructure(tfgen: TF.Generator, sr: SharedResou
           }
       };
     };
-    const la1 = aws.createInstanceWithEip(tfgen, "log_aggregator_one", sr, laparams(aws.firstAzExternalSubnet(sr)));
-    const la2 = aws.createInstanceWithEip(tfgen, "log_aggregator_two", sr, laparams(aws.secondAzExternalSubnet(sr)));
+    const log_aggregators = [
+      aws.createInstanceWithEip(tfgen, "log_aggregator_one", sr, laparams(aws.firstAzExternalSubnet(sr))),
+      aws.createInstanceWithEip(tfgen, "log_aggregator_two", sr, laparams(aws.secondAzExternalSubnet(sr))),
+    ];
+    const log_aggregator_ips = log_aggregators.map( la => la.eip.public_ip);
 
     // The whitelist of static ip addresses allowed to write to the ES domain
-    let logging_ip_whitelist : AT.IpAddress[] = [
-        la1.eip.public_ip,
-        la2.eip.public_ip
-    ];
+    let logging_ip_whitelist : AT.IpAddress[] = log_aggregator_ips;
     if (params.logging_ip_whitelist) {
         logging_ip_whitelist = logging_ip_whitelist.concat(params.logging_ip_whitelist);
     }
@@ -126,7 +148,7 @@ export function createLoggingInfrastructure(tfgen: TF.Generator, sr: SharedResou
     });
 
     return {
-        aggregator_ipaddresses:[la1.eip.public_ip,la2.eip.public_ip]
+        aggregator_ipaddresses:log_aggregator_ips
     }
 }
 

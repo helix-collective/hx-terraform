@@ -126,12 +126,6 @@ export function createSecurityGroupInVpc(
   return AR.createSecurityGroup(tfgen, name, params);
 }
 
-export interface DbInstance {
-  instance: AR.DbInstance;
-  config_json: {};
-  password_s3: s3.S3Ref;
-}
-
 /**  Selects the external subnet of the first availability zone */
 export function firstAzExternalSubnet(sr: SharedResources): AR.Subnet {
   return sr.network.azs[0].external_subnet;
@@ -140,79 +134,6 @@ export function firstAzExternalSubnet(sr: SharedResources): AR.Subnet {
 /**  Selects the external subnet of the second availability zone */
 export function secondAzExternalSubnet(sr: SharedResources): AR.Subnet {
   return sr.network.azs[1].external_subnet;
-}
-
-/**
- * Create an RDS postgres database, with suitable defaults for a uat helix environment.
- * The defaults can be overridden via the customize parameter.
- */
-export function createPostgresInstance(
-  tfgen: TF.Generator,
-  name: string,
-  db_name: string,
-  sr: SharedResources,
-  db_instance_type: AT.DbInstanceType,
-  password_s3: s3.S3Ref,
-  customize: Customize<AR.DbInstanceParams>
-): DbInstance {
-  const sname = tfgen.scopedName(name).join('_');
-
-  const security_group = AR.createSecurityGroup(tfgen, name, {
-    vpc_id: sr.network.vpc.id,
-    ingress: [ingressOnPort(5432)],
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, name),
-  });
-
-  const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
-    name: sname,
-    subnet_ids: sr.network.azs.map(az => az.external_subnet.id),
-  });
-
-  const params: AR.DbInstanceParams = {
-    allocated_storage: 5,
-    engine: AT.postgres,
-    instance_class: db_instance_type,
-    username: 'postgres',
-    password: 'REPLACEME',
-    identifier: sname.replace(/_/g, '-'),
-    name: db_name,
-    engine_version: '9.4.15',
-    publicly_accessible: false,
-    backup_retention_period: 3,
-    vpc_security_group_ids: [security_group.id],
-    db_subnet_group_name: db_subnet_group.name,
-    tags: tfgen.tagsContext(),
-    final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
-    skip_final_snapshot: false,
-  };
-
-  customize(params);
-  const db = AR.createDbInstance(tfgen, name, params);
-
-  const config_json = {
-    name: db.name,
-    username: db.username,
-    address: db.address,
-    port: db.port,
-  };
-
-  tfgen.localExecProvisioner(
-    db,
-    [
-      '# Generate a random password for the instance, and upload it to S3',
-      `export AWS_REGION=${sr.network.region.value}`,
-      `hx-provisioning-tools generate-rds-password ${db.id.value} ${
-        sr.deploy_bucket.id
-      } ${password_s3.key}`,
-    ].join('\n')
-  );
-
-  return {
-    config_json,
-    password_s3,
-    instance: db,
-  };
 }
 
 /**

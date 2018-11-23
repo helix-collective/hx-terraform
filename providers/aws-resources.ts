@@ -966,6 +966,7 @@ export interface DbInstanceParams {
   skip_final_snapshot?: boolean;
   final_snapshot_identifier?: string;
   multi_az?: boolean;
+  license_model?: string;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -988,6 +989,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "skip_final_snapshot", params.skip_final_snapshot, TF.booleanValue);
   TF.addOptionalField(fields, "final_snapshot_identifier", params.final_snapshot_identifier, TF.stringValue);
   TF.addOptionalField(fields, "multi_az", params.multi_az, TF.booleanValue);
+  TF.addOptionalField(fields, "license_model", params.license_model, TF.stringValue);
   return fields;
 }
 

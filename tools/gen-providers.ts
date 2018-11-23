@@ -86,6 +86,7 @@ const db_instance: RecordDecl = {
     optionalField('skip_final_snapshot', BOOLEAN),
     optionalField('final_snapshot_identifier', STRING),
     optionalField('multi_az', BOOLEAN),
+    optionalField('license_model', STRING),
   ],
 };
 

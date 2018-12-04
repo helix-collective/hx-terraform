@@ -16,6 +16,7 @@ import {
   STRING,
   TAGS_MAP,
   stringAliasType,
+  arnType,
   resourceIdType,
   recordType,
   enumType,
@@ -25,6 +26,7 @@ import {
   stringAttr,
   stringAliasAttr,
   resourceIdAttr,
+  resourceArnAttr,
 } from './gen-helpers';
 
 const instance_root_block_device: RecordDecl = {

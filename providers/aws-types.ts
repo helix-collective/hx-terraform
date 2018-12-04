@@ -26,13 +26,24 @@ export const ap_southeast_2 = region('ap-southeast-2');
 
 //----------------------------------------------------------------------
 
+/** Any Amazon Resource ARN */
 export type Arn = {
   type: 'Arn';
   value: string;
+  resource?: string;
 };
 
-export function arn(v: string): Arn {
-  return { type: 'Arn', value: v };
+/** Stronger typed Amazon Resource ARN */
+export type ArnT<R extends string> = Arn & {
+  resource: R;
+};
+
+export function arn(v: string, resource?: string): Arn {
+  return { resource, type: 'Arn', value: v };
+}
+
+export function arnT<R extends string>(v: string, resource: R): ArnT<R> {
+  return { ...arn(v), resource };
 }
 
 //----------------------------------------------------------------------

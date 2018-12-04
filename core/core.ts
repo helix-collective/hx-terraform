@@ -103,6 +103,10 @@ export function resourceIdValue(value: { value: string }): ResourceValue {
   return { kind: 'text', text: JSON.stringify(value.value) };
 }
 
+export function resourceArnValue(value: { value: string }): ResourceValue {
+  return { kind: 'text', text: JSON.stringify(value.value) };
+}
+
 export function listValue<T>(
   conv: (t: T) => ResourceValue
 ): (values: T[]) => ResourceValue {

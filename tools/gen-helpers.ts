@@ -25,6 +25,7 @@ export type Type =
   | RecordType
   | StringAliasType
   | ResourceIdType
+  | ArnType
   | TagsMapType
   | EnumType;
 
@@ -73,6 +74,15 @@ export function resourceIdType(name: string): ResourceIdType {
   return { name, kind: 'resourceid' };
 }
 
+interface ArnType {
+  kind: 'arntype';
+  name: string;
+}
+
+export function arnType<R extends string>(params: RecordDecl): ArnType {
+  return { name: `AT.ArnT<"${resourceName(params.name)}">`, kind: 'arntype' };
+}
+
 interface EnumType {
   kind: 'enum';
   values: string[];
@@ -95,7 +105,8 @@ interface AttributeDecl {
 
 type AttributeType =
   | { kind: 'string'; type: string; typelabel: string }
-  | { kind: 'resourceid'; resource: string };
+  | { kind: 'resourceid'; resource: string }
+  | { kind: 'resourcearn'; resource: string };
 
 export function stringAttr(name: string): AttributeDecl {
   return {
@@ -117,6 +128,13 @@ export function resourceIdAttr(
   params: RecordDecl
 ): AttributeDecl {
   return { name, type: { kind: 'resourceid', resource: params.name } };
+}
+
+export function resourceArnAttr(
+  name: string,
+  params: RecordDecl
+): AttributeDecl {
+  return { name, type: { kind: 'resourcearn', resource: params.name } };
 }
 
 export interface Generator {
@@ -150,6 +168,8 @@ function genType(type: Type): string {
       return paramsInterfaceName(type.name);
     case 'stringalias':
       return type.name;
+    case 'arntype':
+      return type.name;
     case 'resourceid':
       return type.name;
     case 'tagsmap':
@@ -165,6 +185,8 @@ function genAttrType(type: AttributeType): string {
       return type.type;
     case 'resourceid':
       return `${camelFromSnake(type.resource)}Id`;
+    case 'resourcearn':
+      return `${camelFromSnake(type.resource)}Arn`;
   }
 }
 
@@ -174,6 +196,8 @@ function genAttrTypeLabel(type: AttributeType): string {
       return type.typelabel;
     case 'resourceid':
       return camelFromSnake(type.resource) + 'Id';
+    case 'resourcearn':
+      return camelFromSnake(type.resource) + 'Arn';
   }
 }
 
@@ -189,6 +213,8 @@ function genResourceFn(type: Type): string {
       )}(v))`;
     case 'stringalias':
       return 'TF.stringAliasValue';
+    case 'arntype':
+      return 'TF.resourceArnValue';
     case 'resourceid':
       return 'TF.resourceIdValue';
     case 'tagsmap':
@@ -239,6 +265,14 @@ export function fileGenerator(
           `  const ${
             attr.name
           }: string =  '\$\{' + TF.resourceName(resource) + '.${attr.name}}';`
+        );
+      } else if (attr.type.kind === 'resourcearn') {
+        lines.push(
+          `  const ${attr.name}: ${genAttrType(
+            attr.type
+          )} = AT.arnT('\$\{' + TF.resourceName(resource) + '.${
+            attr.name
+          }}', '${name}');`
         );
       } else {
         lines.push(

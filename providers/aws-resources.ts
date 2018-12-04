@@ -41,33 +41,34 @@ export function createDbInstance(tfgen: TF.Generator, rname: string, params: DbI
   const fields = fieldsFromDbInstanceParams(params);
   const resource = tfgen.createResource('aws_db_instance', rname, fields);
   const id: DbInstanceId =  {type: 'DbInstanceId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const username: string =  '${' + TF.resourceName(resource) + '.username}';
   const address: string =  '${' + TF.resourceName(resource) + '.address}';
   const port: string =  '${' + TF.resourceName(resource) + '.port}';
+  const arn: DbInstanceArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbInstance');
 
   return {
     ...resource,
     id,
-    arn,
     name,
     username,
     address,
     port,
+    arn,
   };
 }
 
 export interface DbInstance extends TF.Resource {
   id: DbInstanceId;
-  arn: AT.Arn;
   name: string;
   username: string;
   address: string;
   port: string;
+  arn: DbInstanceArn;
 }
 
 type DbInstanceId = {type:'DbInstanceId',value:string};
+export type DbInstanceArn = AT.ArnT<"DbInstance">;
 
 /**
  *  Provides an Elastic IP Address.
@@ -329,18 +330,22 @@ export function createS3Bucket(tfgen: TF.Generator, rname: string, params: S3Buc
   const fields = fieldsFromS3BucketParams(params);
   const resource = tfgen.createResource('aws_s3_bucket', rname, fields);
   const id: string =  '${' + TF.resourceName(resource) + '.id}';
+  const arn: S3BucketArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'S3Bucket');
 
   return {
     ...resource,
     id,
+    arn,
   };
 }
 
 export interface S3Bucket extends TF.Resource {
   id: string;
+  arn: S3BucketArn;
 }
 
 type S3BucketId = {type:'S3BucketId',value:string};
+export type S3BucketArn = AT.ArnT<"S3Bucket">;
 
 /**
  *  Provides a S3 bucket object resource.
@@ -379,7 +384,7 @@ export function createSnsTopic(tfgen: TF.Generator, rname: string, params: SnsTo
   const fields = fieldsFromSnsTopicParams(params);
   const resource = tfgen.createResource('aws_sns_topic', rname, fields);
   const id: SnsTopicId =  {type: 'SnsTopicId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: SnsTopicArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SnsTopic');
 
   return {
     ...resource,
@@ -390,10 +395,11 @@ export function createSnsTopic(tfgen: TF.Generator, rname: string, params: SnsTo
 
 export interface SnsTopic extends TF.Resource {
   id: SnsTopicId;
-  arn: AT.Arn;
+  arn: SnsTopicArn;
 }
 
 type SnsTopicId = {type:'SnsTopicId',value:string};
+export type SnsTopicArn = AT.ArnT<"SnsTopic">;
 
 /**
  *  Provides an IAM user.
@@ -403,25 +409,26 @@ type SnsTopicId = {type:'SnsTopicId',value:string};
 export function createIamUser(tfgen: TF.Generator, rname: string, params: IamUserParams): IamUser {
   const fields = fieldsFromIamUserParams(params);
   const resource = tfgen.createResource('aws_iam_user', rname, fields);
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
+  const arn: IamUserArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamUser');
 
   return {
     ...resource,
-    arn,
     name,
     unique_id,
+    arn,
   };
 }
 
 export interface IamUser extends TF.Resource {
-  arn: AT.Arn;
   name: string;
   unique_id: string;
+  arn: IamUserArn;
 }
 
 type IamUserId = {type:'IamUserId',value:string};
+export type IamUserArn = AT.ArnT<"IamUser">;
 
 /**
  *  Provides an IAM policy attached to a user.
@@ -469,28 +476,29 @@ type IamUserPolicyAttachmentId = {type:'IamUserPolicyAttachmentId',value:string}
 export function createEcrRepository(tfgen: TF.Generator, rname: string, params: EcrRepositoryParams): EcrRepository {
   const fields = fieldsFromEcrRepositoryParams(params);
   const resource = tfgen.createResource('aws_ecr_repository', rname, fields);
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const registry_id: string =  '${' + TF.resourceName(resource) + '.registry_id}';
   const repository_url: string =  '${' + TF.resourceName(resource) + '.repository_url}';
+  const arn: EcrRepositoryArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EcrRepository');
 
   return {
     ...resource,
-    arn,
     name,
     registry_id,
     repository_url,
+    arn,
   };
 }
 
 export interface EcrRepository extends TF.Resource {
-  arn: AT.Arn;
   name: string;
   registry_id: string;
   repository_url: string;
+  arn: EcrRepositoryArn;
 }
 
 type EcrRepositoryId = {type:'EcrRepositoryId',value:string};
+export type EcrRepositoryArn = AT.ArnT<"EcrRepository">;
 
 /**
  *  Provides an RDS DB subnet group resource.
@@ -502,7 +510,7 @@ export function createDbSubnetGroup(tfgen: TF.Generator, rname: string, params: 
   const resource = tfgen.createResource('aws_db_subnet_group', rname, fields);
   const id: DbSubnetGroupId =  {type: 'DbSubnetGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: DbSubnetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbSubnetGroup');
 
   return {
     ...resource,
@@ -515,10 +523,11 @@ export function createDbSubnetGroup(tfgen: TF.Generator, rname: string, params: 
 export interface DbSubnetGroup extends TF.Resource {
   id: DbSubnetGroupId;
   name: string;
-  arn: AT.Arn;
+  arn: DbSubnetGroupArn;
 }
 
 type DbSubnetGroupId = {type:'DbSubnetGroupId',value:string};
+export type DbSubnetGroupArn = AT.ArnT<"DbSubnetGroup">;
 
 /**
  *  Provides a CloudWatch Metric Alarm resource.
@@ -551,33 +560,34 @@ export function createIamRole(tfgen: TF.Generator, rname: string, params: IamRol
   const fields = fieldsFromIamRoleParams(params);
   const resource = tfgen.createResource('aws_iam_role', rname, fields);
   const id: IamRoleId =  {type: 'IamRoleId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const create_date: string =  '${' + TF.resourceName(resource) + '.create_date}';
   const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
   const description: string =  '${' + TF.resourceName(resource) + '.description}';
+  const arn: IamRoleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamRole');
 
   return {
     ...resource,
     id,
-    arn,
     name,
     create_date,
     unique_id,
     description,
+    arn,
   };
 }
 
 export interface IamRole extends TF.Resource {
   id: IamRoleId;
-  arn: AT.Arn;
   name: string;
   create_date: string;
   unique_id: string;
   description: string;
+  arn: IamRoleArn;
 }
 
 type IamRoleId = {type:'IamRoleId',value:string};
+export type IamRoleArn = AT.ArnT<"IamRole">;
 
 /**
  *  Provides an IAM role policy
@@ -619,30 +629,31 @@ export function createIamInstanceProfile(tfgen: TF.Generator, rname: string, par
   const fields = fieldsFromIamInstanceProfileParams(params);
   const resource = tfgen.createResource('aws_iam_instance_profile', rname, fields);
   const id: IamInstanceProfileId =  {type: 'IamInstanceProfileId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const create_date: string =  '${' + TF.resourceName(resource) + '.create_date}';
   const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
+  const arn: IamInstanceProfileArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamInstanceProfile');
 
   return {
     ...resource,
     id,
-    arn,
     name,
     create_date,
     unique_id,
+    arn,
   };
 }
 
 export interface IamInstanceProfile extends TF.Resource {
   id: IamInstanceProfileId;
-  arn: AT.Arn;
   name: string;
   create_date: string;
   unique_id: string;
+  arn: IamInstanceProfileArn;
 }
 
 type IamInstanceProfileId = {type:'IamInstanceProfileId',value:string};
+export type IamInstanceProfileArn = AT.ArnT<"IamInstanceProfile">;
 
 /**
  *  Provides an SQS queue.
@@ -653,7 +664,7 @@ export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQu
   const fields = fieldsFromSqsQueueParams(params);
   const resource = tfgen.createResource('aws_sqs_queue', rname, fields);
   const id: SqsQueueId =  {type: 'SqsQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: SqsQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SqsQueue');
 
   return {
     ...resource,
@@ -664,10 +675,11 @@ export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQu
 
 export interface SqsQueue extends TF.Resource {
   id: SqsQueueId;
-  arn: AT.Arn;
+  arn: SqsQueueArn;
 }
 
 type SqsQueueId = {type:'SqsQueueId',value:string};
+export type SqsQueueArn = AT.ArnT<"SqsQueue">;
 
 /**
  *  Allows you to set a policy of an SQS Queue while referencing ARN of the queue within the policy.

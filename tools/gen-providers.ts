@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { arn } from '../providers/aws-types';
 
 /**
  * Generate the resource definitions for AWS
@@ -26,7 +27,6 @@ import {
   stringAttr,
   stringAliasAttr,
   resourceIdAttr,
-  resourceArnAttr,
 } from './gen-helpers';
 
 const instance_root_block_device: RecordDecl = {
@@ -66,6 +66,9 @@ const instance: RecordDecl = {
 
 const db_instance: RecordDecl = {
   name: 'db_instance',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('allocated_storage', NUMBER),
     requiredField('engine', stringAliasType('AT.DbEngine')),
@@ -298,6 +301,9 @@ const website: RecordDecl = {
 
 const s3_bucket: RecordDecl = {
   name: 's3_bucket',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('bucket', STRING),
     optionalField('acl', stringAliasType('AT.CannedAcl')),
@@ -322,6 +328,9 @@ const s3_bucket_object: RecordDecl = {
 
 const iam_user: RecordDecl = {
   name: 'iam_user',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('name', STRING),
     optionalField('path', STRING),
@@ -348,11 +357,17 @@ const iam_user_policy_attachment: RecordDecl = {
 
 const ecr_repository: RecordDecl = {
   name: 'ecr_repository',
+  options: {
+    arn: true,
+  },
   fields: [requiredField('name', STRING)],
 };
 
 const db_subnet_group: RecordDecl = {
   name: 'db_subnet_group',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('name', STRING),
     optionalField('description', STRING),
@@ -363,6 +378,9 @@ const db_subnet_group: RecordDecl = {
 
 const sns_topic: RecordDecl = {
   name: 'sns_topic',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('name', STRING),
     optionalField('display_name', STRING),
@@ -406,6 +424,9 @@ const cloudwatch_metric_alarm: RecordDecl = {
 
 const iam_instance_profile: RecordDecl = {
   name: 'iam_instance_profile',
+  options: {
+    arn: true,
+  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -417,6 +438,9 @@ const iam_instance_profile: RecordDecl = {
 
 const iam_role: RecordDecl = {
   name: 'iam_role',
+  options: {
+    arn: true,
+  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -436,6 +460,9 @@ const iam_role_policy: RecordDecl = {
 
 const sqs_queue: RecordDecl = {
   name: 'sqs_queue',
+  options: {
+    arn: true,
+  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -500,6 +527,9 @@ const lb: RecordDecl = {
 
 const lb_listener_action: RecordDecl = {
   name: 'lb_listener_action',
+  options: {
+    arn: true,
+  },
   fields: [
     requiredField('target_group_arn', stringAliasType('AT.Arn')),
     requiredField('type', enumType(['forward'])),
@@ -683,7 +713,6 @@ function generateAws(gen: Generator) {
     db_instance,
     [
       resourceIdAttr('id', db_instance),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('username'),
       stringAttr('address'),
@@ -790,18 +819,14 @@ function generateAws(gen: Generator) {
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
-    [resourceIdAttr('id', sns_topic), stringAliasAttr('arn', 'Arn', 'AT.Arn')]
+    [resourceIdAttr('id', sns_topic)]
   );
 
   gen.generateResource(
     'Provides an IAM user.',
     'https://www.terraform.io/docs/providers/aws/r/iam_user.html',
     iam_user,
-    [
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
-      stringAttr('name'),
-      stringAttr('unique_id'),
-    ]
+    [stringAttr('name'), stringAttr('unique_id')]
   );
 
   gen.generateResource(
@@ -823,7 +848,6 @@ function generateAws(gen: Generator) {
     'https://www.terraform.io/docs/providers/aws/r/ecr_repository.html',
     ecr_repository,
     [
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('registry_id'),
       stringAttr('repository_url'),
@@ -834,11 +858,7 @@ function generateAws(gen: Generator) {
     'Provides an RDS DB subnet group resource.',
     'https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html',
     db_subnet_group,
-    [
-      resourceIdAttr('id', db_subnet_group),
-      stringAttr('name'),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
-    ]
+    [resourceIdAttr('id', db_subnet_group), stringAttr('name')]
   );
 
   gen.generateResource(
@@ -854,7 +874,6 @@ function generateAws(gen: Generator) {
     iam_role,
     [
       resourceIdAttr('id', iam_role),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('create_date'),
       stringAttr('unique_id'),
@@ -880,7 +899,6 @@ function generateAws(gen: Generator) {
     iam_instance_profile,
     [
       resourceIdAttr('id', iam_instance_profile),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('name'),
       stringAttr('create_date'),
       stringAttr('unique_id'),
@@ -891,7 +909,7 @@ function generateAws(gen: Generator) {
     'Provides an SQS queue.',
     'https://www.terraform.io/docs/providers/aws/r/sqs_queue.html',
     sqs_queue,
-    [resourceIdAttr('id', sqs_queue), stringAliasAttr('arn', 'Arn', 'AT.Arn')]
+    [resourceIdAttr('id', sqs_queue)]
   );
 
   gen.generateResource(
@@ -1036,9 +1054,9 @@ function main() {
   const gen = fileGenerator('aws', [
     '/** Automatically @' + 'generated by gen-providers.ts, DO NOT EDIT */',
     '',
-    'import * as _ from "lodash";',
-    'import * as AT from "./aws-types";',
-    'import * as TF from "../core/core";',
+    'imp' + 'ort * as _ from "lodash";',
+    'imp' + 'ort * as AT from "./aws-types";',
+    'imp' + 'ort * as TF from "../core/core";',
     '',
   ]);
   generateAws(gen);

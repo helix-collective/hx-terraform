@@ -15,7 +15,7 @@ export class BootScript {
   private apt_packages: Set<string> = new Set();
   private script_lines: string[] = [];
 
-  addAptKeyUrl(key_url:string) {
+  addAptKeyUrl(key_url: string) {
     this.apt_key_urls.add(key_url);
   }
 

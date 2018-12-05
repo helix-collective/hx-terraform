@@ -14,7 +14,7 @@ export function sslTerminator(
   name: string,
   sr: shared.SharedResources,
   ec2: AR.Instance,
-  certificate_arns: AT.Arn[]
+  certificate_arns: AR.AcmCertificateArn[]
 ): AR.Lb {
   const tags = tfgen.tagsContext();
 

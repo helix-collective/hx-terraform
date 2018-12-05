@@ -504,6 +504,9 @@ const lb_access_logs = {
 
 const lb: RecordDecl = {
   name: 'lb',
+  options: {
+    arn: true,
+  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -525,26 +528,22 @@ const lb: RecordDecl = {
   ],
 };
 
-const lb_listener_action: RecordDecl = {
-  name: 'lb_listener_action',
+const acm_certificate: RecordDecl = {
+  name: 'acm_certificate',
   options: {
     arn: true,
   },
   fields: [
-    requiredField('target_group_arn', stringAliasType('AT.Arn')),
-    requiredField('type', enumType(['forward'])),
+    requiredField('domain_name', STRING),
+    requiredField('validation_method', STRING),
   ],
 };
 
-const lb_listener: RecordDecl = {
-  name: 'lb_listener',
+const acm_certificate_validation: RecordDecl = {
+  name: 'acm_certificate_validation',
   fields: [
-    requiredField('load_balancer_arn', stringAliasType('AT.Arn')),
-    requiredField('port', NUMBER),
-    optionalField('protocol', enumType(['TCP', 'HTTP', 'HTTPS'])),
-    optionalField('ssl_policy', STRING),
-    optionalField('certificate_arn', stringAliasType('AT.Arn')),
-    requiredField('default_action', recordType(lb_listener_action)),
+    requiredField('certificate_arn', arnType(acm_certificate)),
+    optionalField('validation_record_fqdns', listType(STRING)),
   ],
 };
 
@@ -573,6 +572,9 @@ const lb_target_group_health_check: RecordDecl = {
 
 const lb_target_group: RecordDecl = {
   name: 'lb_target_group',
+  options: {
+    arn: true,
+  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -589,13 +591,11 @@ const lb_target_group: RecordDecl = {
   ],
 };
 
-const lb_target_group_attachment: RecordDecl = {
-  name: 'lb_target_group_attachment',
+const lb_listener_action: RecordDecl = {
+  name: 'lb_listener_action',
   fields: [
-    requiredField('target_group_arn', stringAliasType('AT.Arn')),
-    requiredField('target_id', STRING),
-    optionalField('port', NUMBER),
-    optionalField('availability_zone', stringAliasType('AT.AvailabilityZone')),
+    requiredField('target_group_arn', arnType(lb_target_group)),
+    requiredField('type', enumType(['forward'])),
   ],
 };
 
@@ -607,13 +607,47 @@ const lb_listener_rule_condition: RecordDecl = {
   ],
 };
 
+const lb_listener: RecordDecl = {
+  name: 'lb_listener',
+  options: {
+    arn: true,
+  },
+  fields: [
+    requiredField('load_balancer_arn', arnType(lb)),
+    requiredField('port', NUMBER),
+    optionalField('protocol', enumType(['TCP', 'HTTP', 'HTTPS'])),
+    optionalField('ssl_policy', STRING),
+    optionalField('certificate_arn', arnType(acm_certificate)),
+    requiredField('default_action', recordType(lb_listener_action)),
+  ],
+};
+
 const lb_listener_rule: RecordDecl = {
   name: 'lb_listener_rule',
   fields: [
-    requiredField('listener_arn', stringAliasType('AT.Arn')),
+    requiredField('listener_arn', arnType(lb_listener)),
     optionalField('priority', NUMBER),
     requiredField('action', recordType(lb_listener_action)),
     requiredField('condition', recordType(lb_listener_rule_condition)),
+  ],
+};
+
+const lb_listener_certificate: RecordDecl = {
+  name: 'lb_listener_certificate',
+  options: { arn: true },
+  fields: [
+    requiredField('listener_arn', arnType(lb_listener)),
+    requiredField('certificate_arn', arnType(acm_certificate)),
+  ],
+};
+
+const lb_target_group_attachment: RecordDecl = {
+  name: 'lb_target_group_attachment',
+  fields: [
+    requiredField('target_group_arn', arnType(lb_target_group)),
+    requiredField('target_id', STRING),
+    optionalField('port', NUMBER),
+    optionalField('availability_zone', stringAliasType('AT.AvailabilityZone')),
   ],
 };
 
@@ -925,7 +959,6 @@ function generateAws(gen: Generator) {
     lb,
     [
       resourceIdAttr('id', lb),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('dns_name'),
       stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
     ]
@@ -935,7 +968,34 @@ function generateAws(gen: Generator) {
     'Provides a Load Balancer Listener resource.',
     'https://www.terraform.io/docs/providers/aws/r/lb_listener.html',
     lb_listener,
-    [resourceIdAttr('id', lb_listener), stringAliasAttr('arn', 'Arn', 'AT.Arn')]
+    [resourceIdAttr('id', lb_listener)]
+  );
+
+  gen.generateResource(
+    'The ACM certificate resource allows requesting and management of certificates from the Amazon Certificate Manager.',
+    'https://www.terraform.io/docs/providers/aws/r/acm_certificate.html',
+    acm_certificate,
+    [
+      resourceIdAttr('id', acm_certificate),
+      /*stringAttr list?
+      // ??? needs array of attribute options eg domain_validation_options*/
+    ]
+  );
+
+  gen.generateResource(
+    'This resource represents a successful validation of an ACM certificate in concert with other resources.',
+    'https://www.terraform.io/docs/providers/aws/r/acm_certificate.html',
+    acm_certificate_validation,
+    [
+      // terraform only concept - not a real aws resource - hence no id or arn.
+    ]
+  );
+
+  gen.generateResource(
+    'Provides a Load Balancer Listener Certificate resource.',
+    'https://www.terraform.io/docs/providers/aws/r/lb_listener_certificate.html',
+    lb_listener_certificate,
+    [resourceIdAttr('id', lb_listener_certificate)]
   );
 
   gen.generateResource(
@@ -944,7 +1004,6 @@ function generateAws(gen: Generator) {
     lb_target_group,
     [
       resourceIdAttr('id', lb_target_group),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('arn_suffix'),
       stringAttr('name'),
     ]
@@ -1048,6 +1107,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_ebs_options);
   gen.generateParams(elasticsearch_domain_snapshot_options);
   gen.generateParams(elasticsearch_domain_policy);
+  gen.generateParams(acm_certificate);
+  gen.generateParams(acm_certificate_validation);
+  gen.generateParams(lb_listener_certificate);
 }
 
 function main() {

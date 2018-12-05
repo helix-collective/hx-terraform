@@ -709,27 +709,28 @@ export function createLb(tfgen: TF.Generator, rname: string, params: LbParams): 
   const fields = fieldsFromLbParams(params);
   const resource = tfgen.createResource('aws_lb', rname, fields);
   const id: LbId =  {type: 'LbId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const dns_name: string =  '${' + TF.resourceName(resource) + '.dns_name}';
   const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
+  const arn: LbArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Lb');
 
   return {
     ...resource,
     id,
-    arn,
     dns_name,
     zone_id,
+    arn,
   };
 }
 
 export interface Lb extends TF.Resource {
   id: LbId;
-  arn: AT.Arn;
   dns_name: string;
   zone_id: AT.HostedZoneId;
+  arn: LbArn;
 }
 
 type LbId = {type:'LbId',value:string};
+export type LbArn = AT.ArnT<"Lb">;
 
 /**
  *  Provides a Load Balancer Listener resource.
@@ -740,7 +741,7 @@ export function createLbListener(tfgen: TF.Generator, rname: string, params: LbL
   const fields = fieldsFromLbListenerParams(params);
   const resource = tfgen.createResource('aws_lb_listener', rname, fields);
   const id: LbListenerId =  {type: 'LbListenerId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: LbListenerArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbListener');
 
   return {
     ...resource,
@@ -751,10 +752,82 @@ export function createLbListener(tfgen: TF.Generator, rname: string, params: LbL
 
 export interface LbListener extends TF.Resource {
   id: LbListenerId;
-  arn: AT.Arn;
+  arn: LbListenerArn;
 }
 
 type LbListenerId = {type:'LbListenerId',value:string};
+export type LbListenerArn = AT.ArnT<"LbListener">;
+
+/**
+ *  The ACM certificate resource allows requesting and management of certificates from the Amazon Certificate Manager.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/acm_certificate.html
+ */
+export function createAcmCertificate(tfgen: TF.Generator, rname: string, params: AcmCertificateParams): AcmCertificate {
+  const fields = fieldsFromAcmCertificateParams(params);
+  const resource = tfgen.createResource('aws_acm_certificate', rname, fields);
+  const id: AcmCertificateId =  {type: 'AcmCertificateId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: AcmCertificateArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AcmCertificate');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface AcmCertificate extends TF.Resource {
+  id: AcmCertificateId;
+  arn: AcmCertificateArn;
+}
+
+type AcmCertificateId = {type:'AcmCertificateId',value:string};
+export type AcmCertificateArn = AT.ArnT<"AcmCertificate">;
+
+/**
+ *  This resource represents a successful validation of an ACM certificate in concert with other resources.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/acm_certificate.html
+ */
+export function createAcmCertificateValidation(tfgen: TF.Generator, rname: string, params: AcmCertificateValidationParams): AcmCertificateValidation {
+  const fields = fieldsFromAcmCertificateValidationParams(params);
+  const resource = tfgen.createResource('aws_acm_certificate_validation', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface AcmCertificateValidation extends TF.Resource {
+}
+
+type AcmCertificateValidationId = {type:'AcmCertificateValidationId',value:string};
+
+/**
+ *  Provides a Load Balancer Listener Certificate resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lb_listener_certificate.html
+ */
+export function createLbListenerCertificate(tfgen: TF.Generator, rname: string, params: LbListenerCertificateParams): LbListenerCertificate {
+  const fields = fieldsFromLbListenerCertificateParams(params);
+  const resource = tfgen.createResource('aws_lb_listener_certificate', rname, fields);
+  const id: LbListenerCertificateId =  {type: 'LbListenerCertificateId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: LbListenerCertificateArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbListenerCertificate');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface LbListenerCertificate extends TF.Resource {
+  id: LbListenerCertificateId;
+  arn: LbListenerCertificateArn;
+}
+
+type LbListenerCertificateId = {type:'LbListenerCertificateId',value:string};
+export type LbListenerCertificateArn = AT.ArnT<"LbListenerCertificate">;
 
 /**
  *  Provides a Target Group resource for use with Load Balancer resources.
@@ -765,27 +838,28 @@ export function createLbTargetGroup(tfgen: TF.Generator, rname: string, params: 
   const fields = fieldsFromLbTargetGroupParams(params);
   const resource = tfgen.createResource('aws_lb_target_group', rname, fields);
   const id: LbTargetGroupId =  {type: 'LbTargetGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const arn_suffix: string =  '${' + TF.resourceName(resource) + '.arn_suffix}';
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const arn: LbTargetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbTargetGroup');
 
   return {
     ...resource,
     id,
-    arn,
     arn_suffix,
     name,
+    arn,
   };
 }
 
 export interface LbTargetGroup extends TF.Resource {
   id: LbTargetGroupId;
-  arn: AT.Arn;
   arn_suffix: string;
   name: string;
+  arn: LbTargetGroupArn;
 }
 
 type LbTargetGroupId = {type:'LbTargetGroupId',value:string};
+export type LbTargetGroupArn = AT.ArnT<"LbTargetGroup">;
 
 /**
  *  Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group. 
@@ -1618,33 +1692,33 @@ export function fieldsFromLbSubnetMappingParams(params: LbSubnetMappingParams) :
 }
 
 export interface LbListenerParams {
-  load_balancer_arn: AT.Arn;
+  load_balancer_arn: AT.ArnT<"Lb">;
   port: number;
   protocol?: 'TCP' | 'HTTP' | 'HTTPS';
   ssl_policy?: string;
-  certificate_arn?: AT.Arn;
+  certificate_arn?: AT.ArnT<"AcmCertificate">;
   default_action: LbListenerActionParams;
 }
 
 export function fieldsFromLbListenerParams(params: LbListenerParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "load_balancer_arn", params.load_balancer_arn, TF.stringAliasValue);
+  TF.addField(fields, "load_balancer_arn", params.load_balancer_arn, TF.resourceArnValue);
   TF.addField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
   TF.addOptionalField(fields, "ssl_policy", params.ssl_policy, TF.stringValue);
-  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.stringAliasValue);
+  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
   TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
   return fields;
 }
 
 export interface LbListenerActionParams {
-  target_group_arn: AT.Arn;
+  target_group_arn: AT.ArnT<"LbTargetGroup">;
   type: 'forward';
 }
 
 export function fieldsFromLbListenerActionParams(params: LbListenerActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.stringAliasValue);
+  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
   return fields;
 }
@@ -1720,7 +1794,7 @@ export function fieldsFromLbTargetGroupStickinessParams(params: LbTargetGroupSti
 }
 
 export interface LbTargetGroupAttachmentParams {
-  target_group_arn: AT.Arn;
+  target_group_arn: AT.ArnT<"LbTargetGroup">;
   target_id: string;
   port?: number;
   availability_zone?: AT.AvailabilityZone;
@@ -1728,7 +1802,7 @@ export interface LbTargetGroupAttachmentParams {
 
 export function fieldsFromLbTargetGroupAttachmentParams(params: LbTargetGroupAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.stringAliasValue);
+  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
   TF.addField(fields, "target_id", params.target_id, TF.stringValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
@@ -1736,7 +1810,7 @@ export function fieldsFromLbTargetGroupAttachmentParams(params: LbTargetGroupAtt
 }
 
 export interface LbListenerRuleParams {
-  listener_arn: AT.Arn;
+  listener_arn: AT.ArnT<"LbListener">;
   priority?: number;
   action: LbListenerActionParams;
   condition: LbListenerRuleConditionParams;
@@ -1744,7 +1818,7 @@ export interface LbListenerRuleParams {
 
 export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "listener_arn", params.listener_arn, TF.stringAliasValue);
+  TF.addField(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
   TF.addOptionalField(fields, "priority", params.priority, TF.numberValue);
   TF.addField(fields, "action", params.action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
   TF.addField(fields, "condition", params.condition, (v) => TF.mapValue(fieldsFromLbListenerRuleConditionParams(v)));
@@ -1868,5 +1942,41 @@ export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchD
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
   TF.addOptionalField(fields, "access_policies", params.access_policies, TF.stringValue);
+  return fields;
+}
+
+export interface AcmCertificateParams {
+  domain_name: string;
+  validation_method: string;
+}
+
+export function fieldsFromAcmCertificateParams(params: AcmCertificateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addField(fields, "validation_method", params.validation_method, TF.stringValue);
+  return fields;
+}
+
+export interface AcmCertificateValidationParams {
+  certificate_arn: AT.ArnT<"AcmCertificate">;
+  validation_record_fqdns?: string[];
+}
+
+export function fieldsFromAcmCertificateValidationParams(params: AcmCertificateValidationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "validation_record_fqdns", params.validation_record_fqdns, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface LbListenerCertificateParams {
+  listener_arn: AT.ArnT<"LbListener">;
+  certificate_arn: AT.ArnT<"AcmCertificate">;
+}
+
+export function fieldsFromLbListenerCertificateParams(params: LbListenerCertificateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
+  TF.addField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
   return fields;
 }

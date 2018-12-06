@@ -1,0 +1,11 @@
+module config
+{
+import adlc.config.haskell.HaskellFieldPrefix;
+
+annotation DeployContextFile HaskellFieldPrefix "dcf_";
+annotation EndPoint HaskellFieldPrefix "ep_";
+annotation EndPointType HaskellFieldPrefix "ep_";
+annotation ToolConfig HaskellFieldPrefix "tc_";
+annotation ProxyModeConfig HaskellFieldPrefix "pm_";
+annotation LetsEncryptConfig HaskellFieldPrefix "lec_";
+};

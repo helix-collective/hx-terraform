@@ -1,0 +1,105 @@
+module config
+{
+import types.FilePath;
+import types.S3Path;
+import types.EndPointLabel;
+import sys.types.Map;
+import sys.types.Pair;
+import sys.types.Maybe;
+
+/// Configuration file for the deployment tool
+struct ToolConfig {
+    FilePath releasesDir = "/opt/releases";
+    FilePath contextCache = "/opt/etc/deployment";
+    FilePath logFile = "/opt/var/log/hx-deploy-tool.log";
+
+    /// The storage location for release zip files
+    BlobStoreConfig releases;
+
+    /// The storage location for deployment context files
+    BlobStoreConfig deployContext;
+
+    Vector<DeployContextFile> deployContextFiles;
+    DeployMode deployMode = "select";
+};
+
+union DeployMode {
+   Void select;
+   ProxyModeConfig proxy;
+};
+
+union BlobStoreConfig {
+   S3Path s3;
+   FilePath localdir;
+};
+
+
+struct ProxyModeConfig {
+    /// The configured endpoints.
+    StringMap<EndPoint> endPoints;
+
+    /// If set, we are in remote mode, with state stored at this S3 path
+    Maybe<S3Path> remoteStateS3 = "nothing";
+
+    /// When we start deploys we choose a port from this range
+    Pair<Word32,Word32> dynamicPortRange = {"v1":8000, "v2":8100};
+
+    /// How we generate identifiers for slave machines
+    MachineLabel slaveLabel = "ec2InstanceId";
+};
+
+union MachineLabel {
+  String label;
+  Void ec2InstanceId;
+};
+
+// A proxy exposed endpoint
+struct EndPoint {
+  EndPointLabel label;
+  String serverName;
+  String sslCertDir;
+  EndPointType etype;
+};
+
+union EndPointType {
+  Void httpOnly;
+  Void httpsWithRedirect;
+};
+
+struct DeployContextFile
+{
+    FilePath name;
+    String sourceName;
+};
+
+union Verbosity
+{
+  Void quiet;
+  Void noisy;
+};
+
+
+/// Configuration specification for the letsencrypt related functions
+struct LetsEncryptConfig
+{
+  /// The path to the install certbot executable
+  String certbotPath;
+
+  /// The ID of the AWS hosted zone containing the SSL DNS entries
+  String awsHostedZoneId;
+
+  /// The directory within which certbot will it's working files
+  /// and live certificates
+  String basedir;
+
+  /// The email address that certbot will use for essential communications
+  String email;
+
+  /// The fully scoped DNS names required on the certificate
+  Vector<String> domains;
+
+  /// How much logging output to generate
+  Verbosity verbosity = "quiet";
+};
+
+};

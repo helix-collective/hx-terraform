@@ -1,5 +1,6 @@
-import * as s3 from './aws-s3';
-import * as bootscript from './bootscript';
+import * as s3 from '../aws-s3';
+import * as bootscript from '../bootscript';
+import { release_url } from './releaseurl';
 
 export interface ContextFile {
   name: string;
@@ -91,7 +92,7 @@ export function install(
   bs.sh(`chown -R ${username}:${username} /opt/releases`);
   bs.sh(`chown -R ${username}:${username} /opt/var/log`);
   bs.sh(
-    'wget https://github.com/helix-collective/hx-deploy-tool/releases/download/0.8.3/hx-deploy-tool.x86_64-linux.gz -O /opt/bin/hx-deploy-tool.gz'
+    'wget ' + release_url,
   );
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');

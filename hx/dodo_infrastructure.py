@@ -27,7 +27,7 @@ def dockerized_adlc(wdir,rcmd):
     cmd =  "docker run -it --rm "
     cmd += "-v {0}:{0} -w {0} ".format(wdir.absolute())
     cmd += "--user $(id -u):$(id -g) "
-    cmd += "helixta/hxadl:0.10 "
+    cmd += "helixta/hxadl:0.11 "
     cmd += ' '.join(rcmd)
     return cmd
 
@@ -65,22 +65,9 @@ def update_deploytool(basedir):
             "--runtime-dir", 'runtime',
             "--outputdir", str(deploytooldir/'adl-gen'),
             "--include-rt",
+            "--include-resolver",
             str(deploytooldir/'adl/*.adl')
         ] + adlstdlib), shell=True)
-        with open(deploytooldir/'adl-gen/adl.ts', 'w') as f:
-            f.write('''\
-import { declResolver, ScopedDecl } from "./runtime/adl";
-import { _AST_MAP as systypes } from "./sys/types";
-import { _AST_MAP as config } from "./config";
-import { _AST_MAP as types } from "./types";
-export const ADL: { [key: string]: ScopedDecl } = {
-  ...systypes,
-  ...config,
-  ...types,
-};
-
-export const RESOLVER = declResolver(ADL);
-''')
 
         with open('typescript/hx-terraform/library/deploytool/releaseurl.ts', 'w') as f:
             f.write('export const release_url: string = "https://github.com/helix-collective/hx-deploy-tool/releases/download/{}/hx-deploy-tool.x86_64-linux.gz -O /opt/bin/hx-deploy-tool.gz";\n'.format(version))

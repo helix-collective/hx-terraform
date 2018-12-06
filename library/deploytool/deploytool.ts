@@ -4,7 +4,7 @@ import { release_url } from './releaseurl';
 import * as C from "./adl-gen/config";
 import * as T from "./adl-gen/types";
 import { createJsonBinding } from "./adl-gen/runtime/json";
-import { RESOLVER } from "./adl-gen/adl";
+import { RESOLVER } from "./adl-gen/resolver";
 import { TcpNetConnectOpts } from 'net';
 
 export interface ContextFile {

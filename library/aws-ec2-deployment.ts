@@ -47,10 +47,12 @@ export function createEc2Deployment(
     { kind: 'https', name: 'main', dnsname: params.dns_name },
     { kind: 'https', name: 'test', dnsname: params.dns_name + '-test' },
   ];
-  const https_endpoints: EndPointHttps[] = [];
+  const https_fqdns: string[] = [];
   endpoints.forEach(ep => {
     if (ep.kind === 'https') {
-      https_endpoints.push(ep);
+      https_fqdns.push(shared.fqdn(sr, ep.dnsname));
+    } else if (ep.kind === 'https-external') {
+      https_fqdns.push(ep.fqdnsname);
     }
   });
 
@@ -63,19 +65,20 @@ export function createEc2Deployment(
     bs.include(params.extra_bootscript);
   }
 
-  const ssl_cert_dns_names = https_endpoints.map(ep =>
-    shared.fqdn(sr, ep.dnsname)
-  );
-  const ssl_cert_dir = '/etc/letsencrypt/live/' + ssl_cert_dns_names[0];
   const proxy_endpoints = endpoints.map(ep => {
     if (ep.kind === 'https') {
       return deploytool.httpsProxyEndpoint(
         ep.name,
         shared.fqdn(sr, ep.dnsname),
-        ssl_cert_dir
       );
+    } else if (ep.kind === 'https-external') {
+      return deploytool.httpsProxyEndpoint(
+        ep.name,
+        ep.fqdnsname
+      );
+    } else {
+      return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
     }
-    return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
   });
   bs.include(
     deploytool.install(
@@ -83,10 +86,11 @@ export function createEc2Deployment(
       params.releases_s3,
       params.config_s3,
       context_files,
-      deploytool.localProxy(proxy_endpoints)
+      deploytool.localProxy(proxy_endpoints),
+      params.ssl_cert_email
+
     )
   );
-  bs.letsencyptAwsRoute53(params.ssl_cert_email, ssl_cert_dns_names);
 
   let iampolicies = [
     policies.publish_metrics_policy,
@@ -114,15 +118,17 @@ export function createEc2Deployment(
     },
   });
 
-  https_endpoints.forEach(ep => {
-    shared.dnsARecord(
-      tfgen,
-      'appserver_' + ep.name,
-      sr,
-      ep.dnsname,
-      [appserver.eip.public_ip],
-      '3600'
+  endpoints.forEach(ep => {
+    if (ep.kind == 'https') {
+      shared.dnsARecord(
+        tfgen,
+        'appserver_' + ep.name,
+        sr,
+        ep.dnsname,
+        [appserver.eip.public_ip],
+        '3600'
     );
+    }
   });
 
   return appserver;
@@ -204,19 +210,30 @@ export interface Ec2DeploymentParams {
   docker_config?: docker.DockerConfig;
 }
 
-export interface EndPointHttps {
-  kind: 'https';
-  name: string;
-  dnsname: string;
-}
-
+// An http endpoint
 export interface EndPointHttp {
   kind: 'http';
   name: string;
   fqdnsname: string;
 }
 
-export type EndPoint = EndPointHttps | EndPointHttp;
+// An https endpoints for which we create a dns entry
+export interface EndPointHttps {
+  kind: 'https';
+  name: string;
+  dnsname: string;
+}
+
+// An https endpoints for an externally configured dns entry
+export interface EndPointHttpsExternal {
+  kind: 'https-external';
+  name: string;
+  fqdnsname: string;
+}
+
+
+
+export type EndPoint = EndPointHttps | EndPointHttp | EndPointHttpsExternal;
 
 interface Ec2Deployment {
   eip: AR.Eip;

@@ -1,6 +1,11 @@
 import * as s3 from '../aws-s3';
 import * as bootscript from '../bootscript';
 import { release_url } from './releaseurl';
+import * as C from "./adl-gen/config";
+import * as T from "./adl-gen/types";
+import { createJsonBinding } from "./adl-gen/runtime/json";
+import { RESOLVER } from "./adl-gen/adl";
+import { TcpNetConnectOpts } from 'net';
 
 export interface ContextFile {
   name: string;
@@ -26,47 +31,37 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
   return { source_name, name: name[0] };
 }
 
-export interface ProxyEndPoint {
-  label: string;
-  details: {};
-}
 
 export function httpProxyEndpoint(
   label: string,
   serverName: string
-): ProxyEndPoint {
-  return {
-    label,
-    details: {
+): C.EndPoint {
+  return  {
       label,
       serverName,
-      sslCertDir: '',
-      etype: 'httpOnly',
-    },
-  };
+      etype: {kind:'httpOnly'},
+    };
 }
 
 export function httpsProxyEndpoint(
   label: string,
   serverName: string,
-  sslCertDir: string
-): ProxyEndPoint {
-  return {
-    label,
-    details: {
+): C.EndPoint {
+  return  {
       label,
       serverName,
-      sslCertDir,
-      etype: 'httpsWithRedirect',
-    },
+      etype: {
+        kind:'httpsWithRedirect',
+        value: {kind: 'generated'}
+      },
   };
 }
 
 export type ProxyConfig =
   | { kind: 'none' }
-  | { kind: 'local'; endpoints: ProxyEndPoint[] };
+  | { kind: 'local'; endpoints: C.EndPoint[] };
 
-export function localProxy(endpoints: ProxyEndPoint[]): ProxyConfig {
+export function localProxy(endpoints: C.EndPoint[]): ProxyConfig {
   return { endpoints, kind: 'local' };
 }
 
@@ -79,7 +74,8 @@ export function install(
   releases: s3.S3Ref,
   deploy_context: s3.S3Ref,
   contextFiles: ContextFile[],
-  proxy: ProxyConfig
+  proxy: ProxyConfig,
+  ssl_cert_email?: string
 ): bootscript.BootScript {
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure hx-deploy-tool');
@@ -92,44 +88,69 @@ export function install(
   bs.sh(`chown -R ${username}:${username} /opt/releases`);
   bs.sh(`chown -R ${username}:${username} /opt/var/log`);
   bs.sh(
-    'wget ' + release_url,
+    'wget ' + release_url
   );
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
 
-  let deployMode;
+  let deployMode : C.DeployMode;
   if (proxy.kind === 'none') {
-    deployMode = 'select';
-  } else if (proxy.kind === 'local') {
-    const endPoints: { [key: string]: {} } = {};
+    deployMode = {kind:'select'};
+  } else { //  (proxy.kind === 'local')
+    const endPoints: { [key: string]: C.EndPoint } = {};
     proxy.endpoints.forEach(ep => {
-      endPoints[ep.label] = ep.details;
+      endPoints[ep.label] = ep;
     });
     deployMode = {
-      proxy: {
-        endPoints,
-      },
+      kind: "proxy",
+      value: C.makeProxyModeConfig({endPoints}),
     };
   }
 
+  const jb = createJsonBinding(RESOLVER, C.texprToolConfig());
+  const config = C.makeToolConfig({
+    deployMode: deployMode,
+    releases: {
+      kind: 's3',
+      value: releases.url(),
+    },
+    deployContext: {
+      kind: 's3',
+      value: deploy_context.url()
+    },
+    deployContextFiles: contextFiles.map( cf => {return {
+      name: cf.name,
+      sourceName: cf.source_name
+    }} ),
+    contextCache: "/opt/config",
+    autoCertContactEmail: ssl_cert_email
+  });
   const deployContextFiles = bs.catToFile(
     '/opt/etc/hx-deploy-tool.json',
-    JSON.stringify(
-      {
-        deployMode,
-        contextCache: '/opt/config',
-        releases: { s3: releases.url() },
-        deployContext: { s3: deploy_context.url() },
-        deployContextFiles: contextFiles.map(cf => {
-          return {
-            name: cf.name,
-            sourceName: cf.source_name,
-          };
-        }),
-      },
-      null,
-      2
-    )
+    
+    JSON.stringify(jb.toJson(config), null, 2)
   );
+
+
+  const generate_ssl_cert: boolean = (() => {
+    if (proxy.kind == "local") {
+      for(const ep of proxy.endpoints) {
+        if (ep.etype.kind == 'httpsWithRedirect' && ep.etype.value.kind == 'generated') {
+          return true;
+        }
+      };
+    }
+    return false;
+  })();
+
+  if (generate_ssl_cert) {
+    const cmd = "/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate";
+    bs.comment("generate an ssl certificate")
+    bs.sh("sudo -u app " + cmd);
+    bs.cronJob('ssl-renewal', [
+      `MAILTO=""`,
+      `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
+    ]);
+  }
   return bs;
 }

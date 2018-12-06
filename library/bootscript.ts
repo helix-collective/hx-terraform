@@ -2,7 +2,6 @@ import * as docker from './docker';
 import * as s3 from './aws-s3';
 import * as path from 'path';
 
-import * as deploytool from './deploytool';
 import { listeners } from 'cluster';
 import { listType } from '../tools/gen-helpers';
 
@@ -107,6 +106,12 @@ export class BootScript {
     ]);
   }
 
+  /**
+   * Create a script /opt/bin/get-ssl-certificates using letsencrypt to fetch/renew
+   * certificates using dns challenges.
+   * 
+   * Run it now, and schedule a cron job to run it periodically. 
+   */
   letsencyptAwsRoute53(contact_email: string, dns_domains: string[]) {
     const script_path = '/opt/bin/get-ssl-certificates';
     const script = [

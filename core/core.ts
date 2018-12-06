@@ -19,6 +19,13 @@ export interface Generator {
     fields: ResourceFieldMap
   ): Resource;
 
+  createTypedResource<T extends string>(
+    type: T,
+    tftype: string,
+    tfname: string,
+    fields: ResourceFieldMap
+  ): ResourceT<T>;
+
   /** Construct a terraform output */
   createOutput(name: string, value: string): void;
 
@@ -59,6 +66,8 @@ interface FileGenerator extends Generator {
 export type ResourceType = string;
 export type ResourceName = string[];
 export type Resource = { tftype: ResourceType; tfname: ResourceName };
+
+export type ResourceT<T extends string> = Resource & { type: T };
 
 export type StringAlias<T> = {
   type: T;
@@ -223,6 +232,19 @@ export function fileGenerator(): FileGenerator {
       return { tftype, tfname };
     }
 
+    function createTypedResource<T extends string>(
+      type: T,
+      tftype: string,
+      name: string,
+      fields: ResourceFieldMap
+    ): ResourceT<T> {
+      const res: ResourceT<T> = {
+        type,
+        ...createResource(tftype, name, fields),
+      };
+      return res;
+    }
+
     function createOutput(name: string, value: string) {
       const tfname = nameContext0.concat(name);
       addOutput(generated, tfname, value);
@@ -277,6 +299,7 @@ export function fileGenerator(): FileGenerator {
     return {
       createProvider,
       createResource,
+      createTypedResource,
       createOutput,
       ignoreChanges,
       dependsOn,

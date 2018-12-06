@@ -266,7 +266,7 @@ export function fileGenerator(
     );
     lines.push(`  const fields = fieldsFrom${paramsName}(params);`);
     lines.push(
-      `  const resource = tfgen.createResource('${resourceType}', rname, fields);`
+      `  const resource = tfgen.createTypedResource('${name}', '${resourceType}', rname, fields);`
     );
     for (const attr of attributes) {
       if (attr.type.kind === 'string' && attr.type.type === 'string') {
@@ -302,7 +302,8 @@ export function fileGenerator(
     lines.push('  };');
     lines.push('}');
     lines.push('');
-    lines.push(`export interface ${name} extends TF.Resource {`);
+    lines.push(`export interface ${name} extends TF.ResourceT<'${name}'> {`);
+
     for (const attr of attributes) {
       lines.push(`  ${attr.name}: ${genAttrType(attr.type)};`);
     }

@@ -651,6 +651,17 @@ const lb_target_group_attachment: RecordDecl = {
   ],
 };
 
+const autoscaling_attachment: RecordDecl = {
+  name: 'autoscaling_attachment',
+  fields: [
+    requiredField(
+      'autoscaling_group_name',
+      resourceIdType('AutoscalingGroupId')
+    ),
+    requiredField('alb_target_group_arn', arnType(lb_target_group)),
+  ],
+};
+
 const cloudwatch_log_group: RecordDecl = {
   name: 'cloudwatch_log_group',
   fields: [
@@ -724,8 +735,77 @@ const elasticsearch_domain_policy: RecordDecl = {
   ],
 };
 
+const launch_configuration: RecordDecl = {
+  name: 'launch_configuration',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    requiredField('image_id', stringAliasType('AT.Ami')),
+    requiredField('instance_type', stringAliasType('AT.InstanceType')),
+    optionalField(
+      'iam_instance_profile',
+      resourceIdType('IamInstanceProfileId')
+    ),
+    optionalField('key_name', stringAliasType('AT.KeyName')),
+    optionalField(
+      'security_groups',
+      listType(resourceIdType('SecurityGroupId'))
+    ),
+    optionalField('associate_public_ip_address', BOOLEAN),
+    optionalField('user_data', STRING),
+    optionalField('enable_monitoring', BOOLEAN),
+
+    optionalField('ebs_optimized', BOOLEAN),
+    optionalField('root_block_device', recordType(instance_root_block_device)),
+  ],
+};
+
+// https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#tag-and-tags
+const autoscaling_group_tag: RecordDecl = {
+  name: 'autoscaling_group_tag',
+  fields: [
+    requiredField('key', STRING),
+    requiredField('value', STRING),
+    requiredField('propagate_at_launch', BOOLEAN),
+  ],
+};
+
+const autoscaling_group: RecordDecl = {
+  name: 'autoscaling_group',
+  options: {
+    arn: true,
+  },
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    requiredField('min_size', NUMBER),
+    requiredField('max_size', NUMBER),
+    optionalField('vpc_zone_identifier', listType(resourceIdType('SubnetId'))),
+
+    requiredField('launch_configuration', STRING), // launch_configuration.name
+    optionalField('load_balancers', listType(STRING)),
+
+    optionalField('tags', listType(recordType(autoscaling_group_tag))),
+  ],
+};
+
 function generateAws(gen: Generator) {
   // Generate the resources
+
+  gen.generateResource(
+    'Provides attachment of a autoscaling group to a ALB load balancer',
+    'https://www.terraform.io/docs/providers/aws/r/autoscaling_attachment.html',
+    autoscaling_attachment,
+    []
+  );
+
+  gen.generateResource(
+    'Provides aws_autoscaling_group',
+    'https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html',
+    autoscaling_group,
+    [resourceIdAttr('id', autoscaling_group), stringAttr('name')]
+  );
+
   gen.generateResource(
     'Provides an EC2 instance resource.',
     'https://www.terraform.io/docs/providers/aws/r/instance.html',
@@ -1052,7 +1132,18 @@ function generateAws(gen: Generator) {
     [stringAliasAttr('arn', 'Arn', 'AT.Arn')]
   );
 
+  gen.generateResource(
+    'Provides aws_launch_configuration',
+    'https://www.terraform.io/docs/providers/aws/r/launch_configuration.html',
+    launch_configuration,
+    [resourceIdAttr('id', launch_configuration), stringAttr('name')]
+  );
+
   // Generate all of the parameter structures
+  gen.generateParams(autoscaling_group_tag);
+  gen.generateParams(autoscaling_group);
+  gen.generateParams(autoscaling_attachment);
+
   gen.generateParams(instance_root_block_device);
   gen.generateParams(instance);
   gen.generateParams(db_instance);
@@ -1110,6 +1201,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);
+  gen.generateParams(launch_configuration);
 }
 
 function main() {

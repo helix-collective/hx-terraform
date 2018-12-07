@@ -5,6 +5,54 @@ import * as AT from "./aws-types";
 import * as TF from "../core/core";
 
 /**
+ *  Provides attachment of a autoscaling group to a ALB load balancer
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/autoscaling_attachment.html
+ */
+export function createAutoscalingAttachment(tfgen: TF.Generator, rname: string, params: AutoscalingAttachmentParams): AutoscalingAttachment {
+  const fields = fieldsFromAutoscalingAttachmentParams(params);
+  const resource = tfgen.createTypedResource('AutoscalingAttachment', 'aws_autoscaling_attachment', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface AutoscalingAttachment extends TF.ResourceT<'AutoscalingAttachment'> {
+}
+
+type AutoscalingAttachmentId = {type:'AutoscalingAttachmentId',value:string};
+
+/**
+ *  Provides aws_autoscaling_group
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html
+ */
+export function createAutoscalingGroup(tfgen: TF.Generator, rname: string, params: AutoscalingGroupParams): AutoscalingGroup {
+  const fields = fieldsFromAutoscalingGroupParams(params);
+  const resource = tfgen.createTypedResource('AutoscalingGroup', 'aws_autoscaling_group', rname, fields);
+  const id: AutoscalingGroupId =  {type: 'AutoscalingGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const arn: AutoscalingGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingGroup');
+
+  return {
+    ...resource,
+    id,
+    name,
+    arn,
+  };
+}
+
+export interface AutoscalingGroup extends TF.ResourceT<'AutoscalingGroup'> {
+  id: AutoscalingGroupId;
+  name: string;
+  arn: AutoscalingGroupArn;
+}
+
+type AutoscalingGroupId = {type:'AutoscalingGroupId',value:string};
+export type AutoscalingGroupArn = AT.ArnT<"AutoscalingGroup">;
+
+/**
  *  Provides an EC2 instance resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/instance.html
@@ -982,6 +1030,81 @@ export interface CloudwatchLogGroup extends TF.ResourceT<'CloudwatchLogGroup'> {
 }
 
 type CloudwatchLogGroupId = {type:'CloudwatchLogGroupId',value:string};
+
+/**
+ *  Provides aws_launch_configuration
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/launch_configuration.html
+ */
+export function createLaunchConfiguration(tfgen: TF.Generator, rname: string, params: LaunchConfigurationParams): LaunchConfiguration {
+  const fields = fieldsFromLaunchConfigurationParams(params);
+  const resource = tfgen.createTypedResource('LaunchConfiguration', 'aws_launch_configuration', rname, fields);
+  const id: LaunchConfigurationId =  {type: 'LaunchConfigurationId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    id,
+    name,
+  };
+}
+
+export interface LaunchConfiguration extends TF.ResourceT<'LaunchConfiguration'> {
+  id: LaunchConfigurationId;
+  name: string;
+}
+
+type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
+
+export interface AutoscalingGroupTagParams {
+  key: string;
+  value: string;
+  propagate_at_launch: boolean;
+}
+
+export function fieldsFromAutoscalingGroupTagParams(params: AutoscalingGroupTagParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "key", params.key, TF.stringValue);
+  TF.addField(fields, "value", params.value, TF.stringValue);
+  TF.addField(fields, "propagate_at_launch", params.propagate_at_launch, TF.booleanValue);
+  return fields;
+}
+
+export interface AutoscalingGroupParams {
+  name?: string;
+  name_prefix?: string;
+  min_size: number;
+  max_size: number;
+  vpc_zone_identifier?: SubnetId[];
+  launch_configuration: string;
+  load_balancers?: string[];
+  tags?: AutoscalingGroupTagParams[];
+}
+
+export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addField(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addField(fields, "max_size", params.max_size, TF.numberValue);
+  TF.addOptionalField(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
+  TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
+  TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
+  return fields;
+}
+
+export interface AutoscalingAttachmentParams {
+  autoscaling_group_name: AutoscalingGroupId;
+  alb_target_group_arn: AT.ArnT<"LbTargetGroup">;
+}
+
+export function fieldsFromAutoscalingAttachmentParams(params: AutoscalingAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
+  TF.addField(fields, "alb_target_group_arn", params.alb_target_group_arn, TF.resourceArnValue);
+  return fields;
+}
 
 export interface InstanceRootBlockDeviceParams {
   volume_type?: 'standard' | 'gp2' | 'io1';
@@ -1978,5 +2101,37 @@ export function fieldsFromLbListenerCertificateParams(params: LbListenerCertific
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
   TF.addField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface LaunchConfigurationParams {
+  name?: string;
+  name_prefix?: string;
+  image_id: AT.Ami;
+  instance_type: AT.InstanceType;
+  iam_instance_profile?: IamInstanceProfileId;
+  key_name?: AT.KeyName;
+  security_groups?: SecurityGroupId[];
+  associate_public_ip_address?: boolean;
+  user_data?: string;
+  enable_monitoring?: boolean;
+  ebs_optimized?: boolean;
+  root_block_device?: InstanceRootBlockDeviceParams;
+}
+
+export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addField(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
+  TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
+  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
+  TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
+  TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
+  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
+  TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
   return fields;
 }

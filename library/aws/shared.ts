@@ -4,12 +4,12 @@
  *  (includes VPC and networking etc)
  */
 
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
-import * as s3 from './aws-s3';
-import { ingressOnPort, egress_all, contextTagsWithName } from './util';
-import { s3ModifyPolicy, ecr_modify_all_policy } from './aws-policies';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
+import * as s3 from './s3';
+import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 import { RSA_NO_PADDING } from 'constants';
 
 /**

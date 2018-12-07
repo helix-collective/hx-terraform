@@ -1,9 +1,9 @@
 
 import * as TF from '../core/core';
 
-import * as AT from '../providers/aws-types';
-import * as shared from './aws-shared';
-import * as s3 from './aws-s3';
+import * as AT from '../providers/aws/types';
+import * as shared from './aws/shared';
+import * as s3 from './aws/s3';
 
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:

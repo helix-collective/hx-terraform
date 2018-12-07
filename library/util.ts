@@ -1,6 +1,6 @@
 import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
+import * as AT from '../providers/aws/types';
+import * as AR from '../providers/aws/resources';
 
 /**
  * Create resource for a subsystem in their own scope

@@ -1,5 +1,5 @@
-import * as TF from '../core/core';
-import * as AR from '../providers/aws-resources';
+import * as TF from '../../core/core';
+import * as AR from '../../providers/aws/resources';
 
 export interface NamedPolicy {
   name: string;

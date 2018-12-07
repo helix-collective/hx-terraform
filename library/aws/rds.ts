@@ -1,16 +1,16 @@
 import * as _ from 'lodash';
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
-import * as s3 from './aws-s3';
-import * as bootscript from './bootscript';
-import { SharedResources } from './aws-shared';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
+import * as s3 from './s3';
+import * as bootscript from '../bootscript';
+import { SharedResources } from './shared';
 import {
   ingressOnPort,
   egress_all,
   contextTagsWithName,
   Customize,
-} from './util';
+} from '../util';
 
 export interface DbInstance {
   instance: AR.DbInstance;

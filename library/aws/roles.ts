@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
-import { assume_role_policy, NamedPolicy } from './aws-policies';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
+import { assume_role_policy, NamedPolicy } from './policies';
 import { watchFile } from 'fs';
 
 /**

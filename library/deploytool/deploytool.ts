@@ -1,4 +1,4 @@
-import * as s3 from '../aws-s3';
+import * as s3 from '../aws/s3';
 import * as bootscript from '../bootscript';
 import { release_url } from './releaseurl';
 import * as C from "./adl-gen/config";

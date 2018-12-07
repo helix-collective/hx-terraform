@@ -1,5 +1,5 @@
 import * as docker from './docker';
-import * as s3 from './aws-s3';
+import * as s3 from './aws/s3';
 import * as path from 'path';
 
 import { listeners } from 'cluster';

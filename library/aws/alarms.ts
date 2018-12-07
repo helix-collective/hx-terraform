@@ -1,8 +1,8 @@
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
 
-import { SharedResources } from './aws-shared';
+import { SharedResources } from './shared';
 
 /**
  *  Create alarm resources on the given EC2 instance suitable for use in a Prod environment

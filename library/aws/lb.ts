@@ -1,8 +1,8 @@
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
 
-import * as shared from './aws-shared';
+import * as shared from './shared';
 
 /**
  * Create a load balancer pointing at a single elastic ip address, which

@@ -4,17 +4,17 @@
  */
 
 import * as _ from 'lodash';
-import * as TF from '../core/core';
-import * as AT from '../providers/aws-types';
-import * as AR from '../providers/aws-resources';
-import * as policies from './aws-policies';
-import * as roles from './aws-roles';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
+import * as policies from './policies';
+import * as roles from './roles';
 import * as aws from './aws';
-import * as s3 from './aws-s3';
-import * as bootscript from './bootscript';
-import * as util from './util';
-import { SharedResources } from './aws-shared';
-import * as docker from './docker';
+import * as s3 from './s3';
+import * as bootscript from '../bootscript';
+import * as util from '../util';
+import { SharedResources } from './shared';
+import * as docker from '../docker';
 
 export interface LoggingInfrastructureParams {
   secrets_s3_ref: s3.S3Ref;

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
-import * as AT from './aws-types';
-import * as TF from '../core/core';
+import * as AT from './types';
+import * as TF from '../../core/core';
 
 /**
  *  Registers the AWS provider

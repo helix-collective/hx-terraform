@@ -238,9 +238,15 @@ function paramsInterfaceName(name: string) {
 
 export function fileGenerator(
   provider: string,
-  headerLines: string[]
+  headerLines: string[],
+  providerPrefix: boolean = false
 ): FileGenerator {
   const lines: string[] = headerLines.concat([]);
+
+  let prefix = '';
+  if (providerPrefix) {
+    prefix = camelFromSnake(provider);
+  }
 
   function generateResource(
     comment: string,
@@ -266,9 +272,9 @@ export function fileGenerator(
     lines.push(` *  see ${link}`);
     lines.push(` */`);
     lines.push(
-      `export function create${name}(tfgen: TF.Generator, rname: string, params: ${paramsName}): ${name} {`
+      `export function create${prefix}${name}(tfgen: TF.Generator, rname: string, params: ${prefix}${paramsName}): ${name} {`
     );
-    lines.push(`  const fields = fieldsFrom${paramsName}(params);`);
+    lines.push(`  const fields = fieldsFrom${prefix}${paramsName}(params);`);
     lines.push(
       `  const resource = tfgen.createTypedResource('${name}', '${resourceType}', rname, fields);`
     );
@@ -322,7 +328,7 @@ export function fileGenerator(
 
   function generateParams(record: RecordDecl) {
     const interfaceName = paramsInterfaceName(record.name);
-    lines.push(`export interface ${interfaceName} {`);
+    lines.push(`export interface ${prefix}${interfaceName} {`);
     for (const field of record.fields) {
       const type = genType(field.type);
       const optional = field.optional ? '?' : '';
@@ -331,7 +337,7 @@ export function fileGenerator(
     lines.push('}');
     lines.push('');
     lines.push(
-      `export function fieldsFrom${interfaceName}(params: ${interfaceName}) : TF.ResourceFieldMap {`
+      `export function fieldsFrom${prefix}${interfaceName}(params: ${prefix}${interfaceName}) : TF.ResourceFieldMap {`
     );
     lines.push('  const fields: TF.ResourceFieldMap = [];');
     for (const field of record.fields) {

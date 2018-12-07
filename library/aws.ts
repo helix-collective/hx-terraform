@@ -126,6 +126,10 @@ export function createSecurityGroupInVpc(
   return AR.createSecurityGroup(tfgen, name, params);
 }
 
+export function externalSubnets(sr: SharedResources): AR.Subnet[] {
+  return sr.network.azs.map(az => az.external_subnet);
+}
+
 /**  Selects the external subnet of the first availability zone */
 export function firstAzExternalSubnet(sr: SharedResources): AR.Subnet {
   return sr.network.azs[0].external_subnet;

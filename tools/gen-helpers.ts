@@ -2,6 +2,10 @@ import * as fs from 'fs';
 
 export interface RecordDecl {
   name: string;
+  options?: {
+    // id: boolean;
+    arn: boolean /** Opt-in: Generate a typed Arn and expose as 'arn' attribute */;
+  };
   fields: FieldDecl[];
 }
 
@@ -247,6 +251,11 @@ export function fileGenerator(
     const name = resourceName(params.name);
     const paramsName = paramsInterfaceName(name);
     const resourceType = provider + '_' + params.name;
+
+    if (params.options && params.options.arn) {
+      attributes.push(resourceArnAttr('arn', params));
+    }
+
     lines.push(`/**`);
     lines.push(` *  ${comment}`);
     lines.push(` *`);
@@ -300,6 +309,9 @@ export function fileGenerator(
     lines.push('}');
     lines.push('');
     lines.push(`type ${name}Id = {type:'${name}Id',value:string};`);
+    if (params.options && params.options.arn) {
+      lines.push(`export type ${name}Arn = AT.ArnT<"${name}">;`);
+    }
     lines.push('');
   }
 

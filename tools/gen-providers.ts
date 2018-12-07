@@ -66,9 +66,6 @@ const instance: RecordDecl = {
 
 const db_instance: RecordDecl = {
   name: 'db_instance',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('allocated_storage', NUMBER),
     requiredField('engine', stringAliasType('AT.DbEngine')),
@@ -301,9 +298,6 @@ const website: RecordDecl = {
 
 const s3_bucket: RecordDecl = {
   name: 's3_bucket',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('bucket', STRING),
     optionalField('acl', stringAliasType('AT.CannedAcl')),
@@ -328,9 +322,6 @@ const s3_bucket_object: RecordDecl = {
 
 const iam_user: RecordDecl = {
   name: 'iam_user',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('name', STRING),
     optionalField('path', STRING),
@@ -357,17 +348,11 @@ const iam_user_policy_attachment: RecordDecl = {
 
 const ecr_repository: RecordDecl = {
   name: 'ecr_repository',
-  options: {
-    arn: true,
-  },
   fields: [requiredField('name', STRING)],
 };
 
 const db_subnet_group: RecordDecl = {
   name: 'db_subnet_group',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('name', STRING),
     optionalField('description', STRING),
@@ -378,9 +363,6 @@ const db_subnet_group: RecordDecl = {
 
 const sns_topic: RecordDecl = {
   name: 'sns_topic',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('name', STRING),
     optionalField('display_name', STRING),
@@ -424,9 +406,6 @@ const cloudwatch_metric_alarm: RecordDecl = {
 
 const iam_instance_profile: RecordDecl = {
   name: 'iam_instance_profile',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -438,9 +417,6 @@ const iam_instance_profile: RecordDecl = {
 
 const iam_role: RecordDecl = {
   name: 'iam_role',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -460,9 +436,6 @@ const iam_role_policy: RecordDecl = {
 
 const sqs_queue: RecordDecl = {
   name: 'sqs_queue',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -504,9 +477,6 @@ const lb_access_logs = {
 
 const lb: RecordDecl = {
   name: 'lb',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -530,9 +500,6 @@ const lb: RecordDecl = {
 
 const acm_certificate: RecordDecl = {
   name: 'acm_certificate',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('domain_name', STRING),
     requiredField('validation_method', STRING),
@@ -572,9 +539,6 @@ const lb_target_group_health_check: RecordDecl = {
 
 const lb_target_group: RecordDecl = {
   name: 'lb_target_group',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -609,9 +573,6 @@ const lb_listener_rule_condition: RecordDecl = {
 
 const lb_listener: RecordDecl = {
   name: 'lb_listener',
-  options: {
-    arn: true,
-  },
   fields: [
     requiredField('load_balancer_arn', arnType(lb)),
     requiredField('port', NUMBER),
@@ -634,7 +595,6 @@ const lb_listener_rule: RecordDecl = {
 
 const lb_listener_certificate: RecordDecl = {
   name: 'lb_listener_certificate',
-  options: { arn: true },
   fields: [
     requiredField('listener_arn', arnType(lb_listener)),
     requiredField('certificate_arn', arnType(acm_certificate)),
@@ -772,9 +732,6 @@ const autoscaling_group_tag: RecordDecl = {
 
 const autoscaling_group: RecordDecl = {
   name: 'autoscaling_group',
-  options: {
-    arn: true,
-  },
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
@@ -803,7 +760,10 @@ function generateAws(gen: Generator) {
     'Provides aws_autoscaling_group',
     'https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html',
     autoscaling_group,
-    [resourceIdAttr('id', autoscaling_group), stringAttr('name')]
+    [resourceIdAttr('id', autoscaling_group), stringAttr('name')],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -831,7 +791,10 @@ function generateAws(gen: Generator) {
       stringAttr('username'),
       stringAttr('address'),
       stringAttr('port'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -919,7 +882,10 @@ function generateAws(gen: Generator) {
     'Provides a S3 bucket resource.',
     'https://www.terraform.io/docs/providers/aws/r/s3_bucket.html',
     s3_bucket,
-    [stringAttr('id')]
+    [stringAttr('id')],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -933,14 +899,20 @@ function generateAws(gen: Generator) {
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
-    [resourceIdAttr('id', sns_topic)]
+    [resourceIdAttr('id', sns_topic)],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
     'Provides an IAM user.',
     'https://www.terraform.io/docs/providers/aws/r/iam_user.html',
     iam_user,
-    [stringAttr('name'), stringAttr('unique_id')]
+    [stringAttr('name'), stringAttr('unique_id')],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -965,14 +937,20 @@ function generateAws(gen: Generator) {
       stringAttr('name'),
       stringAttr('registry_id'),
       stringAttr('repository_url'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
     'Provides an RDS DB subnet group resource.',
     'https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html',
     db_subnet_group,
-    [resourceIdAttr('id', db_subnet_group), stringAttr('name')]
+    [resourceIdAttr('id', db_subnet_group), stringAttr('name')],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -992,7 +970,10 @@ function generateAws(gen: Generator) {
       stringAttr('create_date'),
       stringAttr('unique_id'),
       stringAttr('description'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -1016,14 +997,20 @@ function generateAws(gen: Generator) {
       stringAttr('name'),
       stringAttr('create_date'),
       stringAttr('unique_id'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
     'Provides an SQS queue.',
     'https://www.terraform.io/docs/providers/aws/r/sqs_queue.html',
     sqs_queue,
-    [resourceIdAttr('id', sqs_queue)]
+    [resourceIdAttr('id', sqs_queue)],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -1041,14 +1028,20 @@ function generateAws(gen: Generator) {
       resourceIdAttr('id', lb),
       stringAttr('dns_name'),
       stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
     'Provides a Load Balancer Listener resource.',
     'https://www.terraform.io/docs/providers/aws/r/lb_listener.html',
     lb_listener,
-    [resourceIdAttr('id', lb_listener)]
+    [resourceIdAttr('id', lb_listener)],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -1059,7 +1052,10 @@ function generateAws(gen: Generator) {
       resourceIdAttr('id', acm_certificate),
       /*stringAttr list?
       // ??? needs array of attribute options eg domain_validation_options*/
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -1075,7 +1071,10 @@ function generateAws(gen: Generator) {
     'Provides a Load Balancer Listener Certificate resource.',
     'https://www.terraform.io/docs/providers/aws/r/lb_listener_certificate.html',
     lb_listener_certificate,
-    [resourceIdAttr('id', lb_listener_certificate)]
+    [resourceIdAttr('id', lb_listener_certificate)],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(
@@ -1086,7 +1085,10 @@ function generateAws(gen: Generator) {
       resourceIdAttr('id', lb_target_group),
       stringAttr('arn_suffix'),
       stringAttr('name'),
-    ]
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # Helper to follow the workflow of having one git commit per code phab code review. This script
 # automatically calls the arc command, with the apprioriate args, depending on if we are creating
@@ -48,5 +48,5 @@ else:
     cmd = ["arc", "diff", "--allow-untracked", "--cc", CC, "--verbatim", "--browse", "--reviewers"] + [' '.join(sys.argv[1:])] + ["HEAD^1"]
     call(*cmd)
 
-print "Pushing branch for CI"
-call("git", "push", "--quiet", "-f", "origin", "HEAD:refs/heads/for-ci/%s" % USER)
+#print "Pushing branch for CI"
+#call("git", "push", "--quiet", "-f", "origin", "HEAD:refs/heads/for-phab-ci/%s" % USER)

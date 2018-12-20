@@ -57,6 +57,10 @@ export function availabilityZone(v: string): AvailabilityZone {
   return { type: 'AvailabilityZone', value: v };
 }
 
+export const us_east_1a = availabilityZone('us-east-1a');
+export const us_east_1b = availabilityZone('us-east-1b');
+export const us_east_1c = availabilityZone('us-east-1c');
+
 export const ap_southeast_2a = availabilityZone('ap-southeast-2a');
 export const ap_southeast_2b = availabilityZone('ap-southeast-2b');
 export const ap_southeast_2c = availabilityZone('ap-southeast-2c');

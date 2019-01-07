@@ -1,4 +1,3 @@
-
 import * as TF from '../core/core';
 
 import * as AT from '../providers/aws/types';
@@ -20,9 +19,8 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-
-    // TODO(dong): implement!!
-    return {};
+  // TODO(dong): implement!!
+  return {};
 }
 
 interface AutoscaleDeploymentParams {
@@ -48,9 +46,8 @@ interface AutoscaleDeploymentParams {
    */
   config_s3: s3.S3Ref;
 
-  // TODO(dong): extend with all of the option fields in the 
+  // TODO(dong): extend with all of the option fields in the
   // haskell type AutoScaleDeploymentConfig
 }
 
-interface AutoscaleDeployment {
-}
+interface AutoscaleDeployment {}

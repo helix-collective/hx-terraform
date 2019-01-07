@@ -1,10 +1,10 @@
 import * as s3 from '../aws/s3';
 import * as bootscript from '../bootscript';
 import { release_url } from './releaseurl';
-import * as C from "./adl-gen/config";
-import * as T from "./adl-gen/types";
-import { createJsonBinding } from "./adl-gen/runtime/json";
-import { RESOLVER } from "./adl-gen/resolver";
+import * as C from './adl-gen/config';
+import * as T from './adl-gen/types';
+import { createJsonBinding } from './adl-gen/runtime/json';
+import { RESOLVER } from './adl-gen/resolver';
 import { TcpNetConnectOpts } from 'net';
 
 export interface ContextFile {
@@ -31,29 +31,28 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
   return { source_name, name: name[0] };
 }
 
-
 export function httpProxyEndpoint(
   label: string,
   serverName: string
 ): C.EndPoint {
-  return  {
-      label,
-      serverName,
-      etype: {kind:'httpOnly'},
-    };
+  return {
+    label,
+    serverName,
+    etype: { kind: 'httpOnly' },
+  };
 }
 
 export function httpsProxyEndpoint(
   label: string,
-  serverName: string,
+  serverName: string
 ): C.EndPoint {
-  return  {
-      label,
-      serverName,
-      etype: {
-        kind:'httpsWithRedirect',
-        value: {kind: 'generated'}
-      },
+  return {
+    label,
+    serverName,
+    etype: {
+      kind: 'httpsWithRedirect',
+      value: { kind: 'generated' },
+    },
   };
 }
 
@@ -87,23 +86,22 @@ export function install(
   bs.sh(`chown -R ${username}:${username} /opt/config`);
   bs.sh(`chown -R ${username}:${username} /opt/releases`);
   bs.sh(`chown -R ${username}:${username} /opt/var/log`);
-  bs.sh(
-    'wget ' + release_url
-  );
+  bs.sh('wget ' + release_url);
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
 
-  let deployMode : C.DeployMode;
+  let deployMode: C.DeployMode;
   if (proxy.kind === 'none') {
-    deployMode = {kind:'select'};
-  } else { //  (proxy.kind === 'local')
+    deployMode = { kind: 'select' };
+  } else {
+    //  (proxy.kind === 'local')
     const endPoints: { [key: string]: C.EndPoint } = {};
     proxy.endpoints.forEach(ep => {
       endPoints[ep.label] = ep;
     });
     deployMode = {
-      kind: "proxy",
-      value: C.makeProxyModeConfig({endPoints}),
+      kind: 'proxy',
+      value: C.makeProxyModeConfig({ endPoints }),
     };
   }
 
@@ -116,37 +114,41 @@ export function install(
     },
     deployContext: {
       kind: 's3',
-      value: deploy_context.url()
+      value: deploy_context.url(),
     },
-    deployContextFiles: contextFiles.map( cf => {return {
-      name: cf.name,
-      sourceName: cf.source_name
-    }} ),
-    contextCache: "/opt/config",
-    autoCertContactEmail: ssl_cert_email
+    deployContextFiles: contextFiles.map(cf => {
+      return {
+        name: cf.name,
+        sourceName: cf.source_name,
+      };
+    }),
+    contextCache: '/opt/config',
+    autoCertContactEmail: ssl_cert_email,
   });
   const deployContextFiles = bs.catToFile(
     '/opt/etc/hx-deploy-tool.json',
-    
+
     JSON.stringify(jb.toJson(config), null, 2)
   );
 
-
   const generate_ssl_cert: boolean = (() => {
-    if (proxy.kind == "local") {
-      for(const ep of proxy.endpoints) {
-        if (ep.etype.kind == 'httpsWithRedirect' && ep.etype.value.kind == 'generated') {
+    if (proxy.kind == 'local') {
+      for (const ep of proxy.endpoints) {
+        if (
+          ep.etype.kind == 'httpsWithRedirect' &&
+          ep.etype.value.kind == 'generated'
+        ) {
           return true;
         }
-      };
+      }
     }
     return false;
   })();
 
   if (generate_ssl_cert) {
-    const cmd = "/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate";
-    bs.comment("generate an ssl certificate")
-    bs.sh("sudo -u app " + cmd);
+    const cmd = '/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate';
+    bs.comment('generate an ssl certificate');
+    bs.sh('sudo -u app ' + cmd);
     bs.cronJob('ssl-renewal', [
       `MAILTO=""`,
       `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,

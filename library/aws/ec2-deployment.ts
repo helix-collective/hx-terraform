@@ -69,13 +69,10 @@ export function createEc2Deployment(
     if (ep.kind === 'https') {
       return deploytool.httpsProxyEndpoint(
         ep.name,
-        shared.fqdn(sr, ep.dnsname),
+        shared.fqdn(sr, ep.dnsname)
       );
     } else if (ep.kind === 'https-external') {
-      return deploytool.httpsProxyEndpoint(
-        ep.name,
-        ep.fqdnsname
-      );
+      return deploytool.httpsProxyEndpoint(ep.name, ep.fqdnsname);
     } else {
       return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
     }
@@ -88,7 +85,6 @@ export function createEc2Deployment(
       context_files,
       deploytool.localProxy(proxy_endpoints),
       params.ssl_cert_email
-
     )
   );
 
@@ -127,7 +123,7 @@ export function createEc2Deployment(
         ep.dnsname,
         [appserver.eip.public_ip],
         '3600'
-    );
+      );
     }
   });
 
@@ -230,8 +226,6 @@ export interface EndPointHttpsExternal {
   name: string;
   fqdnsname: string;
 }
-
-
 
 export type EndPoint = EndPointHttps | EndPointHttp | EndPointHttpsExternal;
 

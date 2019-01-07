@@ -36,5 +36,9 @@
     // Configuration of enabled rules
     "variable-name": [true, "allow-pascal-case", "allow-snake-case"]
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+
+  "linterOptions": {
+    "exclude": ["library/deploytool/adl-gen/**/*.ts"]
+  }
 }

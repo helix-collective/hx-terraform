@@ -29,7 +29,7 @@
     "generate-providers": "ts-node ./tools/gen-providers.ts",
     "lint": "tslint --format verbose --project .",
     "lint:fix": "tslint --format verbose --fix --project .",
-    "prettier": "prettier --write $(find . -type d -name node_modules -prune -o -iname '*.ts*' -not -exec grep -q @generated '{}' \\; -print)",
+    "prettier": "prettier --write $(find . -type d -name node_modules -prune -o  -type d -name adl-gen -prune -o  -iname '*.ts*' -not -exec grep -q [@]generated '{}' \\; -print)",
     "clean": "rm -rf build",
     "build": "yarn && yarn clean && yarn tsc",
     "typecheck": "yarn && yarn tsc --noEmit"

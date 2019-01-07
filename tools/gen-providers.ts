@@ -89,6 +89,7 @@ const db_instance: RecordDecl = {
     optionalField('final_snapshot_identifier', STRING),
     optionalField('multi_az', BOOLEAN),
     optionalField('license_model', STRING),
+    optionalField('auto_minor_version_upgrade', BOOLEAN),
   ],
 };
 

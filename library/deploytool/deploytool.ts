@@ -107,7 +107,7 @@ export function install(
 
   const jb = createJsonBinding(RESOLVER, C.texprToolConfig());
   const config = C.makeToolConfig({
-    deployMode: deployMode,
+    deployMode,
     releases: {
       kind: 's3',
       value: releases.url(),
@@ -132,11 +132,11 @@ export function install(
   );
 
   const generate_ssl_cert: boolean = (() => {
-    if (proxy.kind == 'local') {
+    if (proxy.kind === 'local') {
       for (const ep of proxy.endpoints) {
         if (
-          ep.etype.kind == 'httpsWithRedirect' &&
-          ep.etype.value.kind == 'generated'
+          ep.etype.kind === 'httpsWithRedirect' &&
+          ep.etype.value.kind === 'generated'
         ) {
           return true;
         }

@@ -71,11 +71,12 @@ export function createEc2Deployment(
         ep.name,
         shared.fqdn(sr, ep.dnsname)
       );
-    } else if (ep.kind === 'https-external') {
-      return deploytool.httpsProxyEndpoint(ep.name, ep.fqdnsname);
-    } else {
-      return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
     }
+    if (ep.kind === 'https-external') {
+      return deploytool.httpsProxyEndpoint(ep.name, ep.fqdnsname);
+    }
+
+    return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
   });
   bs.include(
     deploytool.install(
@@ -115,7 +116,7 @@ export function createEc2Deployment(
   });
 
   endpoints.forEach(ep => {
-    if (ep.kind == 'https') {
+    if (ep.kind === 'https') {
       shared.dnsARecord(
         tfgen,
         'appserver_' + ep.name,

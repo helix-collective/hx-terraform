@@ -154,6 +154,13 @@ export class BootScript {
     this.sh('gunzip ' + args.join(' '));
   }
 
+  systemd(name: string, serviceFile: string[]) {
+    const file = '/lib/systemd/system/' + name + '.service';
+    this.comment(' Install systemd configuration for ' + name);
+    this.catToFile(file, serviceFile.join('\n'));
+    this.sh('systemctl start ' + name);
+  }
+
   cronJob(jobname: string, crontext: string[]) {
     const cronfile = '/etc/cron.d/' + jobname;
     this.comment(`Add a cron job for ${jobname}`);

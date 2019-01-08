@@ -294,6 +294,24 @@ export function dnsARecord(
 }
 
 /**
+ * Create a DNS ALIAS record in the primary dns zone
+ */
+export function dnsAliasRecord(
+  tfgen: TF.Generator,
+  name: string,
+  sr: SharedResources,
+  dnsname: string,
+  alias: AR.Route53AliasParams
+) {
+  AR.createRoute53Record(tfgen, name, {
+    zone_id: sr.primary_dns_zone.zone_id,
+    name: dnsname,
+    type: 'A',
+    alias
+  });
+}
+
+/**
  * Return the full qualified domain name for a host in the primary dns zone
  */
 export function fqdn(sr: SharedResources, dnsname: string) {

@@ -2070,13 +2070,17 @@ export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchD
 
 export interface AcmCertificateParams {
   domain_name: string;
+  subject_alternative_names?: string[];
   validation_method: string;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromAcmCertificateParams(params: AcmCertificateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalField(fields, "subject_alternative_names", params.subject_alternative_names, TF.listValue(TF.stringValue));
   TF.addField(fields, "validation_method", params.validation_method, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

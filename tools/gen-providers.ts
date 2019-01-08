@@ -504,7 +504,9 @@ const acm_certificate: RecordDecl = {
   name: 'acm_certificate',
   fields: [
     requiredField('domain_name', STRING),
+    optionalField('subject_alternative_names', listType(STRING)),
     requiredField('validation_method', STRING),
+    optionalField('tags', TAGS_MAP),
   ],
 };
 

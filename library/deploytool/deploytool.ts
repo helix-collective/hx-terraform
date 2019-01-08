@@ -6,6 +6,8 @@ import * as T from './adl-gen/types';
 import { createJsonBinding } from './adl-gen/runtime/json';
 import { RESOLVER } from './adl-gen/resolver';
 import { TcpNetConnectOpts } from 'net';
+import { S3Bucket } from '../../providers/aws/resources';
+import { Maybe } from './adl-gen/runtime/sys/types';
 
 export interface ContextFile {
   name: string;
@@ -58,10 +60,35 @@ export function httpsProxyEndpoint(
 
 export type ProxyConfig =
   | { kind: 'none' }
-  | { kind: 'local'; endpoints: C.EndPoint[] };
+  | { kind: 'local'; endpoints: C.EndPoint[] }
+  | { kind: 'remoteSlave'; endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref }
+  | { kind: 'remoteMaster'; endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref };
+
+export function remoteProxyMaster(endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref): ProxyConfig {
+  return { endpoints, kind: 'remoteMaster', remoteStateS3 };
+}
+
+export function remoteProxySlave(endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref): ProxyConfig {
+  return { endpoints, kind: 'remoteSlave', remoteStateS3 };
+}
 
 export function localProxy(endpoints: C.EndPoint[]): ProxyConfig {
   return { endpoints, kind: 'local' };
+}
+
+function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {
+  if (proxy.kind == 'none' || proxy.kind == 'local') {
+    throw Error("hx-deploy-tool not configured with proxy mode");
+  }
+  const endPoints: { [key: string]: C.EndPoint } = {};
+  const remoteStateS3: Maybe<string> = { kind: 'just', value: proxy.remoteStateS3.url() };
+  proxy.endpoints.forEach(ep => {
+    endPoints[ep.label] = ep;
+  });
+  return {
+    kind: "proxy",
+    value: C.makeProxyModeConfig({ endPoints, remoteStateS3 }),
+  };
 }
 
 /**
@@ -90,19 +117,32 @@ export function install(
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
 
-  let deployMode: C.DeployMode;
-  if (proxy.kind === 'none') {
-    deployMode = { kind: 'select' };
-  } else {
-    //  (proxy.kind === 'local')
-    const endPoints: { [key: string]: C.EndPoint } = {};
-    proxy.endpoints.forEach(ep => {
-      endPoints[ep.label] = ep;
-    });
-    deployMode = {
-      kind: 'proxy',
-      value: C.makeProxyModeConfig({ endPoints }),
-    };
+  let deployMode : C.DeployMode;
+
+  switch (proxy.kind) {
+    case 'none':
+      deployMode = { kind: 'select' };
+      break;
+    case 'local':
+      {
+        const endPoints: { [key: string]: C.EndPoint } = {};
+        proxy.endpoints.forEach(ep => {
+          endPoints[ep.label] = ep;
+        });
+        deployMode = {
+          kind: "proxy",
+          value: C.makeProxyModeConfig({ endPoints }),
+        };
+      }
+      break;
+    case 'remoteSlave':
+      deployMode = remoteDeployMode(proxy);
+      break;
+    case 'remoteMaster':
+      deployMode = remoteDeployMode(proxy);
+      break;
+    default:
+      throw Error(`proxy kind is unrecognised`);
   }
 
   const jb = createJsonBinding(RESOLVER, C.texprToolConfig());
@@ -127,10 +167,20 @@ export function install(
   });
   const deployContextFiles = bs.catToFile(
     '/opt/etc/hx-deploy-tool.json',
-
     JSON.stringify(jb.toJson(config), null, 2)
   );
 
+  if (proxy.kind == 'none' || proxy.kind == 'local') {
+    // If not in proxy mode, use letsEncrypt SSL
+    letsEncryptSSL(proxy, bs);
+  } else if (proxy.kind == 'remoteSlave') {
+    // Install tools necessary for the slaves to poll the S3 state file
+    bootscriptProxySlaveUpdate(bs, username);
+  }
+  return bs;
+}
+
+function letsEncryptSSL(proxy: ProxyConfig, bs: bootscript.BootScript) {
   const generate_ssl_cert: boolean = (() => {
     if (proxy.kind === 'local') {
       for (const ep of proxy.endpoints) {
@@ -154,5 +204,24 @@ export function install(
       `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
     ]);
   }
-  return bs;
+}
+
+function bootscriptProxySlaveUpdate(bs: bootscript.BootScript, username: string): void {
+  bs.cronJob("proxy-nginx-reload", [
+    `MAILTO=""`,
+    `15 0 * * * ${username} docker kill --signal=SIGHUP frontendproxy`,
+  ]);
+  bs.systemd("proxy-slave-update", [
+    `[Unit]`,
+    `Description=Periodically refresh local hx-deploy-tool proxy state from S3`,
+    ``,
+    `[Service]`,
+    `ExecStart=/opt/bin/hx-deploy-tool proxy-slave-update --repeat 20`,
+    `User=${username}`,
+    `Restart=on-failure`,
+    `WorkingDirectory=~`,
+    ``,
+    `[Install]`,
+    `WantedBy=multi-user.target`,
+  ]);
 }

@@ -33,6 +33,9 @@ export interface Generator {
    cause the resource to be updated */
   ignoreChanges(resource: Resource, fieldname: string): void;
 
+  /** Mark the resource to ensure a new resource is created before the original is destroyed */
+  createBeforeDestroy(resource: Resource, value: boolean): void;
+
   /** Mark that resource1  depends on the existance of resource2, and hence implies a
    creation ordering */
   dependsOn(resource1: Resource, resource2: Resource): void;
@@ -257,6 +260,13 @@ export function fileGenerator(): FileGenerator {
       }
     }
 
+    function createBeforeDestroy(resource: Resource, value: boolean) {
+      const details = generated.resourcesByName[resourceName(resource)];
+      if (details) {
+        details.createBeforeDestroy = value;
+      }
+    }
+
     function dependsOn(resource1: Resource, resource2: Resource) {
       const details1 = generated.resourcesByName[resourceName(resource1)];
       const details2 = generated.resourcesByName[resourceName(resource2)];
@@ -302,6 +312,7 @@ export function fileGenerator(): FileGenerator {
       createTypedResource,
       createOutput,
       ignoreChanges,
+      createBeforeDestroy,
       dependsOn,
       localExecProvisioner,
       nameContext,
@@ -474,20 +485,29 @@ export function fileGenerator(): FileGenerator {
           value: { kind: 'text', text: `[${dependsOn.join(', ')}]` },
         });
       }
-      if (resource.ignoreChanges.length > 0) {
-        const ignoreChanges = resource.ignoreChanges.map(f => '"' + f + '"');
-        fields.push({
+      if (resource.ignoreChanges.length > 0 || resource.createBeforeDestroy) {
+        let lifecycleFieldMap: ResourceField[] = [];
+        if (resource.ignoreChanges.length > 0) {
+          const ignoreChanges = resource.ignoreChanges.map(f => '"' + f + '"');
+          lifecycleFieldMap.push({
+            key: 'ignore_changes',
+            value: { kind: 'text', text: `[${ignoreChanges.join(', ')}]` },
+          });
+        }
+        if (resource.createBeforeDestroy) {
+          lifecycleFieldMap.push({
+            key: 'create_before_destroy',
+            value: { kind: 'text', text: "true" }
+          })
+        }
+        const lifecycleField: ResourceField = {
           key: 'lifecycle',
           value: {
             kind: 'map',
-            map: [
-              {
-                key: 'ignore_changes',
-                value: { kind: 'text', text: `[${ignoreChanges.join(', ')}]` },
-              },
-            ],
+            map: lifecycleFieldMap,
           },
-        });
+        };
+        fields.push(lifecycleField);
       }
       lines = lines.concat(mapLines(indent, prefix, fields, false));
       for (const provisioner of resource.provisioners) {

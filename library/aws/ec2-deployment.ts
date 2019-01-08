@@ -240,7 +240,7 @@ interface Ec2Deployment {
  *
  * (ubuntu xenial, hvm:ebs-ssd)
  */
-function getDefaultAmi(region: AT.Region): AT.Ami {
+export function getDefaultAmi(region: AT.Region): AT.Ami {
   if (region.value === AT.ap_southeast_2.value) {
     return AT.ami('ami-47c21a25');
   }

@@ -79,6 +79,7 @@ export function createPostgresInstance(
 
   const config_json = {
     name: db.name,
+    identifier: dbparams.identifier,
     username: db.username,
     address: db.address,
     port: db.port,

@@ -1176,6 +1176,7 @@ export interface DbInstanceParams {
   final_snapshot_identifier?: string;
   multi_az?: boolean;
   license_model?: string;
+  replicate_source_db?: string;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {

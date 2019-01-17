@@ -1177,6 +1177,7 @@ export interface DbInstanceParams {
   multi_az?: boolean;
   license_model?: string;
   auto_minor_version_upgrade?: boolean;
+  replicate_source_db?: DbInstanceId;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -1201,6 +1202,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "multi_az", params.multi_az, TF.booleanValue);
   TF.addOptionalField(fields, "license_model", params.license_model, TF.stringValue);
   TF.addOptionalField(fields, "auto_minor_version_upgrade", params.auto_minor_version_upgrade, TF.booleanValue);
+  TF.addOptionalField(fields, "replicate_source_db", params.replicate_source_db, TF.stringAliasValue);
   return fields;
 }
 

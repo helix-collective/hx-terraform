@@ -37,7 +37,11 @@ export function createAutoscaleDeployment(
   const appserverAutoScaleGroup = createAppserverAutoScaleGroup(tfgen, name, sr, params);
   const appserverLoadBalancer = createAppserverLoadBalancer(tfgen, name, sr, params, appserverAutoScaleGroup);
 
-  return {};
+  return {
+    autoscaling_group: appserverAutoScaleGroup,
+    target_group: appserverLoadBalancer.target_group,
+    load_balancer: appserverLoadBalancer.load_balancer
+  };
 }
 
 function createController(
@@ -187,12 +191,17 @@ function createAppserverAutoScaleGroup(
   return autoscaling_group;
 }
 
+export type LoadBalancerResources = {
+  load_balancer: AR.Lb;
+  target_group: AR.LbTargetGroup;
+}
+
 function createAppserverLoadBalancer(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams,
-  autoscaling_group: AR.AutoscalingGroup) {
+  autoscaling_group: AR.AutoscalingGroup): LoadBalancerResources {
 
   const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, endpoints);
@@ -274,6 +283,10 @@ function createAppserverLoadBalancer(
     );
     }
   });
+  return {
+    load_balancer: alb,
+    target_group: alb_target_group
+  };
 }
 type DNSRecordType = 'A' | 'AAAA' | 'CAA' | 'CNAME' | 'MX' | 'NAPTR' | 'NS' | 'PTR' | 'SOA' | 'SPF' | 'SRV' | 'TXT';
 
@@ -454,4 +467,8 @@ interface AutoscaleDeploymentParams {
 
 }
 
-interface AutoscaleDeployment {}
+interface AutoscaleDeployment {
+  autoscaling_group: AR.AutoscalingGroup;
+  target_group: AR.LbTargetGroup;
+  load_balancer: AR.Lb;
+}

@@ -245,14 +245,14 @@ interface Ec2Deployment {
 /**
  * Standard ubuntu base AMIs.
  *
- * (ubuntu xenial, hvm:ebs-ssd)
+ * (ubuntu xenial, hvm:ebs-ssd, EBS General purpose SSD, x86)
  */
 export function getDefaultAmi(region: AT.Region): AT.Ami {
   if (region.value === AT.ap_southeast_2.value) {
     return AT.ami('ami-47c21a25');
   }
   if (region.value === AT.us_east_1.value) {
-    return AT.ami('ami-759bc50a');
+    return AT.ami('ami-03a935aafa6b52b97');
   }
   if (region.value === AT.us_east_2.value) {
     return AT.ami('ami-5e8bb23b');

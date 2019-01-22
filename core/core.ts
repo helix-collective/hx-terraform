@@ -486,7 +486,7 @@ export function fileGenerator(): FileGenerator {
         });
       }
       if (resource.ignoreChanges.length > 0 || resource.createBeforeDestroy) {
-        let lifecycleFieldMap: ResourceField[] = [];
+        const lifecycleFieldMap: ResourceField[] = [];
         if (resource.ignoreChanges.length > 0) {
           const ignoreChanges = resource.ignoreChanges.map(f => '"' + f + '"');
           lifecycleFieldMap.push({

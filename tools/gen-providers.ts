@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { arn } from '../providers/aws/types';
+import {arn} from '../providers/aws/types';
 
 /**
  * Generate the resource definitions for AWS
@@ -750,6 +750,52 @@ const autoscaling_group: RecordDecl = {
   ],
 };
 
+const cloudwatch_logging_options: RecordDecl = {
+  name: 'cloudwatch_logging_options',
+  fields: [
+    optionalField('enabled', BOOLEAN),
+    optionalField('log_group_name', STRING),
+    optionalField('log_stream_name', STRING),
+  ]
+}
+
+const extended_s3_configuration: RecordDecl = {
+  name: 'extended_s3_configuration',
+  fields: [
+    requiredField('role_arn', arnType(iam_role)),
+    requiredField('bucket_arn', arnType(s3_bucket)),
+    optionalField('buffer_size', NUMBER),
+    optionalField('buffer_interval', NUMBER),
+    optionalField('cloudwatch_logging_options', recordType(cloudwatch_logging_options)),
+  ],
+};
+
+const kinesis_firehose_delivery_stream: RecordDecl = {
+  name: 'kinesis_firehose_delivery_stream',
+  fields: [
+    requiredField('name', STRING),
+    requiredField(
+      'destination',
+      enumType([
+        'extended_s3',
+        'redshift',
+        'elasticsearch',
+        'splunk'
+      ]),
+    ),
+    optionalField('extended_s3_configuration', recordType(extended_s3_configuration)),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const s3_bucket_metric: RecordDecl = {
+  name: 's3_bucket_metric',
+  fields: [
+    requiredField('bucket', STRING),
+    requiredField('name', STRING),
+  ],
+};
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1144,6 +1190,23 @@ function generateAws(gen: Generator) {
     [resourceIdAttr('id', launch_configuration), stringAttr('name')]
   );
 
+  gen.generateResource(
+    'Provides a Kinesis Firehose Delivery Stream resource',
+    'https://www.terraform.io/docs/providers/aws/r/kinesis_firehose_delivery_stream.html',
+    kinesis_firehose_delivery_stream,
+    [],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a S3 bucket metrics configuration resource',
+    'https://www.terraform.io/docs/providers/aws/r/s3_bucket_metric.html',
+    s3_bucket_metric,
+    [],
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1207,6 +1270,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);
   gen.generateParams(launch_configuration);
+  gen.generateParams(cloudwatch_logging_options);
+  gen.generateParams(extended_s3_configuration);
+  gen.generateParams(kinesis_firehose_delivery_stream);
+  gen.generateParams(s3_bucket_metric);
+
 }
 
 function generateRandom(gen: Generator) {

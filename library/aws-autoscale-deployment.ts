@@ -181,8 +181,8 @@ function createAppserverAutoScaleGroup(
     launch_configuration: launch_config.name,
     tags: Object.entries(contextTagsWithName(tfgen, name)).map(([key, value]) => { // note that tag and tags parameters appear to have the same function
       return {
-        key: key,
-        value: value,
+        key,
+        value,
         propagate_at_launch: true
       }
     })
@@ -230,7 +230,7 @@ function createAppserverLoadBalancer(
     tags: tfgen.tagsContext()
   });
 
-  let r53rs = https_fqdns.map((fqdn, i) => {
+  const r53rs = https_fqdns.map((fqdn, i) => {
 
     const domain_validation_options = domainValidationOptions(acm_certificate, i);
     return AR.createRoute53Record(tfgen, "cert" + i, {

@@ -1161,7 +1161,7 @@ export interface DbInstanceParams {
   engine: AT.DbEngine;
   instance_class: AT.DbInstanceType;
   username: string;
-  password: string;
+  password?: string;
   engine_version?: string;
   identifier?: string;
   name?: string;
@@ -1186,7 +1186,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addField(fields, "engine", params.engine, TF.stringAliasValue);
   TF.addField(fields, "instance_class", params.instance_class, TF.stringAliasValue);
   TF.addField(fields, "username", params.username, TF.stringValue);
-  TF.addField(fields, "password", params.password, TF.stringValue);
+  TF.addOptionalField(fields, "password", params.password, TF.stringValue);
   TF.addOptionalField(fields, "engine_version", params.engine_version, TF.stringValue);
   TF.addOptionalField(fields, "identifier", params.identifier, TF.stringValue);
   TF.addOptionalField(fields, "name", params.name, TF.stringValue);

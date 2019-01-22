@@ -71,7 +71,7 @@ const db_instance: RecordDecl = {
     requiredField('engine', stringAliasType('AT.DbEngine')),
     requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
     requiredField('username', STRING),
-    requiredField('password', STRING),
+    optionalField('password', STRING),
     optionalField('engine_version', STRING),
     optionalField('identifier', STRING),
     optionalField('name', STRING),

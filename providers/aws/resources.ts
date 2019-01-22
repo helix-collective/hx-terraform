@@ -1056,6 +1056,48 @@ export interface LaunchConfiguration extends TF.ResourceT<'LaunchConfiguration'>
 
 type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
 
+/**
+ *  Provides a Kinesis Firehose Delivery Stream resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/kinesis_firehose_delivery_stream.html
+ */
+export function createKinesisFirehoseDeliveryStream(tfgen: TF.Generator, rname: string, params: KinesisFirehoseDeliveryStreamParams): KinesisFirehoseDeliveryStream {
+  const fields = fieldsFromKinesisFirehoseDeliveryStreamParams(params);
+  const resource = tfgen.createTypedResource('KinesisFirehoseDeliveryStream', 'aws_kinesis_firehose_delivery_stream', rname, fields);
+  const arn: KinesisFirehoseDeliveryStreamArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'KinesisFirehoseDeliveryStream');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface KinesisFirehoseDeliveryStream extends TF.ResourceT<'KinesisFirehoseDeliveryStream'> {
+  arn: KinesisFirehoseDeliveryStreamArn;
+}
+
+type KinesisFirehoseDeliveryStreamId = {type:'KinesisFirehoseDeliveryStreamId',value:string};
+export type KinesisFirehoseDeliveryStreamArn = AT.ArnT<"KinesisFirehoseDeliveryStream">;
+
+/**
+ *  Provides a S3 bucket metrics configuration resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_metric.html
+ */
+export function createS3BucketMetric(tfgen: TF.Generator, rname: string, params: S3BucketMetricParams): S3BucketMetric {
+  const fields = fieldsFromS3BucketMetricParams(params);
+  const resource = tfgen.createTypedResource('S3BucketMetric', 'aws_s3_bucket_metric', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface S3BucketMetric extends TF.ResourceT<'S3BucketMetric'> {
+}
+
+type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2141,5 +2183,65 @@ export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationP
   TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
   TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
+  return fields;
+}
+
+export interface CloudwatchLoggingOptionsParams {
+  enabled?: boolean;
+  log_group_name?: string;
+  log_stream_name?: string;
+}
+
+export function fieldsFromCloudwatchLoggingOptionsParams(params: CloudwatchLoggingOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "log_group_name", params.log_group_name, TF.stringValue);
+  TF.addOptionalField(fields, "log_stream_name", params.log_stream_name, TF.stringValue);
+  return fields;
+}
+
+export interface ExtendedS3ConfigurationParams {
+  role_arn: AT.ArnT<"IamRole">;
+  bucket_arn: AT.ArnT<"S3Bucket">;
+  buffer_size?: number;
+  buffer_interval?: number;
+  cloudwatch_logging_options?: CloudwatchLoggingOptionsParams;
+}
+
+export function fieldsFromExtendedS3ConfigurationParams(params: ExtendedS3ConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addField(fields, "bucket_arn", params.bucket_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "buffer_size", params.buffer_size, TF.numberValue);
+  TF.addOptionalField(fields, "buffer_interval", params.buffer_interval, TF.numberValue);
+  TF.addOptionalField(fields, "cloudwatch_logging_options", params.cloudwatch_logging_options, (v) => TF.mapValue(fieldsFromCloudwatchLoggingOptionsParams(v)));
+  return fields;
+}
+
+export interface KinesisFirehoseDeliveryStreamParams {
+  name: string;
+  destination: 'extended_s3' | 'redshift' | 'elasticsearch' | 'splunk';
+  extended_s3_configuration?: ExtendedS3ConfigurationParams;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromKinesisFirehoseDeliveryStreamParams(params: KinesisFirehoseDeliveryStreamParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "destination", params.destination, TF.stringValue);
+  TF.addOptionalField(fields, "extended_s3_configuration", params.extended_s3_configuration, (v) => TF.mapValue(fieldsFromExtendedS3ConfigurationParams(v)));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface S3BucketMetricParams {
+  bucket: string;
+  name: string;
+}
+
+export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addField(fields, "name", params.name, TF.stringValue);
   return fields;
 }

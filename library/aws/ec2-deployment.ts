@@ -124,6 +124,18 @@ export function createEc2Deployment(
     }
   });
 
+  // Create a canonical DNS record for the ec2 box (independent of switchable endpoints)
+  if (params.public_dns_name !== undefined) {
+    shared.dnsARecord(
+      tfgen,
+      'appserver',
+      sr,
+      params.public_dns_name,
+      [appserver.eip.public_ip],
+      '3600'
+    );
+  }
+
   return appserver;
 }
 
@@ -137,6 +149,12 @@ export interface Ec2DeploymentParams {
    * The AWS instance type (ie mem and cores) for the EC2 instance.
    */
   instance_type: AT.InstanceType;
+
+  /**
+   * The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name
+   * they can cname to (that is, one of the endpoints is https-external)
+   */
+  public_dns_name?: string;
 
   /**
    * The email address for SSL certificate admin and notification.

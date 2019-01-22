@@ -43,12 +43,8 @@ export function createEc2Deployment(
     context_files = [];
   }
 
-  const endpoints: EndPoint[] = params.endpoints || [
-    { kind: 'https', name: 'main', dnsname: params.dns_name },
-    { kind: 'https', name: 'test', dnsname: params.dns_name + '-test' },
-  ];
   const https_fqdns: string[] = [];
-  endpoints.forEach(ep => {
+  params.endpoints.forEach(ep => {
     if (ep.kind === 'https') {
       https_fqdns.push(shared.fqdn(sr, ep.dnsname));
     } else if (ep.kind === 'https-external') {
@@ -65,7 +61,7 @@ export function createEc2Deployment(
     bs.include(params.extra_bootscript);
   }
 
-  const proxy_endpoints = endpoints.map(ep => {
+  const proxy_endpoints = params.endpoints.map(ep => {
     if (ep.kind === 'https') {
       return deploytool.httpsProxyEndpoint(
         ep.name,
@@ -115,7 +111,7 @@ export function createEc2Deployment(
     },
   });
 
-  endpoints.forEach(ep => {
+  params.endpoints.forEach(ep => {
     if (ep.kind === 'https') {
       shared.dnsARecord(
         tfgen,
@@ -143,13 +139,6 @@ export interface Ec2DeploymentParams {
   instance_type: AT.InstanceType;
 
   /**
-   * The DNS name of the machine. This is a prefix to the shared primary DNS zone.
-   * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
-   * will be aaa.helix.com).
-   */
-  dns_name: string;
-
-  /**
    * The email address for SSL certificate admin and notification.
    */
   ssl_cert_email: string;
@@ -175,7 +164,7 @@ export interface Ec2DeploymentParams {
    *    main:   ${dns_name}.${primary_dns_zone}
    *    test:   ${dns_name}-test.${primary_dns_zone}
    */
-  endpoints?: EndPoint[];
+  endpoints: EndPoint[];
 
   /**
    * Specifies the AMI for the EC2 instance. Defaults to an ubuntu 16.04 AMI

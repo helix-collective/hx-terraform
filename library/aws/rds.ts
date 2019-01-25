@@ -75,6 +75,26 @@ export function createPostgresInstance(
   if (params.customize) {
     params.customize(dbparams);
   }
+
+  //Override some default DB parameters for read replicas.
+  if (dbparams.replicate_source_db) {
+    // Set the DB name to undefined for read replicas.
+    // The read replica should have the same name as the master DB by design.
+    dbparams.name = undefined;
+
+    // Do not set a backup retention period.
+    dbparams.backup_retention_period = undefined;
+
+    // The read replica should be in the same subnet group like the master DB.
+    dbparams.db_subnet_group_name = undefined;
+
+    //Skip creating the final snapshot for read replicas.
+    dbparams.skip_final_snapshot = true;
+    dbparams.final_snapshot_identifier = undefined;
+
+    // The read replica should have the same password like the master DB.
+    dbparams.password = undefined;
+  }
   const db = AR.createDbInstance(tfgen, name, dbparams);
 
   const config_json = {

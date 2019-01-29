@@ -70,6 +70,8 @@ export function createPostgresInstance(
     tags: tfgen.tagsContext(),
     final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
     skip_final_snapshot: false,
+    apply_immediately: false,
+    storage_type: AT.gp2
   };
 
   if (params.customize) {

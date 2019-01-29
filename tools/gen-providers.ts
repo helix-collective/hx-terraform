@@ -90,7 +90,9 @@ const db_instance: RecordDecl = {
     optionalField('multi_az', BOOLEAN),
     optionalField('license_model', STRING),
     optionalField('auto_minor_version_upgrade', BOOLEAN),
-    optionalField('replicate_source_db', stringAliasType('DbInstanceId'))
+    optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
+    optionalField('apply_immediately', BOOLEAN),
+    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType'))
   ],
 };
 

@@ -339,7 +339,7 @@ export function dbInstanceStorageType(v: string): DbInstanceStorageType {
   return { type: 'DbInstanceStorageType', value: v };
 }
 
-export const magnetic: DbInstanceStorageType = dbInstanceStorageType('standard');
-export const general_purpose_ssd: DbInstanceStorageType = dbInstanceStorageType('gp2');
-export const provisioned_iops_ssd : DbInstanceStorageType = dbInstanceStorageType('io1');
+export const standard: DbInstanceStorageType = dbInstanceStorageType('standard');
+export const gp2: DbInstanceStorageType = dbInstanceStorageType('gp2');
+export const io1 : DbInstanceStorageType = dbInstanceStorageType('io1');
 //----------------------------------------------------------------------

@@ -11,7 +11,6 @@ import {
   contextTagsWithName,
   Customize,
 } from '../util';
-import {DbInstanceStorageType, dbInstanceStorageType} from "../../providers/aws/types";
 
 export interface DbInstance {
   instance: AR.DbInstance;
@@ -72,7 +71,7 @@ export function createPostgresInstance(
     final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
     skip_final_snapshot: false,
     apply_immediately: false,
-    storage_type: AT.general_purpose_ssd
+    storage_type: AT.gp2
   };
 
   if (params.customize) {

@@ -1220,6 +1220,8 @@ export interface DbInstanceParams {
   license_model?: string;
   auto_minor_version_upgrade?: boolean;
   replicate_source_db?: DbInstanceId;
+  apply_immediately?: boolean;
+  storage_type ?: string;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -1245,6 +1247,8 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "license_model", params.license_model, TF.stringValue);
   TF.addOptionalField(fields, "auto_minor_version_upgrade", params.auto_minor_version_upgrade, TF.booleanValue);
   TF.addOptionalField(fields, "replicate_source_db", params.replicate_source_db, TF.stringAliasValue);
+  TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
+  TF.addOptionalField(fields, "storage_type ", params.storage_type , TF.stringValue);
   return fields;
 }
 

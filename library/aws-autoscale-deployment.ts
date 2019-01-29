@@ -208,7 +208,8 @@ function createAppserverLoadBalancer(
 
   const alb = createLb(tfgen, "alb", {
     load_balancer_type: 'application',
-    tags: tfgen.tagsContext()
+    tags: tfgen.tagsContext(),
+    subnets: sr.network.azs.map(az => az.external_subnet.id)
   });
 
   const alb_target_group = createLbTargetGroup(tfgen, "tg80", {

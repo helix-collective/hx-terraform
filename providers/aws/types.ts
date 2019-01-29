@@ -328,3 +328,18 @@ export const i3_8xlarge_elasticsearch = esInstanceType(
 export const i3_16xlarge_elasticsearch = esInstanceType(
   'i3.16xlarge.elasticsearch'
 );
+
+//----------------------------------------------------------------------
+export type DbInstanceStorageType = {
+  type: 'DbInstanceStorageType';
+  value: string;
+};
+
+export function dbInstanceStorageType(v: string): DbInstanceStorageType {
+  return { type: 'DbInstanceStorageType', value: v };
+}
+
+export const magnetic: DbInstanceStorageType = dbInstanceStorageType('standard');
+export const general_purpose_ssd: DbInstanceStorageType = dbInstanceStorageType('gp2');
+export const provisioned_iops_ssd : DbInstanceStorageType = dbInstanceStorageType('io1');
+//----------------------------------------------------------------------

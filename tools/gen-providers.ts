@@ -92,7 +92,7 @@ const db_instance: RecordDecl = {
     optionalField('auto_minor_version_upgrade', BOOLEAN),
     optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
     optionalField('apply_immediately', BOOLEAN),
-    optionalField('storage_type ', STRING)
+    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType'))
   ],
 };
 

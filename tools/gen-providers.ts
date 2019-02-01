@@ -812,7 +812,7 @@ const elasticache_cluster: RecordDecl = {
   fields: [
     requiredField('cluster_id', STRING),
     requiredField('engine', enumType(['memcached', 'redis'])),
-    requiredField('node_type', stringAliasType('AT.CacheInstanceType')),
+    requiredField('node_type', stringAliasType('AT.CacheNodeType')),
     requiredField('num_cache_nodes', NUMBER),
     requiredField('parameter_group_name', STRING),
     optionalField('port', NUMBER),

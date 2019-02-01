@@ -16,7 +16,6 @@ import {
   contextTagsWithName,
   Customize,
 } from '../util';
-import { cache_t2_micro } from "../../providers/aws/types";
 
 export interface InstanceWithEipParams {
   instance_type: AT.InstanceType;
@@ -177,7 +176,7 @@ export function createMemcacheCluster(
   const params: AR.ElasticacheClusterParams = {
     cluster_id: name,
     engine: "memcached",
-    node_type: cache_t2_micro,
+    node_type: AT.cache_t2_micro,
     num_cache_nodes: 1,
     parameter_group_name: name + '-group'
   };

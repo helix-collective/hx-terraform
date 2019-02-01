@@ -244,39 +244,39 @@ export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
 //----------------------------------------------------------------------
 
 //-----------------------Elasticache instance types---------------------
-export type CacheInstanceType = {
-  type: 'CacheInstanceType';
+export type CacheNodeType = {
+  type: 'CacheNodeType';
   value: string;
 };
 
-export function cacheInstanceType(v: string): CacheInstanceType {
-  return { type: 'CacheInstanceType', value: v };
+export function cacheNodeType(v: string): CacheNodeType {
+  return { type: 'CacheNodeType', value: v };
 }
 
-export const cache_t2_micro	  : CacheInstanceType = cacheInstanceType('cache.t2.micro');
-export const cache_t2_small	  : CacheInstanceType = cacheInstanceType('cache.t2.small');
-export const cache_t2_medium  : CacheInstanceType = cacheInstanceType('cache.t2.medium');
-export const cache_m4_large	  : CacheInstanceType = cacheInstanceType('cache.m4.large');
-export const cache_m4_xlarge  : CacheInstanceType = cacheInstanceType('cache.m4.xlarge');
-export const cache_m4_2xlarge : CacheInstanceType = cacheInstanceType('cache.m4.2xlarge');
-export const cache_m4_4xlarge	: CacheInstanceType = cacheInstanceType('cache.m4.4xlarge');
-export const cache_m4_10_large: CacheInstanceType = cacheInstanceType('cache.m4.10xlarge');
-export const cache_m5_2xlarge	: CacheInstanceType = cacheInstanceType('cache.m5.2xlarge');
-export const cache_m5_4xlarge	: CacheInstanceType = cacheInstanceType('cache.m5.4xlarge');
-export const cache_m5_12xlarge: CacheInstanceType = cacheInstanceType('cache.m5.12xlarge');
-export const cache_m5_24xlarge: CacheInstanceType = cacheInstanceType('cache.m5.24xlarge');
-export const cache_r4_large	  : CacheInstanceType = cacheInstanceType('cache.r4.large');
-export const cache_r4_xlarge	: CacheInstanceType = cacheInstanceType('cache.r4.xlarge');
-export const cache_r4_2xlarge	: CacheInstanceType = cacheInstanceType('cache.r4.2xlarge');
-export const cache_r4_4xlarge	: CacheInstanceType = cacheInstanceType('cache.r4.4xlarge');
-export const cache_r4_8xlarge	: CacheInstanceType = cacheInstanceType('cache.r4.8xlarge');
-export const cache_r4_16xlarge: CacheInstanceType = cacheInstanceType('cache.r4.16xlarge');
-export const cache_r5_large	  : CacheInstanceType = cacheInstanceType('cache.r5.large');
-export const cache_r5_xlarge	: CacheInstanceType = cacheInstanceType('cache.r5.xlarge');
-export const cache_r5_2xlarge	: CacheInstanceType = cacheInstanceType('cache.r5.2xlarge');
-export const cache_r5_4xlarge	: CacheInstanceType = cacheInstanceType('cache.r5.4xlarge');
-export const cache_r5_12xlarge: CacheInstanceType = cacheInstanceType('cache.r5.12xlarge');
-export const cache_r5_24xlarge: CacheInstanceType = cacheInstanceType('cache.r5.24xlarge');
+export const cache_t2_micro: CacheNodeType = cacheNodeType('cache.t2.micro');
+export const cache_t2_small: CacheNodeType = cacheNodeType('cache.t2.small');
+export const cache_t2_medium: CacheNodeType = cacheNodeType('cache.t2.medium');
+export const cache_m4_large: CacheNodeType = cacheNodeType('cache.m4.large');
+export const cache_m4_xlarge: CacheNodeType = cacheNodeType('cache.m4.xlarge');
+export const cache_m4_2xlarge: CacheNodeType = cacheNodeType('cache.m4.2xlarge');
+export const cache_m4_4xlarge: CacheNodeType = cacheNodeType('cache.m4.4xlarge');
+export const cache_m4_10_large: CacheNodeType = cacheNodeType('cache.m4.10xlarge');
+export const cache_m5_2xlarge: CacheNodeType = cacheNodeType('cache.m5.2xlarge');
+export const cache_m5_4xlarge: CacheNodeType = cacheNodeType('cache.m5.4xlarge');
+export const cache_m5_12xlarge: CacheNodeType = cacheNodeType('cache.m5.12xlarge');
+export const cache_m5_24xlarge: CacheNodeType = cacheNodeType('cache.m5.24xlarge');
+export const cache_r4_large: CacheNodeType = cacheNodeType('cache.r4.large');
+export const cache_r4_xlarge: CacheNodeType = cacheNodeType('cache.r4.xlarge');
+export const cache_r4_2xlarge: CacheNodeType = cacheNodeType('cache.r4.2xlarge');
+export const cache_r4_4xlarge: CacheNodeType = cacheNodeType('cache.r4.4xlarge');
+export const cache_r4_8xlarge: CacheNodeType = cacheNodeType('cache.r4.8xlarge');
+export const cache_r4_16xlarge: CacheNodeType = cacheNodeType('cache.r4.16xlarge');
+export const cache_r5_large: CacheNodeType = cacheNodeType('cache.r5.large');
+export const cache_r5_xlarge: CacheNodeType = cacheNodeType('cache.r5.xlarge');
+export const cache_r5_2xlarge: CacheNodeType = cacheNodeType('cache.r5.2xlarge');
+export const cache_r5_4xlarge	: CacheNodeType = cacheNodeType('cache.r5.4xlarge');
+export const cache_r5_12xlarge: CacheNodeType = cacheNodeType('cache.r5.12xlarge');
+export const cache_r5_24xlarge: CacheNodeType = cacheNodeType('cache.r5.24xlarge');
 //----------------------------------------------------------------------
 
 export type EsInstanceType = {

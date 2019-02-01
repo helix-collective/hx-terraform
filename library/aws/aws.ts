@@ -170,7 +170,7 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
 export function createMemcacheCluster(
   tfgen: TF.Generator,
   name: string,
-  customize: Customize<AR.ElasticacheClusterParams>
+  customize?: Customize<AR.ElasticacheClusterParams>
 ): AR.ElasticacheCluster {
 
   const params: AR.ElasticacheClusterParams = {
@@ -180,7 +180,9 @@ export function createMemcacheCluster(
     num_cache_nodes: 1,
     parameter_group_name: name + '-group'
   };
-  customize(params);
+  if (customize) {
+    customize(params);
+  }
   AR.createElasticacheParameterGroup(tfgen, params.parameter_group_name, {
     name: params.parameter_group_name,
     family: "memcached1.5"

@@ -1234,7 +1234,10 @@ function generateAws(gen: Generator) {
     'Provides an ElastiCache parameter group resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_parameter_group.html',
     elasticache_parameter_group,
-    [ stringAttr('name'), stringAttr('family'), stringAttr('description')],
+    [ stringAttr('name'),
+      stringAttr('family'),
+      stringAttr('description')
+    ],
     {
       arn: true,
     }
@@ -1244,7 +1247,11 @@ function generateAws(gen: Generator) {
     'Provides an elasticache cluster resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html',
     elasticache_cluster,
-    [ stringAttr('cluster_id'), stringAttr('engine'), stringAttr('node_type'), stringAttr('parameter_group_name')],
+    [ stringAttr('cluster_id'),
+      stringAttr('engine'),
+      stringAttr('node_type'),
+      stringAttr('parameter_group_name')
+    ],
     {
       arn: true,
     }

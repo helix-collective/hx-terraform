@@ -1098,6 +1098,73 @@ export interface S3BucketMetric extends TF.ResourceT<'S3BucketMetric'> {
 
 type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
 
+/**
+ *  Provides an ElastiCache parameter group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticache_parameter_group.html
+ */
+export function createElasticacheParameterGroup(tfgen: TF.Generator, rname: string, params: ElasticacheParameterGroupParams): ElasticacheParameterGroup {
+  const fields = fieldsFromElasticacheParameterGroupParams(params);
+  const resource = tfgen.createTypedResource('ElasticacheParameterGroup', 'aws_elasticache_parameter_group', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const family: string =  '${' + TF.resourceName(resource) + '.family}';
+  const description: string =  '${' + TF.resourceName(resource) + '.description}';
+  const arn: ElasticacheParameterGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheParameterGroup');
+
+  return {
+    ...resource,
+    name,
+    family,
+    description,
+    arn,
+  };
+}
+
+export interface ElasticacheParameterGroup extends TF.ResourceT<'ElasticacheParameterGroup'> {
+  name: string;
+  family: string;
+  description: string;
+  arn: ElasticacheParameterGroupArn;
+}
+
+type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:string};
+export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
+
+/**
+ *  Provides an elasticache cluster resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html
+ */
+export function createElasticacheCluster(tfgen: TF.Generator, rname: string, params: ElasticacheClusterParams): ElasticacheCluster {
+  const fields = fieldsFromElasticacheClusterParams(params);
+  const resource = tfgen.createTypedResource('ElasticacheCluster', 'aws_elasticache_cluster', rname, fields);
+  const cluster_id: string =  '${' + TF.resourceName(resource) + '.cluster_id}';
+  const engine: string =  '${' + TF.resourceName(resource) + '.engine}';
+  const node_type: string =  '${' + TF.resourceName(resource) + '.node_type}';
+  const parameter_group_name: string =  '${' + TF.resourceName(resource) + '.parameter_group_name}';
+  const arn: ElasticacheClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheCluster');
+
+  return {
+    ...resource,
+    cluster_id,
+    engine,
+    node_type,
+    parameter_group_name,
+    arn,
+  };
+}
+
+export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
+  cluster_id: string;
+  engine: string;
+  node_type: string;
+  parameter_group_name: string;
+  arn: ElasticacheClusterArn;
+}
+
+type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
+export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2247,5 +2314,39 @@ export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : T
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "bucket", params.bucket, TF.stringValue);
   TF.addField(fields, "name", params.name, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticacheParameterGroupParams {
+  name: string;
+  family: string;
+  description?: string;
+}
+
+export function fieldsFromElasticacheParameterGroupParams(params: ElasticacheParameterGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "family", params.family, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticacheClusterParams {
+  cluster_id: string;
+  engine: 'memcached' | 'redis';
+  node_type: AT.CacheInstanceType;
+  num_cache_nodes: number;
+  parameter_group_name: string;
+  port?: number;
+}
+
+export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "cluster_id", params.cluster_id, TF.stringValue);
+  TF.addField(fields, "engine", params.engine, TF.stringValue);
+  TF.addField(fields, "node_type", params.node_type, TF.stringAliasValue);
+  TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
+  TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringValue);
+  TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   return fields;
 }

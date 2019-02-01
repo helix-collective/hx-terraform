@@ -11,14 +11,12 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as policies from './policies';
-import * as s3 from './s3';
 import { SharedResources } from './shared';
 import {
-  ingressOnPort,
-  egress_all,
   contextTagsWithName,
   Customize,
 } from '../util';
+import { cache_t2_micro } from "../../providers/aws/types";
 
 export interface InstanceWithEipParams {
   instance_type: AT.InstanceType;
@@ -167,4 +165,26 @@ export function s3DeployBucketModifyPolicy(sr: SharedResources) {
 
 export function s3BackupBucketModifyPolicy(sr: SharedResources) {
   return policies.s3ModifyPolicy('modifys3backup', sr.backup_bucket_name);
+}
+
+
+export function createMemcacheCluster(
+  tfgen: TF.Generator,
+  name: string,
+  customize: Customize<AR.ElasticacheClusterParams>
+): AR.ElasticacheCluster {
+
+  const params: AR.ElasticacheClusterParams = {
+    cluster_id: name,
+    engine: "memcached",
+    node_type: cache_t2_micro,
+    num_cache_nodes: 1,
+    parameter_group_name: name + '-group'
+  };
+  customize(params);
+  AR.createElasticacheParameterGroup(tfgen, params.parameter_group_name, {
+    name: params.parameter_group_name,
+    family: "memcached1.5"
+  });
+  return AR.createElasticacheCluster(tfgen, name, params);
 }

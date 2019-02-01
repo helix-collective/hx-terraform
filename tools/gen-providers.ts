@@ -798,6 +798,27 @@ const s3_bucket_metric: RecordDecl = {
   ],
 };
 
+const elasticache_parameter_group: RecordDecl = {
+  name: 'elasticache_parameter_group',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('family', STRING),
+    optionalField('description', STRING),
+  ],
+};
+
+const elasticache_cluster: RecordDecl = {
+  name: 'elasticache_cluster',
+  fields: [
+    requiredField('cluster_id', STRING),
+    requiredField('engine', enumType(['memcached', 'redis'])),
+    requiredField('node_type', stringAliasType('AT.CacheInstanceType')),
+    requiredField('num_cache_nodes', NUMBER),
+    requiredField('parameter_group_name', STRING),
+    optionalField('port', NUMBER),
+  ],
+};
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1209,6 +1230,26 @@ function generateAws(gen: Generator) {
     [],
   );
 
+  gen.generateResource(
+    'Provides an ElastiCache parameter group resource.',
+    'https://www.terraform.io/docs/providers/aws/r/elasticache_parameter_group.html',
+    elasticache_parameter_group,
+    [ stringAttr('name'), stringAttr('family'), stringAttr('description')],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides an elasticache cluster resource.',
+    'https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html',
+    elasticache_cluster,
+    [ stringAttr('cluster_id'), stringAttr('engine'), stringAttr('node_type'), stringAttr('parameter_group_name')],
+    {
+      arn: true,
+    }
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1276,6 +1317,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(extended_s3_configuration);
   gen.generateParams(kinesis_firehose_delivery_stream);
   gen.generateParams(s3_bucket_metric);
+  gen.generateParams(elasticache_parameter_group);
+  gen.generateParams(elasticache_cluster);
 
 }
 

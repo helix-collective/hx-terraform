@@ -28,7 +28,6 @@ import {
   stringAliasAttr,
   resourceIdAttr,
 } from './gen-helpers';
-import {StringAlias} from "../core/core";
 
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',

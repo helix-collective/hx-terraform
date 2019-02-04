@@ -1,5 +1,5 @@
 import * as path from 'path';
-import {arn} from '../providers/aws/types';
+import {arn, ElasticacheParameterGroupName} from '../providers/aws/types';
 
 /**
  * Generate the resource definitions for AWS
@@ -28,6 +28,7 @@ import {
   stringAliasAttr,
   resourceIdAttr,
 } from './gen-helpers';
+import {StringAlias} from "../core/core";
 
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',
@@ -801,8 +802,8 @@ const s3_bucket_metric: RecordDecl = {
 const elasticache_parameter_group: RecordDecl = {
   name: 'elasticache_parameter_group',
   fields: [
-    requiredField('name', STRING),
-    requiredField('family', STRING),
+    requiredField('name', stringAliasType('AT.ElasticacheParameterGroupName')),
+    requiredField('family', stringAliasType('AT.ElasticacheParameterGroupFamily')),
     optionalField('description', STRING),
   ],
 };
@@ -1234,8 +1235,10 @@ function generateAws(gen: Generator) {
     'Provides an ElastiCache parameter group resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_parameter_group.html',
     elasticache_parameter_group,
-    [ stringAttr('name'),
-      stringAttr('family'),
+    [ stringAliasAttr('name', 'ElasticacheParameterGroupName',
+      'AT.ElasticacheParameterGroupName'),
+      stringAliasAttr('family', 'ElasticacheParameterGroupFamily',
+        'AT.ElasticacheParameterGroupFamily'),
       stringAttr('description')
     ],
     {

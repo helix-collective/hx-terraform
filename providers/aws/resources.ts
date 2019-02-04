@@ -1106,8 +1106,8 @@ type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
 export function createElasticacheParameterGroup(tfgen: TF.Generator, rname: string, params: ElasticacheParameterGroupParams): ElasticacheParameterGroup {
   const fields = fieldsFromElasticacheParameterGroupParams(params);
   const resource = tfgen.createTypedResource('ElasticacheParameterGroup', 'aws_elasticache_parameter_group', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const family: string =  '${' + TF.resourceName(resource) + '.family}';
+  const name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: '${' + TF.resourceName(resource) + '.name}'};
+  const family: AT.ElasticacheParameterGroupFamily =  {type: 'ElasticacheParameterGroupFamily', value: '${' + TF.resourceName(resource) + '.family}'};
   const description: string =  '${' + TF.resourceName(resource) + '.description}';
   const arn: ElasticacheParameterGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheParameterGroup');
 
@@ -1121,8 +1121,8 @@ export function createElasticacheParameterGroup(tfgen: TF.Generator, rname: stri
 }
 
 export interface ElasticacheParameterGroup extends TF.ResourceT<'ElasticacheParameterGroup'> {
-  name: string;
-  family: string;
+  name: AT.ElasticacheParameterGroupName;
+  family: AT.ElasticacheParameterGroupFamily;
   description: string;
   arn: ElasticacheParameterGroupArn;
 }
@@ -2318,15 +2318,15 @@ export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : T
 }
 
 export interface ElasticacheParameterGroupParams {
-  name: string;
-  family: string;
+  name: AT.ElasticacheParameterGroupName;
+  family: AT.ElasticacheParameterGroupFamily;
   description?: string;
 }
 
 export function fieldsFromElasticacheParameterGroupParams(params: ElasticacheParameterGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "family", params.family, TF.stringValue);
+  TF.addField(fields, "name", params.name, TF.stringAliasValue);
+  TF.addField(fields, "family", params.family, TF.stringAliasValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }
@@ -2334,7 +2334,7 @@ export function fieldsFromElasticacheParameterGroupParams(params: ElasticachePar
 export interface ElasticacheClusterParams {
   cluster_id: string;
   engine: 'memcached' | 'redis';
-  node_type: AT.CacheInstanceType;
+  node_type: AT.CacheNodeType;
   num_cache_nodes: number;
   parameter_group_name: string;
   port?: number;

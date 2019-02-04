@@ -2336,7 +2336,7 @@ export interface ElasticacheClusterParams {
   engine: 'memcached' | 'redis';
   node_type: AT.CacheNodeType;
   num_cache_nodes: number;
-  parameter_group_name: string;
+  parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
 }
 
@@ -2346,7 +2346,7 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "engine", params.engine, TF.stringValue);
   TF.addField(fields, "node_type", params.node_type, TF.stringAliasValue);
   TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
-  TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringValue);
+  TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   return fields;
 }

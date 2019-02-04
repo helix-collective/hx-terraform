@@ -166,26 +166,33 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
   return policies.s3ModifyPolicy('modifys3backup', sr.backup_bucket_name);
 }
 
-
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
   customize?: Customize<AR.ElasticacheClusterParams>
 ): AR.ElasticacheCluster {
 
-  const params: AR.ElasticacheClusterParams = {
+  const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
+    name: name,
+    family: AT.memcached_1_5.value
+  }
+
+  const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, elasticache_parameter_group_params.name, {
+    name: elasticache_parameter_group_params.name,
+    family: AT.memcached_1_5.value
+  });
+
+  const elasticache_params: AR.ElasticacheClusterParams = {
     cluster_id: name,
     engine: "memcached",
     node_type: AT.cache_t2_micro,
     num_cache_nodes: 1,
-    parameter_group_name: name + '-group'
+    parameter_group_name: elasticache_parameter_group.name
   };
+
   if (customize) {
-    customize(params);
+    customize(elasticache_params);
   }
-  AR.createElasticacheParameterGroup(tfgen, params.parameter_group_name, {
-    name: params.parameter_group_name,
-    family: AT.memcached_1_5.value
-  });
-  return AR.createElasticacheCluster(tfgen, name, params);
+
+  return AR.createElasticacheCluster(tfgen, name, elasticache_params);
 }

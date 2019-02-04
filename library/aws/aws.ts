@@ -169,11 +169,14 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
-  customize?: Customize<AR.ElasticacheClusterParams>
+  params: {
+    parameter_group_name: string,
+    customize?: Customize<AR.ElasticacheClusterParams>
+  }
 ): AR.ElasticacheCluster {
 
   const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
-    name: name,
+    name: params.parameter_group_name,
     family: AT.memcached_1_5.value
   }
 
@@ -190,8 +193,8 @@ export function createMemcachedCluster(
     parameter_group_name: elasticache_parameter_group.name
   };
 
-  if (customize) {
-    customize(elasticache_params);
+  if (params.customize) {
+    params.customize(elasticache_params);
   }
 
   return AR.createElasticacheCluster(tfgen, name, elasticache_params);

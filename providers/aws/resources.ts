@@ -1141,7 +1141,7 @@ export function createElasticacheCluster(tfgen: TF.Generator, rname: string, par
   const cluster_id: string =  '${' + TF.resourceName(resource) + '.cluster_id}';
   const engine: string =  '${' + TF.resourceName(resource) + '.engine}';
   const node_type: string =  '${' + TF.resourceName(resource) + '.node_type}';
-  const parameter_group_name: string =  '${' + TF.resourceName(resource) + '.parameter_group_name}';
+  const parameter_group_name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: '${' + TF.resourceName(resource) + '.parameter_group_name}'};
   const arn: ElasticacheClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheCluster');
 
   return {
@@ -1158,7 +1158,7 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
   cluster_id: string;
   engine: string;
   node_type: string;
-  parameter_group_name: string;
+  parameter_group_name: AT.ElasticacheParameterGroupName;
   arn: ElasticacheClusterArn;
 }
 

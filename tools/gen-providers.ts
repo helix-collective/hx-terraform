@@ -1252,7 +1252,8 @@ function generateAws(gen: Generator) {
     [ stringAttr('cluster_id'),
       stringAttr('engine'),
       stringAttr('node_type'),
-      stringAttr('parameter_group_name')
+      stringAliasAttr('parameter_group_name', 'ElasticacheParameterGroupName',
+        'AT.ElasticacheParameterGroupName'),
     ],
     {
       arn: true,

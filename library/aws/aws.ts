@@ -167,7 +167,7 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
 }
 
 
-export function createMemcacheCluster(
+export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
   customize?: Customize<AR.ElasticacheClusterParams>

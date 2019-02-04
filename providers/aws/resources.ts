@@ -2318,15 +2318,15 @@ export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : T
 }
 
 export interface ElasticacheParameterGroupParams {
-  name: AT.ElasticacheParameterGroupName;
-  family: AT.ElasticacheParameterGroupFamily;
+  name: string;
+  family: string;
   description?: string;
 }
 
 export function fieldsFromElasticacheParameterGroupParams(params: ElasticacheParameterGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringAliasValue);
-  TF.addField(fields, "family", params.family, TF.stringAliasValue);
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "family", params.family, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }

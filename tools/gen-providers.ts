@@ -801,8 +801,8 @@ const s3_bucket_metric: RecordDecl = {
 const elasticache_parameter_group: RecordDecl = {
   name: 'elasticache_parameter_group',
   fields: [
-    requiredField('name', stringAliasType('AT.ElasticacheParameterGroupName')),
-    requiredField('family', stringAliasType('AT.ElasticacheParameterGroupFamily')),
+    requiredField('name', STRING),
+    requiredField('family', STRING),
     optionalField('description', STRING),
   ],
 };

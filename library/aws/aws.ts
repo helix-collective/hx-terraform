@@ -184,8 +184,8 @@ export function createMemcachedCluster(
     customize(params);
   }
   AR.createElasticacheParameterGroup(tfgen, params.parameter_group_name, {
-    name: AT.elasticacheParameterGroupName(params.parameter_group_name),
-    family: AT.memcached_1_5
+    name: params.parameter_group_name,
+    family: AT.memcached_1_5.value
   });
   return AR.createElasticacheCluster(tfgen, name, params);
 }

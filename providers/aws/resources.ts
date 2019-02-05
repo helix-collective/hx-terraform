@@ -1165,6 +1165,28 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
 type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
 export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
 
+/**
+ *  Provides a WAF Byte Match Set Resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/waf_byte_match_set.html
+ */
+export function createWafByteMatchSet(tfgen: TF.Generator, rname: string, params: WafByteMatchSetParams): WafByteMatchSet {
+  const fields = fieldsFromWafByteMatchSetParams(params);
+  const resource = tfgen.createTypedResource('WafByteMatchSet', 'aws_waf_byte_match_set', rname, fields);
+  const id: WafByteMatchSetId =  {type: 'WafByteMatchSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafByteMatchSet extends TF.ResourceT<'WafByteMatchSet'> {
+  id: WafByteMatchSetId;
+}
+
+type WafByteMatchSetId = {type:'WafByteMatchSetId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2348,5 +2370,43 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
+  return fields;
+}
+
+export interface FieldToMatchParams {
+  data?: string;
+  type: 'HEADER' | 'METHOD' | 'QUERY_STRING' | 'URI' | 'BODY' | 'SINGLE_QUERY_ARG' | 'ALL_QUERY_ARGS';
+}
+
+export function fieldsFromFieldToMatchParams(params: FieldToMatchParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "data", params.data, TF.stringValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface ByteMatchTuplesParams {
+  field_to_match: FieldToMatchParams;
+  positional_constraint: AT.PositionalConstraint;
+  target_string?: string;
+}
+
+export function fieldsFromByteMatchTuplesParams(params: ByteMatchTuplesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "field_to_match", params.field_to_match, (v) => TF.mapValue(fieldsFromFieldToMatchParams(v)));
+  TF.addField(fields, "positional_constraint", params.positional_constraint, TF.stringAliasValue);
+  TF.addOptionalField(fields, "target_string", params.target_string, TF.stringValue);
+  return fields;
+}
+
+export interface WafByteMatchSetParams {
+  name: string;
+  byte_match_tuples: ByteMatchTuplesParams;
+}
+
+export function fieldsFromWafByteMatchSetParams(params: WafByteMatchSetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "byte_match_tuples", params.byte_match_tuples, (v) => TF.mapValue(fieldsFromByteMatchTuplesParams(v)));
   return fields;
 }

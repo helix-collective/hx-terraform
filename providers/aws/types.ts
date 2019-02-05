@@ -361,3 +361,18 @@ export const redis_2_8 = elasticacheParameterGroupFamily('redis2.8');
 export const redis_3_2 = elasticacheParameterGroupFamily('redis3.2');
 export const redis_4_0 = elasticacheParameterGroupFamily('redis4.0');
 //----------------------------------------------------------------------
+
+export type PositionalConstraint = {
+  type: 'PositionalConstraint',
+  value: string
+}
+
+export function positionalConstraint(v: string): PositionalConstraint {
+  return { type: 'PositionalConstraint', value: v }
+}
+
+export const contains = positionalConstraint('CONTAINS');
+export const contains_word = positionalConstraint('CONTAINS_WORD');
+export const exactly = positionalConstraint('EXACTLY');
+export const starts_with = positionalConstraint('STARTS_WITH');
+export const ends_with = positionalConstraint('ENDS_WITH');

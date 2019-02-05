@@ -819,6 +819,31 @@ const elasticache_cluster: RecordDecl = {
   ],
 };
 
+const field_to_match: RecordDecl = {
+  name: 'field_to_match',
+  fields: [
+    optionalField('data', STRING),
+    requiredField('type', enumType(['HEADER', 'METHOD', 'QUERY_STRING', 'URI', 'BODY', 'SINGLE_QUERY_ARG', 'ALL_QUERY_ARGS'])),
+  ]
+}
+
+const byte_match_tuples: RecordDecl = {
+  name: 'byte_match_tuples',
+  fields: [
+    requiredField('field_to_match', recordType(field_to_match)),
+    requiredField('positional_constraint', stringAliasType('AT.PositionalConstraint')),
+    optionalField('target_string', STRING),
+  ]
+}
+
+const waf_byte_match_set: RecordDecl = {
+  name: 'waf_byte_match_set',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('byte_match_tuples', recordType(byte_match_tuples)),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1260,6 +1285,14 @@ function generateAws(gen: Generator) {
     }
   );
 
+  gen.generateResource(
+    'Provides a WAF Byte Match Set Resource',
+    'https://www.terraform.io/docs/providers/aws/r/waf_byte_match_set.html',
+    waf_byte_match_set,
+    [ resourceIdAttr('id', waf_byte_match_set)
+    ]
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1329,6 +1362,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_metric);
   gen.generateParams(elasticache_parameter_group);
   gen.generateParams(elasticache_cluster);
+  gen.generateParams(field_to_match);
+  gen.generateParams(byte_match_tuples);
+  gen.generateParams(waf_byte_match_set);
 
 }
 

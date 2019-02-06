@@ -1257,6 +1257,32 @@ export interface WafregionalRegexPatternSet extends TF.ResourceT<'WafregionalReg
 
 type WafregionalRegexPatternSetId = {type:'WafregionalRegexPatternSetId',value:string};
 
+/**
+ *  Provides a WAF Regional IPSet Resource for use with Application Load Balancer.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_ipset.html
+ */
+export function createWafregionalIpset(tfgen: TF.Generator, rname: string, params: WafregionalIpsetParams): WafregionalIpset {
+  const fields = fieldsFromWafregionalIpsetParams(params);
+  const resource = tfgen.createTypedResource('WafregionalIpset', 'aws_wafregional_ipset', rname, fields);
+  const id: WafregionalIpsetId =  {type: 'WafregionalIpsetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: WafregionalIpsetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'WafregionalIpset');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface WafregionalIpset extends TF.ResourceT<'WafregionalIpset'> {
+  id: WafregionalIpsetId;
+  arn: WafregionalIpsetArn;
+}
+
+type WafregionalIpsetId = {type:'WafregionalIpsetId',value:string};
+export type WafregionalIpsetArn = AT.ArnT<"WafregionalIpset">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2540,5 +2566,17 @@ export function fieldsFromWafregionalRegexMatchSetParams(params: WafregionalRege
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "regex_match_tuple", params.regex_match_tuple, (v) => TF.mapValue(fieldsFromRegexMatchTupleParams(v)));
+  return fields;
+}
+
+export interface WafregionalIpsetParams {
+  name: string;
+  ip_set_descriptor?: IpSetDescriptorsParams[];
+}
+
+export function fieldsFromWafregionalIpsetParams(params: WafregionalIpsetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "ip_set_descriptor", params.ip_set_descriptor, TF.listValue((v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v))));
   return fields;
 }

@@ -424,6 +424,29 @@ export interface S3BucketObject extends TF.ResourceT<'S3BucketObject'> {
 type S3BucketObjectId = {type:'S3BucketObjectId',value:string};
 
 /**
+ *  Provides an S3 bucket event notification resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html
+ */
+export function createS3BucketNotification(tfgen: TF.Generator, rname: string, params: S3BucketNotificationParams): S3BucketNotification {
+  const fields = fieldsFromS3BucketNotificationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketNotification', 'aws_s3_bucket_notification', rname, fields);
+  const arn: S3BucketNotificationArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'S3BucketNotification');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification'> {
+  arn: S3BucketNotificationArn;
+}
+
+type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
+export type S3BucketNotificationArn = AT.ArnT<"S3BucketNotification">;
+
+/**
  *  Provides an SNS topic resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/sns_topic.html
@@ -1659,6 +1682,22 @@ export function fieldsFromS3BucketObjectParams(params: S3BucketObjectParams) : T
   return fields;
 }
 
+export interface S3BucketNotificationParams {
+  bucket: string;
+  topic?: SnsEventNotificationTargetParams;
+  queue?: SqsEventNotificationTargetParams;
+  lambda_function ?: LambdaEventNotificationTargetParams;
+}
+
+export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "topic", params.topic, (v) => TF.mapValue(fieldsFromSnsEventNotificationTargetParams(v)));
+  TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromSqsEventNotificationTargetParams(v)));
+  TF.addOptionalField(fields, "lambda_function ", params.lambda_function , (v) => TF.mapValue(fieldsFromLambdaEventNotificationTargetParams(v)));
+  return fields;
+}
+
 export interface SnsTopicParams {
   name: string;
   display_name?: string;
@@ -2348,5 +2387,59 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
+  return fields;
+}
+
+export interface SnsEventNotificationTargetParams {
+  sns_arn: string;
+  id?: string;
+  events: AT.BucketEventNotificationType[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromSnsEventNotificationTargetParams(params: SnsEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "sns_arn", params.sns_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface SqsEventNotificationTargetParams {
+  queue_arn: string;
+  id?: string;
+  events: AT.BucketEventNotificationType[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromSqsEventNotificationTargetParams(params: SqsEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "queue_arn", params.queue_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface LambdaEventNotificationTargetParams {
+  lambda_arn: string;
+  id?: string;
+  events: AT.BucketEventNotificationType[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromLambdaEventNotificationTargetParams(params: LambdaEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "lambda_arn", params.lambda_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
   return fields;
 }

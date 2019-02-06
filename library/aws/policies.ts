@@ -1,5 +1,7 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
+import {ArnT} from "../../providers/aws/types";
+import {SqsQueueArn} from "../../providers/aws/resources";
 
 export interface NamedPolicy {
   name: string;
@@ -98,6 +100,25 @@ export function s3ModifyPolicy(name: string, bucket: string) {
           ],
           Effect: 'Allow',
           Resource: [`arn:aws:s3:::${bucket}/*`],
+        },
+      ],
+    },
+  };
+}
+
+export function s3PublishNotificationPolicy(name: string, bucket: string, queue: SqsQueueArn ) {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['sqs:SendMessage'],
+          Resource: [`arn:aws:sqs:::${queue}`],
+          Condition: {
+            ArnEquals: { "aws:SourceArn": `arn:aws:s3:::${bucket}` }
+          }
         },
       ],
     },

@@ -178,7 +178,7 @@ export function createMemcachedCluster(
   const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
     name: params.parameter_group_name,
     family: AT.memcached_1_5.value
-  }
+  };
 
   const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, elasticache_parameter_group_params.name, {
     name: elasticache_parameter_group_params.name,
@@ -198,4 +198,24 @@ export function createMemcachedCluster(
   }
 
   return AR.createElasticacheCluster(tfgen, name, elasticache_params);
+}
+
+export function createBucketNotificationForSqs(
+  tfgen: TF.Generator,
+  name: string,
+  bucket: string,
+  queue_arn: AR.SqsQueueArn,
+  customize?: Customize<AR.S3BucketNotificationParams>
+): AR.S3BucketNotification {
+  const bucket_notification_params: AR.S3BucketNotificationParams = {
+    bucket,
+    queue: {
+      queue_arn: queue_arn.value,
+      events: [ AT.s3_objectCreated_all, AT.s3_objectRemoved_all ]
+    }
+  };
+  if (customize) {
+    customize(bucket_notification_params);
+  }
+  return AR.createS3BucketNotification(tfgen, name, bucket_notification_params);
 }

@@ -1,5 +1,9 @@
 import * as path from 'path';
-import {arn, ElasticacheParameterGroupName} from '../providers/aws/types';
+import {
+  Arn,
+  arn,
+  ElasticacheParameterGroupName,
+} from '../providers/aws/types';
 
 /**
  * Generate the resource definitions for AWS
@@ -321,6 +325,49 @@ const s3_bucket_object: RecordDecl = {
     requiredField('key', STRING),
     optionalField('source', STRING),
     optionalField('content', STRING),
+  ],
+};
+
+const sns_event_notification_target: RecordDecl = {
+  name: 'sns_event_notification_target',
+  fields: [
+    requiredField('sns_arn', STRING),
+    optionalField('id', STRING),
+    requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+    optionalField('filter_prefix', STRING),
+    optionalField('filter_suffix', STRING),
+  ]
+};
+
+const sqs_event_notification_target: RecordDecl = {
+  name: 'sqs_event_notification_target',
+  fields: [
+    requiredField('queue_arn', STRING),
+    optionalField('id', STRING),
+    requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+    optionalField('filter_prefix', STRING),
+    optionalField('filter_suffix', STRING),
+  ]
+};
+
+const lambda_event_notification_target: RecordDecl = {
+  name: 'LambdaEventNotificationTarget',
+  fields: [
+    requiredField('lambda_arn', STRING),
+    optionalField('id', STRING),
+    requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+    optionalField('filter_prefix', STRING),
+    optionalField('filter_suffix', STRING),
+  ]
+};
+
+const s3_bucket_notification: RecordDecl = {
+  name: 's3_bucket_notification',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('topic', recordType(sns_event_notification_target)),
+    optionalField('queue', recordType(sqs_event_notification_target)),
+    optionalField('lambda_function ', recordType(lambda_event_notification_target)),
   ],
 };
 
@@ -968,6 +1015,16 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an S3 bucket event notification resource.',
+    'https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html',
+    s3_bucket_notification,
+    [],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
@@ -1289,6 +1346,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket);
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);
+  gen.generateParams(s3_bucket_notification);
   gen.generateParams(sns_topic);
   gen.generateParams(iam_user);
   gen.generateParams(iam_user_policy);
@@ -1329,7 +1387,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_metric);
   gen.generateParams(elasticache_parameter_group);
   gen.generateParams(elasticache_cluster);
-
+  gen.generateParams(sns_event_notification_target);
+  gen.generateParams(sqs_event_notification_target);
+  gen.generateParams(lambda_event_notification_target);
 }
 
 function generateRandom(gen: Generator) {

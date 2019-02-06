@@ -1,7 +1,4 @@
-import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
-import {ArnT} from "../../providers/aws/types";
-import {SqsQueueArn} from "../../providers/aws/resources";
 
 export interface NamedPolicy {
   name: string;
@@ -106,7 +103,7 @@ export function s3ModifyPolicy(name: string, bucket: string) {
   };
 }
 
-export function s3PublishNotificationPolicy(name: string, bucket: string, queue: SqsQueueArn ) {
+export function s3PublishNotificationPolicy(name: string, bucket: string, queue: AR.SqsQueueArn ) {
   return {
     name,
     policy: {

@@ -844,6 +844,22 @@ const waf_byte_match_set: RecordDecl = {
   ]
 }
 
+const ip_set_descriptors: RecordDecl = {
+  name: 'ip_set_descriptors',
+  fields: [
+    requiredField('type', enumType(['IPV4', 'IPV6'])),
+    requiredField('value', STRING),
+  ]
+}
+
+const waf_ipset: RecordDecl = {
+  name: 'waf_ipset',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('ip_set_descriptors', recordType(ip_set_descriptors)),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1293,6 +1309,17 @@ function generateAws(gen: Generator) {
     ]
   );
 
+  gen.generateResource(
+    'Provides a WAF IPSet Resource',
+    'https://www.terraform.io/docs/providers/aws/r/waf_ipset.html',
+    waf_ipset,
+    [ resourceIdAttr('id', waf_ipset),
+    ],
+    {
+      arn: true
+    }
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1365,6 +1392,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(field_to_match);
   gen.generateParams(byte_match_tuples);
   gen.generateParams(waf_byte_match_set);
+  gen.generateParams(ip_set_descriptors);
+  gen.generateParams(waf_ipset);
 
 }
 

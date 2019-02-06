@@ -911,6 +911,34 @@ const wafregional_rule: RecordDecl = {
   ]
 }
 
+const action: RecordDecl = {
+  name: 'action',
+  fields: [
+    requiredField('type', enumType(['ALLOW', 'BLOCK', 'COUNT']))
+  ]
+}
+
+const rule: RecordDecl = {
+  name: 'rule',
+  fields: [
+    requiredField('action', recordType(action)),
+    optionalField('override_action', recordType(action)),
+    requiredField('priority', NUMBER),
+    requiredField('rule_id', resourceIdType('WafregionalRuleId')),
+    optionalField('type', enumType(['REGULAR', 'RATE_BASED', 'GROUP'])),
+  ]
+}
+
+const wafregional_web_acl: RecordDecl = {
+  name: 'wafregional_web_acl',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('metric_name', STRING),
+    requiredField('default_action', recordType(action)),
+    requiredField('rule', recordType(rule))
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1406,6 +1434,15 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    'Provides a WAF Regional Web ACL Resource for use with Application Load Balancer.',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl.html',
+    wafregional_web_acl,
+    [ resourceIdAttr('id', wafregional_web_acl)
+    ]
+
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1486,6 +1523,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(wafregional_ipset);
   gen.generateParams(predicate);
   gen.generateParams(wafregional_rule);
+  gen.generateParams(action);
+  gen.generateParams(rule);
+  gen.generateParams(wafregional_web_acl);
 
 }
 

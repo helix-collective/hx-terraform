@@ -1305,6 +1305,28 @@ export interface WafregionalRule extends TF.ResourceT<'WafregionalRule'> {
 
 type WafregionalRuleId = {type:'WafregionalRuleId',value:string};
 
+/**
+ *  Provides a WAF Regional Web ACL Resource for use with Application Load Balancer.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl.html
+ */
+export function createWafregionalWebAcl(tfgen: TF.Generator, rname: string, params: WafregionalWebAclParams): WafregionalWebAcl {
+  const fields = fieldsFromWafregionalWebAclParams(params);
+  const resource = tfgen.createTypedResource('WafregionalWebAcl', 'aws_wafregional_web_acl', rname, fields);
+  const id: WafregionalWebAclId =  {type: 'WafregionalWebAclId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafregionalWebAcl extends TF.ResourceT<'WafregionalWebAcl'> {
+  id: WafregionalWebAclId;
+}
+
+type WafregionalWebAclId = {type:'WafregionalWebAclId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2628,5 +2650,49 @@ export function fieldsFromWafregionalRuleParams(params: WafregionalRuleParams) :
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
   TF.addOptionalField(fields, "predicate", params.predicate, TF.listValue((v) => TF.mapValue(fieldsFromPredicateParams(v))));
+  return fields;
+}
+
+export interface ActionParams {
+  type: 'ALLOW' | 'BLOCK' | 'COUNT';
+}
+
+export function fieldsFromActionParams(params: ActionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface RuleParams {
+  action: ActionParams;
+  override_action?: ActionParams;
+  priority: number;
+  rule_id: WafregionalRuleId;
+  type?: 'REGULAR' | 'RATE_BASED' | 'GROUP';
+}
+
+export function fieldsFromRuleParams(params: RuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "action", params.action, (v) => TF.mapValue(fieldsFromActionParams(v)));
+  TF.addOptionalField(fields, "override_action", params.override_action, (v) => TF.mapValue(fieldsFromActionParams(v)));
+  TF.addField(fields, "priority", params.priority, TF.numberValue);
+  TF.addField(fields, "rule_id", params.rule_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface WafregionalWebAclParams {
+  name: string;
+  metric_name: string;
+  default_action: ActionParams;
+  rule: RuleParams;
+}
+
+export function fieldsFromWafregionalWebAclParams(params: WafregionalWebAclParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromActionParams(v)));
+  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromRuleParams(v)));
   return fields;
 }

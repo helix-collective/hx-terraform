@@ -860,6 +860,31 @@ const waf_ipset: RecordDecl = {
   ]
 }
 
+const wafregional_regex_pattern_set: RecordDecl = {
+  name: 'wafregional_regex_pattern_set',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('regex_pattern_strings', listType(STRING))
+  ]
+}
+
+const regex_match_tuple: RecordDecl = {
+  name: 'regex_match_tuple',
+  fields: [
+    requiredField('field_to_match', recordType(field_to_match)),
+    requiredField('regex_pattern_set_id', resourceIdType('WafregionalRegexPatternSetId')),
+    requiredField('text_transformation', stringAliasType('AT.TextTransformation')),
+  ]
+}
+
+const wafregional_regex_match_set: RecordDecl = {
+  name: 'wafregional_regex_match_set',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('regex_match_tuple', recordType(regex_match_tuple))
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1320,6 +1345,22 @@ function generateAws(gen: Generator) {
     }
   )
 
+  gen.generateResource(
+    'Provides a WAF Regional Regex Match Set Resource',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_regex_match_set.html',
+    wafregional_regex_match_set,
+    [ resourceIdAttr('id', wafregional_regex_match_set)
+    ]
+  )
+
+  gen.generateResource(
+    'Provides a WAF Regional Regex Pattern Set Resource',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_regex_pattern_set.html',
+    wafregional_regex_pattern_set,
+    [ resourceIdAttr('id', wafregional_regex_pattern_set)
+    ]
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1394,6 +1435,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(waf_byte_match_set);
   gen.generateParams(ip_set_descriptors);
   gen.generateParams(waf_ipset);
+  gen.generateParams(wafregional_regex_pattern_set);
+  gen.generateParams(regex_match_tuple);
+  gen.generateParams(wafregional_regex_match_set);
 
 }
 

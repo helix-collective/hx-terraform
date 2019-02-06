@@ -1187,6 +1187,32 @@ export interface WafByteMatchSet extends TF.ResourceT<'WafByteMatchSet'> {
 
 type WafByteMatchSetId = {type:'WafByteMatchSetId',value:string};
 
+/**
+ *  Provides a WAF IPSet Resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/waf_ipset.html
+ */
+export function createWafIpset(tfgen: TF.Generator, rname: string, params: WafIpsetParams): WafIpset {
+  const fields = fieldsFromWafIpsetParams(params);
+  const resource = tfgen.createTypedResource('WafIpset', 'aws_waf_ipset', rname, fields);
+  const id: WafIpsetId =  {type: 'WafIpsetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: WafIpsetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'WafIpset');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface WafIpset extends TF.ResourceT<'WafIpset'> {
+  id: WafIpsetId;
+  arn: WafIpsetArn;
+}
+
+type WafIpsetId = {type:'WafIpsetId',value:string};
+export type WafIpsetArn = AT.ArnT<"WafIpset">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2408,5 +2434,29 @@ export function fieldsFromWafByteMatchSetParams(params: WafByteMatchSetParams) :
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "byte_match_tuples", params.byte_match_tuples, (v) => TF.mapValue(fieldsFromByteMatchTuplesParams(v)));
+  return fields;
+}
+
+export interface IpSetDescriptorsParams {
+  type: 'IPV4' | 'IPV6';
+  value: string;
+}
+
+export function fieldsFromIpSetDescriptorsParams(params: IpSetDescriptorsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addField(fields, "value", params.value, TF.stringValue);
+  return fields;
+}
+
+export interface WafIpsetParams {
+  name: string;
+  ip_set_descriptors: IpSetDescriptorsParams;
+}
+
+export function fieldsFromWafIpsetParams(params: WafIpsetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "ip_set_descriptors", params.ip_set_descriptors, (v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v)));
   return fields;
 }

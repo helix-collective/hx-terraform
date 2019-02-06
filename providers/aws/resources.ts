@@ -1327,6 +1327,28 @@ export interface WafregionalWebAcl extends TF.ResourceT<'WafregionalWebAcl'> {
 
 type WafregionalWebAclId = {type:'WafregionalWebAclId',value:string};
 
+/**
+ *  Provides a resource to create an association between a WAF Regional WebACL and Application Load Balancer.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl_association.html
+ */
+export function createWafregionalWebAclAssociation(tfgen: TF.Generator, rname: string, params: WafregionalWebAclAssociationParams): WafregionalWebAclAssociation {
+  const fields = fieldsFromWafregionalWebAclAssociationParams(params);
+  const resource = tfgen.createTypedResource('WafregionalWebAclAssociation', 'aws_wafregional_web_acl_association', rname, fields);
+  const id: WafregionalWebAclAssociationId =  {type: 'WafregionalWebAclAssociationId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafregionalWebAclAssociation extends TF.ResourceT<'WafregionalWebAclAssociation'> {
+  id: WafregionalWebAclAssociationId;
+}
+
+type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2694,5 +2716,17 @@ export function fieldsFromWafregionalWebAclParams(params: WafregionalWebAclParam
   TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
   TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromActionParams(v)));
   TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromRuleParams(v)));
+  return fields;
+}
+
+export interface WafregionalWebAclAssociationParams {
+  web_acl_id: WafregionalWebAclId;
+  resource_arn: AT.ArnT<"Lb">;
+}
+
+export function fieldsFromWafregionalWebAclAssociationParams(params: WafregionalWebAclAssociationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
+  TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
   return fields;
 }

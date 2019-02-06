@@ -939,6 +939,14 @@ const wafregional_web_acl: RecordDecl = {
   ]
 }
 
+const wafregional_web_acl_association: RecordDecl = {
+  name: 'wafregional_web_acl_association',
+  fields: [
+    requiredField('web_acl_id', resourceIdType('WafregionalWebAclId')),
+    requiredField('resource_arn', arnType(lb)),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1440,7 +1448,14 @@ function generateAws(gen: Generator) {
     wafregional_web_acl,
     [ resourceIdAttr('id', wafregional_web_acl)
     ]
+  )
 
+  gen.generateResource(
+    'Provides a resource to create an association between a WAF Regional WebACL and Application Load Balancer.',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl_association.html',
+    wafregional_web_acl_association,
+    [ resourceIdAttr('id', wafregional_web_acl_association)
+    ]
   )
 
   // Generate all of the parameter structures
@@ -1526,6 +1541,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(action);
   gen.generateParams(rule);
   gen.generateParams(wafregional_web_acl);
+  gen.generateParams(wafregional_web_acl_association);
 
 }
 

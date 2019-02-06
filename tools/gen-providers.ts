@@ -893,6 +893,24 @@ const wafregional_ipset: RecordDecl = {
   ]
 }
 
+const predicate: RecordDecl = {
+  name: 'predicate',
+  fields: [
+    requiredField('type', STRING),
+    requiredField('data_id', STRING),
+    requiredField('negated', BOOLEAN)
+  ]
+}
+
+const wafregional_rule: RecordDecl = {
+  name: 'wafregional_rule',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('metric_name', STRING),
+    optionalField('predicate', listType(recordType(predicate))),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1380,6 +1398,14 @@ function generateAws(gen: Generator) {
     }
   )
 
+  gen.generateResource(
+    'Provides an WAF Regional Rule Resource for use with Application Load Balancer.',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_rule.html',
+    wafregional_rule,
+    [ resourceIdAttr('id', wafregional_rule)
+    ]
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1458,6 +1484,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(regex_match_tuple);
   gen.generateParams(wafregional_regex_match_set);
   gen.generateParams(wafregional_ipset);
+  gen.generateParams(predicate);
+  gen.generateParams(wafregional_rule);
 
 }
 

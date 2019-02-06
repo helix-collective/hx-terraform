@@ -1283,6 +1283,28 @@ export interface WafregionalIpset extends TF.ResourceT<'WafregionalIpset'> {
 type WafregionalIpsetId = {type:'WafregionalIpsetId',value:string};
 export type WafregionalIpsetArn = AT.ArnT<"WafregionalIpset">;
 
+/**
+ *  Provides an WAF Regional Rule Resource for use with Application Load Balancer.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_rule.html
+ */
+export function createWafregionalRule(tfgen: TF.Generator, rname: string, params: WafregionalRuleParams): WafregionalRule {
+  const fields = fieldsFromWafregionalRuleParams(params);
+  const resource = tfgen.createTypedResource('WafregionalRule', 'aws_wafregional_rule', rname, fields);
+  const id: WafregionalRuleId =  {type: 'WafregionalRuleId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafregionalRule extends TF.ResourceT<'WafregionalRule'> {
+  id: WafregionalRuleId;
+}
+
+type WafregionalRuleId = {type:'WafregionalRuleId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2578,5 +2600,33 @@ export function fieldsFromWafregionalIpsetParams(params: WafregionalIpsetParams)
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addOptionalField(fields, "ip_set_descriptor", params.ip_set_descriptor, TF.listValue((v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v))));
+  return fields;
+}
+
+export interface PredicateParams {
+  type: string;
+  data_id: string;
+  negated: boolean;
+}
+
+export function fieldsFromPredicateParams(params: PredicateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addField(fields, "data_id", params.data_id, TF.stringValue);
+  TF.addField(fields, "negated", params.negated, TF.booleanValue);
+  return fields;
+}
+
+export interface WafregionalRuleParams {
+  name: string;
+  metric_name: string;
+  predicate?: PredicateParams[];
+}
+
+export function fieldsFromWafregionalRuleParams(params: WafregionalRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addOptionalField(fields, "predicate", params.predicate, TF.listValue((v) => TF.mapValue(fieldsFromPredicateParams(v))));
   return fields;
 }

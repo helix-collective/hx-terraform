@@ -376,3 +376,16 @@ export const contains_word = positionalConstraint('CONTAINS_WORD');
 export const exactly = positionalConstraint('EXACTLY');
 export const starts_with = positionalConstraint('STARTS_WITH');
 export const ends_with = positionalConstraint('ENDS_WITH');
+
+export type TextTransformation = {
+  type: 'TextTransformation',
+  value: string
+}
+
+export function textTransformation(v: string): TextTransformation {
+  return { type: 'TextTransformation', value: v }
+}
+
+export const cmd_line = textTransformation('CMD_LINE');
+export const html_entity_decode = textTransformation('HTML_ENTITY_DECODE');
+export const none = textTransformation('NONE');

@@ -1213,6 +1213,50 @@ export interface WafIpset extends TF.ResourceT<'WafIpset'> {
 type WafIpsetId = {type:'WafIpsetId',value:string};
 export type WafIpsetArn = AT.ArnT<"WafIpset">;
 
+/**
+ *  Provides a WAF Regional Regex Match Set Resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_regex_match_set.html
+ */
+export function createWafregionalRegexMatchSet(tfgen: TF.Generator, rname: string, params: WafregionalRegexMatchSetParams): WafregionalRegexMatchSet {
+  const fields = fieldsFromWafregionalRegexMatchSetParams(params);
+  const resource = tfgen.createTypedResource('WafregionalRegexMatchSet', 'aws_wafregional_regex_match_set', rname, fields);
+  const id: WafregionalRegexMatchSetId =  {type: 'WafregionalRegexMatchSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafregionalRegexMatchSet extends TF.ResourceT<'WafregionalRegexMatchSet'> {
+  id: WafregionalRegexMatchSetId;
+}
+
+type WafregionalRegexMatchSetId = {type:'WafregionalRegexMatchSetId',value:string};
+
+/**
+ *  Provides a WAF Regional Regex Pattern Set Resource
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/wafregional_regex_pattern_set.html
+ */
+export function createWafregionalRegexPatternSet(tfgen: TF.Generator, rname: string, params: WafregionalRegexPatternSetParams): WafregionalRegexPatternSet {
+  const fields = fieldsFromWafregionalRegexPatternSetParams(params);
+  const resource = tfgen.createTypedResource('WafregionalRegexPatternSet', 'aws_wafregional_regex_pattern_set', rname, fields);
+  const id: WafregionalRegexPatternSetId =  {type: 'WafregionalRegexPatternSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface WafregionalRegexPatternSet extends TF.ResourceT<'WafregionalRegexPatternSet'> {
+  id: WafregionalRegexPatternSetId;
+}
+
+type WafregionalRegexPatternSetId = {type:'WafregionalRegexPatternSetId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2458,5 +2502,43 @@ export function fieldsFromWafIpsetParams(params: WafIpsetParams) : TF.ResourceFi
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "ip_set_descriptors", params.ip_set_descriptors, (v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v)));
+  return fields;
+}
+
+export interface WafregionalRegexPatternSetParams {
+  name: string;
+  regex_pattern_strings?: string[];
+}
+
+export function fieldsFromWafregionalRegexPatternSetParams(params: WafregionalRegexPatternSetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "regex_pattern_strings", params.regex_pattern_strings, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface RegexMatchTupleParams {
+  field_to_match: FieldToMatchParams;
+  regex_pattern_set_id: WafregionalRegexPatternSetId;
+  text_transformation: AT.TextTransformation;
+}
+
+export function fieldsFromRegexMatchTupleParams(params: RegexMatchTupleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "field_to_match", params.field_to_match, (v) => TF.mapValue(fieldsFromFieldToMatchParams(v)));
+  TF.addField(fields, "regex_pattern_set_id", params.regex_pattern_set_id, TF.resourceIdValue);
+  TF.addField(fields, "text_transformation", params.text_transformation, TF.stringAliasValue);
+  return fields;
+}
+
+export interface WafregionalRegexMatchSetParams {
+  name: string;
+  regex_match_tuple: RegexMatchTupleParams;
+}
+
+export function fieldsFromWafregionalRegexMatchSetParams(params: WafregionalRegexMatchSetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "regex_match_tuple", params.regex_match_tuple, (v) => TF.mapValue(fieldsFromRegexMatchTupleParams(v)));
   return fields;
 }

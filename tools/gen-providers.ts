@@ -885,6 +885,14 @@ const wafregional_regex_match_set: RecordDecl = {
   ]
 }
 
+const wafregional_ipset: RecordDecl = {
+  name: 'wafregional_ipset',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('ip_set_descriptor', listType(recordType(ip_set_descriptors)))
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1361,6 +1369,17 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    'Provides a WAF Regional IPSet Resource for use with Application Load Balancer.',
+    'https://www.terraform.io/docs/providers/aws/r/wafregional_ipset.html',
+    wafregional_ipset,
+    [ resourceIdAttr('id', wafregional_ipset)
+    ],
+    {
+      arn: true
+    }
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1438,6 +1457,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(wafregional_regex_pattern_set);
   gen.generateParams(regex_match_tuple);
   gen.generateParams(wafregional_regex_match_set);
+  gen.generateParams(wafregional_ipset);
 
 }
 

@@ -340,21 +340,11 @@ function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: EndPoint
 }
 
 function proxyEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
-  return endpoints.map(ep => {
-    if (ep.kind === 'https') {
-      return deploytool.httpsProxyEndpoint(
-        ep.name,
-        shared.fqdn(sr, ep.dnsname),
-      );
-    } else if (ep.kind === 'https-external') {
-      return deploytool.httpsProxyEndpoint(
-        ep.name,
-        ep.fqdnsname
-      );
-    } else {
-      return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
-    }
-  });
+  return endpoints
+    .map(ep => {
+      const fqdnsname = (ep.kind === 'https') ? shared.fqdn(sr, ep.dnsname) : ep.fqdnsname;
+      return deploytool.httpProxyEndpoint(ep.name, fqdnsname);
+    });
 }
 
 function controllerLabel(label?: string) {

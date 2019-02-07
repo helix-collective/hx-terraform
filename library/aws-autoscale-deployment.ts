@@ -271,19 +271,21 @@ function createAppserverLoadBalancer(
   });
 
   endpoints.forEach(ep => {
-    if (ep.kind == 'https') {
+    const dnsname = (ep.kind == 'https') ? ep.dnsname : ep.fqdnsname;
+    // if (ep.kind == 'https') {
       shared.dnsAliasRecord(
         tfgen,
         'appserver_lb_' + ep.name,
         sr,
-        ep.dnsname,
+        dnsname,
+        // ep.dnsname,
         {
           name: alb.dns_name,
           zone_id: alb.zone_id,
           evaluate_target_health: true
         }
     );
-    }
+    // }
   });
   return {
     load_balancer: alb,
@@ -333,6 +335,8 @@ function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: EndPoint
     if (ep.kind === 'https') {
       https_fqdns.push(shared.fqdn(sr, ep.dnsname));
     } else if (ep.kind === 'https-external') {
+      https_fqdns.push(ep.fqdnsname);
+    } else {
       https_fqdns.push(ep.fqdnsname);
     }
   });

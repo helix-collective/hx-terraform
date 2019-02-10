@@ -223,3 +223,19 @@ export function edModifyPolicy(
     },
   };
 }
+
+export const ses_all_actions_policy: NamedPolicy = {
+  name: 'ses_full_access',
+  policy: {
+    Version: '2012-10-17',
+    Statement: [
+      {
+          'Effect': 'Allow',
+          'Action': [
+              'ses:*'
+          ],
+          'Resource': '*'
+      }
+    ]
+  }
+}

@@ -93,6 +93,7 @@ export function createDbInstance(tfgen: TF.Generator, rname: string, params: DbI
   const username: string =  '${' + TF.resourceName(resource) + '.username}';
   const address: string =  '${' + TF.resourceName(resource) + '.address}';
   const port: string =  '${' + TF.resourceName(resource) + '.port}';
+  const engine_version: string =  '${' + TF.resourceName(resource) + '.engine_version}';
   const arn: DbInstanceArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbInstance');
 
   return {
@@ -102,6 +103,7 @@ export function createDbInstance(tfgen: TF.Generator, rname: string, params: DbI
     username,
     address,
     port,
+    engine_version,
     arn,
   };
 }
@@ -112,6 +114,7 @@ export interface DbInstance extends TF.ResourceT<'DbInstance'> {
   username: string;
   address: string;
   port: string;
+  engine_version: string;
   arn: DbInstanceArn;
 }
 

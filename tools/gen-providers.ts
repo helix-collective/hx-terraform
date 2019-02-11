@@ -992,6 +992,7 @@ function generateAws(gen: Generator) {
       stringAttr('username'),
       stringAttr('address'),
       stringAttr('port'),
+      stringAttr('engine_version')
     ],
     {
       arn: true,

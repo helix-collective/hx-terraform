@@ -241,6 +241,12 @@ export const db_t2_large: DbInstanceType = dbInstanceType('db.t2.large');
 export const db_t2_xlarge: DbInstanceType = dbInstanceType('db.t2.xlarge');
 export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
 
+export const db_t3_small: DbInstanceType = dbInstanceType('db.t3.small');
+export const db_t3_medium: DbInstanceType = dbInstanceType('db.t3.medium');
+export const db_t3_large: DbInstanceType = dbInstanceType('db.t3.large');
+export const db_t3_xlarge: DbInstanceType = dbInstanceType('db.t3.xlarge');
+export const db_t3_2xlarge: DbInstanceType = dbInstanceType('db.t3.2xlarge');
+
 //----------------------------------------------------------------------
 
 //-----------------------Elasticache instance types---------------------

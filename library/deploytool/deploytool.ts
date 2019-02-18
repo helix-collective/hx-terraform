@@ -35,22 +35,22 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
 
 export function httpProxyEndpoint(
   label: string,
-  serverName: string
+  serverNames: string[]
 ): C.EndPoint {
   return {
     label,
-    serverNames:[serverName],
+    serverNames,
     etype: { kind: 'httpOnly' },
   };
 }
 
 export function httpsProxyEndpoint(
   label: string,
-  serverName: string
+  serverNames: string[]
 ): C.EndPoint {
   return {
     label,
-    serverNames:[serverName],
+    serverNames,
     etype: {
       kind: 'httpsWithRedirect',
       value: { kind: 'generated' },

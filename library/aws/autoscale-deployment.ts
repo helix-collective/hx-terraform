@@ -1,20 +1,20 @@
-import * as TF from '../core/core';
-import * as AT from '../providers/aws/types';
-import * as AR from '../providers/aws/resources';
+import * as TF from '../../core/core';
+import * as AT from '../../providers/aws/types';
+import * as AR from '../../providers/aws/resources';
 
-import * as aws from './aws/aws';
-import * as roles from './aws/roles';
-import * as shared from './aws/shared';
-import * as s3 from './aws/s3';
-import * as bootscript from './bootscript';
-import * as policies from './aws/policies';
-import * as docker from './docker';
-import * as deploytool from './deploytool/deploytool';
-import * as C from "../library/deploytool/adl-gen/config";
+import * as aws from './aws';
+import * as roles from './roles';
+import * as shared from './shared';
+import * as s3 from './s3';
+import * as bootscript from '../bootscript';
+import * as policies from './policies';
+import * as docker from '../docker';
+import * as deploytool from '../deploytool/deploytool';
+import * as C from "../../library/deploytool/adl-gen/config";
 
-import { EndPoint, getDefaultAmi } from './aws/ec2-deployment';
-import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb, createLbTargetGroup } from '../providers/aws/resources';
-import { contextTagsWithName } from './util';
+import { EndPoint, getDefaultAmi, httpsFqdnsFromEndpoints } from './ec2-deployment';
+import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb, createLbTargetGroup } from '../../providers/aws/resources';
+import { contextTagsWithName } from '../util';
 
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:
@@ -59,8 +59,7 @@ function createController(
 
   const context_files: deploytool.ContextFile[] = contextFiles(config_s3, params.controller_context_files);
 
-  const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
-  const proxy_endpoints = proxyEndpoints(sr, endpoints);
+  const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
@@ -119,8 +118,8 @@ function createAppserverAutoScaleGroup(
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
   const context_files: deploytool.ContextFile[] = contextFiles(config_s3, params.appserver_context_files)
-  const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
-  const proxy_endpoints = proxyEndpoints(sr, endpoints);
+  const endpoints: EndPoint[] = params.endpoints;
+  const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
@@ -203,8 +202,7 @@ function createAppserverLoadBalancer(
   params: AutoscaleDeploymentParams,
   autoscaling_group: AR.AutoscalingGroup): LoadBalancerResources {
 
-  const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
-  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, endpoints);
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb = createLb(tfgen, "alb", {
     load_balancer_type: 'application',
@@ -249,21 +247,24 @@ function createAppserverLoadBalancer(
     }
   });
 
-  endpoints.forEach(ep => {
-    if (ep.kind == 'https') {
-      shared.dnsAliasRecord(
-        tfgen,
-        'appserver_lb_' + ep.name,
-        sr,
-        ep.dnsname,
-        {
-          name: alb.dns_name,
-          zone_id: alb.zone_id,
-          evaluate_target_health: true
-        }
-    );
-    }
+  params.endpoints.forEach(ep => {
+    ep.urls.forEach( (url,i) => {
+      if (url.kind == 'https') {
+        shared.dnsAliasRecord(
+          tfgen,
+          'appserver_lb_' + ep.name + "_" + i,
+          sr,
+          url.dnsname,
+          {
+            name: alb.dns_name,
+            zone_id: alb.zone_id,
+            evaluate_target_health: true
+          }
+      );
+      }
+    });
   });
+
   return {
     load_balancer: alb,
     target_group: alb_target_group
@@ -333,31 +334,19 @@ function contextFiles(config_s3: s3.S3Ref, files: s3.S3Ref[] = []): deploytool.C
   ].map(ref => deploytool.contextFile(config_s3, ref));
 }
 
-function endpointsOrDefault(dns_name: string, endpoints?: EndPoint[]): EndPoint[] {
-  return endpoints || [
-    { kind: 'https', name: 'main', dnsname: dns_name },
-    { kind: 'https', name: 'test', dnsname: dns_name + '-test' },
-  ];
-}
-
-function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): string[] {
-  const https_fqdns: string[] = [];
-  endpoints.forEach(ep => {
-    if (ep.kind === 'https') {
-      https_fqdns.push(shared.fqdn(sr, ep.dnsname));
-    } else if (ep.kind === 'https-external') {
-      https_fqdns.push(ep.fqdnsname);
-    }
-  });
-  return https_fqdns;
-}
-
-function proxyEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
-  return endpoints
-    .map(ep => {
-      const fqdnsname = (ep.kind === 'https') ? shared.fqdn(sr, ep.dnsname) : ep.fqdnsname;
-      return deploytool.httpProxyEndpoint(ep.name, fqdnsname);
+function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
+  return endpoints.map(ep => {
+    const fqdns = ep.urls.map( url => {
+        if (url.kind === 'https') {
+          return (shared.fqdn(sr, url.dnsname));
+        } else if (url.kind === 'https-external') {
+          return (url.fqdnsname);
+        } else {
+          return (url.fqdnsname);
+        }
     });
+    return deploytool.httpProxyEndpoint(ep.name, fqdns);
+  });
 }
 
 function controllerLabel(label?: string) {
@@ -402,11 +391,9 @@ interface AutoscaleDeploymentParams {
   app_user?: string;
 
   /**
-   * The endpoints configured for http/https access. Defaults to
-   *    main:   ${dns_name}.${primary_dns_zone}
-   *    test:   ${dns_name}-test.${primary_dns_zone}
+   * The endpoints configured for http/https access.
    */
-  endpoints?: EndPoint[];
+  endpoints: EndPoint[];
 
   /**
    * Additional operations for the controller first boot can be passed vis the operation.

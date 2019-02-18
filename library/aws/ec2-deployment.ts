@@ -13,6 +13,7 @@ import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as docker from '../docker';
 import * as deploytool from '../deploytool/deploytool';
+import * as C from "../../library/deploytool/adl-gen/config";
 
 /**
  *  Creates a logical deployment on a single EC2 instance, including:
@@ -43,15 +44,6 @@ export function createEc2Deployment(
     context_files = [];
   }
 
-  const https_fqdns: string[] = [];
-  params.endpoints.forEach(ep => {
-    if (ep.kind === 'https') {
-      https_fqdns.push(shared.fqdn(sr, ep.dnsname));
-    } else if (ep.kind === 'https-external') {
-      https_fqdns.push(ep.fqdnsname);
-    }
-  });
-
   bs.utf8Locale();
   bs.dockerWithConfig(docker_config);
   bs.createUserWithKeypairAccess(app_user);
@@ -61,19 +53,8 @@ export function createEc2Deployment(
     bs.include(params.extra_bootscript);
   }
 
-  const proxy_endpoints = params.endpoints.map(ep => {
-    if (ep.kind === 'https') {
-      return deploytool.httpsProxyEndpoint(
-        ep.name,
-        shared.fqdn(sr, ep.dnsname)
-      );
-    }
-    if (ep.kind === 'https-external') {
-      return deploytool.httpsProxyEndpoint(ep.name, ep.fqdnsname);
-    }
+  const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
-    return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
-  });
   bs.include(
     deploytool.install(
       app_user,
@@ -112,16 +93,18 @@ export function createEc2Deployment(
   });
 
   params.endpoints.forEach(ep => {
-    if (ep.kind === 'https') {
-      shared.dnsARecord(
-        tfgen,
-        'appserver_' + ep.name,
-        sr,
-        ep.dnsname,
-        [appserver.eip.public_ip],
-        '3600'
-      );
-    }
+    ep.urls.forEach( (url,i) => {
+      if (url.kind === 'https') {
+        shared.dnsARecord(
+          tfgen,
+          'appserver_' + ep.name + "_" + i,
+          sr,
+          url.dnsname,
+          [appserver.eip.public_ip],
+          '3600'
+        );
+      }
+    });
   });
 
   // Create a canonical DNS record for the ec2 box (independent of switchable endpoints)
@@ -138,6 +121,50 @@ export function createEc2Deployment(
 
   return appserver;
 }
+
+/**
+ * Get the fully qualified domain names for all https urls.
+ * (eg to use to generate a certificate)
+ * 
+ */
+export function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): string[] {
+  const https_fqdns: string[] = [];
+  endpoints.forEach(ep => {
+      ep.urls.forEach( url => {
+      if (url.kind === 'https') {
+        https_fqdns.push(shared.fqdn(sr, url.dnsname));
+      } else if (url.kind === 'https-external') {
+        https_fqdns.push(url.fqdnsname);
+      }
+    })
+  });
+  return https_fqdns;
+}
+
+export function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
+  return endpoints.map(ep => {
+    const http_fqdns: string[] = []; 
+    const https_fqdns: string[] = []; 
+    ep.urls.forEach( url => {
+      if (url.kind === 'https') {
+        https_fqdns.push(shared.fqdn(sr, url.dnsname));
+      } else if (url.kind === 'https-external') {
+        https_fqdns.push(url.fqdnsname);
+      } else if (url.kind === 'http') {
+        http_fqdns.push(url.fqdnsname);
+      }
+    });
+    if (https_fqdns.length >0) {
+      return deploytool.httpsProxyEndpoint(
+        ep.name,
+        https_fqdns
+      ) 
+    } else {
+      return deploytool.httpProxyEndpoint(ep.name, http_fqdns);
+    }
+  });
+}
+
 
 export interface Ec2DeploymentParams {
   /**
@@ -214,28 +241,33 @@ export interface Ec2DeploymentParams {
   docker_config?: docker.DockerConfig;
 }
 
+// An Endpoint consists of a name and one or more connected
+// URLs. 
+export interface EndPoint {
+  name: string,
+  urls: EndPointUrl[]
+};
+
+export type EndPointUrl = EndPointHttpsUrl | EndPointHttpUrl | EndPointHttpsExternalUrl;
+
+
 // An http endpoint
-export interface EndPointHttp {
+export interface EndPointHttpUrl {
   kind: 'http';
-  name: string;
   fqdnsname: string;
 }
 
 // An https endpoints for which we create a dns entry
-export interface EndPointHttps {
+export interface EndPointHttpsUrl {
   kind: 'https';
-  name: string;
   dnsname: string;
 }
 
 // An https endpoints for an externally configured dns entry
-export interface EndPointHttpsExternal {
+export interface EndPointHttpsExternalUrl {
   kind: 'https-external';
-  name: string;
   fqdnsname: string;
 }
-
-export type EndPoint = EndPointHttps | EndPointHttp | EndPointHttpsExternal;
 
 interface Ec2Deployment {
   eip: AR.Eip;

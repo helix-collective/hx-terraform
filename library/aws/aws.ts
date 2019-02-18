@@ -170,17 +170,18 @@ export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
   params: {
-    parameter_group_name: string,
     customize?: Customize<AR.ElasticacheClusterParams>
   }
 ): AR.ElasticacheCluster {
 
+  const parameter_group_name = tfgen.scopedName(name).join('-');
+
   const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
-    name: params.parameter_group_name,
+    name: parameter_group_name,
     family: AT.memcached_1_5.value
   }
 
-  const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, elasticache_parameter_group_params.name, {
+  const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, name, {
     name: elasticache_parameter_group_params.name,
     family: AT.memcached_1_5.value
   });

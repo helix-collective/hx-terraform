@@ -39,7 +39,7 @@ export function httpProxyEndpoint(
 ): C.EndPoint {
   return {
     label,
-    serverName,
+    serverNames:[serverName],
     etype: { kind: 'httpOnly' },
   };
 }
@@ -50,7 +50,7 @@ export function httpsProxyEndpoint(
 ): C.EndPoint {
   return {
     label,
-    serverName,
+    serverNames:[serverName],
     etype: {
       kind: 'httpsWithRedirect',
       value: { kind: 'generated' },

@@ -164,26 +164,26 @@ export function texprMachineLabel(): ADL.ATypeExpr<MachineLabel> {
 
 export interface EndPoint {
   label: types.EndPointLabel;
-  serverName: string;
+  serverNames: string[];
   etype: EndPointType;
 }
 
 export function makeEndPoint(
   input: {
     label: types.EndPointLabel,
-    serverName: string,
+    serverNames: string[],
     etype: EndPointType,
   }
 ): EndPoint {
   return {
     label: input.label,
-    serverName: input.serverName,
+    serverNames: input.serverNames,
     etype: input.etype,
   };
 }
 
 const EndPoint_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"label","default":{"kind":"nothing"},"name":"label","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"serverName","default":{"kind":"nothing"},"name":"serverName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"label","default":{"kind":"nothing"},"name":"label","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
 
 export function texprEndPoint(): ADL.ATypeExpr<EndPoint> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "EndPoint"}}, parameters : []}};

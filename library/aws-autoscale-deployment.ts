@@ -225,29 +225,8 @@ function createAppserverLoadBalancer(
     alb_target_group_arn: alb_target_group.arn
   });
 
-  const acm_certificate = AR.createAcmCertificate(tfgen, "cert", {
-    domain_name: https_fqdns[0],
-    subject_alternative_names: [https_fqdns[1]],
-    validation_method: 'DNS',
-    tags: tfgen.tagsContext()
-  });
-
-  const r53rs = https_fqdns.map((fqdn, i) => {
-
-    const domain_validation_options = domainValidationOptions(acm_certificate, i);
-    return AR.createRoute53Record(tfgen, "cert" + i, {
-      zone_id: sr.primary_dns_zone.zone_id,
-      name: domain_validation_options.name,
-      type: domain_validation_options.type,
-      ttl: "60",
-      records: [domain_validation_options.value]
-    });
-  });
-
-  const acm_certificate_validation = AR.createAcmCertificateValidation(tfgen, "cert", {
-    certificate_arn: acm_certificate.arn,
-    validation_record_fqdns: r53rs.map(r53r => r53r.fqdn)
-  });
+  const acm_certificate_arn = params.acm_certificate_arn != undefined ?
+    params.acm_certificate_arn : createAcmCertificate(tfgen, sr, https_fqdns );
 
   const alb_http_listener = AR.createLbListener(tfgen, "http", {
     load_balancer_arn: alb.arn,
@@ -263,7 +242,7 @@ function createAppserverLoadBalancer(
     load_balancer_arn: alb.arn,
     port: 443,
     protocol: 'HTTPS',
-    certificate_arn: acm_certificate.arn,
+    certificate_arn: acm_certificate_arn,
     default_action: {
       target_group_arn: alb_target_group.arn,
       type: 'forward'
@@ -290,6 +269,40 @@ function createAppserverLoadBalancer(
     target_group: alb_target_group
   };
 }
+
+function createAcmCertificate(  
+  tfgen: TF.Generator,
+  sr: shared.SharedResources,
+  https_fqdns: string[]
+  ): AT.ArnT<"AcmCertificate"> {
+
+  const acm_certificate = AR.createAcmCertificate(tfgen, "cert", {
+    domain_name: https_fqdns[0],
+    subject_alternative_names: [https_fqdns[1]],
+    validation_method: 'DNS',
+    tags: tfgen.tagsContext()
+  });
+  const arn = acm_certificate.arn;
+  const r53rs = https_fqdns.map((fqdn, i) => {
+
+    const domain_validation_options = domainValidationOptions(acm_certificate, i);
+    return AR.createRoute53Record(tfgen, "cert" + i, {
+      zone_id: sr.primary_dns_zone.zone_id,
+      name: domain_validation_options.name,
+      type: domain_validation_options.type,
+      ttl: "60",
+      records: [domain_validation_options.value]
+    });
+  });
+
+  const acm_certificate_validation = AR.createAcmCertificateValidation(tfgen, "cert", {
+    certificate_arn: acm_certificate.arn,
+    validation_record_fqdns: r53rs.map(r53r => r53r.fqdn)
+  });
+
+  return arn;
+}
+
 type DNSRecordType = 'A' | 'AAAA' | 'CAA' | 'CNAME' | 'MX' | 'NAPTR' | 'NS' | 'PTR' | 'SOA' | 'SPF' | 'SRV' | 'TXT';
 
 interface DomainValidationOptions {
@@ -456,6 +469,11 @@ interface AutoscaleDeploymentParams {
    * Override the default docker config.
    */
   docker_config?: docker.DockerConfig;
+
+  /**
+   * Use this AWS ACM certificate rather than automatically generating one
+   */
+  acm_certificate_arn?: AT.ArnT<"AcmCertificate">
 
 }
 

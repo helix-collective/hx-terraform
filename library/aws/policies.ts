@@ -1,5 +1,6 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
+import { ArnSecret } from './secrets';
 
 export interface NamedPolicy {
   name: string;
@@ -222,6 +223,20 @@ export function edModifyPolicy(
       ],
     },
   };
+}
+
+export function secretReadOnlyPolicy(name: string, arn: ArnSecret): NamedPolicy {
+  return {
+    name,
+    policy: {
+        "Version": "2012-10-17",
+        "Statement": {
+            "Effect": "Allow",
+            "Action": "secretsmanager:GetSecretValue",
+            "Resource": `${arn.value}`
+        }
+    }
+  }
 }
 
 export const ses_all_actions_policy: NamedPolicy = {

@@ -1,36 +1,17 @@
 import * as s3 from '../aws/s3';
 import * as bootscript from '../bootscript';
+import * as rds from '../aws/rds';
 import { release_url } from './releaseurl';
 import * as C from './adl-gen/config';
-import * as T from './adl-gen/types';
 import { createJsonBinding } from './adl-gen/runtime/json';
 import { RESOLVER } from './adl-gen/resolver';
-import { TcpNetConnectOpts } from 'net';
-import { S3Bucket } from '../../providers/aws/resources';
 import { Maybe } from './adl-gen/runtime/sys/types';
+import { ArnSecret } from '../aws/secrets';
+
 
 export interface ContextFile {
   name: string;
   source_name: string;
-}
-
-export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
-  if (
-    base_s3.bucket !== file_s3.bucket ||
-    !file_s3.key.startsWith(base_s3.key)
-  ) {
-    throw new Error('contextFile: base_s3 must be a prefix of file_s3');
-  }
-  let source_name: string = file_s3.key.substr(base_s3.key.length);
-  if (source_name.startsWith('/')) {
-    source_name = source_name.substr(1);
-  }
-  // The name is the characters after the last slash
-  const name = /[^/]*$/.exec(source_name);
-  if (!name) {
-    throw new Error('Invalid context file path');
-  }
-  return { source_name, name: name[0] };
 }
 
 export function httpProxyEndpoint(
@@ -76,6 +57,18 @@ export function localProxy(endpoints: C.EndPoint[]): ProxyConfig {
   return { endpoints, kind: 'local' };
 }
 
+export function contextFromS3(name: string, s3Ref: s3.S3Ref) : C.DeployContext {
+  return {name, source:{kind:"s3", value: s3Ref.url() }};
+}
+
+export function contextFromSecret(name: string, arn: ArnSecret): C.DeployContext {
+  return {name, source:{kind:"awsSecretArn", value: arn.value}};
+} 
+
+export function contextFromDb(name: string, db: rds.DbInstance): C.DeployContext {
+  return {name, source:{kind:"s3", value: db.password_s3.url()}};
+}
+
 function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {
   if (proxy.kind == 'none' || proxy.kind == 'local') {
     throw Error("hx-deploy-tool not configured with proxy mode");
@@ -98,8 +91,7 @@ function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {
 export function install(
   username: string,
   releases: s3.S3Ref,
-  deploy_context: s3.S3Ref,
-  contextFiles: ContextFile[],
+  deployContexts: C.DeployContext[],
   proxy: ProxyConfig,
   ssl_cert_email?: string
 ): bootscript.BootScript {
@@ -152,16 +144,7 @@ export function install(
       kind: 's3',
       value: releases.url(),
     },
-    deployContext: {
-      kind: 's3',
-      value: deploy_context.url(),
-    },
-    deployContextFiles: contextFiles.map(cf => {
-      return {
-        name: cf.name,
-        sourceName: cf.source_name,
-      };
-    }),
+    deployContexts: deployContexts,
     contextCache: '/opt/config',
     autoCertContactEmail: ssl_cert_email,
   });

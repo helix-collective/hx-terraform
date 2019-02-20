@@ -35,13 +35,11 @@ export function createEc2Deployment(
   const bs = bootscript.newBootscript();
   const app_user = params.app_user || 'app';
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-  let context_files: deploytool.ContextFile[];
-  if (params.context_files) {
-    context_files = params.context_files.map(ref =>
-      deploytool.contextFile(params.config_s3, ref)
-    );
+  let deploy_contexts: C.DeployContext[];
+  if (params.deploy_contexts) {
+    deploy_contexts = params.deploy_contexts;
   } else {
-    context_files = [];
+    deploy_contexts = [];
   }
 
   bs.utf8Locale();
@@ -59,8 +57,7 @@ export function createEc2Deployment(
     deploytool.install(
       app_user,
       params.releases_s3,
-      params.config_s3,
-      context_files,
+      deploy_contexts,
       deploytool.localProxy(proxy_endpoints),
       params.ssl_cert_email
     )
@@ -194,11 +191,6 @@ export interface Ec2DeploymentParams {
   releases_s3: s3.S3Ref;
 
   /**
-   * The S3 location where hx-deploy-tool context files are stored.
-   */
-  config_s3: s3.S3Ref;
-
-  /**
    * The name of the unprivileged user used to run application code.
    * Defaults to "app".
    */
@@ -228,7 +220,7 @@ export interface Ec2DeploymentParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  context_files?: s3.S3Ref[];
+  deploy_contexts?: C.DeployContext[];
 
   /**
    * Additional operations for the EC2 instances first boot can be passed vis the operation.

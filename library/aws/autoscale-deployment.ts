@@ -51,13 +51,12 @@ function createController(
   params: AutoscaleDeploymentParams
 ) {
   const app_user = appUserOrDefault(params.app_user);
-  const config_s3 = params.config_s3;
   const releases_s3 = params.releases_s3;
   const state_s3 = params.state_s3;
   const controller_label = controllerLabel(params.controller_label);
   const subnetId = externalSubnetId(sr.network);
 
-  const context_files: deploytool.ContextFile[] = contextFiles(config_s3, params.controller_context_files);
+  const deploy_contexts: C.DeployContext[] = params.controller_deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
@@ -74,8 +73,7 @@ function createController(
     deploytool.install(
       app_user,
       releases_s3,
-      config_s3,
-      context_files,
+      deploy_contexts,
       deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
     )
   );
@@ -114,10 +112,9 @@ function createAppserverAutoScaleGroup(
   params: AutoscaleDeploymentParams): AR.AutoscalingGroup {
 
   const app_user = appUserOrDefault(params.app_user);
-  const config_s3 = params.config_s3;
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
-  const context_files: deploytool.ContextFile[] = contextFiles(config_s3, params.appserver_context_files)
+  const deploy_contexts: C.DeployContext[] = params.appserver_deploy_contexts || [];
   const endpoints: EndPoint[] = params.endpoints;
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
@@ -137,8 +134,7 @@ function createAppserverAutoScaleGroup(
     deploytool.install(
       app_user,
       params.releases_s3,
-      params.config_s3,
-      context_files,
+      deploy_contexts,
       deploytool.remoteProxySlave(proxy_endpoints, state_s3),
     )
   );
@@ -331,12 +327,6 @@ function externalSubnetId(network: shared.NetworkResources): SubnetId {
   return network.azs.map(az => az.external_subnet.id)[0]
 }
 
-function contextFiles(config_s3: s3.S3Ref, files: s3.S3Ref[] = []): deploytool.ContextFile[] {
-  return [
-    ...files
-  ].map(ref => deploytool.contextFile(config_s3, ref));
-}
-
 function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
   return endpoints.map(ep => {
     const fqdns = ep.urls.map( url => {
@@ -378,11 +368,6 @@ interface AutoscaleDeploymentParams {
   releases_s3: s3.S3Ref;
 
   /**
-   * The S3 location where hx-deploy-tool context files are stored.
-   */
-  config_s3: s3.S3Ref;
-
-  /**
    * The S3 location where hx-deploy-tool keeps it's state information
    */
   state_s3: s3.S3Ref;
@@ -413,7 +398,7 @@ interface AutoscaleDeploymentParams {
    * The context files are fetched from S3 and made available to the controller instance for
    * interpolation into the deployed application configuration.
    */
-  controller_context_files?: s3.S3Ref[];
+  controller_deploy_contexts?: C.DeployContext[];
 
   /**
    * Label the deploy master instance and associated resources for client convenience
@@ -440,7 +425,7 @@ interface AutoscaleDeploymentParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  appserver_context_files?: s3.S3Ref[];
+  appserver_deploy_contexts?: C.DeployContext[];
 
   /**
    * The EC2 instance created is given an IAM profile with sufficient access policies to

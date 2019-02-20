@@ -130,7 +130,7 @@ export function createResources(
 
   const appserver_security_group = AR.createSecurityGroup(tfgen, 'appserver', {
     vpc_id: network.vpc.id,
-    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressOnPort(11211)],
+    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'appserver'),
   });

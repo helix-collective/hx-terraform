@@ -949,6 +949,26 @@ const wafregional_web_acl_association: RecordDecl = {
   ]
 }
 
+const secretsmanager_secret: RecordDecl = {
+  name: 'secretsmanager_secret',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    optionalField('description', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
+const secretsmanager_secret_version: RecordDecl = {
+  name: 'secretsmanager_secret_version',
+  fields: [
+    requiredField('secret_id', resourceIdType('SecretsmanagerSecretId')),
+    optionalField('secret_string', STRING),
+    optionalField('secret_binary', STRING),
+    optionalField('version_stages', listType(STRING)),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1461,6 +1481,26 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    'Provides a resource to manage AWS Secrets Manager secret metadata.',
+    'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html',
+    secretsmanager_secret,
+    [ resourceIdAttr('id', secretsmanager_secret) ],
+    {
+      arn: true,
+    }
+  )
+
+  gen.generateResource(
+    'Provides a resource to manage AWS Secrets Manager secret version including its secret value.',
+    'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret_version.html',
+    secretsmanager_secret_version,
+    [ resourceIdAttr('id', secretsmanager_secret) ],
+    {
+      arn: true,
+    }
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1545,7 +1585,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(rule);
   gen.generateParams(wafregional_web_acl);
   gen.generateParams(wafregional_web_acl_association);
-
+  gen.generateParams(secretsmanager_secret);
+  gen.generateParams(secretsmanager_secret_version);
 }
 
 function generateRandom(gen: Generator) {

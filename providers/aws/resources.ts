@@ -1352,6 +1352,58 @@ export interface WafregionalWebAclAssociation extends TF.ResourceT<'WafregionalW
 
 type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
 
+/**
+ *  Provides a resource to manage AWS Secrets Manager secret metadata.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html
+ */
+export function createSecretsmanagerSecret(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretParams): SecretsmanagerSecret {
+  const fields = fieldsFromSecretsmanagerSecretParams(params);
+  const resource = tfgen.createTypedResource('SecretsmanagerSecret', 'aws_secretsmanager_secret', rname, fields);
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: SecretsmanagerSecretArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecret');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface SecretsmanagerSecret extends TF.ResourceT<'SecretsmanagerSecret'> {
+  id: SecretsmanagerSecretId;
+  arn: SecretsmanagerSecretArn;
+}
+
+type SecretsmanagerSecretId = {type:'SecretsmanagerSecretId',value:string};
+export type SecretsmanagerSecretArn = AT.ArnT<"SecretsmanagerSecret">;
+
+/**
+ *  Provides a resource to manage AWS Secrets Manager secret version including its secret value.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret_version.html
+ */
+export function createSecretsmanagerSecretVersion(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretVersionParams): SecretsmanagerSecretVersion {
+  const fields = fieldsFromSecretsmanagerSecretVersionParams(params);
+  const resource = tfgen.createTypedResource('SecretsmanagerSecretVersion', 'aws_secretsmanager_secret_version', rname, fields);
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: SecretsmanagerSecretVersionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecretVersion');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface SecretsmanagerSecretVersion extends TF.ResourceT<'SecretsmanagerSecretVersion'> {
+  id: SecretsmanagerSecretId;
+  arn: SecretsmanagerSecretVersionArn;
+}
+
+type SecretsmanagerSecretVersionId = {type:'SecretsmanagerSecretVersionId',value:string};
+export type SecretsmanagerSecretVersionArn = AT.ArnT<"SecretsmanagerSecretVersion">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2735,5 +2787,37 @@ export function fieldsFromWafregionalWebAclAssociationParams(params: Wafregional
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
   TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface SecretsmanagerSecretParams {
+  name?: string;
+  name_prefix?: string;
+  description?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromSecretsmanagerSecretParams(params: SecretsmanagerSecretParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SecretsmanagerSecretVersionParams {
+  secret_id: SecretsmanagerSecretId;
+  secret_string?: string;
+  secret_binary?: string;
+  version_stages?: string[];
+}
+
+export function fieldsFromSecretsmanagerSecretVersionParams(params: SecretsmanagerSecretVersionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "secret_id", params.secret_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "secret_string", params.secret_string, TF.stringValue);
+  TF.addOptionalField(fields, "secret_binary", params.secret_binary, TF.stringValue);
+  TF.addOptionalField(fields, "version_stages", params.version_stages, TF.listValue(TF.stringValue));
   return fields;
 }

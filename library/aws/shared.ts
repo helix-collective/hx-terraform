@@ -51,7 +51,6 @@ export interface SharedResources {
   backup_bucket_name: string;
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
-  memcached_security_group: AR.SecurityGroup;
   load_balancer_security_group: AR.SecurityGroup;
   alert_topic: AR.SnsTopic;
   alarm_topic: AR.SnsTopic;
@@ -135,13 +134,6 @@ export function createResources(
     tags: contextTagsWithName(tfgen, 'appserver'),
   });
 
-  const memcached_security_group = AR.createSecurityGroup(tfgen, 'memcached', {
-    vpc_id: network.vpc.id,
-    ingress: [ingressOnPort(11211)],
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, 'memcached'),
-  });
-
   const load_balancer_security_group = AR.createSecurityGroup(tfgen, 'lb', {
     vpc_id: network.vpc.id,
     ingress: [ingressOnPort(80), ingressOnPort(443)],
@@ -190,7 +182,6 @@ export function createResources(
     backup_bucket_name,
     bastion_security_group,
     appserver_security_group,
-    memcached_security_group,
     load_balancer_security_group,
     alert_topic,
     alarm_topic,

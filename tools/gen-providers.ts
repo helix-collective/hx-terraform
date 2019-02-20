@@ -808,6 +808,15 @@ const elasticache_parameter_group: RecordDecl = {
   ],
 };
 
+const elasticache_subnet_group: RecordDecl = {
+  name: 'elasticache_subnet_group',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('description', STRING),
+    requiredField('subnet_ids', listType(resourceIdType('SubnetId'))),
+  ],
+};
+
 const elasticache_cluster: RecordDecl = {
   name: 'elasticache_cluster',
   fields: [
@@ -818,6 +827,7 @@ const elasticache_cluster: RecordDecl = {
     requiredField('parameter_group_name', stringAliasType('AT.ElasticacheParameterGroupName')),
     optionalField('port', NUMBER),
     optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    optionalField('subnet_group_name ', stringAliasType('AT.ElasticacheSubnetGroupName')),
   ],
 };
 
@@ -1376,6 +1386,17 @@ function generateAws(gen: Generator) {
     }
   );
 
+
+  gen.generateResource(
+    'Provides an ElastiCache Subnet Group resource.',
+    'https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html',
+    elasticache_subnet_group,
+    [],
+    {
+      arn: true,
+    }
+  );
+
   gen.generateResource(
     'Provides an elasticache cluster resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html',
@@ -1545,7 +1566,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(rule);
   gen.generateParams(wafregional_web_acl);
   gen.generateParams(wafregional_web_acl_association);
-
+  gen.generateParams(elasticache_subnet_group);
 }
 
 function generateRandom(gen: Generator) {

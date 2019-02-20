@@ -2527,6 +2527,7 @@ export interface ElasticacheClusterParams {
   num_cache_nodes: number;
   parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
+  security_group_ids?: SecurityGroupId[];
 }
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
@@ -2537,6 +2538,7 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 

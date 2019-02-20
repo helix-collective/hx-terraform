@@ -217,6 +217,9 @@ function createAppserverLoadBalancer(
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
+    health_check: {
+      path: '/health-check'
+    },
     tags: tfgen.tagsContext()
   });
 

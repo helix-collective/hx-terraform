@@ -26,6 +26,9 @@ export interface Generator {
     fields: ResourceFieldMap
   ): ResourceT<T>;
 
+  /** Create an ad-hoc output file */
+  createAdhocFile(path: string, content: string): void;
+
   /** Construct a terraform output */
   createOutput(name: string, value: string): void;
 
@@ -192,6 +195,7 @@ export function fileGenerator(): FileGenerator {
     providers: ProviderDetails[];
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
+    adhocFiles:  { [path: string]: string };
     outputs: OutputDetails[];
   }
 
@@ -233,6 +237,10 @@ export function fileGenerator(): FileGenerator {
       };
       addResourceDetails(generated, details);
       return { tftype, tfname };
+    }
+
+    function createAdhocFile(path: string, content: string): void {
+      generated.adhocFiles[path] = content;
     }
 
     function createTypedResource<T extends string>(
@@ -310,6 +318,7 @@ export function fileGenerator(): FileGenerator {
       createProvider,
       createResource,
       createTypedResource,
+      createAdhocFile,
       createOutput,
       ignoreChanges,
       createBeforeDestroy,
@@ -335,7 +344,7 @@ export function fileGenerator(): FileGenerator {
   }
 
   function emptyGenerated(): Generated {
-    return { providers: [], resources: [], resourcesByName: {}, outputs: [] };
+    return { providers: [], resources: [], resourcesByName: {}, outputs: [], adhocFiles: {} };
   }
 
   function addProviderDetails(generated: Generated, provider: ProviderDetails) {
@@ -539,6 +548,9 @@ export function fileGenerator(): FileGenerator {
     }
     for (const path in fileResources) {
       writeGenerated(outdir + '/' + path, fileResources[path]);
+    }
+    for(const path of Object.keys(generated.adhocFiles)) {
+      fs.writeFileSync(outdir + '/' + path, generated.adhocFiles[path])
     }
   }
 

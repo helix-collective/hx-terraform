@@ -76,7 +76,8 @@ export function createResources(
   tfgen: TF.Generator,
   domain_name: string,
   s3_bucket_prefix: string,
-  network_config: NetworkConfig
+  network_config: NetworkConfig,
+  create_buildbot_user?: boolean,
 ): SharedResources {
   const network = createNetworkResources(tfgen, network_config);
   const primary_dns_zone = AR.createRoute53Zone(tfgen, 'primary', {
@@ -141,28 +142,30 @@ export function createResources(
     tags: contextTagsWithName(tfgen, 'lb'),
   });
 
-  const buildbot_user = AR.createIamUser(tfgen, 'buildbot', {
-    name: tfgen.scopedName('buildbot').join('_'),
-  });
+  if (create_buildbot_user) {
+    const buildbot_user = AR.createIamUser(tfgen, 'buildbot', {
+      name: tfgen.scopedName('buildbot').join('_'),
+    });
 
-  const modifys3deploy = s3ModifyPolicy('modifys3deploy', deploy_bucket_name);
+    const modifys3deploy = s3ModifyPolicy('modifys3deploy', deploy_bucket_name);
 
-  AR.createIamUserPolicy(tfgen, 'modifys3deploy', {
-    name: tfgen.scopedName('modifys3deploy').join('_'),
-    policy: JSON.stringify(modifys3deploy.policy, null, 2),
-    user: buildbot_user.name,
-  });
+    AR.createIamUserPolicy(tfgen, 'modifys3deploy', {
+      name: tfgen.scopedName('modifys3deploy').join('_'),
+      policy: JSON.stringify(modifys3deploy.policy, null, 2),
+      user: buildbot_user.name,
+    });
 
-  AR.createIamUserPolicy(tfgen, 'ecrmodifyall', {
-    name: tfgen.scopedName('ecrmodifyall').join('_'),
-    policy: JSON.stringify(ecr_modify_all_policy.policy, null, 2),
-    user: buildbot_user.name,
-  });
+    AR.createIamUserPolicy(tfgen, 'ecrmodifyall', {
+      name: tfgen.scopedName('ecrmodifyall').join('_'),
+      policy: JSON.stringify(ecr_modify_all_policy.policy, null, 2),
+      user: buildbot_user.name,
+    });
 
-  AR.createIamUserPolicyAttachment(tfgen, 'readonly', {
-    user: buildbot_user.name,
-    policy_arn: AT.arn('arn:aws:iam::aws:policy/ReadOnlyAccess'),
-  });
+    AR.createIamUserPolicyAttachment(tfgen, 'readonly', {
+      user: buildbot_user.name,
+      policy_arn: AT.arn('arn:aws:iam::aws:policy/ReadOnlyAccess'),
+    });
+  }
 
   const alarm_topic = AR.createSnsTopic(tfgen, 'alarms', {
     name: tfgen.scopedName('alarms').join('_'),

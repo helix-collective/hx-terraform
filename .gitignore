@@ -1,4 +1,6 @@
+.terraform/
+terraform.tfstate.backup
+build/
+.doit.db
+__pycache__/
 node_modules/
-/build
-/yarn-error.log
-*.pyc

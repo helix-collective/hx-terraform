@@ -1,0 +1,77 @@
+import os
+import uuid
+from datetime import date
+import getpass
+from pathlib import *
+from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
+from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
+
+
+# Use helix's packaged terraform and assocated tools
+# from the image helixta/terraform at this version:
+TERRAFORM_IMAGE = 'helixta/terraform:2018-08-27'
+
+HERE = Path('.')
+
+terraform_initialized = MarkerFile(HERE/'build/.terraform_initialized')
+terraform_image_built = MarkerFile(HERE/'build/.terraform_image_built')
+terraform_image_pushed = MarkerFile(HERE/'build/.terraform_image_pushed')
+
+provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10/8.2.2/bin/hx-provisioning-tools'
+
+nodemodules = YarnNodeModules(HERE / 'typescript')
+
+def dockerized_terraform(cmd):
+    return run_dockerized_terraform(TERRAFORM_IMAGE, cmd)
+
+def task_node_modules():
+    return nodemodules.task()
+
+def generate_providers():
+    return '(cd typescript; ./node_modules/.bin/ts-node hx-terraform/tools/gen-providers.ts)'
+
+def generate_tf():
+    return '(cd typescript; ./node_modules/.bin/ts-node main.ts)'
+
+def task_plan():
+    return {
+        'doc' : 'Execute terraform plan to show pending infrastructure changes',
+        'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan']) ],
+        'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep(),
+        'verbosity' : 2,
+        'uptodate': [False],
+    }
+
+def task_apply():
+  return {
+      'doc' : 'Execute terraform apply to make any pending infrastructure changes',
+      'actions': [ generate_tf(), dockerized_terraform(['apply', '-auto-approve']) ],
+      'file_dep': [ terraform_initialized.path ],
+      'verbosity' : 2,
+      'uptodate': [False],
+  }
+
+def task_generate():
+    return {
+        'doc' : 'Generate terraform files from the terraform EDSL',
+        'actions': [ generate_providers(), generate_tf() ],
+        'file_dep': nodemodules.file_dep(),
+        'verbosity' : 2,
+        'uptodate': [False],
+    }
+
+def task_update_deploytool():
+    return update_deploytool(HERE)
+
+def task_terraform_init():
+    # You can only run this target after the infrastructure has been
+    # deployed, as the bucket used for state storage is part of it.
+    # (See the state-backend.tf file)
+
+    return {
+        'doc' : 'Initialize terraform and connect to the remote AWS stored state',
+        'actions': [ dockerized_terraform(['init', '--force-copy']), terraform_initialized.action() ],
+        'targets': [ terraform_initialized.path ],
+        'verbosity' : 2,
+        'uptodate': [True], # the task is up to date if its ever been run
+    }

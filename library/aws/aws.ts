@@ -200,3 +200,20 @@ export function createMemcachedCluster(
 
   return AR.createElasticacheCluster(tfgen, name, elasticache_params);
 }
+
+
+
+/**
+ * Include in the generated terraform configuration to store the terraform state in the
+ * specified S3 bucket.
+ */
+export function enableTerraformS3RemoteState(tfgen: TF.Generator, bucket: string, region: AT.Region) {
+  tfgen.createAdhocFile("state-backend.tf", `\
+terraform {
+   backend "s3" {
+     bucket = "${bucket}"
+     key    = "terraform/state"
+     region = "${region.value}"
+   }
+}`);
+}

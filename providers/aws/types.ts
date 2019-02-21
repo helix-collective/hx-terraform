@@ -349,6 +349,15 @@ export type ElasticacheParameterGroupName = {
 export function elasticacheParameterGroupName(v: string): ElasticacheParameterGroupName {
   return { type: 'ElasticacheParameterGroupName', value: v};
 }
+
+export type ElasticacheSubnetGroupName = {
+  type: 'ElasticacheSubnetGroupName';
+  value: string;
+};
+
+export function elasticacheSubnetGroupName(v: string): ElasticacheSubnetGroupName {
+  return { type: 'ElasticacheSubnetGroupName', value: v};
+}
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------

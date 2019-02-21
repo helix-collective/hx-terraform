@@ -1134,6 +1134,29 @@ type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:str
 export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 
 /**
+ *  Provides an ElastiCache Subnet Group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html
+ */
+export function createElasticacheSubnetGroup(tfgen: TF.Generator, rname: string, params: ElasticacheSubnetGroupParams): ElasticacheSubnetGroup {
+  const fields = fieldsFromElasticacheSubnetGroupParams(params);
+  const resource = tfgen.createTypedResource('ElasticacheSubnetGroup', 'aws_elasticache_subnet_group', rname, fields);
+  const arn: ElasticacheSubnetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheSubnetGroup');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface ElasticacheSubnetGroup extends TF.ResourceT<'ElasticacheSubnetGroup'> {
+  arn: ElasticacheSubnetGroupArn;
+}
+
+type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
+export type ElasticacheSubnetGroupArn = AT.ArnT<"ElasticacheSubnetGroup">;
+
+/**
  *  Provides an elasticache cluster resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html
@@ -2528,6 +2551,7 @@ export interface ElasticacheClusterParams {
   parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
   security_group_ids?: SecurityGroupId[];
+  subnet_group_name ?: AT.ElasticacheSubnetGroupName;
 }
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
@@ -2539,6 +2563,7 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_group_name ", params.subnet_group_name , TF.stringAliasValue);
   return fields;
 }
 
@@ -2735,5 +2760,19 @@ export function fieldsFromWafregionalWebAclAssociationParams(params: Wafregional
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
   TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface ElasticacheSubnetGroupParams {
+  name: string;
+  description?: string;
+  subnet_ids: SubnetId[];
+}
+
+export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnetGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }

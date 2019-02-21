@@ -2,28 +2,30 @@ import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
 import _ from 'lodash';
 import { ArnT } from '../../providers/aws/types';
+import { DESTRUCTION } from 'dns';
 
 export type ArnSecret = ArnT<'SecretsmanagerSecret'>;
 
+export interface JsonSecretParams {
+  description?: string,
+  initial_value?: {}
+};
+
 /**
- * Create an initialy empty secret in the  AWS Secrets manager.
+ * Create a JSON secret in the AWS Secrets manager.
  * 
- * It is expected that the contents will be subsequently updated manually.
+ * An initial value may be provided, which can be manually updated later.
  */
-export function createEmptyJsonSecret(tfgen: TF.Generator, name: string, params0: AR.SecretsmanagerSecretParams) {
-    let params =_.cloneDeep(params0);
-    params.tags = {
-      ...tfgen.tagsContext(),
-      ...params.tags,
-    };
-    if (params.name == undefined) {
-      params.name = tfgen.scopedName(name).join("_").replace(/-/g,"_");
-    }
-    const secret = AR.createSecretsmanagerSecret(tfgen, name, params);
+export function createJsonSecret(tfgen: TF.Generator, name: string, params: JsonSecretParams) {
+    const secret = AR.createSecretsmanagerSecret(tfgen, name, {
+      name: tfgen.scopedName(name).join("_").replace(/-/g,"_"),
+      tags: tfgen.tagsContext(),
+      description: params.description
+    });
     
     AR.createSecretsmanagerSecretVersion( tfgen, name, {
       secret_id: secret.id,
-      secret_string: "{}"
+      secret_string: JSON.stringify(params.initial_value || {}, null, 2)
     });
 
     return secret;

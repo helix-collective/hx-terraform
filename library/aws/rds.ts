@@ -11,12 +11,26 @@ import {
   contextTagsWithName,
   Customize,
 } from '../util';
+import { ArnSecret } from './secrets';
 
 export interface DbInstance {
   instance: AR.DbInstance;
   config_json: {};
-  password_s3: s3.S3Ref;
+  password_to: PasswordStore;
 }
+
+// We can store the password either in S3 or the AWS secret manager
+export type PasswordStore = PasswordStoreS3 | PasswordStoreSecretManager;
+
+interface PasswordStoreS3 {
+  kind: 's3',
+  s3Ref: s3.S3Ref
+};
+
+interface PasswordStoreSecretManager {
+  kind: 'secret',
+  arnSecret: ArnSecret
+};
 
 /**
  * Create an RDS postgres database, with suitable defaults for a uat helix environment.
@@ -30,7 +44,7 @@ export function createPostgresInstance(
   params: {
     db_name: string;
     db_instance_type: AT.DbInstanceType;
-    password_s3: s3.S3Ref;
+    password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
     use_external_subnets?: boolean;
   }
@@ -86,20 +100,11 @@ export function createPostgresInstance(
     port: db.port,
   };
 
-  tfgen.localExecProvisioner(
-    db,
-    [
-      '# Generate a random password for the instance, and upload it to S3',
-      `export AWS_REGION=${sr.network.region.value}`,
-      `hx-provisioning-tools generate-rds-password ${db.id.value} ${
-        sr.deploy_bucket.id
-      } ${params.password_s3.key}`,
-    ].join('\n')
-  );
+  createPasswordProvisioner(tfgen, sr, db, params.password_to);
 
   return {
     config_json,
-    password_s3: params.password_s3,
+    password_to: params.password_to,
     instance: db,
   };
 }
@@ -116,7 +121,7 @@ export function createMssqlInstance(
   params: {
     db_name: string;
     db_instance_type: AT.DbInstanceType;
-    password_s3: s3.S3Ref;
+    password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
     use_external_subnets?: boolean;
   }
@@ -170,22 +175,38 @@ export function createMssqlInstance(
     port: db.port,
   };
 
-  tfgen.localExecProvisioner(
-    db,
-    [
-      '# Generate a random password for the instance, and upload it to S3',
-      `export AWS_REGION=${sr.network.region.value}`,
-      `hx-provisioning-tools generate-rds-password ${db.id.value} ${
-        sr.deploy_bucket.id
-      } ${params.password_s3.key}`,
-    ].join('\n')
-  );
+  createPasswordProvisioner(tfgen, sr, db, params.password_to);
 
   return {
     config_json,
-    password_s3: params.password_s3,
+    password_to: params.password_to,
     instance: db,
   };
+}
+
+function createPasswordProvisioner(tfgen: TF.Generator, sr: SharedResources, db: AR.DbInstance, passwordStore: PasswordStore) {
+  switch (passwordStore.kind) {
+  case 's3':
+    tfgen.localExecProvisioner(
+      db,
+      [
+        '# Generate a random password for the instance, and upload it to S3',
+        `export AWS_REGION=${sr.network.region.value}`,
+        `hx-provisioning-tools generate-rds-password --to-s3 ${db.id.value} ${sr.deploy_bucket.id} ${passwordStore.s3Ref.key}`,
+      ].join('\n')
+    );
+    break;
+  case 'secret':
+    tfgen.localExecProvisioner(
+      db,
+      [
+        '# Generate a random password for the instance, and upload it to S3',
+        `export AWS_REGION=${sr.network.region.value}`,
+        `hx-provisioning-tools generate-rds-password --to-secret ${db.id.value} ${passwordStore.arnSecret.value}`,
+      ].join('\n')
+    );
+    break;
+  }
 }
 
 /**

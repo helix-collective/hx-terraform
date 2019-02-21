@@ -6,10 +6,9 @@ from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
 from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
 
-
-# Use helix's packaged terraform and assocated tools
+# Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
-TERRAFORM_IMAGE = 'helixta/terraform:2018-08-27'
+TERRAFORM_IMAGE = 'helixta/terraform:2019-02-21'
 
 HERE = Path('.')
 

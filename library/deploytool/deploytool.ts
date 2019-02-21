@@ -66,7 +66,13 @@ export function contextFromSecret(name: string, arn: ArnSecret): C.DeployContext
 } 
 
 export function contextFromDb(name: string, db: rds.DbInstance): C.DeployContext {
-  return {name, source:{kind:"s3", value: db.password_s3.url()}};
+  switch (db.password_to.kind) {
+    case 's3':
+      return {name, source:{kind:"s3", value: db.password_to.s3Ref.url()}};
+    case 'secret':
+    return {name, source:{kind:"awsSecretArn", value: db.password_to.arnSecret.value}}
+  }
+
 }
 
 function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {

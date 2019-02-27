@@ -187,6 +187,57 @@ export class BootScript {
     }
   }
 
+  /**
+   * Adds a single docker container running Fluentbit to send system logs to an Elasticsearch container
+   * Assumes docker has been installed in the bootscript (i.e. dockerWithConfig())
+   */
+  addSystemLogging(logging_domain: string) {
+    const dir = `/opt/etc/fluent-bit`;
+    this.mkdir(dir);
+    const docker_compose_file = `${dir}/docker-compose.yml`;
+    const fluentbit_file = `${dir}/fluent-bit.conf`;
+    const docker_compose_contents = [
+      `version: '2'`,
+      `services:`,
+      `  fluentbit:`,
+      `    image: fluent/fluent-bit:1.0`,
+      `    ports:`,
+      `      - 24224/udp`, // Same port config as fluentd
+      `    volumes:`,
+      `      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf    # location of default fluent-bit.conf`,
+      `      - /run/log/journal:/run/log/journal`,
+      ``,
+    ];
+    const fluentbit_contents = [
+      `[SERVICE]`,
+      `    Flush        1`,
+      `    Daemon       Off`,
+      `    Log_Level    info`,
+      ``,
+      `[INPUT]`,
+      `    Name disk`,
+      `    Tag  cpu.local`,
+      ``,
+      `[OUTPUT]`,
+      `    Name                  es`,
+      `    Match                 *`,
+      `    Host                  ${logging_domain}`,
+      `    Port                  24224`,
+      `    Index                 slyp-api`,
+      `    tls                   on`,
+      `    # tls.crt_file        /fluentd/etc/certificate.crt`,
+      ``,
+      `[OUTPUT]`,
+      `    Name  stdout`,
+      `    Match *`,
+      ``,
+    ];
+
+    this.catToFile(docker_compose_file, docker_compose_contents.join('\n'));
+    this.catToFile(fluentbit_file, fluentbit_contents.join('\n'));
+    this.sh('(cd /opt/etc/fluent-bit/ && docker-compose up -d)');
+  }
+
   include(other: BootScript) {
     other.apt_key_urls.forEach(key_url => {
       this.apt_key_urls.add(key_url);

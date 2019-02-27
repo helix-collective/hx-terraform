@@ -109,6 +109,11 @@ export const t2_large = instanceType('t2.large');
 export const t2_xlarge = instanceType('t2.xlarge');
 export const t2_2xlarge = instanceType('t2.2xlarge');
 
+export const c4_large = instanceType('c4.large');
+export const c4_xlarge = instanceType('c4.xlarge');
+export const c4_2xlarge = instanceType('c4.2xlarge');
+export const c4_4xlarge = instanceType('c4.4xlarge');
+export const c4_8xlarge = instanceType('c4.8xlarge');
 //----------------------------------------------------------------------
 
 export type CannedAcl = {

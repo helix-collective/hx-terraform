@@ -67,8 +67,8 @@ function createController(
   bs.utf8Locale();
   bs.createUserWithKeypairAccess(app_user);
 
-  if (params.appserver_extra_bootscript) {
-    bs.include(params.appserver_extra_bootscript);
+  if (params.controller_extra_bootscript) {
+    bs.include(params.controller_extra_bootscript);
   }
 
   bs.include(

@@ -31,7 +31,7 @@ export function createEc2Deployment(
   sr: shared.SharedResources,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
-  const letsencrypt_challenge_type = params.letsencrypt_challenge_type || 'http-01';
+  const dns_ttl = (params.dns_ttl || 180) + '';
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
@@ -102,7 +102,7 @@ export function createEc2Deployment(
           sr,
           url.dnsname,
           [appserver.eip.public_ip],
-          '3600'
+          dns_ttl
         );
       }
     });
@@ -116,7 +116,7 @@ export function createEc2Deployment(
       sr,
       params.public_dns_name,
       [appserver.eip.public_ip],
-      '3600'
+      dns_ttl
     );
   }
 
@@ -256,6 +256,17 @@ export interface Ec2DeploymentParams {
    */
 
    letsencrypt_challenge_type?: 'http-01' | 'dns-01';
+
+   /**
+    * Specify the DNS ttl value.
+    * 
+    * This defaults to 3 minutes, on the assumption that when initially being setup
+    * a short TTL is useful to ensure the fast propagation of changes. Once a system
+    * has stabilised this should be increased to a much larger value.
+    * 
+    * (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
+    */
+   dns_ttl?: number,
 }
 
 // An Endpoint consists of a name and one or more connected

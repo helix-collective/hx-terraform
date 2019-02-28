@@ -715,17 +715,20 @@ export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQu
   const fields = fieldsFromSqsQueueParams(params);
   const resource = tfgen.createTypedResource('SqsQueue', 'aws_sqs_queue', rname, fields);
   const id: SqsQueueId =  {type: 'SqsQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const arn: SqsQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SqsQueue');
 
   return {
     ...resource,
     id,
+    name,
     arn,
   };
 }
 
 export interface SqsQueue extends TF.ResourceT<'SqsQueue'> {
   id: SqsQueueId;
+  name: string;
   arn: SqsQueueArn;
 }
 

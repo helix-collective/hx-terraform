@@ -1230,7 +1230,10 @@ function generateAws(gen: Generator) {
     'Provides an SQS queue.',
     'https://www.terraform.io/docs/providers/aws/r/sqs_queue.html',
     sqs_queue,
-    [resourceIdAttr('id', sqs_queue)],
+    [
+      resourceIdAttr('id', sqs_queue),
+      stringAttr('name'),
+    ],
     {
       arn: true,
     }

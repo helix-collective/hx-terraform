@@ -74,11 +74,11 @@ export function createEc2Deployment(
 
   const instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
-    'appserver',
+    name,
     iampolicies
   );
 
-  const appserver = aws.createInstanceWithEip(tfgen, 'appserver', sr, {
+  const appserver = aws.createInstanceWithEip(tfgen, name, sr, {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
     security_group: sr.appserver_security_group,
@@ -94,7 +94,7 @@ export function createEc2Deployment(
       if (url.kind === 'https') {
         shared.dnsARecord(
           tfgen,
-          'appserver_' + ep.name + "_" + i,
+          name + '_' + ep.name + "_" + i,
           sr,
           url.dnsname,
           [appserver.eip.public_ip],
@@ -108,7 +108,7 @@ export function createEc2Deployment(
   if (params.public_dns_name !== undefined) {
     shared.dnsARecord(
       tfgen,
-      'appserver',
+      name,
       sr,
       params.public_dns_name,
       [appserver.eip.public_ip],

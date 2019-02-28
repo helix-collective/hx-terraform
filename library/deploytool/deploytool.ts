@@ -18,7 +18,7 @@ export function httpProxyEndpoint(
   label: string,
   serverNames: string[]
 ): C.EndPoint {
-  return {
+  return { 
     label,
     serverNames,
     etype: { kind: 'httpOnly' },
@@ -99,7 +99,8 @@ export function install(
   releases: s3.S3Ref,
   deployContexts: C.DeployContext[],
   proxy: ProxyConfig,
-  ssl_cert_email?: string
+  ssl_cert_email?: string,
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
 ): bootscript.BootScript {
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure hx-deploy-tool');
@@ -161,7 +162,7 @@ export function install(
 
   if (proxy.kind == 'none' || proxy.kind == 'local') {
     // If not in proxy mode, use letsEncrypt SSL
-    letsEncryptSSL(proxy, bs);
+    letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
   } else if (proxy.kind == 'remoteSlave') {
     // Install tools necessary for the slaves to poll the S3 state file
     bootscriptProxySlaveUpdate(bs, username);
@@ -169,22 +170,29 @@ export function install(
   return bs;
 }
 
-function letsEncryptSSL(proxy: ProxyConfig, bs: bootscript.BootScript) {
-  const generate_ssl_cert: boolean = (() => {
-    if (proxy.kind === 'local') {
-      for (const ep of proxy.endpoints) {
-        if (
-          ep.etype.kind === 'httpsWithRedirect' &&
-          ep.etype.value.kind === 'generated'
-        ) {
-          return true;
-        }
+function letsEncryptSSL(config: C.ToolConfig, proxy: ProxyConfig, bs: bootscript.BootScript, letsencrypt_challenge_mode?: 'http-01' | 'dns-01') {
+  const certdnsnames: string[] = [];
+  
+  if (proxy.kind === 'local') {
+    for (const ep of proxy.endpoints) {
+       if (
+        ep.etype.kind === 'httpsWithRedirect' &&
+        ep.etype.value.kind === 'generated'
+      ) {
+        ep.serverNames.forEach(dnsname => {
+          certdnsnames.push(dnsname);
+        });
       }
     }
-    return false;
-  })();
+  }
+  const challenge_mode = letsencrypt_challenge_mode || 'http-01';
 
-  if (generate_ssl_cert) {
+  if (certdnsnames.length == 0) {
+    return;
+  }
+
+  switch (challenge_mode) {
+  case 'http-01':
     const cmd = '/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate';
     bs.comment('generate an ssl certificate');
     bs.sh('sudo -u app ' + cmd);
@@ -192,6 +200,10 @@ function letsEncryptSSL(proxy: ProxyConfig, bs: bootscript.BootScript) {
       `MAILTO=""`,
       `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
     ]);
+    break;
+  case 'dns-01':
+    bs.letsencyptAwsRoute53(config.autoCertContactEmail, certdnsnames);
+    break;
   }
 }
 

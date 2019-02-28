@@ -31,6 +31,8 @@ export function createEc2Deployment(
   sr: shared.SharedResources,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
+  const letsencrypt_challenge_type = params.letsencrypt_challenge_type || 'http-01';
+
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
   const app_user = params.app_user || 'app';
@@ -59,7 +61,8 @@ export function createEc2Deployment(
       params.releases_s3,
       deploy_contexts,
       deploytool.localProxy(proxy_endpoints),
-      params.ssl_cert_email
+      params.ssl_cert_email,
+      params.letsencrypt_challenge_type,
     )
   );
 
@@ -231,6 +234,19 @@ export interface Ec2DeploymentParams {
    * Override the default docker config.
    */
   docker_config?: docker.DockerConfig;
+
+  /**
+   * Set the letsencrypt DNS challenge mode
+   * 
+   * If the endpoints require an SSL certificate to be created via letsencrypt,
+   * this controls the challenge mechanism. http-01 challenges have the
+   * benefit that they can be used to generate certificates for domains without
+   * dns control. dns-01 challenges have the benefit that they can be generated
+   * off-line, ie the system doesn't need to be connected via dns before certs
+   * can be generated. 
+   */
+
+   letsencrypt_challenge_type?: 'http-01' | 'dns-01';
 }
 
 // An Endpoint consists of a name and one or more connected

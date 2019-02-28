@@ -31,6 +31,60 @@ def dockerized_adlc(wdir,rcmd):
     cmd += ' '.join(rcmd)
     return cmd
 
+def generate_logging_certs(todir):
+
+    def cmd(cmd):
+        subprocess.check_call(cmd, shell=True, cwd=todir)
+
+    def generate_certs():
+        # Based upon logic here:
+        # https://banzaicloud.com/blog/k8s-logging-tls/
+        for dir in ['ca', 'client', 'server']:
+            (todir/dir).mkdir(parents=True,exist_ok=True)
+        with open(todir/'index.txt', 'w') as f:
+            f.write('')
+        with open(todir/'serial', 'w') as f:
+            f.write('1000')
+        with open(todir/'openssl.cnf', 'w') as f:
+            f.write( OPENSSL_CNF)
+
+        def subject(cn):
+            return ' -subj "/O=Helix/C=AU/L=Sydney/OU=Technology/ST=New South Wales/CN={}"'.format(cn)
+
+        # create CA private key
+        cmd('openssl genrsa -out ca/ca.key.pem 4096')
+
+        # create CA certificate
+        ca_subject = subject('ca')
+        cmd('openssl req -config openssl.cnf -key ca/ca.key.pem -new -x509 -days 365 -sha256 -extensions v3_ca -out ca/ca.crt.pem' + ca_subject)
+
+        # create server private key
+        cmd('openssl genrsa -out server/server.key.pem 4096')
+
+        # create server csr
+        server_subject = subject('logging-server')
+        cmd('openssl req -config openssl.cnf -key server/server.key.pem  -new -sha256 -out server/server.csr.pem' + server_subject)
+
+        # create server certificate
+        cmd('openssl ca -batch -config openssl.cnf -outdir server -cert ca/ca.crt.pem -keyfile ca/ca.key.pem -extensions server_cert -days 365 -notext -md sha256 -in server/server.csr.pem -out server/server.crt.pem');
+
+        # create client private key
+        cmd('openssl genrsa -out client/client.key.pem 4096')
+
+        # create client csr
+        client_subject = subject('logging-client')
+        cmd('openssl req -config openssl.cnf -key client/client.key.pem  -new -sha256 -out client/client.csr.pem' + client_subject)
+
+        # create client certificate
+        cmd('openssl ca -batch -config openssl.cnf -outdir client -cert ca/ca.crt.pem -keyfile ca/ca.key.pem -extensions client_cert -days 365 -notext -md sha256 -in client/client.csr.pem -out client/client.crt.pem');
+
+    return {
+        'doc' : 'Generate self signed certificates for the logging system',
+        'actions': [generate_certs],
+    }
+
+
+
 def update_deploytool(basedir):
     """
     Returns a doit task to update the version of the deploytool in this repo
@@ -86,3 +140,98 @@ def update_deploytool(basedir):
         'actions': [update_deploytool],
         'verbosity': 2
     }
+
+OPENSSL_CNF = '''\
+[ ca ]
+# `man ca`
+default_ca = CA_default
+
+[ CA_default ]
+# Directory and file locations.
+dir               = .
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+
+# The root key and root certificate.
+private_key       = $dir/private/ca.key.pem
+certificate       = $dir/certs/ca.crt.pem
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md        = sha256
+
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 365
+preserve          = no
+policy            = policy_strict
+
+[ req ]
+# Options for the `req` tool (`man req`).
+default_bits        = 4096
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md          = sha256
+
+# Extension to add when the -x509 option is used.
+x509_extensions     = v3_ca
+
+[ req_distinguished_name ]
+# See <https://en.wikipedia.org/wiki/Certificate_signing_request>.
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+0.organizationName              = Organization Name
+organizationalUnitName          = Organizational Unit Name
+commonName                      = Common Name (required)
+emailAddress                    = Email Address
+
+# Optionally, specify some defaults.
+countryName_default             = US
+stateOrProvinceName_default     = CA
+#localityName_default           = Mountain View
+0.organizationName_default      = Your company name
+#organizationalUnitName_default =
+emailAddress_default            = foo@example.com
+
+[v3_ca]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always, issuer
+basicConstraints = critical,CA:true
+keyUsage = critical, cRLSign, digitalSignature, keyCertSign
+
+[ client_cert ]
+# Extensions for client certificates (`man x509v3_config`).
+basicConstraints = CA:FALSE
+nsCertType = client, email
+nsComment = "OpenSSL Generated Client Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+
+[ server_cert ]
+# Extensions for server certificates (`man x509v3_config`).
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Generated Server Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[ policy_strict ]
+# The root CA should only sign intermediate certificates that match.
+# See the POLICY FORMAT section of `man ca`.
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+'''

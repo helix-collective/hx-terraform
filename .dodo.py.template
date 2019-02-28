@@ -4,7 +4,7 @@ from datetime import date
 import getpass
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
-from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
+from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, generate_logging_certs
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -61,6 +61,9 @@ def task_generate():
 
 def task_update_deploytool():
     return update_deploytool(HERE)
+
+def task_generate_logging_certs():
+    return generate_logging_certs(Path("/tmp/certs"));
 
 def task_terraform_init():
     # You can only run this target after the infrastructure has been

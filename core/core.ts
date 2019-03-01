@@ -67,6 +67,7 @@ export interface Generator {
  */
 interface FileGenerator extends Generator {
   writeFiles(outdir: string): void;
+  clearFiles(outdir: string): void;
 }
 
 export type ResourceType = string;
@@ -546,23 +547,65 @@ export function fileGenerator(): FileGenerator {
     fs.writeFileSync(path, lines.join('\n'));
   }
 
+  type GeneratedFilesManifest = {
+    files: string[];
+  };
+
+  const manifestFileName = '.manifest.json';
+  const emptyManifest: GeneratedFilesManifest = {
+    files: [],
+  };
+
+  function clearFiles(outdir: string) {
+    const manifestFilePath = `${outdir}/${manifestFileName}`;
+    if (fs.existsSync(manifestFilePath)) {
+      const manifest: GeneratedFilesManifest = JSON.parse(
+        fs.readFileSync(manifestFilePath).toString()
+      );
+      for (const path of manifest.files) {
+        const fpath = outdir + '/' + path;
+        if (fs.existsSync(fpath)) {
+          fs.unlinkSync(fpath);
+        }
+      }
+    }
+
+    fs.writeFileSync(
+      manifestFilePath,
+      JSON.stringify(emptyManifest, null, 4) + '\n'
+    );
+  }
+
   function writeFiles(outdir: string) {
+    clearFiles(outdir);
+
+    const manifest: GeneratedFilesManifest = { ...emptyManifest };
+    const manifestFilePath = `${outdir}/${manifestFileName}`;
+
     const fileResources = groupResourcesByFile();
     const fileProviders = groupProvidersByFile();
     for (const path in fileProviders) {
       writeGenerated(outdir + '/' + path, fileProviders[path]);
+      manifest.files.push(path);
     }
     for (const path in fileResources) {
       writeGenerated(outdir + '/' + path, fileResources[path]);
+      manifest.files.push(path);
     }
     for (const path of Object.keys(generated.adhocFiles)) {
       fs.writeFileSync(outdir + '/' + path, generated.adhocFiles[path]);
+      manifest.files.push(path);
     }
+    fs.writeFileSync(
+      manifestFilePath,
+      JSON.stringify(manifest, null, 4) + '\n'
+    );
   }
 
   return {
     ...generator([], {}),
     writeFiles,
+    clearFiles,
   };
 }
 

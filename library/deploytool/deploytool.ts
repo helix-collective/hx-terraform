@@ -202,7 +202,7 @@ function letsEncryptSSL(config: C.ToolConfig, proxy: ProxyConfig, bs: bootscript
     ]);
     break;
   case 'dns-01':
-    bs.letsencyptAwsRoute53(config.autoCertContactEmail, certdnsnames);
+    bs.letsencyptAwsRoute53(config.autoCertContactEmail, certdnsnames, '/opt', config.autoCertName);
     break;
   }
 }

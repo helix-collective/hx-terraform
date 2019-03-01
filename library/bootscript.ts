@@ -122,16 +122,19 @@ export class BootScript {
    *
    * Run it now, and schedule a cron job to run it periodically.
    */
-  letsencyptAwsRoute53(contact_email: string, dns_domains: string[]) {
+  letsencyptAwsRoute53(contact_email: string, dns_domains: string[], letsencrypt_prefix_dir? : string, certname?: string) {
     const script_path = '/opt/bin/get-ssl-certificates';
+    const ledir = letsencrypt_prefix_dir || "";
+    const certnamearg = certname ? '--cert-name ' + certname : ""; 
     const script = [
       `#!/bin/bash`,
       `# Request SSL certificates for ${dns_domains.join(', ')}`,
       `docker run --rm \\`,
-      `  -v /etc/letsencrypt:/etc/letsencrypt \\`,
-      `  -v /var/lib/letsencrypt:/var/lib/letsencrypt \\`,
+      `  -v ${ledir}/etc/letsencrypt:/etc/letsencrypt \\`,
+      `  -v ${ledir}/var/lib/letsencrypt:/var/lib/letsencrypt \\`,
       `  certbot/dns-route53 \\`,
       `  certonly --dns-route53 \\`,
+      `  ${certnamearg} \\`,
       `  -m ${contact_email} -n --agree-tos \\`,
       `  ${dns_domains.map(d => '-d ' + d).join(' ')}`,
       `chmod -R ag+rX /etc/letsencrypt`,
@@ -140,8 +143,8 @@ export class BootScript {
     this.comment('Install and run certbot/dns-route53 to get SSL certificates');
     this.catToFile(script_path, script.join('\n'));
     this.sh('chmod +x ' + script_path);
-    this.mkdir('/etc/letsencrypt');
-    this.mkdir('/var/lib/letsencrypt');
+    this.mkdir(ledir + '/etc/letsencrypt');
+    this.mkdir(ledir + '/var/lib/letsencrypt');
     this.sh(script_path);
     this.cronJob('certbot-renewal', [
       `MAILTO=""`,

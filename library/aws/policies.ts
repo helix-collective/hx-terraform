@@ -225,18 +225,21 @@ export function edModifyPolicy(
   };
 }
 
-export function secretReadOnlyPolicy(name: string, arn: ArnSecret): NamedPolicy {
+export function secretReadOnlyPolicy(
+  name: string,
+  arn: ArnSecret
+): NamedPolicy {
   return {
     name,
     policy: {
-        "Version": "2012-10-17",
-        "Statement": {
-            "Effect": "Allow",
-            "Action": "secretsmanager:GetSecretValue",
-            "Resource": `${arn.value}`
-        }
-    }
-  }
+      Version: '2012-10-17',
+      Statement: {
+        Effect: 'Allow',
+        Action: 'secretsmanager:GetSecretValue',
+        Resource: `${arn.value}`,
+      },
+    },
+  };
 }
 
 export const ses_all_actions_policy: NamedPolicy = {
@@ -245,12 +248,10 @@ export const ses_all_actions_policy: NamedPolicy = {
     Version: '2012-10-17',
     Statement: [
       {
-          'Effect': 'Allow',
-          'Action': [
-              'ses:*'
-          ],
-          'Resource': '*'
-      }
-    ]
-  }
-}
+        Effect: 'Allow',
+        Action: ['ses:*'],
+        Resource: '*',
+      },
+    ],
+  },
+};

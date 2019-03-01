@@ -1,5 +1,5 @@
 import * as path from 'path';
-import {arn, ElasticacheParameterGroupName} from '../providers/aws/types';
+import { arn, ElasticacheParameterGroupName } from '../providers/aws/types';
 
 /**
  * Generate the resource definitions for AWS
@@ -759,8 +759,8 @@ const cloudwatch_logging_options: RecordDecl = {
     optionalField('enabled', BOOLEAN),
     optionalField('log_group_name', STRING),
     optionalField('log_stream_name', STRING),
-  ]
-}
+  ],
+};
 
 const extended_s3_configuration: RecordDecl = {
   name: 'extended_s3_configuration',
@@ -769,7 +769,10 @@ const extended_s3_configuration: RecordDecl = {
     requiredField('bucket_arn', arnType(s3_bucket)),
     optionalField('buffer_size', NUMBER),
     optionalField('buffer_interval', NUMBER),
-    optionalField('cloudwatch_logging_options', recordType(cloudwatch_logging_options)),
+    optionalField(
+      'cloudwatch_logging_options',
+      recordType(cloudwatch_logging_options)
+    ),
   ],
 };
 
@@ -779,24 +782,19 @@ const kinesis_firehose_delivery_stream: RecordDecl = {
     requiredField('name', STRING),
     requiredField(
       'destination',
-      enumType([
-        'extended_s3',
-        'redshift',
-        'elasticsearch',
-        'splunk'
-      ]),
+      enumType(['extended_s3', 'redshift', 'elasticsearch', 'splunk'])
     ),
-    optionalField('extended_s3_configuration', recordType(extended_s3_configuration)),
+    optionalField(
+      'extended_s3_configuration',
+      recordType(extended_s3_configuration)
+    ),
     optionalField('tags', TAGS_MAP),
   ],
 };
 
 const s3_bucket_metric: RecordDecl = {
   name: 's3_bucket_metric',
-  fields: [
-    requiredField('bucket', STRING),
-    requiredField('name', STRING),
-  ],
+  fields: [requiredField('bucket', STRING), requiredField('name', STRING)],
 };
 
 const elasticache_parameter_group: RecordDecl = {
@@ -815,9 +813,15 @@ const elasticache_cluster: RecordDecl = {
     requiredField('engine', enumType(['memcached', 'redis'])),
     requiredField('node_type', stringAliasType('AT.CacheNodeType')),
     requiredField('num_cache_nodes', NUMBER),
-    requiredField('parameter_group_name', stringAliasType('AT.ElasticacheParameterGroupName')),
+    requiredField(
+      'parameter_group_name',
+      stringAliasType('AT.ElasticacheParameterGroupName')
+    ),
     optionalField('port', NUMBER),
-    optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    optionalField(
+      'security_group_ids',
+      listType(resourceIdType('SecurityGroupId'))
+    ),
   ],
 };
 
@@ -825,84 +829,118 @@ const field_to_match: RecordDecl = {
   name: 'field_to_match',
   fields: [
     optionalField('data', STRING),
-    requiredField('type', enumType(['HEADER', 'METHOD', 'QUERY_STRING', 'URI', 'BODY', 'SINGLE_QUERY_ARG', 'ALL_QUERY_ARGS'])),
-  ]
-}
+    requiredField(
+      'type',
+      enumType([
+        'HEADER',
+        'METHOD',
+        'QUERY_STRING',
+        'URI',
+        'BODY',
+        'SINGLE_QUERY_ARG',
+        'ALL_QUERY_ARGS',
+      ])
+    ),
+  ],
+};
 
 const byte_match_tuples: RecordDecl = {
   name: 'byte_match_tuples',
   fields: [
     requiredField('field_to_match', recordType(field_to_match)),
-    requiredField('positional_constraint', stringAliasType('AT.PositionalConstraint')),
+    requiredField(
+      'positional_constraint',
+      stringAliasType('AT.PositionalConstraint')
+    ),
     optionalField('target_string', STRING),
-  ]
-}
+  ],
+};
 
 const waf_byte_match_set: RecordDecl = {
   name: 'waf_byte_match_set',
   fields: [
     requiredField('name', STRING),
     requiredField('byte_match_tuples', recordType(byte_match_tuples)),
-  ]
-}
+  ],
+};
 
 const ip_set_descriptors: RecordDecl = {
   name: 'ip_set_descriptors',
   fields: [
     requiredField('type', enumType(['IPV4', 'IPV6'])),
     requiredField('value', STRING),
-  ]
-}
+  ],
+};
 
 const waf_ipset: RecordDecl = {
   name: 'waf_ipset',
   fields: [
     requiredField('name', STRING),
     requiredField('ip_set_descriptors', recordType(ip_set_descriptors)),
-  ]
-}
+  ],
+};
 
 const wafregional_regex_pattern_set: RecordDecl = {
   name: 'wafregional_regex_pattern_set',
   fields: [
     requiredField('name', STRING),
-    optionalField('regex_pattern_strings', listType(STRING))
-  ]
-}
+    optionalField('regex_pattern_strings', listType(STRING)),
+  ],
+};
 
 const regex_match_tuple: RecordDecl = {
   name: 'regex_match_tuple',
   fields: [
     requiredField('field_to_match', recordType(field_to_match)),
-    requiredField('regex_pattern_set_id', resourceIdType('WafregionalRegexPatternSetId')),
-    requiredField('text_transformation', stringAliasType('AT.TextTransformation')),
-  ]
-}
+    requiredField(
+      'regex_pattern_set_id',
+      resourceIdType('WafregionalRegexPatternSetId')
+    ),
+    requiredField(
+      'text_transformation',
+      stringAliasType('AT.TextTransformation')
+    ),
+  ],
+};
 
 const wafregional_regex_match_set: RecordDecl = {
   name: 'wafregional_regex_match_set',
   fields: [
     requiredField('name', STRING),
-    requiredField('regex_match_tuple', recordType(regex_match_tuple))
-  ]
-}
+    requiredField('regex_match_tuple', recordType(regex_match_tuple)),
+  ],
+};
 
 const wafregional_ipset: RecordDecl = {
   name: 'wafregional_ipset',
   fields: [
     requiredField('name', STRING),
-    optionalField('ip_set_descriptor', listType(recordType(ip_set_descriptors)))
-  ]
-}
+    optionalField(
+      'ip_set_descriptor',
+      listType(recordType(ip_set_descriptors))
+    ),
+  ],
+};
 
 const predicate: RecordDecl = {
   name: 'predicate',
   fields: [
-    requiredField('type', enumType(['IPMatch', 'ByteMatch', 'SqlInjectionMatch', 'GeoMatch', 'SizeConstraint', 'XssMatch', 'RegexMatch'])),
+    requiredField(
+      'type',
+      enumType([
+        'IPMatch',
+        'ByteMatch',
+        'SqlInjectionMatch',
+        'GeoMatch',
+        'SizeConstraint',
+        'XssMatch',
+        'RegexMatch',
+      ])
+    ),
     requiredField('data_id', STRING),
-    requiredField('negated', BOOLEAN)
-  ]
-}
+    requiredField('negated', BOOLEAN),
+  ],
+};
 
 const wafregional_rule: RecordDecl = {
   name: 'wafregional_rule',
@@ -910,15 +948,13 @@ const wafregional_rule: RecordDecl = {
     requiredField('name', STRING),
     requiredField('metric_name', STRING),
     optionalField('predicate', listType(recordType(predicate))),
-  ]
-}
+  ],
+};
 
 const action: RecordDecl = {
   name: 'action',
-  fields: [
-    requiredField('type', enumType(['ALLOW', 'BLOCK', 'COUNT']))
-  ]
-}
+  fields: [requiredField('type', enumType(['ALLOW', 'BLOCK', 'COUNT']))],
+};
 
 const rule: RecordDecl = {
   name: 'rule',
@@ -928,8 +964,8 @@ const rule: RecordDecl = {
     requiredField('priority', NUMBER),
     requiredField('rule_id', resourceIdType('WafregionalRuleId')),
     optionalField('type', enumType(['REGULAR', 'RATE_BASED', 'GROUP'])),
-  ]
-}
+  ],
+};
 
 const wafregional_web_acl: RecordDecl = {
   name: 'wafregional_web_acl',
@@ -937,17 +973,17 @@ const wafregional_web_acl: RecordDecl = {
     requiredField('name', STRING),
     requiredField('metric_name', STRING),
     requiredField('default_action', recordType(action)),
-    requiredField('rule', recordType(rule))
-  ]
-}
+    requiredField('rule', recordType(rule)),
+  ],
+};
 
 const wafregional_web_acl_association: RecordDecl = {
   name: 'wafregional_web_acl_association',
   fields: [
     requiredField('web_acl_id', resourceIdType('WafregionalWebAclId')),
     requiredField('resource_arn', arnType(lb)),
-  ]
-}
+  ],
+};
 
 const secretsmanager_secret: RecordDecl = {
   name: 'secretsmanager_secret',
@@ -956,8 +992,8 @@ const secretsmanager_secret: RecordDecl = {
     optionalField('name_prefix', STRING),
     optionalField('description', STRING),
     optionalField('tags', TAGS_MAP),
-  ]
-}
+  ],
+};
 
 const secretsmanager_secret_version: RecordDecl = {
   name: 'secretsmanager_secret_version',
@@ -966,8 +1002,8 @@ const secretsmanager_secret_version: RecordDecl = {
     optionalField('secret_string', STRING),
     optionalField('secret_binary', STRING),
     optionalField('version_stages', listType(STRING)),
-  ]
-}
+  ],
+};
 
 function generateAws(gen: Generator) {
   // Generate the resources
@@ -1013,7 +1049,7 @@ function generateAws(gen: Generator) {
       stringAttr('username'),
       stringAttr('address'),
       stringAttr('port'),
-      stringAttr('engine_version')
+      stringAttr('engine_version'),
     ],
     {
       arn: true,
@@ -1230,10 +1266,7 @@ function generateAws(gen: Generator) {
     'Provides an SQS queue.',
     'https://www.terraform.io/docs/providers/aws/r/sqs_queue.html',
     sqs_queue,
-    [
-      resourceIdAttr('id', sqs_queue),
-      stringAttr('name'),
-    ],
+    [resourceIdAttr('id', sqs_queue), stringAttr('name')],
     {
       arn: true,
     }
@@ -1381,18 +1414,25 @@ function generateAws(gen: Generator) {
     'Provides a S3 bucket metrics configuration resource',
     'https://www.terraform.io/docs/providers/aws/r/s3_bucket_metric.html',
     s3_bucket_metric,
-    [],
+    []
   );
 
   gen.generateResource(
     'Provides an ElastiCache parameter group resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_parameter_group.html',
     elasticache_parameter_group,
-    [ stringAliasAttr('name', 'ElasticacheParameterGroupName',
-      'AT.ElasticacheParameterGroupName'),
-      stringAliasAttr('family', 'ElasticacheParameterGroupFamily',
-        'AT.ElasticacheParameterGroupFamily'),
-      stringAttr('description')
+    [
+      stringAliasAttr(
+        'name',
+        'ElasticacheParameterGroupName',
+        'AT.ElasticacheParameterGroupName'
+      ),
+      stringAliasAttr(
+        'family',
+        'ElasticacheParameterGroupFamily',
+        'AT.ElasticacheParameterGroupFamily'
+      ),
+      stringAttr('description'),
     ],
     {
       arn: true,
@@ -1403,11 +1443,15 @@ function generateAws(gen: Generator) {
     'Provides an elasticache cluster resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html',
     elasticache_cluster,
-    [ stringAttr('cluster_id'),
+    [
+      stringAttr('cluster_id'),
       stringAttr('engine'),
       stringAttr('node_type'),
-      stringAliasAttr('parameter_group_name', 'ElasticacheParameterGroupName',
-        'AT.ElasticacheParameterGroupName'),
+      stringAliasAttr(
+        'parameter_group_name',
+        'ElasticacheParameterGroupName',
+        'AT.ElasticacheParameterGroupName'
+      ),
     ],
     {
       arn: true,
@@ -1418,91 +1462,83 @@ function generateAws(gen: Generator) {
     'Provides a WAF Byte Match Set Resource',
     'https://www.terraform.io/docs/providers/aws/r/waf_byte_match_set.html',
     waf_byte_match_set,
-    [ resourceIdAttr('id', waf_byte_match_set)
-    ]
+    [resourceIdAttr('id', waf_byte_match_set)]
   );
 
   gen.generateResource(
     'Provides a WAF IPSet Resource',
     'https://www.terraform.io/docs/providers/aws/r/waf_ipset.html',
     waf_ipset,
-    [ resourceIdAttr('id', waf_ipset),
-    ],
+    [resourceIdAttr('id', waf_ipset)],
     {
-      arn: true
+      arn: true,
     }
-  )
+  );
 
   gen.generateResource(
     'Provides a WAF Regional Regex Match Set Resource',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_regex_match_set.html',
     wafregional_regex_match_set,
-    [ resourceIdAttr('id', wafregional_regex_match_set)
-    ]
-  )
+    [resourceIdAttr('id', wafregional_regex_match_set)]
+  );
 
   gen.generateResource(
     'Provides a WAF Regional Regex Pattern Set Resource',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_regex_pattern_set.html',
     wafregional_regex_pattern_set,
-    [ resourceIdAttr('id', wafregional_regex_pattern_set)
-    ]
-  )
+    [resourceIdAttr('id', wafregional_regex_pattern_set)]
+  );
 
   gen.generateResource(
     'Provides a WAF Regional IPSet Resource for use with Application Load Balancer.',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_ipset.html',
     wafregional_ipset,
-    [ resourceIdAttr('id', wafregional_ipset)
-    ],
+    [resourceIdAttr('id', wafregional_ipset)],
     {
-      arn: true
+      arn: true,
     }
-  )
+  );
 
   gen.generateResource(
     'Provides an WAF Regional Rule Resource for use with Application Load Balancer.',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_rule.html',
     wafregional_rule,
-    [ resourceIdAttr('id', wafregional_rule)
-    ]
-  )
+    [resourceIdAttr('id', wafregional_rule)]
+  );
 
   gen.generateResource(
     'Provides a WAF Regional Web ACL Resource for use with Application Load Balancer.',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl.html',
     wafregional_web_acl,
-    [ resourceIdAttr('id', wafregional_web_acl)
-    ]
-  )
+    [resourceIdAttr('id', wafregional_web_acl)]
+  );
 
   gen.generateResource(
     'Provides a resource to create an association between a WAF Regional WebACL and Application Load Balancer.',
     'https://www.terraform.io/docs/providers/aws/r/wafregional_web_acl_association.html',
     wafregional_web_acl_association,
-    [ resourceIdAttr('id', wafregional_web_acl_association)
-    ]
-  )
+    [resourceIdAttr('id', wafregional_web_acl_association)]
+  );
 
   gen.generateResource(
     'Provides a resource to manage AWS Secrets Manager secret metadata.',
     'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html',
     secretsmanager_secret,
-    [ resourceIdAttr('id', secretsmanager_secret) ],
+    [resourceIdAttr('id', secretsmanager_secret)],
     {
       arn: true,
     }
-  )
+  );
 
   gen.generateResource(
     'Provides a resource to manage AWS Secrets Manager secret version including its secret value.',
     'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret_version.html',
     secretsmanager_secret_version,
-    [ resourceIdAttr('id', secretsmanager_secret) ],
+    [resourceIdAttr('id', secretsmanager_secret)],
     {
       arn: true,
     }
-  )
+  );
 
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);

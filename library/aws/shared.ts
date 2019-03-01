@@ -77,7 +77,7 @@ export function createResources(
   domain_name: string,
   s3_bucket_prefix: string,
   network_config: NetworkConfig,
-  create_buildbot_user?: boolean,
+  create_buildbot_user?: boolean
 ): SharedResources {
   const network = createNetworkResources(tfgen, network_config);
   const primary_dns_zone = AR.createRoute53Zone(tfgen, 'primary', {
@@ -307,10 +307,10 @@ export function dnsAliasRecord(
   alias: AR.Route53AliasParams
 ) {
   AR.createRoute53Record(tfgen, name, {
+    alias,
     zone_id: sr.primary_dns_zone.zone_id,
     name: dnsname,
     type: 'A',
-    alias
   });
 }
 

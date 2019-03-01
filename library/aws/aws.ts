@@ -12,10 +12,7 @@ import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as policies from './policies';
 import { SharedResources } from './shared';
-import {
-  contextTagsWithName,
-  Customize,
-} from '../util';
+import { contextTagsWithName, Customize } from '../util';
 
 export interface InstanceWithEipParams {
   instance_type: AT.InstanceType;
@@ -170,28 +167,31 @@ export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
   params: {
-    customize?: Customize<AR.ElasticacheClusterParams>
+    customize?: Customize<AR.ElasticacheClusterParams>;
   }
 ): AR.ElasticacheCluster {
-
   const parameter_group_name = tfgen.scopedName(name).join('-');
 
   const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
     name: parameter_group_name,
-    family: AT.memcached_1_5.value
-  }
+    family: AT.memcached_1_5.value,
+  };
 
-  const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, name, {
-    name: elasticache_parameter_group_params.name,
-    family: AT.memcached_1_5.value
-  });
+  const elasticache_parameter_group = AR.createElasticacheParameterGroup(
+    tfgen,
+    name,
+    {
+      name: elasticache_parameter_group_params.name,
+      family: AT.memcached_1_5.value,
+    }
+  );
 
   const elasticache_params: AR.ElasticacheClusterParams = {
     cluster_id: name,
-    engine: "memcached",
+    engine: 'memcached',
     node_type: AT.cache_t2_micro,
     num_cache_nodes: 1,
-    parameter_group_name: elasticache_parameter_group.name
+    parameter_group_name: elasticache_parameter_group.name,
   };
 
   if (params.customize) {
@@ -201,19 +201,24 @@ export function createMemcachedCluster(
   return AR.createElasticacheCluster(tfgen, name, elasticache_params);
 }
 
-
-
 /**
  * Include in the generated terraform configuration to store the terraform state in the
  * specified S3 bucket.
  */
-export function enableTerraformS3RemoteState(tfgen: TF.Generator, bucket: string, region: AT.Region) {
-  tfgen.createAdhocFile("state-backend.tf", `\
+export function enableTerraformS3RemoteState(
+  tfgen: TF.Generator,
+  bucket: string,
+  region: AT.Region
+) {
+  tfgen.createAdhocFile(
+    'state-backend.tf',
+    `\
 terraform {
    backend "s3" {
      bucket = "${bucket}"
      key    = "terraform/state"
      region = "${region.value}"
    }
-}`);
+}`
+  );
 }

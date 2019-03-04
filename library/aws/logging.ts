@@ -15,13 +15,17 @@ import * as bootscript from '../bootscript';
 import * as util from '../util';
 import { SharedResources } from './shared';
 import * as docker from '../docker';
+import * as deploytool from '../deploytool/deploytool';
 
 export interface LoggingInfrastructureParams {
   secrets_s3_ref: s3.S3Ref;
   domain_name: string;
   aggregator_key_name: AT.KeyName;
+  shared_key_secret_context: string; // The shared key used for TLS communcation
   customize?: util.Customize<AR.ElasticsearchDomainParams>;
   logging_ip_whitelist?: AT.IpAddress[];
+  config_s3: s3.S3Ref;
+  context_files: s3.S3Ref[];
 }
 
 export interface LoggingInfrastructure {
@@ -137,8 +141,25 @@ export function createLoggingInfrastructure(
     '/opt/etc/secrets/fluentd-sender.crt',
     10
   );
-  bs.catToFile('/opt/etc/fluentd.conf', fluentdConfigFile(ed));
+
+  // Hack to inject params.shared_key_secret_context into the config file
+  bs.include(
+    deploytool.install(
+      'app',
+      new s3.S3Ref('', ''), // We don't care about any application releases here
+      params.config_s3,
+      params.context_files.map((ctx) => deploytool.contextFile(params.config_s3, ctx)),
+      deploytool.localProxy([]), // We don't plan on using this to setup deploys
+    )
+  );
+  const fluentd_conf_file_tpl = '/opt/etc/fluentd.conf.tpl';
+  const fluentd_conf_file = '/opt/etc/fluentd.conf';
+
+  bs.catToFile(fluentd_conf_file_tpl, fluentdConfigFile(ed, params.shared_key_secret_context));
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
+  bs.sh('/opt/bin/hx-deploy-tool fetch-context');
+  bs.sh(`/opt/bin/hx-deploy-tool expand-template ${fluentd_conf_file_tpl} ${fluentd_conf_file}`);
+
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
   function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
@@ -256,7 +277,7 @@ services:
       - FLUENTD_CONF=fluentd.conf
 `;
 
-function fluentdConfigFile(ed: AR.ElasticsearchDomain) {
+function fluentdConfigFile(ed: AR.ElasticsearchDomain, shared_key_secret_context: string) {
   return `\
 <source>
   @type forward
@@ -265,6 +286,10 @@ function fluentdConfigFile(ed: AR.ElasticsearchDomain) {
     cert_path /etc/secrets/fluentd-sender.crt
     private_key_path /etc/secrets/fluentd-aggregator.key
   </transport>
+  <security>
+    self_hostname logging.uat-slyp.com.au
+    shared_key {{${shared_key_secret_context}}}
+  </security>
 </source>
 <filter **>
   @type ec2_metadata

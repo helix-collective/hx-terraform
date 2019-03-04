@@ -52,6 +52,7 @@ function createController(
 ) {
   const app_user = appUserOrDefault(params.app_user);
   const config_s3 = params.config_s3;
+  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const releases_s3 = params.releases_s3;
   const state_s3 = params.state_s3;
   const controller_label = controllerLabel(params.controller_label);
@@ -65,11 +66,9 @@ function createController(
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
   bs.utf8Locale();
+  bs.dockerWithConfig(docker_config);
   bs.createUserWithKeypairAccess(app_user);
-
-  if (params.controller_extra_bootscript) {
-    bs.include(params.controller_extra_bootscript);
-  }
+  bs.addUserToGroup(app_user, 'docker');
 
   bs.include(
     deploytool.install(
@@ -80,6 +79,10 @@ function createController(
       deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
     )
   );
+
+  if (params.controller_extra_bootscript) {
+    bs.include(params.controller_extra_bootscript);
+  }
 
   const controller_iampolicies = [
     aws.s3DeployBucketModifyPolicy(sr)
@@ -130,9 +133,6 @@ function createAppserverAutoScaleGroup(
   bs.createUserWithKeypairAccess(app_user);
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user);
-  if (params.appserver_extra_bootscript) {
-    bs.include(params.appserver_extra_bootscript);
-  }
 
   bs.include(
     deploytool.install(
@@ -143,6 +143,10 @@ function createAppserverAutoScaleGroup(
       deploytool.remoteProxySlave(proxy_endpoints, state_s3),
     )
   );
+
+  if (params.appserver_extra_bootscript) {
+    bs.include(params.appserver_extra_bootscript);
+  }
 
   let appserver_iampolicies = [
     policies.publish_metrics_policy,
@@ -334,6 +338,7 @@ function contextFiles(config_s3: s3.S3Ref, files: s3.S3Ref[] = []): deploytool.C
   return [
     ...files
   ].map(ref => deploytool.contextFile(config_s3, ref));
+  // ].map(ref => deploytool.contextFromS3(ref.url(), ref))
 }
 
 function endpointsOrDefault(dns_name: string, endpoints?: EndPoint[]): EndPoint[] {

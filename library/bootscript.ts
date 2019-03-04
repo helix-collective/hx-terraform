@@ -192,20 +192,17 @@ export class BootScript {
    * Assumes docker has been installed in the bootscript (i.e. dockerWithConfig())
    * Creates a template for the certificate file, to be injected from context files
    */
-  addSystemLogging(logging_domain: string, certificate_context: string) {
+  addSystemLogging(logging_domain: string, machine_name: string, env: string, shared_key_secret_context: string) {
     const dir = `/opt/etc/fluent-bit`;
-    this.mkdir(dir);
     const docker_compose_file = `${dir}/docker-compose.yml`;
+    const fluentbit_file_tpl = `${dir}/fluent-bit.conf.tpl`;
     const fluentbit_file = `${dir}/fluent-bit.conf`;
-    const certificate_tpl = `${dir}/certificate.crt.tpl`;
 
     const docker_compose_contents = [
       `version: '2'`,
       `services:`,
       `  fluentbit:`,
       `    image: fluent/fluent-bit:1.0`,
-      `    ports:`,
-      `      - 24224/udp`, // Same port config as fluentd
       `    volumes:`,
       `      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf    # location of default fluent-bit.conf`,
       `      - /run/log/journal:/run/log/journal`,
@@ -218,33 +215,42 @@ export class BootScript {
       `    Log_Level    info`,
       ``,
       `[INPUT]`,
-      `    Name disk`,
-      `    Tag  cpu.local`,
+      `    Name                systemd`,
+      `    Path                /run/log/journal/`,
+      `    Tag                 slyp-commandline`,
+      `    Read_From_Tail      true`,
+      `    Strip_Underscores   true`,
+      ``,
+      `[FILTER]`,
+      `    Name      record_modifier`,
+      `    Match     *`,
+      `    Record    machine_type ${machine_name}`,
+      `    Record    env ${env}`,
+      `    Record    component systemd`,
+      `    Record    @es_index slyp-system`,
       ``,
       `[OUTPUT]`,
-      `    Name                  es`,
+      `    Name                  forward`,
       `    Match                 *`,
       `    Host                  ${logging_domain}`,
       `    Port                  24224`,
-      `    Index                 slyp-api`,
       `    tls                   on`,
-      `    # tls.crt_file        /fluentd/etc/certificate.crt`,
+      `    tls.verify            off`,
+      `    Shared_Key            {{${shared_key_secret_context}}}`,
       ``,
-      `[OUTPUT]`,
-      `    Name  stdout`,
-      `    Match *`,
-      ``,
-    ];
-    const certificate_tpl_contents = [
-      `{{${certificate_context}}}`
     ];
 
+    const runAsUser = (user: string, cmd: string): string => `runuser -l ${user} -c '${cmd}'`;
+    const user = 'app';
+
+    this.mkdir(dir);
+    this.sh(`chown -R ${user}:${user} ${dir}`); // Allow hx-deploy-tool to expand template into the directory
     this.catToFile(docker_compose_file, docker_compose_contents.join('\n'));
-    this.catToFile(fluentbit_file, fluentbit_contents.join('\n'));
-    this.catToFile(certificate_tpl, certificate_tpl_contents.join('\n'));
+    this.catToFile(fluentbit_file_tpl, fluentbit_contents.join('\n'));
+    this.sh(runAsUser(user, '/opt/bin/hx-deploy-tool fetch-context'));
+    this.sh(runAsUser(user, `/opt/bin/hx-deploy-tool expand-template ${fluentbit_file_tpl} ${fluentbit_file}`));
+    this.sh(`chown -R root:root ${dir}`); // fluentbit config file will be owned by 'app' - change it to root
     this.sh('(cd /opt/etc/fluent-bit/ && docker-compose up -d)');
-    this.sh('/opt/bin/hx-deploy-tool fetch-context');
-    this.sh(`/opt/bin/hx-deploy-tool expand-template ${certificate_tpl} ${dir}`);
   }
 
   include(other: BootScript) {

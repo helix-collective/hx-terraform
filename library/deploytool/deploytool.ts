@@ -8,6 +8,7 @@ import { RESOLVER } from './adl-gen/resolver';
 import { TcpNetConnectOpts } from 'net';
 import { S3Bucket } from '../../providers/aws/resources';
 import { Maybe } from './adl-gen/runtime/sys/types';
+import * as path from 'path';
 
 export interface ContextFile {
   name: string;
@@ -26,11 +27,16 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
     source_name = source_name.substr(1);
   }
   // The name is the characters after the last slash
-  const name = /[^/]*$/.exec(source_name);
-  if (!name) {
+  const name_with_ext = /[^/]*$/.exec(source_name);
+  if (!name_with_ext) {
     throw new Error('Invalid context file path');
   }
-  return { source_name, name: name[0] };
+  const name = path.parse(name_with_ext[0]).name;
+  return { source_name, name: name };
+}
+
+export function contextFromS3(name: string, s3Ref: s3.S3Ref) : C.DeployContext {
+  return {name, source:{kind:"s3", value: s3Ref.url() }};
 }
 
 export function httpProxyEndpoint(

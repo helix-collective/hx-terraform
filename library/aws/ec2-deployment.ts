@@ -65,14 +65,14 @@ export function createEc2Deployment(
     if (ep.kind === 'https') {
       return deploytool.httpsProxyEndpoint(
         ep.name,
-        shared.fqdn(sr, ep.dnsname)
+        [shared.fqdn(sr, ep.dnsname)]
       );
     }
     if (ep.kind === 'https-external') {
-      return deploytool.httpsProxyEndpoint(ep.name, ep.fqdnsname);
+      return deploytool.httpsProxyEndpoint(ep.name, [ep.fqdnsname]);
     }
 
-    return deploytool.httpProxyEndpoint(ep.name, ep.fqdnsname);
+    return deploytool.httpProxyEndpoint(ep.name, [ep.fqdnsname]);
   });
   bs.include(
     deploytool.install(

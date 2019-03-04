@@ -23,11 +23,7 @@ export interface ToolConfig {
    * The storage location for release zip files
    */
   releases: BlobStoreConfig;
-  /**
-   * The storage location for deployment context files
-   */
-  deployContext: BlobStoreConfig;
-  deployContextFiles: DeployContextFile[];
+  deployContexts: DeployContext[];
   deployMode: DeployMode;
 }
 
@@ -41,8 +37,7 @@ export function makeToolConfig(
     autoCertName?: string,
     autoCertContactEmail?: string,
     releases: BlobStoreConfig,
-    deployContext: BlobStoreConfig,
-    deployContextFiles: DeployContextFile[],
+    deployContexts: DeployContext[],
     deployMode?: DeployMode,
   }
 ): ToolConfig {
@@ -55,14 +50,13 @@ export function makeToolConfig(
     autoCertName: input.autoCertName === undefined ? "hxdeploytoolcert" : input.autoCertName,
     autoCertContactEmail: input.autoCertContactEmail === undefined ? "" : input.autoCertContactEmail,
     releases: input.releases,
-    deployContext: input.deployContext,
-    deployContextFiles: input.deployContextFiles,
+    deployContexts: input.deployContexts,
     deployMode: input.deployMode === undefined ? {kind : "select"} : input.deployMode,
   };
 }
 
 const ToolConfig_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"releasesDir","default":{"kind":"just","value":"/opt/releases"},"name":"releasesDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/etc/deployment"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/hx-deploy-tool.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"hxdeploytoolcert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContext","default":{"kind":"nothing"},"name":"deployContext","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContextFiles","default":{"kind":"nothing"},"name":"deployContextFiles","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContextFile"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"select"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"releasesDir","default":{"kind":"just","value":"/opt/releases"},"name":"releasesDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/etc/deployment"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/hx-deploy-tool.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"hxdeploytoolcert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContexts","default":{"kind":"nothing"},"name":"deployContexts","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContext"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"select"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
 
 export function texprToolConfig(): ADL.ATypeExpr<ToolConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ToolConfig"}}, parameters : []}};
@@ -164,26 +158,26 @@ export function texprMachineLabel(): ADL.ATypeExpr<MachineLabel> {
 
 export interface EndPoint {
   label: types.EndPointLabel;
-  serverName: string;
+  serverNames: string[];
   etype: EndPointType;
 }
 
 export function makeEndPoint(
   input: {
     label: types.EndPointLabel,
-    serverName: string,
+    serverNames: string[],
     etype: EndPointType,
   }
 ): EndPoint {
   return {
     label: input.label,
-    serverName: input.serverName,
+    serverNames: input.serverNames,
     etype: input.etype,
   };
 }
 
 const EndPoint_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"label","default":{"kind":"nothing"},"name":"label","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"serverName","default":{"kind":"nothing"},"name":"serverName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"label","default":{"kind":"nothing"},"name":"label","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
 
 export function texprEndPoint(): ADL.ATypeExpr<EndPoint> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "EndPoint"}}, parameters : []}};
@@ -247,28 +241,50 @@ export function texprSslCertPaths(): ADL.ATypeExpr<SslCertPaths> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "SslCertPaths"}}, parameters : []}};
 }
 
-export interface DeployContextFile {
-  name: types.FilePath;
-  sourceName: string;
+export interface DeployContext {
+  name: string;
+  source: DeployContextSource;
 }
 
-export function makeDeployContextFile(
+export function makeDeployContext(
   input: {
-    name: types.FilePath,
-    sourceName: string,
+    name: string,
+    source: DeployContextSource,
   }
-): DeployContextFile {
+): DeployContext {
   return {
     name: input.name,
-    sourceName: input.sourceName,
+    source: input.source,
   };
 }
 
-const DeployContextFile_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"name","default":{"kind":"nothing"},"name":"name","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"sourceName","default":{"kind":"nothing"},"name":"sourceName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"DeployContextFile","version":{"kind":"nothing"}}};
+const DeployContext_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"name","default":{"kind":"nothing"},"name":"name","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"source","default":{"kind":"nothing"},"name":"source","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContextSource"}},"parameters":[]}}]}},"name":"DeployContext","version":{"kind":"nothing"}}};
 
-export function texprDeployContextFile(): ADL.ATypeExpr<DeployContextFile> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployContextFile"}}, parameters : []}};
+export function texprDeployContext(): ADL.ATypeExpr<DeployContext> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployContext"}}, parameters : []}};
+}
+
+export interface DeployContextSource_File {
+  kind: 'file';
+  value: types.FilePath;
+}
+export interface DeployContextSource_S3 {
+  kind: 's3';
+  value: types.S3Path;
+}
+export interface DeployContextSource_AwsSecretArn {
+  kind: 'awsSecretArn';
+  value: string;
+}
+
+export type DeployContextSource = DeployContextSource_File | DeployContextSource_S3 | DeployContextSource_AwsSecretArn;
+
+const DeployContextSource_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"file","default":{"kind":"nothing"},"name":"file","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"s3","default":{"kind":"nothing"},"name":"s3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}},{"annotations":[],"serializedName":"awsSecretArn","default":{"kind":"nothing"},"name":"awsSecretArn","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"DeployContextSource","version":{"kind":"nothing"}}};
+
+export function texprDeployContextSource(): ADL.ATypeExpr<DeployContextSource> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployContextSource"}}, parameters : []}};
 }
 
 export enum Verbosity {
@@ -351,7 +367,8 @@ export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "config.EndPointType" : EndPointType_AST,
   "config.SslCertMode" : SslCertMode_AST,
   "config.SslCertPaths" : SslCertPaths_AST,
-  "config.DeployContextFile" : DeployContextFile_AST,
+  "config.DeployContext" : DeployContext_AST,
+  "config.DeployContextSource" : DeployContextSource_AST,
   "config.Verbosity" : Verbosity_AST,
   "config.LetsEncryptConfig" : LetsEncryptConfig_AST
 };

@@ -35,22 +35,22 @@ export function contextFile(base_s3: s3.S3Ref, file_s3: s3.S3Ref): ContextFile {
 
 export function httpProxyEndpoint(
   label: string,
-  serverName: string
+  serverNames: string[]
 ): C.EndPoint {
   return {
     label,
-    serverName,
+    serverNames,
     etype: { kind: 'httpOnly' },
   };
 }
 
 export function httpsProxyEndpoint(
   label: string,
-  serverName: string
+  serverNames: string[]
 ): C.EndPoint {
   return {
     label,
-    serverName,
+    serverNames,
     etype: {
       kind: 'httpsWithRedirect',
       value: { kind: 'generated' },
@@ -152,16 +152,16 @@ export function install(
       kind: 's3',
       value: releases.url(),
     },
-    deployContext: {
-      kind: 's3',
-      value: deploy_context.url(),
-    },
-    deployContextFiles: contextFiles.map(cf => {
-      return {
+    deployContexts: contextFiles.map(cf => {
+      return C.makeDeployContext({
         name: cf.name,
-        sourceName: cf.source_name,
-      };
+        source: {
+          kind: 's3',
+          value: `${deploy_context.url()}/${cf.source_name}`,
+        }
+      });
     }),
+    // deployContexts: contextFiles,
     contextCache: '/opt/config',
     autoCertContactEmail: ssl_cert_email,
   });

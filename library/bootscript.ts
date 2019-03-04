@@ -190,12 +190,15 @@ export class BootScript {
   /**
    * Adds a single docker container running Fluentbit to send system logs to an Elasticsearch container
    * Assumes docker has been installed in the bootscript (i.e. dockerWithConfig())
+   * Creates a template for the certificate file, to be injected from context files
    */
-  addSystemLogging(logging_domain: string) {
+  addSystemLogging(logging_domain: string, certificate_context: string) {
     const dir = `/opt/etc/fluent-bit`;
     this.mkdir(dir);
     const docker_compose_file = `${dir}/docker-compose.yml`;
     const fluentbit_file = `${dir}/fluent-bit.conf`;
+    const certificate_tpl = `${dir}/certificate.crt.tpl`;
+
     const docker_compose_contents = [
       `version: '2'`,
       `services:`,
@@ -232,10 +235,16 @@ export class BootScript {
       `    Match *`,
       ``,
     ];
+    const certificate_tpl_contents = [
+      `{{${certificate_context}}}`
+    ];
 
     this.catToFile(docker_compose_file, docker_compose_contents.join('\n'));
     this.catToFile(fluentbit_file, fluentbit_contents.join('\n'));
+    this.catToFile(certificate_tpl, certificate_tpl_contents.join('\n'));
     this.sh('(cd /opt/etc/fluent-bit/ && docker-compose up -d)');
+    this.sh('/opt/bin/hx-deploy-tool fetch-context');
+    this.sh(`/opt/bin/hx-deploy-tool expand-template ${certificate_tpl} ${dir}`);
   }
 
   include(other: BootScript) {

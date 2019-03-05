@@ -1,5 +1,6 @@
 import os
 import uuid
+import sys
 from datetime import date
 import getpass
 from pathlib import *
@@ -32,6 +33,15 @@ def generate_providers():
 def generate_tf():
     return '(cd typescript; ./node_modules/.bin/ts-node main.ts)'
 
+def confirm_apply():
+    print("You are about to apply changes to live infrastructure.")
+    print("Please confirm you have checked the plan and wish to proceed")
+    print("by entering yes: ", end='')
+    s = input().strip()
+    if s != "yes":
+        print("terraform apply aborted")
+        sys.exit(1)
+
 def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes',
@@ -44,7 +54,7 @@ def task_plan():
 def task_apply():
   return {
       'doc' : 'Execute terraform apply to make any pending infrastructure changes',
-      'actions': [ generate_tf(), dockerized_terraform(['apply', '-auto-approve']) ],
+      'actions': [ confirm_apply, generate_tf(), dockerized_terraform(['apply', '-auto-approve']) ],
       'file_dep': [ terraform_initialized.path ],
       'verbosity' : 2,
       'uptodate': [False],

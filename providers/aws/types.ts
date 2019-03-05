@@ -376,6 +376,30 @@ export const redis_2_8 = elasticacheParameterGroupFamily('redis2.8');
 export const redis_3_2 = elasticacheParameterGroupFamily('redis3.2');
 export const redis_4_0 = elasticacheParameterGroupFamily('redis4.0');
 //----------------------------------------------------------------------
+//----------------------------------------------------------------------
+export type LambdaRuntime = {
+  type: 'LambdaRuntime';
+  value: string;
+};
+
+export function lambdaRuntime(v: string): LambdaRuntime {
+  return { type: 'LambdaRuntime', value: v};
+}
+
+export const nodejs_8_10 = lambdaRuntime('nodejs8.10');
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+export type LambdaPermissionAction = {
+  type: 'LambdaPermissionAction';
+  value: string;
+};
+
+export function lambdaPermissionAction(v: string): LambdaPermissionAction {
+  return { type: 'LambdaPermissionAction', value: v};
+}
+
+export const lambda_InvokeFunction = lambdaPermissionAction('lambda:InvokeFunction');
+//----------------------------------------------------------------------
 
 export type PositionalConstraint = {
   type: 'PositionalConstraint',

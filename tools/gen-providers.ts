@@ -1,5 +1,5 @@
 import * as path from 'path';
-import {arn, ElasticacheParameterGroupName} from '../providers/aws/types';
+import {Arn, arn, ElasticacheParameterGroupName} from '../providers/aws/types';
 
 /**
  * Generate the resource definitions for AWS
@@ -831,6 +831,55 @@ const elasticache_cluster: RecordDecl = {
   ],
 };
 
+const vpc_config: RecordDecl = {
+  name: 'vpc_config',
+  fields: [
+    requiredField('subnet_ids', listType(resourceIdType('SubnetId'))),
+    requiredField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+  ],
+};
+
+const lambda_function: RecordDecl = {
+  name: 'lambda_function',
+  fields: [
+    requiredField('function_name', STRING),
+    optionalField('filename', STRING),
+    optionalField('s3_bucket', STRING),
+    optionalField('s3_key', STRING),
+    optionalField('role', resourceIdType('IamRoleId')),
+    optionalField('handler', STRING),
+    optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
+    optionalField('vpc_config', recordType(vpc_config)),
+  ],
+};
+
+const cloudwatch_event_rule = {
+  name: 'cloudwatch_event_rule',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('schedule_expression', STRING),
+    optionalField('description', STRING),
+  ],
+};
+
+const cloudwatch_event_target = {
+  name: 'cloudwatch_event_target',
+  fields: [
+    requiredField('rule', STRING),
+    requiredField('arn', stringAliasType('AT.Arn')),
+  ],
+};
+
+const lambda_permission: RecordDecl = {
+  name: 'lambda_permission',
+  fields: [
+    requiredField('action', stringAliasType('AT.LambdaPermissionAction')),
+    requiredField('function_name', STRING),
+    requiredField('principal', STRING),
+    optionalField('source_arn', stringAliasType('AT.Arn')),
+  ],
+};
+
 const field_to_match: RecordDecl = {
   name: 'field_to_match',
   fields: [
@@ -1413,6 +1462,55 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides information about a Lambda Function.',
+    'https://www.terraform.io/docs/providers/aws/d/lambda_function.html',
+    lambda_function,
+    [ stringAttr('function_name'),
+      resourceIdAttr('role', iam_role),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    `Creates a Lambda permission to allow external sources invoking the Lambda function
+    (e.g. CloudWatch Event Rule, SNS or S3).`,
+    'https://www.terraform.io/docs/providers/aws/r/lambda_permission.html',
+    lambda_permission,
+    [ stringAliasAttr('action', 'LambdaPermissionAction', 'AT.LambdaPermissionAction'),
+      stringAttr('function_name'),
+      stringAttr('principal'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a CloudWatch Event Rule resource.',
+    'https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html',
+    cloudwatch_event_rule,
+    [ stringAttr('name'),
+      stringAttr('schedule_expression'),
+      stringAttr('description'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a CloudWatch Event Target resource.',
+    'https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html',
+    cloudwatch_event_target,
+    [],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides a WAF Byte Match Set Resource',
     'https://www.terraform.io/docs/providers/aws/r/waf_byte_match_set.html',
     waf_byte_match_set,
@@ -1551,6 +1649,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_metric);
   gen.generateParams(elasticache_parameter_group);
   gen.generateParams(elasticache_cluster);
+  gen.generateParams(vpc_config);
+  gen.generateParams(lambda_function);
+  gen.generateParams(lambda_permission);
+  gen.generateParams(cloudwatch_event_rule);
+  gen.generateParams(cloudwatch_event_target);
   gen.generateParams(field_to_match);
   gen.generateParams(byte_match_tuples);
   gen.generateParams(waf_byte_match_set);

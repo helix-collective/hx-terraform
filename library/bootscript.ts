@@ -37,6 +37,12 @@ export class BootScript {
     this.script_lines.push('EOF');
   }
 
+  appendToFile(path: string, content: string) {
+    this.script_lines.push('cat >>' + path + " <<'EOF'");
+    this.script_lines = this.script_lines.concat(content.split('\n'));
+    this.script_lines.push('EOF');
+  }
+
   comment(text: string) {
     this.script_lines.push('');
     this.script_lines.push('# ' + text);
@@ -76,6 +82,10 @@ export class BootScript {
     this.createUser(username);
     this.sh(`cp /home/ubuntu/.ssh/authorized_keys ~${username}/.ssh`);
     this.sh(`chown -R ${username}:${username} /home/${username}/.ssh`);
+  }
+
+  extendUserShellProfile(username: string, content: string) {
+    this.appendToFile(`~${username}/.profile`, content);
   }
 
   addUserToGroup(username: string, groupname: string) {

@@ -47,6 +47,7 @@ export function createEc2Deployment(
   bs.utf8Locale();
   bs.dockerWithConfig(docker_config);
   bs.createUserWithKeypairAccess(app_user);
+  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user);
   if (params.extra_bootscript) {

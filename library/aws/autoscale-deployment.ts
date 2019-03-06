@@ -63,10 +63,11 @@ function createController(
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
   bs.utf8Locale();
-  bs.createUserWithKeypairAccess(app_user);
+  bs.createUserWithKeypairAccess( app_user);
+  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
 
-  if (params.appserver_extra_bootscript) {
-    bs.include(params.appserver_extra_bootscript);
+  if (params.controller_extra_bootscript) {
+    bs.include(params.controller_extra_bootscript);
   }
 
   bs.include(
@@ -100,7 +101,7 @@ function createController(
     },
   });
 
-  const controller_route53 = shared.dnsARecord(tfgen, controller_label, sr, params.dns_name + "-" + controller_label, [controller.eip.public_ip], "3600");
+  const controller_route53 = shared.dnsARecord(tfgen, controller_label, sr, params.controller_dns_name, [controller.eip.public_ip], "3600");
 
   return {};
 }
@@ -124,6 +125,7 @@ function createAppserverAutoScaleGroup(
   bs.utf8Locale();
   bs.dockerWithConfig(docker_config);
   bs.createUserWithKeypairAccess(app_user);
+  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user);
   if (params.appserver_extra_bootscript) {
@@ -356,11 +358,11 @@ interface AutoscaleDeploymentParams {
   key_name: AT.KeyName;
 
   /**
-   * The DNS name of the machine. This is a prefix to the shared primary DNS zone.
+   * The DNS name of the controller machine. This is a prefix to the shared primary DNS zone.
    * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
    * will be aaa.helix.com).
    */
-  dns_name: string;
+  controller_dns_name: string;
 
   /**
    * The S3 location where hx-deploy-tool releases are stored.

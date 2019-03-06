@@ -158,7 +158,7 @@ function createAppserverAutoScaleGroup(
   );
 
   const launch_config = createLaunchConfiguration(tfgen, "appserver", {
-      name: tfgen.scopedName(name).join('-'),
+      name_prefix: tfgen.scopedName(name).join('-') + '-',
       key_name: params.key_name,
       image_id: (params.appserver_amis) ? params.appserver_amis(sr.network.region) : getDefaultAmi(sr.network.region),
       instance_type: params.appserver_instance_type,

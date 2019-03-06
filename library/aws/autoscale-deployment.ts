@@ -158,6 +158,7 @@ function createAppserverAutoScaleGroup(
   );
 
   const launch_config = createLaunchConfiguration(tfgen, "appserver", {
+      name: tfgen.scopedName(name).join('-'),
       key_name: params.key_name,
       image_id: (params.appserver_amis) ? params.appserver_amis(sr.network.region) : getDefaultAmi(sr.network.region),
       instance_type: params.appserver_instance_type,
@@ -172,6 +173,7 @@ function createAppserverAutoScaleGroup(
   tfgen.createBeforeDestroy(launch_config, true);
 
   const autoscaling_group = createAutoscalingGroup(tfgen, "appserver", {
+    name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size || 1,
     max_size: params.max_size || 1,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
@@ -203,6 +205,7 @@ function createAppserverLoadBalancer(
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb = createLb(tfgen, "alb", {
+    name: tfgen.scopedName(name).join('-'),
     load_balancer_type: 'application',
     tags: tfgen.tagsContext(),
     security_groups: [sr.load_balancer_security_group.id],

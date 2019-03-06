@@ -25,6 +25,7 @@ export interface ToolConfig {
   releases: BlobStoreConfig;
   deployContexts: DeployContext[];
   deployMode: DeployMode;
+  healthCheck: (HealthCheckConfig|null);
 }
 
 export function makeToolConfig(
@@ -39,6 +40,7 @@ export function makeToolConfig(
     releases: BlobStoreConfig,
     deployContexts: DeployContext[],
     deployMode?: DeployMode,
+    healthCheck?: (HealthCheckConfig|null),
   }
 ): ToolConfig {
   return {
@@ -52,11 +54,12 @@ export function makeToolConfig(
     releases: input.releases,
     deployContexts: input.deployContexts,
     deployMode: input.deployMode === undefined ? {kind : "select"} : input.deployMode,
+    healthCheck: input.healthCheck === undefined ? {incomingPath : "/health-check", outgoingPath : "/"} : input.healthCheck,
   };
 }
 
 const ToolConfig_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"releasesDir","default":{"kind":"just","value":"/opt/releases"},"name":"releasesDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/etc/deployment"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/hx-deploy-tool.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"hxdeploytoolcert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContexts","default":{"kind":"nothing"},"name":"deployContexts","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContext"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"select"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"releasesDir","default":{"kind":"just","value":"/opt/releases"},"name":"releasesDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/etc/deployment"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/hx-deploy-tool.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"hxdeploytoolcert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContexts","default":{"kind":"nothing"},"name":"deployContexts","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContext"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"select"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}},{"annotations":[],"serializedName":"healthCheck","default":{"kind":"just","value":{"outgoingPath":"/","incomingPath":"/health-check"}},"name":"healthCheck","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"HealthCheckConfig"}},"parameters":[]}]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
 
 export function texprToolConfig(): ADL.ATypeExpr<ToolConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ToolConfig"}}, parameters : []}};
@@ -137,6 +140,37 @@ const ProxyModeConfig_AST : ADL.ScopedDecl =
 
 export function texprProxyModeConfig(): ADL.ATypeExpr<ProxyModeConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ProxyModeConfig"}}, parameters : []}};
+}
+
+export interface HealthCheckConfig {
+  /**
+   * a health check;
+   */
+  incomingPath: string;
+  /**
+   * The path to which will will proxy the above on the first
+   * configured endpoint
+   */
+  outgoingPath: string;
+}
+
+export function makeHealthCheckConfig(
+  input: {
+    incomingPath: string,
+    outgoingPath: string,
+  }
+): HealthCheckConfig {
+  return {
+    incomingPath: input.incomingPath,
+    outgoingPath: input.outgoingPath,
+  };
+}
+
+const HealthCheckConfig_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"incomingPath","default":{"kind":"nothing"},"name":"incomingPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"outgoingPath","default":{"kind":"nothing"},"name":"outgoingPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"HealthCheckConfig","version":{"kind":"nothing"}}};
+
+export function texprHealthCheckConfig(): ADL.ATypeExpr<HealthCheckConfig> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "HealthCheckConfig"}}, parameters : []}};
 }
 
 export interface MachineLabel_Label {
@@ -362,6 +396,7 @@ export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "config.DeployMode" : DeployMode_AST,
   "config.BlobStoreConfig" : BlobStoreConfig_AST,
   "config.ProxyModeConfig" : ProxyModeConfig_AST,
+  "config.HealthCheckConfig" : HealthCheckConfig_AST,
   "config.MachineLabel" : MachineLabel_AST,
   "config.EndPoint" : EndPoint_AST,
   "config.EndPointType" : EndPointType_AST,

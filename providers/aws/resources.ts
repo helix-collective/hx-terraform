@@ -2196,14 +2196,52 @@ export function fieldsFromLbListenerParams(params: LbListenerParams) : TF.Resour
 }
 
 export interface LbListenerActionParams {
-  target_group_arn: AT.ArnT<"LbTargetGroup">;
-  type: 'forward';
+  type: 'forward' | 'redirect' | 'fixed-response';
+  target_group_arn?: AT.ArnT<"LbTargetGroup">;
+  redirect?: LbListenerActionRedirectParams;
+  fixed_response?: LbListenerActionFixedResponseParams;
 }
 
 export function fieldsFromLbListenerActionParams(params: LbListenerActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "redirect", params.redirect, (v) => TF.mapValue(fieldsFromLbListenerActionRedirectParams(v)));
+  TF.addOptionalField(fields, "fixed_response", params.fixed_response, (v) => TF.mapValue(fieldsFromLbListenerActionFixedResponseParams(v)));
+  return fields;
+}
+
+export interface LbListenerActionRedirectParams {
+  host?: string;
+  path?: string;
+  port?: string;
+  protocol?: 'HTTP' | 'HTTPS' | '#{protocol}';
+  query?: string;
+  status_code: 'HTTP_301' | 'HTTP_302';
+}
+
+export function fieldsFromLbListenerActionRedirectParams(params: LbListenerActionRedirectParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "host", params.host, TF.stringValue);
+  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalField(fields, "port", params.port, TF.stringValue);
+  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalField(fields, "query", params.query, TF.stringValue);
+  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
+  return fields;
+}
+
+export interface LbListenerActionFixedResponseParams {
+  content_type: 'text/plain' | 'text/css' | 'text/html' | 'application/javascript' | 'application/json';
+  message_body?: string;
+  statusCode?: number;
+}
+
+export function fieldsFromLbListenerActionFixedResponseParams(params: LbListenerActionFixedResponseParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "content_type", params.content_type, TF.stringValue);
+  TF.addOptionalField(fields, "message_body", params.message_body, TF.stringValue);
+  TF.addOptionalField(fields, "statusCode", params.statusCode, TF.numberValue);
   return fields;
 }
 

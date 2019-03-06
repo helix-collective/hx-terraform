@@ -235,8 +235,12 @@ function createAppserverLoadBalancer(
     port: 80,
     protocol: "HTTP",
     default_action: {
-      target_group_arn: alb_target_group.arn,
-      type: 'forward'
+      type: 'redirect',
+      redirect: {
+        protocol: 'HTTPS',
+        port: '443',
+        status_code: 'HTTP_301'
+      },
     }
   });
 
@@ -246,8 +250,8 @@ function createAppserverLoadBalancer(
     protocol: 'HTTPS',
     certificate_arn: acm_certificate_arn,
     default_action: {
+      type: 'forward',
       target_group_arn: alb_target_group.arn,
-      type: 'forward'
     }
   });
 

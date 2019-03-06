@@ -562,11 +562,35 @@ const lb_target_group: RecordDecl = {
   ],
 };
 
+
+const lb_listener_action_redirect: RecordDecl = {
+  name: 'lb_listener_action_redirect',
+  fields: [
+    optionalField('host', STRING),
+    optionalField('path', STRING),
+    optionalField('port', STRING),
+    optionalField('protocol', enumType(['HTTP','HTTPS','#{protocol}'])),
+    optionalField('query', STRING),
+    requiredField('status_code', enumType(['HTTP_301', 'HTTP_302']))
+  ]
+};
+
+const lb_listener_action_fixed_response: RecordDecl = {
+  name: 'lb_listener_action_fixed_response',
+  fields: [
+    requiredField('content_type', enumType(['text/plain', 'text/css', 'text/html', 'application/javascript', 'application/json'])),
+    optionalField('message_body', STRING),
+    optionalField('statusCode', NUMBER),
+  ]
+};
+
 const lb_listener_action: RecordDecl = {
   name: 'lb_listener_action',
   fields: [
-    requiredField('target_group_arn', arnType(lb_target_group)),
-    requiredField('type', enumType(['forward'])),
+    requiredField('type', enumType(['forward','redirect','fixed-response'])),
+    optionalField('target_group_arn', arnType(lb_target_group)),
+    optionalField('redirect', recordType(lb_listener_action_redirect)),
+    optionalField('fixed_response', recordType(lb_listener_action_fixed_response)),
   ],
 };
 
@@ -1550,6 +1574,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_subnet_mapping);
   gen.generateParams(lb_listener);
   gen.generateParams(lb_listener_action);
+  gen.generateParams(lb_listener_action_redirect);
+  gen.generateParams(lb_listener_action_fixed_response);
   gen.generateParams(lb_target_group);
   gen.generateParams(lb_target_group_health_check);
   gen.generateParams(lb_target_group_stickiness);

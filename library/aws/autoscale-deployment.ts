@@ -287,7 +287,7 @@ function createAcmCertificate(
 
   const acm_certificate = AR.createAcmCertificate(tfgen, "cert", {
     domain_name: https_fqdns[0],
-    subject_alternative_names: [https_fqdns[1]],
+    subject_alternative_names: https_fqdns.slice(1),
     validation_method: 'DNS',
     tags: tfgen.tagsContext()
   });

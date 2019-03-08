@@ -6,8 +6,6 @@
  * avoid confusing them by giving them different types.
  */
 
-import * as TF from '../../core/core';
-
 export type Region = {
   type: 'Region';
   value: string;
@@ -375,6 +373,18 @@ export const memcached_1_5 = elasticacheParameterGroupFamily('memcached1.5');
 export const redis_2_8 = elasticacheParameterGroupFamily('redis2.8');
 export const redis_3_2 = elasticacheParameterGroupFamily('redis3.2');
 export const redis_4_0 = elasticacheParameterGroupFamily('redis4.0');
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+export type BucketEventNotificationType = {
+    type: 'BucketEventNotificationType';
+    value: string;
+};
+
+export function bucketEventNotificationType(v: string): BucketEventNotificationType {
+  return { type: 'BucketEventNotificationType', value: v};
+}
+export const s3_objectCreated_all = bucketEventNotificationType('s3:ObjectCreated:*');
+export const s3_objectRemoved_all = bucketEventNotificationType('s3:ObjectRemoved:*');
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 export type LambdaRuntime = {

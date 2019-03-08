@@ -239,3 +239,22 @@ export const ses_all_actions_policy: NamedPolicy = {
     ]
   }
 }
+
+export function s3PublishNotificationPolicy(name: string, bucket: string, queue: AR.SqsQueueArn ) {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['sqs:SendMessage'],
+          Resource: [`arn:aws:sqs:::${queue}`],
+          Condition: {
+            ArnEquals: { "aws:SourceArn": `arn:aws:s3:::${bucket}` }
+          }
+        },
+      ],
+    },
+  };
+}

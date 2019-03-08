@@ -839,6 +839,51 @@ const vpc_config: RecordDecl = {
   ],
 };
 
+const sns_event_notification_target: RecordDecl = {
+  name: 'sns_event_notification_target',
+   fields: [
+      requiredField('sns_arn', STRING),
+      optionalField('id', STRING),
+      requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+      optionalField('filter_prefix', STRING),
+      optionalField('filter_suffix', STRING),
+    ]
+};
+
+  const sqs_event_notification_target: RecordDecl = {
+    name: 'sqs_event_notification_target',
+    fields: [
+      requiredField('queue_arn', STRING),
+      optionalField('id', STRING),
+      requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+      optionalField('filter_prefix', STRING),
+      optionalField('filter_suffix', STRING),
+    ]
+};
+
+  const lambda_event_notification_target: RecordDecl = {
+    name: 'LambdaEventNotificationTarget',
+    fields: [
+      requiredField('lambda_arn', STRING),
+      optionalField('id', STRING),
+      requiredField('events', listType(stringAliasType('AT.BucketEventNotificationType'))),
+      optionalField('filter_prefix', STRING),
+      optionalField('filter_suffix', STRING),
+    ]
+};
+
+  const s3_bucket_notification: RecordDecl = {
+    name: 's3_bucket_notification',
+    fields: [
+      requiredField('bucket', STRING),
+      optionalField('topic', recordType(sns_event_notification_target)),
+      optionalField('queue', recordType(sqs_event_notification_target)),
+      optionalField('lambda_function ', recordType(lambda_event_notification_target)),
+    ],
+  };
+
+
+
 const lambda_function: RecordDecl = {
   name: 'lambda_function',
   fields: [
@@ -1461,6 +1506,18 @@ function generateAws(gen: Generator) {
     }
   );
 
+
+  gen.generateResource(
+    'Provides an S3 bucket event notification resource.',
+    'https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html',
+     s3_bucket_notification,
+    [ stringAttr('bucket'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
   gen.generateResource(
     'Provides information about a Lambda Function.',
     'https://www.terraform.io/docs/providers/aws/d/lambda_function.html',
@@ -1651,6 +1708,10 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticache_cluster);
   gen.generateParams(vpc_config);
   gen.generateParams(lambda_function);
+  gen.generateParams(sns_event_notification_target);
+  gen.generateParams(sqs_event_notification_target);
+  gen.generateParams(lambda_event_notification_target);
+  gen.generateParams(s3_bucket_notification);
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);

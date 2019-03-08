@@ -87,14 +87,14 @@ export function createScalingHighCpuAlarm(
   return AR.createCloudwatchMetricAlarm(tfgen, name, {
     alarm_name: tfgen.scopedName(name).join('_'),
     comparison_operator: 'GreaterThanThreshold',
-    evaluation_periods: 4,
+    evaluation_periods: 2,
     metric_name: 'CPUUtilization',
     namespace: 'AWS/EC2',
-    period: 300,
+    period: 120,
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      AutoscalingGroupName: autoscaling_group.name
+      AutoScalingGroupName: autoscaling_group.name
     },
     alarm_description: 'Sustained high cpu usage across an autoscaling group',
     alarm_actions: [topic.arn],
@@ -119,8 +119,8 @@ export function createScalingLowHostsAlarm(
     statistic: 'Average',
     threshold: hosts_threshold,
     dimensions: {
-      LoadBalancer: load_balancer.arn.value,
-      TargetGroup: target_group.arn.value
+      LoadBalancer:  TF.rawExpr(`"\${replace("${load_balancer.arn.value}", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`),
+      TargetGroup: TF.rawExpr(`"\${replace("${target_group.arn.value}", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`),
     },
     alarm_description: 'Less than configured hosts across an autoscaling group',
     alarm_actions: [topic.arn],

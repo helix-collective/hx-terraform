@@ -560,7 +560,23 @@ export function fileGenerator(): FileGenerator {
   };
 }
 
+const RAW_EXPR_PREFIX = "TFRAWEXPR:"
+
+/**
+ * Create a raw string that will be passed to terraform as is.
+ * 
+ * Useful as a workaround to produce terraform expression that
+ * we can't currently generate.
+ */
+export function rawExpr(s: string): string {
+  return RAW_EXPR_PREFIX + s;
+}
+
 function quotedText(s: string) {
+  if (s.startsWith(RAW_EXPR_PREFIX)) {
+    return s.slice(RAW_EXPR_PREFIX.length)
+  }
+
   const needsQuoting = s.includes('\n') || s.includes('"');
 
   if (needsQuoting) {

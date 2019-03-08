@@ -227,8 +227,11 @@ function createAppserverLoadBalancer(
     alb_target_group_arn: alb_target_group.arn
   });
 
+  // Create a new certificate if an existing certificate ARN isn't provided.
+  // When new domains are added, the certificate is deleted and re-created, in this situation,
+  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
   const acm_certificate_arn = params.acm_certificate_arn != undefined ?
-    params.acm_certificate_arn : createAcmCertificate(tfgen, sr, https_fqdns );
+    params.acm_certificate_arn : createAcmCertificate(tfgen, sr, https_fqdns, true /* create before destroy */ );
 
   const alb_http_listener = AR.createLbListener(tfgen, "http", {
     load_balancer_arn: alb.arn,
@@ -279,18 +282,20 @@ function createAppserverLoadBalancer(
   };
 }
 
-function createAcmCertificate(  
+function createAcmCertificate(
   tfgen: TF.Generator,
   sr: shared.SharedResources,
-  https_fqdns: string[]
-  ): AT.ArnT<"AcmCertificate"> {
-
-  const acm_certificate = AR.createAcmCertificate(tfgen, "cert", {
+  https_fqdns: string[],
+  create_before_destroy: boolean
+): AT.ArnT<'AcmCertificate'> {
+  const acm_certificate = AR.createAcmCertificate(tfgen, 'cert', {
     domain_name: https_fqdns[0],
     subject_alternative_names: https_fqdns.slice(1),
     validation_method: 'DNS',
-    tags: tfgen.tagsContext()
+    tags: tfgen.tagsContext(),
   });
+  tfgen.createBeforeDestroy(acm_certificate, create_before_destroy);
+
   const arn = acm_certificate.arn;
   const r53rs = https_fqdns.map((fqdn, i) => {
 

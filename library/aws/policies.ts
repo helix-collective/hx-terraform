@@ -21,6 +21,21 @@ export const assume_role_policy = {
   },
 };
 
+export const assume_role_rds_monitoring_policy = {
+  name: 'assumerole',
+  policy: {
+    Version: '2012-10-17',
+    Statement: [
+      {
+        Action: 'sts:AssumeRole',
+        Principal: { Service: 'monitoring.rds.amazonaws.com' },
+        Effect: 'Allow',
+        Sid: '',
+      },
+    ],
+  },
+}
+
 export const publish_metrics_policy = {
   name: 'publishmetrics',
   policy: {
@@ -258,4 +273,39 @@ export function s3PublishNotificationPolicy(name: string, queue: string, bucket:
       ],
     },
   };
+}
+
+// This is a snapshot of the aws managed policy 'arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole'
+// as at 11 March, 2019
+export const rdsMonitoringPolicy: NamedPolicy = {
+  name: 'rds-monitoring-policy',
+  policy: {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Sid: "EnableCreationAndManagementOfRDSCloudwatchLogGroups",
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogGroup",
+          "logs:PutRetentionPolicy"
+        ],
+        Resource: [
+          "arn:aws:logs:*:*:log-group:RDS*"
+        ]
+      },
+      {
+        Sid: "EnableCreationAndManagementOfRDSCloudwatchLogStreams",
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents"
+        ],
+        Resource: [
+          "arn:aws:logs:*:*:log-group:RDS*:log-stream:*"
+        ]
+      }
+    ]
+  }
 }

@@ -1644,6 +1644,7 @@ export interface DbInstanceParams {
   storage_encrypted?: boolean;
   storage_type?: AT.DbInstanceStorageType;
   monitoring_interval?: '0' | '1' | '5' | '10' | '15' | '30' | '60';
+  monitoring_role_arn?: AT.ArnT<"IamRole">;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -1673,6 +1674,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
   TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.stringValue);
+  TF.addOptionalField(fields, "monitoring_role_arn", params.monitoring_role_arn, TF.resourceArnValue);
   return fields;
 }
 

@@ -64,40 +64,6 @@ const instance: RecordDecl = {
   ],
 };
 
-const db_instance: RecordDecl = {
-  name: 'db_instance',
-  fields: [
-    requiredField('allocated_storage', NUMBER),
-    requiredField('engine', stringAliasType('AT.DbEngine')),
-    requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
-    requiredField('username', STRING),
-    optionalField('password', STRING),
-    optionalField('engine_version', STRING),
-    optionalField('identifier', STRING),
-    optionalField('name', STRING),
-    optionalField('port', NUMBER),
-    optionalField('publicly_accessible', BOOLEAN),
-    optionalField('backup_retention_period', NUMBER),
-    optionalField(
-      'vpc_security_group_ids',
-      listType(resourceIdType('SecurityGroupId'))
-    ),
-    optionalField('parameter_group_name', STRING),
-    optionalField('db_subnet_group_name', STRING),
-    optionalField('tags', TAGS_MAP),
-    optionalField('skip_final_snapshot', BOOLEAN),
-    optionalField('final_snapshot_identifier', STRING),
-    optionalField('multi_az', BOOLEAN),
-    optionalField('license_model', STRING),
-    optionalField('auto_minor_version_upgrade', BOOLEAN),
-    optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
-    optionalField('apply_immediately', BOOLEAN),
-    optionalField('storage_encrypted', BOOLEAN),
-    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType')),
-    optionalField('monitoring_interval', enumType(['0', '1', '5', '10', '15', '30', '60'])),
-  ],
-};
-
 const vpc: RecordDecl = {
   name: 'vpc',
   fields: [
@@ -437,6 +403,41 @@ const iam_role_policy: RecordDecl = {
     requiredField('name', STRING),
     requiredField('policy', STRING),
     requiredField('role', resourceIdType('IamRoleId')),
+  ],
+};
+
+const db_instance: RecordDecl = {
+  name: 'db_instance',
+  fields: [
+    requiredField('allocated_storage', NUMBER),
+    requiredField('engine', stringAliasType('AT.DbEngine')),
+    requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
+    requiredField('username', STRING),
+    optionalField('password', STRING),
+    optionalField('engine_version', STRING),
+    optionalField('identifier', STRING),
+    optionalField('name', STRING),
+    optionalField('port', NUMBER),
+    optionalField('publicly_accessible', BOOLEAN),
+    optionalField('backup_retention_period', NUMBER),
+    optionalField(
+      'vpc_security_group_ids',
+      listType(resourceIdType('SecurityGroupId'))
+    ),
+    optionalField('parameter_group_name', STRING),
+    optionalField('db_subnet_group_name', STRING),
+    optionalField('tags', TAGS_MAP),
+    optionalField('skip_final_snapshot', BOOLEAN),
+    optionalField('final_snapshot_identifier', STRING),
+    optionalField('multi_az', BOOLEAN),
+    optionalField('license_model', STRING),
+    optionalField('auto_minor_version_upgrade', BOOLEAN),
+    optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
+    optionalField('apply_immediately', BOOLEAN),
+    optionalField('storage_encrypted', BOOLEAN),
+    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType')),
+    optionalField('monitoring_interval', enumType(['0', '1', '5', '10', '15', '30', '60'])),
+    optionalField('monitoring_role_arn', arnType(iam_role)),
   ],
 };
 

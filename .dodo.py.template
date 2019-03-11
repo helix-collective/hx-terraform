@@ -9,7 +9,7 @@ from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
-TERRAFORM_IMAGE = 'helixta/terraform:2019-02-21'
+TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11'
 
 HERE = Path('.')
 

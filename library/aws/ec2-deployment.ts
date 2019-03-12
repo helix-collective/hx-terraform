@@ -142,6 +142,14 @@ export function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: E
   return https_fqdns;
 }
 
+export function endpointUrl(sr: shared.SharedResources, url: EndPointUrl ): string {
+  switch (url.kind) {
+    case 'https': return "https://" + shared.fqdn(sr, url.dnsname);
+    case 'https-external': return "https://" + url.fqdnsname;
+    case 'http': return "http://" + url.fqdnsname;
+  }
+}
+
 export function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
   return endpoints.map(ep => {
     const http_fqdns: string[] = []; 

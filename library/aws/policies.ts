@@ -18,6 +18,12 @@ export const assume_role_policy = {
         Effect: 'Allow',
         Sid: '',
       },
+      {
+        Action: 'sts:AssumeRole',
+        Principal: { Service: 'lambda.amazonaws.com' },
+        Effect: 'Allow',
+        Sid: '',
+      },
     ],
   },
 };
@@ -120,6 +126,29 @@ export function putLogsPolicy(name: string, log_group: AR.CloudwatchLogGroup) {
             'logs:PutLogEvents',
           ],
           Resource: [`${log_group.arn.value}`],
+        },
+      ],
+    },
+  };
+}
+
+export function putAnyLogsPolicy(name: string) {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'logs:CreateLogGroup',
+            'logs:CreateLogStream',
+            'logs:DescribeLogStreams',
+            'logs:PutLogEvents',
+          ],
+          Resource: [
+            'arn:aws:logs:*:*:*'
+          ],
         },
       ],
     },

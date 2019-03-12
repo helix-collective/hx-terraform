@@ -1,8 +1,8 @@
 import os
 import uuid
 import sys
+import zipfile
 from datetime import date
-import getpass
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
 from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
@@ -18,6 +18,8 @@ terraform_image_built = MarkerFile(HERE/'build/.terraform_image_built')
 terraform_image_pushed = MarkerFile(HERE/'build/.terraform_image_pushed')
 
 provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10/8.2.2/bin/hx-provisioning-tools'
+
+lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
 
 nodemodules = YarnNodeModules(HERE / 'typescript')
 
@@ -42,11 +44,22 @@ def confirm_apply():
         print("terraform apply aborted")
         sys.exit(1)
 
+def task_lambda_zips():
+    for f in rglobfiles(lambda_zip_sources):
+        zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
+        yield {
+            'name': f.stem,
+            'doc' : 'Build a zip archive for a lambda function',
+            'actions': [generate_zip(zipfile, [f])],
+            'file_dep': [f],
+            'targets': [zipfile],
+        }
+
 def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes',
         'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan']) ],
-        'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep(),
+        'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep() + lambda_zipfiles(),
         'verbosity' : 2,
         'uptodate': [False],
     }
@@ -55,7 +68,7 @@ def task_apply():
   return {
       'doc' : 'Execute terraform apply to make any pending infrastructure changes',
       'actions': [ confirm_apply, generate_tf(), dockerized_terraform(['apply', '-auto-approve']) ],
-      'file_dep': [ terraform_initialized.path ],
+      'file_dep': [ terraform_initialized.path ] + lambda_zipfiles(),
       'verbosity' : 2,
       'uptodate': [False],
   }
@@ -84,3 +97,18 @@ def task_terraform_init():
         'verbosity' : 2,
         'uptodate': [True], # the task is up to date if its ever been run
     }
+
+def generate_zip(zip,paths):
+    def thunk():
+        os.makedirs(zip.parent, exist_ok=True)
+        with zipfile.ZipFile(str(zip), 'w') as zf:
+            for p in paths:
+                zf.write(p,arcname=p.name)
+    return thunk
+
+def lambda_zipfiles():
+    zipfiles = []
+    for f in rglobfiles(lambda_zip_sources):
+        zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
+        zipfiles.append(zipfile)
+    return zipfiles

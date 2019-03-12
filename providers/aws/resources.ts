@@ -1172,6 +1172,123 @@ type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
 export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
 
 /**
+ *  Provides information about a Lambda Function.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/d/lambda_function.html
+ */
+export function createLambdaFunction(tfgen: TF.Generator, rname: string, params: LambdaFunctionParams): LambdaFunction {
+  const fields = fieldsFromLambdaFunctionParams(params);
+  const resource = tfgen.createTypedResource('LambdaFunction', 'aws_lambda_function', rname, fields);
+  const function_name: string =  '${' + TF.resourceName(resource) + '.function_name}';
+  const role: IamRoleId =  {type: 'IamRoleId', value: '${' + TF.resourceName(resource) + '.role}'};
+  const arn: LambdaFunctionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LambdaFunction');
+
+  return {
+    ...resource,
+    function_name,
+    role,
+    arn,
+  };
+}
+
+export interface LambdaFunction extends TF.ResourceT<'LambdaFunction'> {
+  function_name: string;
+  role: IamRoleId;
+  arn: LambdaFunctionArn;
+}
+
+type LambdaFunctionId = {type:'LambdaFunctionId',value:string};
+export type LambdaFunctionArn = AT.ArnT<"LambdaFunction">;
+
+/**
+ *  Creates a Lambda permission to allow external sources invoking the Lambda function
+    (e.g. CloudWatch Event Rule, SNS or S3).
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/lambda_permission.html
+ */
+export function createLambdaPermission(tfgen: TF.Generator, rname: string, params: LambdaPermissionParams): LambdaPermission {
+  const fields = fieldsFromLambdaPermissionParams(params);
+  const resource = tfgen.createTypedResource('LambdaPermission', 'aws_lambda_permission', rname, fields);
+  const action: AT.LambdaPermissionAction =  {type: 'LambdaPermissionAction', value: '${' + TF.resourceName(resource) + '.action}'};
+  const function_name: string =  '${' + TF.resourceName(resource) + '.function_name}';
+  const principal: string =  '${' + TF.resourceName(resource) + '.principal}';
+  const arn: LambdaPermissionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LambdaPermission');
+
+  return {
+    ...resource,
+    action,
+    function_name,
+    principal,
+    arn,
+  };
+}
+
+export interface LambdaPermission extends TF.ResourceT<'LambdaPermission'> {
+  action: AT.LambdaPermissionAction;
+  function_name: string;
+  principal: string;
+  arn: LambdaPermissionArn;
+}
+
+type LambdaPermissionId = {type:'LambdaPermissionId',value:string};
+export type LambdaPermissionArn = AT.ArnT<"LambdaPermission">;
+
+/**
+ *  Provides a CloudWatch Event Rule resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html
+ */
+export function createCloudwatchEventRule(tfgen: TF.Generator, rname: string, params: CloudwatchEventRuleParams): CloudwatchEventRule {
+  const fields = fieldsFromCloudwatchEventRuleParams(params);
+  const resource = tfgen.createTypedResource('CloudwatchEventRule', 'aws_cloudwatch_event_rule', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const schedule_expression: string =  '${' + TF.resourceName(resource) + '.schedule_expression}';
+  const description: string =  '${' + TF.resourceName(resource) + '.description}';
+  const arn: CloudwatchEventRuleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudwatchEventRule');
+
+  return {
+    ...resource,
+    name,
+    schedule_expression,
+    description,
+    arn,
+  };
+}
+
+export interface CloudwatchEventRule extends TF.ResourceT<'CloudwatchEventRule'> {
+  name: string;
+  schedule_expression: string;
+  description: string;
+  arn: CloudwatchEventRuleArn;
+}
+
+type CloudwatchEventRuleId = {type:'CloudwatchEventRuleId',value:string};
+export type CloudwatchEventRuleArn = AT.ArnT<"CloudwatchEventRule">;
+
+/**
+ *  Provides a CloudWatch Event Target resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html
+ */
+export function createCloudwatchEventTarget(tfgen: TF.Generator, rname: string, params: CloudwatchEventTargetParams): CloudwatchEventTarget {
+  const fields = fieldsFromCloudwatchEventTargetParams(params);
+  const resource = tfgen.createTypedResource('CloudwatchEventTarget', 'aws_cloudwatch_event_target', rname, fields);
+  const arn: CloudwatchEventTargetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudwatchEventTarget');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface CloudwatchEventTarget extends TF.ResourceT<'CloudwatchEventTarget'> {
+  arn: CloudwatchEventTargetArn;
+}
+
+type CloudwatchEventTargetId = {type:'CloudwatchEventTargetId',value:string};
+export type CloudwatchEventTargetArn = AT.ArnT<"CloudwatchEventTarget">;
+
+/**
  *  Provides a WAF Byte Match Set Resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/waf_byte_match_set.html
@@ -2632,6 +2749,90 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
+export interface VpcConfigParams {
+  subnet_ids: SubnetId[];
+  security_group_ids: SecurityGroupId[];
+}
+
+export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
+export interface LambdaFunctionParams {
+  function_name: string;
+  filename?: string;
+  s3_bucket?: string;
+  s3_key?: string;
+  source_code_hash?: string;
+  role: AT.ArnT<"IamRole">;
+  handler: string;
+  runtime: AT.LambdaRuntime;
+  vpc_config?: VpcConfigParams;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addOptionalField(fields, "filename", params.filename, TF.stringValue);
+  TF.addOptionalField(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
+  TF.addOptionalField(fields, "s3_key", params.s3_key, TF.stringValue);
+  TF.addOptionalField(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
+  TF.addField(fields, "role", params.role, TF.resourceArnValue);
+  TF.addField(fields, "handler", params.handler, TF.stringValue);
+  TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
+  TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface LambdaPermissionParams {
+  action: AT.LambdaPermissionAction;
+  function_name: string;
+  principal: string;
+  source_arn?: AT.Arn;
+}
+
+export function fieldsFromLambdaPermissionParams(params: LambdaPermissionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "action", params.action, TF.stringAliasValue);
+  TF.addField(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addField(fields, "principal", params.principal, TF.stringValue);
+  TF.addOptionalField(fields, "source_arn", params.source_arn, TF.stringAliasValue);
+  return fields;
+}
+
+export interface CloudwatchEventRuleParams {
+  name?: string;
+  schedule_expression?: string;
+  description?: string;
+}
+
+export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "schedule_expression", params.schedule_expression, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  return fields;
+}
+
+export interface CloudwatchEventTargetParams {
+  rule: string;
+  arn: AT.Arn;
+  input: string;
+}
+
+export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rule", params.rule, TF.stringValue);
+  TF.addField(fields, "arn", params.arn, TF.stringAliasValue);
+  TF.addField(fields, "input", params.input, TF.stringValue);
   return fields;
 }
 

@@ -13,7 +13,7 @@ def run_dockerized_terraform(terraform_image, args):
     using_nix = os.environ.get('NIX_PATH') != None
 
     cmd =  "docker run -it --rm "
-    cmd += "-v `pwd`/terraform:/terraform -w /terraform "
+    cmd += "-v `pwd`:/src -w /src/terraform "
     cmd += "-v {0}:{0} ".format(os.environ['HOME'])
     if using_nix:
         cmd += "-v /nix:/nix "

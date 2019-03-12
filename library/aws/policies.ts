@@ -161,7 +161,7 @@ export function sqsQueueModifyPolicy(
         {
           Action: 'sqs:*',
           Effect: 'Allow',
-          Resource: queue.arn.value,
+          Resource: `${queue.arn.value}`,
         },
       ],
     },

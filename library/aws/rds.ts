@@ -71,7 +71,7 @@ export function createPostgresInstance(
     final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
     skip_final_snapshot: false,
     apply_immediately: false,
-    storage_type: AT.gp2
+    storage_type: AT.gp2,
   };
 
   if (params.customize) {

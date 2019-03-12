@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
-import { assume_role_policy, NamedPolicy } from './policies';
+import { assume_role_policy, NamedPolicy, assume_role_rds_monitoring_policy } from './policies';
 import { watchFile } from 'fs';
 
 /**
@@ -36,6 +36,34 @@ export function createIamRole(
   });
 }
 
+function createIamRolePolicywithPolicies(
+  tfgen: TF.Generator,
+  name: string,
+  role_policy: NamedPolicy,
+  policies: NamedPolicy[]
+): AR.IamRole {
+  const iamr = createIamRole(
+    tfgen,
+    name,
+    JSON.stringify(role_policy.policy, null, 2)
+  );
+  TF.withLocalNameScope(tfgen, name, tfgen => {
+    for (const policy of policies) {
+      createIamRolePolicy(tfgen, iamr, policy);
+    }
+  });
+  return iamr;
+}
+
+// Specifically used for Enhanced Monitoring
+export function createIamRdsRoleWithPolicies(
+    tfgen: TF.Generator,
+    name: string,
+    policies: NamedPolicy[]
+): AR.IamRole {
+  return createIamRolePolicywithPolicies(tfgen, name, assume_role_rds_monitoring_policy, policies);
+}
+
 /**
  * Create an IAM Role with the specified policies
  */
@@ -44,17 +72,7 @@ export function createIamRoleWithPolicies(
   name: string,
   policies: NamedPolicy[]
 ): AR.IamRole {
-  const iamr = createIamRole(
-    tfgen,
-    name,
-    JSON.stringify(assume_role_policy.policy, null, 2)
-  );
-  TF.withLocalNameScope(tfgen, name, tfgen => {
-    for (const policy of policies) {
-      createIamRolePolicy(tfgen, iamr, policy);
-    }
-  });
-  return iamr;
+  return createIamRolePolicywithPolicies(tfgen, name, assume_role_policy, policies);
 }
 
 /**

@@ -265,7 +265,7 @@ export function s3PublishNotificationPolicy(name: string, queue: string, bucket:
           Effect: 'Allow',
           Principal: '*',
           Action: ['sqs:SendMessage'],
-          Resource: [`arn:aws:sqs:::${queue}`],
+          Resource: [`arn:aws:sqs:*:*:${queue}`],
           Condition: {
             ArnLike: { "aws:SourceArn": `arn:aws:s3:*:*:${bucket}` }
           }

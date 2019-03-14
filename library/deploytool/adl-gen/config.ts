@@ -117,6 +117,11 @@ export interface ProxyModeConfig {
    * How we generate identifiers for slave machines
    */
   slaveLabel: MachineLabel;
+  /**
+   * The mustache template to used be for the proxy nginx configuration
+   * If not provided the builtin template will be used.
+   */
+  nginxConfTemplatePath: sys_types.Maybe<types.FilePath>;
 }
 
 export function makeProxyModeConfig(
@@ -125,6 +130,7 @@ export function makeProxyModeConfig(
     remoteStateS3?: sys_types.Maybe<types.S3Path>,
     dynamicPortRange?: sys_types.Pair<number, number>,
     slaveLabel?: MachineLabel,
+    nginxConfTemplatePath?: sys_types.Maybe<types.FilePath>,
   }
 ): ProxyModeConfig {
   return {
@@ -132,11 +138,12 @@ export function makeProxyModeConfig(
     remoteStateS3: input.remoteStateS3 === undefined ? {kind : "nothing"} : input.remoteStateS3,
     dynamicPortRange: input.dynamicPortRange === undefined ? {v1 : 8000, v2 : 8100} : input.dynamicPortRange,
     slaveLabel: input.slaveLabel === undefined ? {kind : "ec2InstanceId"} : input.slaveLabel,
+    nginxConfTemplatePath: input.nginxConfTemplatePath === undefined ? {kind : "nothing"} : input.nginxConfTemplatePath,
   };
 }
 
 const ProxyModeConfig_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"endPoints","default":{"kind":"nothing"},"name":"endPoints","typeExpr":{"typeRef":{"kind":"primitive","value":"StringMap"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPoint"}},"parameters":[]}]}},{"annotations":[],"serializedName":"remoteStateS3","default":{"kind":"just","value":"nothing"},"name":"remoteStateS3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}]}},{"annotations":[],"serializedName":"dynamicPortRange","default":{"kind":"just","value":{"v1":8000,"v2":8100}},"name":"dynamicPortRange","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Pair"}},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]},{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}},{"annotations":[],"serializedName":"slaveLabel","default":{"kind":"just","value":"ec2InstanceId"},"name":"slaveLabel","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"MachineLabel"}},"parameters":[]}}]}},"name":"ProxyModeConfig","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"endPoints","default":{"kind":"nothing"},"name":"endPoints","typeExpr":{"typeRef":{"kind":"primitive","value":"StringMap"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPoint"}},"parameters":[]}]}},{"annotations":[],"serializedName":"remoteStateS3","default":{"kind":"just","value":"nothing"},"name":"remoteStateS3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}]}},{"annotations":[],"serializedName":"dynamicPortRange","default":{"kind":"just","value":{"v1":8000,"v2":8100}},"name":"dynamicPortRange","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Pair"}},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]},{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}},{"annotations":[],"serializedName":"slaveLabel","default":{"kind":"just","value":"ec2InstanceId"},"name":"slaveLabel","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"MachineLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"nginxConfTemplatePath","default":{"kind":"just","value":"nothing"},"name":"nginxConfTemplatePath","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}]}}]}},"name":"ProxyModeConfig","version":{"kind":"nothing"}}};
 
 export function texprProxyModeConfig(): ADL.ATypeExpr<ProxyModeConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ProxyModeConfig"}}, parameters : []}};

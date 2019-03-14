@@ -88,6 +88,10 @@ export class BootScript {
     this.appendToFile(`~${username}/.profile`, content);
   }
 
+  addSshKey(username: string, publicKey: string) {
+    this.appendToFile(`~${username}/.ssh/authorized_keys`, publicKey);
+  }
+
   addUserToGroup(username: string, groupname: string) {
     this.sh(`usermod -aG ${groupname} ${username}`);
   }

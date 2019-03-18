@@ -250,6 +250,7 @@ const route53_record: RecordDecl = {
     optionalField('ttl', STRING),
     optionalField('records', listType(STRING)),
     optionalField('alias', recordType(route53_alias)),
+    optionalField('allow_overwrite', BOOLEAN),
   ],
 };
 
@@ -1045,6 +1046,118 @@ const secretsmanager_secret_version: RecordDecl = {
   ]
 }
 
+const cloudfront_cookies: RecordDecl = {
+  name: 'cloudfront_cookies',
+  fields: [
+    requiredField('forward', enumType(['all','none','whitelist'])),
+    optionalField('whitelisted_names', listType(STRING)),
+  ]
+}
+
+const cloudfront_forwarded_values: RecordDecl = {
+  name: 'cloudfront_forwarded_values',
+  fields: [
+    requiredField('cookies', recordType(cloudfront_cookies)),
+    requiredField('query_string', BOOLEAN),
+  ]
+}
+
+const cloudfront_cache_behavior: RecordDecl = {
+  name: 'cloudfront_cache_behaviour',
+  fields: [
+    requiredField('allowed_methods', listType(STRING)),
+    requiredField('cached_methods', listType(STRING)),
+    requiredField('forwarded_values', recordType(cloudfront_forwarded_values)),
+    optionalField('path_pattern', STRING),
+    optionalField('compress', BOOLEAN),
+    optionalField('default_ttl', NUMBER),
+    optionalField('min_ttl', NUMBER),
+    optionalField('max_ttl', NUMBER),
+    requiredField('target_origin_id', STRING),
+    requiredField('viewer_protocol_policy', enumType(['allow-all', 'https-only', 'redirect-to-https']))
+  ]
+}
+
+const cloudfront_s3_origin_config : RecordDecl = {
+  name: 'cloudfront_s3_origin_config',
+  fields: [
+  ]
+}
+
+const cloudfront_custom_origin_config : RecordDecl = {
+  name: 'cloudfront_custom_origin_config',
+  fields: [
+    requiredField('http_port', NUMBER),
+    requiredField('https_port', NUMBER),
+    requiredField('origin_protocol_policy', enumType(['http-only', 'https-only', 'match-viewer'])),
+    requiredField('origin_ssl_protocols', listType(enumType(['SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2']))),
+    optionalField('origin_keepalive_timeout', NUMBER),
+    optionalField('origin_read_timeout', NUMBER)
+  ]
+}
+
+const cloudfront_origin: RecordDecl = {
+  name: 'cloudfront_origin',
+  fields: [
+    requiredField('domain_name', STRING),
+    requiredField('origin_id', STRING),
+    optionalField('s3_origin_config', recordType(cloudfront_s3_origin_config)),
+    optionalField('custom_origin_config', recordType(cloudfront_custom_origin_config)),
+
+  ]
+}
+
+const cloudfront_geo_restrictions: RecordDecl = {
+  name: 'cloudfront_geo_restrictions',
+  fields: [
+    requiredField('restriction_type', enumType(['none','whitelist', 'blacklist'])),
+    optionalField('locations', listType(STRING))
+  ]
+}
+
+const cloudfront_restrictions: RecordDecl = {
+  name: 'cloudfront_restrictions',
+  fields: [
+    requiredField('geo_restriction',recordType(cloudfront_geo_restrictions)),
+  ]
+}
+
+const cloudfront_viewer_certificate: RecordDecl = {
+  name: 'cloudfront_viewer_certificate',
+  fields: [
+    optionalField('cloudfront_default_certificate', BOOLEAN),
+    optionalField('acm_certificate_arn', arnType(acm_certificate)),
+    optionalField('minimum_protocol_version',  enumType(['SSLv3', 'TLSv1', 'TLSv1_2016', 'TLSv1.1_2016', 'TLSv1.2_2018'])),
+    optionalField('ssl_support_method', enumType(['vip', 'sni-only'])),
+  ]
+}
+
+const cloudfront_custom_error_response: RecordDecl = {
+  name: 'cloudfront_custom_error_response',
+  fields: [
+    requiredField('error_code', NUMBER ),
+    optionalField('response_code', NUMBER ),
+    optionalField('response_page_path', STRING),
+    optionalField('error_caching_min_ttl', NUMBER)
+
+  ]
+};
+
+const cloudfront_distribution: RecordDecl = {
+  name: 'cloudfront_distribution',
+  fields: [
+    requiredField('default_cache_behavior', recordType(cloudfront_cache_behavior)),
+    requiredField('enabled', BOOLEAN),
+    requiredField('origin', listType(recordType(cloudfront_origin))),
+    requiredField('restrictions', recordType(cloudfront_restrictions)),
+    requiredField('viewer_certificate', recordType(cloudfront_viewer_certificate)),
+    optionalField('aliases', listType(STRING) ),
+    optionalField('is_ipv6_enabled', BOOLEAN),
+    optionalField('custom_error_response', listType(recordType(cloudfront_custom_error_response))),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1629,6 +1742,20 @@ function generateAws(gen: Generator) {
     }
   )
 
+  gen.generateResource(
+    'Creates an Amazon CloudFront web distribution.',
+    'https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html',
+    cloudfront_distribution,
+    [ 
+      resourceIdAttr('id', cloudfront_distribution) ,
+      stringAttr('domain_name'),
+      stringAliasAttr('hosted_zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
+    ],
+    {
+      arn: true,
+    }
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1722,6 +1849,17 @@ function generateAws(gen: Generator) {
   gen.generateParams(wafregional_web_acl_association);
   gen.generateParams(secretsmanager_secret);
   gen.generateParams(secretsmanager_secret_version);
+  gen.generateParams(cloudfront_cookies);
+  gen.generateParams(cloudfront_custom_origin_config);
+  gen.generateParams(cloudfront_custom_error_response);
+  gen.generateParams(cloudfront_cache_behavior);
+  gen.generateParams(cloudfront_distribution);
+  gen.generateParams(cloudfront_forwarded_values);
+  gen.generateParams(cloudfront_origin);
+  gen.generateParams(cloudfront_geo_restrictions);
+  gen.generateParams(cloudfront_restrictions);
+  gen.generateParams(cloudfront_s3_origin_config);
+  gen.generateParams(cloudfront_viewer_certificate);
 }
 
 function generateRandom(gen: Generator) {

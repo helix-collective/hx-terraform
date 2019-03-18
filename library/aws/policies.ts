@@ -21,6 +21,21 @@ export const assume_role_policy = {
   },
 };
 
+export const assume_lambda_role_policy = {
+  name: 'assumerole',
+  policy: {
+    Version: '2012-10-17',
+    Statement: [
+      {
+        Action: 'sts:AssumeRole',
+        Principal: { Service: 'lambda.amazonaws.com' },
+        Effect: 'Allow',
+        Sid: '',
+      },
+    ],
+  },
+};
+
 export const assume_role_rds_monitoring_policy = {
   name: 'assumerole',
   policy: {
@@ -309,3 +324,25 @@ export const rdsMonitoringPolicy: NamedPolicy = {
     ]
   }
 }
+
+
+// Lambda role policy
+export const lambdaRolePolicy: NamedPolicy = {
+  name: 'rds-monitoring-policy',
+  policy: {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:CreateNetworkInterface",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeInstances",
+          "ec2:AttachNetworkInterface"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+};

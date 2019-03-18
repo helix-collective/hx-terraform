@@ -893,7 +893,7 @@ const lambda_function: RecordDecl = {
     optionalField('filename', STRING),
     optionalField('s3_bucket', STRING),
     optionalField('s3_key', STRING),
-    optionalField('role', resourceIdType('IamRoleId')),
+    optionalField('role', resourceIdType('AT.Arn')),
     optionalField('handler', STRING),
     optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('vpc_config', recordType(vpc_config)),

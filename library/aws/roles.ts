@@ -2,7 +2,12 @@ import * as _ from 'lodash';
 import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
-import { assume_role_policy, NamedPolicy, assume_role_rds_monitoring_policy } from './policies';
+import {
+  assume_role_policy,
+  NamedPolicy,
+  assume_role_rds_monitoring_policy,
+  assume_lambda_role_policy
+} from './policies';
 import { watchFile } from 'fs';
 
 /**
@@ -62,6 +67,15 @@ export function createIamRdsRoleWithPolicies(
     policies: NamedPolicy[]
 ): AR.IamRole {
   return createIamRolePolicywithPolicies(tfgen, name, assume_role_rds_monitoring_policy, policies);
+}
+
+// Specifically used for Lambda Functions
+export function createIamLambdaRoleWithPolicies(
+  tfgen: TF.Generator,
+  name: string,
+  policies: NamedPolicy[]
+): AR.IamRole {
+  return createIamRolePolicywithPolicies(tfgen, name, assume_lambda_role_policy, policies);
 }
 
 /**

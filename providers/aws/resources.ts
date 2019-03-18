@@ -2731,7 +2731,7 @@ export interface LambdaFunctionParams {
   filename?: string;
   s3_bucket?: string;
   s3_key?: string;
-  role?: IamRoleId;
+  role?: AT.Arn;
   handler?: string;
   runtime?: AT.LambdaRuntime;
   vpc_config?: VpcConfigParams;

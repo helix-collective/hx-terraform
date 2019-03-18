@@ -167,7 +167,7 @@ function genType(type: Type): string {
     case 'primitive':
       return type.type;
     case 'list':
-      return genType(type.type) + '[]';
+      return '(' + genType(type.type) + ')' + '[]';
     case 'record':
       return paramsInterfaceName(type.name);
     case 'stringalias':

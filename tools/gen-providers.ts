@@ -28,6 +28,7 @@ import {
   stringAliasAttr,
   resourceIdAttr,
 } from './gen-helpers';
+import { arn } from '../providers/aws/types';
 
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',
@@ -61,6 +62,39 @@ const instance: RecordDecl = {
       listType(resourceIdType('SecurityGroupId'))
     ),
     optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const db_instance: RecordDecl = {
+  name: 'db_instance',
+  fields: [
+    requiredField('allocated_storage', NUMBER),
+    requiredField('engine', stringAliasType('AT.DbEngine')),
+    requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
+    requiredField('username', STRING),
+    optionalField('password', STRING),
+    optionalField('engine_version', STRING),
+    optionalField('identifier', STRING),
+    optionalField('name', STRING),
+    optionalField('port', NUMBER),
+    optionalField('publicly_accessible', BOOLEAN),
+    optionalField('backup_retention_period', NUMBER),
+    optionalField(
+      'vpc_security_group_ids',
+      listType(resourceIdType('SecurityGroupId'))
+    ),
+    optionalField('parameter_group_name', STRING),
+    optionalField('db_subnet_group_name', STRING),
+    optionalField('tags', TAGS_MAP),
+    optionalField('skip_final_snapshot', BOOLEAN),
+    optionalField('final_snapshot_identifier', STRING),
+    optionalField('multi_az', BOOLEAN),
+    optionalField('license_model', STRING),
+    optionalField('auto_minor_version_upgrade', BOOLEAN),
+    optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
+    optionalField('apply_immediately', BOOLEAN),
+    optionalField('storage_encrypted', BOOLEAN),
+    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType')),
   ],
 };
 
@@ -406,41 +440,6 @@ const iam_role_policy: RecordDecl = {
   ],
 };
 
-const db_instance: RecordDecl = {
-  name: 'db_instance',
-  fields: [
-    requiredField('allocated_storage', NUMBER),
-    requiredField('engine', stringAliasType('AT.DbEngine')),
-    requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
-    requiredField('username', STRING),
-    optionalField('password', STRING),
-    optionalField('engine_version', STRING),
-    optionalField('identifier', STRING),
-    optionalField('name', STRING),
-    optionalField('port', NUMBER),
-    optionalField('publicly_accessible', BOOLEAN),
-    optionalField('backup_retention_period', NUMBER),
-    optionalField(
-      'vpc_security_group_ids',
-      listType(resourceIdType('SecurityGroupId'))
-    ),
-    optionalField('parameter_group_name', STRING),
-    optionalField('db_subnet_group_name', STRING),
-    optionalField('tags', TAGS_MAP),
-    optionalField('skip_final_snapshot', BOOLEAN),
-    optionalField('final_snapshot_identifier', STRING),
-    optionalField('multi_az', BOOLEAN),
-    optionalField('license_model', STRING),
-    optionalField('auto_minor_version_upgrade', BOOLEAN),
-    optionalField('replicate_source_db', stringAliasType('DbInstanceId')),
-    optionalField('apply_immediately', BOOLEAN),
-    optionalField('storage_encrypted', BOOLEAN),
-    optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType')),
-    optionalField('monitoring_interval', enumType(['0', '1', '5', '10', '15', '30', '60'])),
-    optionalField('monitoring_role_arn', arnType(iam_role)),
-  ],
-};
-
 const sqs_queue: RecordDecl = {
   name: 'sqs_queue',
   fields: [
@@ -564,11 +563,35 @@ const lb_target_group: RecordDecl = {
   ],
 };
 
+
+const lb_listener_action_redirect: RecordDecl = {
+  name: 'lb_listener_action_redirect',
+  fields: [
+    optionalField('host', STRING),
+    optionalField('path', STRING),
+    optionalField('port', STRING),
+    optionalField('protocol', enumType(['HTTP','HTTPS','#{protocol}'])),
+    optionalField('query', STRING),
+    requiredField('status_code', enumType(['HTTP_301', 'HTTP_302']))
+  ]
+};
+
+const lb_listener_action_fixed_response: RecordDecl = {
+  name: 'lb_listener_action_fixed_response',
+  fields: [
+    requiredField('content_type', enumType(['text/plain', 'text/css', 'text/html', 'application/javascript', 'application/json'])),
+    optionalField('message_body', STRING),
+    optionalField('statusCode', NUMBER),
+  ]
+};
+
 const lb_listener_action: RecordDecl = {
   name: 'lb_listener_action',
   fields: [
-    requiredField('target_group_arn', arnType(lb_target_group)),
-    requiredField('type', enumType(['forward'])),
+    requiredField('type', enumType(['forward','redirect','fixed-response'])),
+    optionalField('target_group_arn', arnType(lb_target_group)),
+    optionalField('redirect', recordType(lb_listener_action_redirect)),
+    optionalField('fixed_response', recordType(lb_listener_action_fixed_response)),
   ],
 };
 
@@ -897,6 +920,7 @@ const lambda_function: RecordDecl = {
     optionalField('handler', STRING),
     optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('vpc_config', recordType(vpc_config)),
+    optionalField('tags', TAGS_MAP),
   ],
 };
 
@@ -914,6 +938,7 @@ const cloudwatch_event_target = {
   fields: [
     requiredField('rule', STRING),
     requiredField('arn', stringAliasType('AT.Arn')),
+    requiredField('input', STRING)
   ],
 };
 
@@ -1052,6 +1077,138 @@ const wafregional_web_acl_association: RecordDecl = {
   fields: [
     requiredField('web_acl_id', resourceIdType('WafregionalWebAclId')),
     requiredField('resource_arn', arnType(lb)),
+  ]
+}
+
+const secretsmanager_secret: RecordDecl = {
+  name: 'secretsmanager_secret',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    optionalField('description', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
+const secretsmanager_secret_version: RecordDecl = {
+  name: 'secretsmanager_secret_version',
+  fields: [
+    requiredField('secret_id', resourceIdType('SecretsmanagerSecretId')),
+    optionalField('secret_string', STRING),
+    optionalField('secret_binary', STRING),
+    optionalField('version_stages', listType(STRING)),
+  ]
+}
+
+const cloudfront_cookies: RecordDecl = {
+  name: 'cloudfront_cookies',
+  fields: [
+    requiredField('forward', enumType(['all','none','whitelist'])),
+    optionalField('whitelisted_names', listType(STRING)),
+  ]
+}
+
+const cloudfront_forwarded_values: RecordDecl = {
+  name: 'cloudfront_forwarded_values',
+  fields: [
+    requiredField('cookies', recordType(cloudfront_cookies)),
+    requiredField('query_string', BOOLEAN),
+  ]
+}
+
+const cloudfront_cache_behavior: RecordDecl = {
+  name: 'cloudfront_cache_behaviour',
+  fields: [
+    requiredField('allowed_methods', listType(STRING)),
+    requiredField('cached_methods', listType(STRING)),
+    requiredField('forwarded_values', recordType(cloudfront_forwarded_values)),
+    optionalField('path_pattern', STRING),
+    optionalField('compress', BOOLEAN),
+    optionalField('default_ttl', NUMBER),
+    optionalField('min_ttl', NUMBER),
+    optionalField('max_ttl', NUMBER),
+    requiredField('target_origin_id', STRING),
+    requiredField('viewer_protocol_policy', enumType(['allow-all', 'https-only', 'redirect-to-https']))
+  ]
+}
+
+const cloudfront_s3_origin_config : RecordDecl = {
+  name: 'cloudfront_s3_origin_config',
+  fields: [
+  ]
+}
+
+const cloudfront_custom_origin_config : RecordDecl = {
+  name: 'cloudfront_custom_origin_config',
+  fields: [
+    requiredField('http_port', NUMBER),
+    requiredField('https_port', NUMBER),
+    requiredField('origin_protocol_policy', enumType(['http-only', 'https-only', 'match-viewer'])),
+    requiredField('origin_ssl_protocols', listType(enumType(['SSLv3', 'TLSv1', 'TLSv1.1', 'TLSv1.2']))),
+    optionalField('origin_keepalive_timeout', NUMBER),
+    optionalField('origin_read_timeout', NUMBER)
+  ]
+}
+
+const cloudfront_origin: RecordDecl = {
+  name: 'cloudfront_origin',
+  fields: [
+    requiredField('domain_name', STRING),
+    requiredField('origin_id', STRING),
+    optionalField('s3_origin_config', recordType(cloudfront_s3_origin_config)),
+    optionalField('custom_origin_config', recordType(cloudfront_custom_origin_config)),
+
+  ]
+}
+
+const cloudfront_geo_restrictions: RecordDecl = {
+  name: 'cloudfront_geo_restrictions',
+  fields: [
+    requiredField('restriction_type', enumType(['none','whitelist', 'blacklist'])),
+    optionalField('locations', listType(STRING))
+  ]
+}
+
+const cloudfront_restrictions: RecordDecl = {
+  name: 'cloudfront_restrictions',
+  fields: [
+    requiredField('geo_restriction',recordType(cloudfront_geo_restrictions)),
+  ]
+}
+
+const cloudfront_viewer_certificate: RecordDecl = {
+  name: 'cloudfront_viewer_certificate',
+  fields: [
+    optionalField('cloudfront_default_certificate', BOOLEAN),
+    optionalField('acm_certificate_arn', arnType(acm_certificate)),
+    optionalField('minimum_protocol_version',  enumType(['SSLv3', 'TLSv1', 'TLSv1_2016', 'TLSv1.1_2016', 'TLSv1.2_2018'])),
+    optionalField('ssl_support_method', enumType(['vip', 'sni-only'])),
+  ]
+}
+
+const cloudfront_custom_error_response: RecordDecl = {
+  name: 'cloudfront_custom_error_response',
+  fields: [
+    requiredField('error_code', NUMBER ),
+    optionalField('response_code', NUMBER ),
+    optionalField('response_page_path', STRING),
+    optionalField('error_caching_min_ttl', NUMBER)
+
+  ]
+};
+
+const cloudfront_distribution: RecordDecl = {
+  name: 'cloudfront_distribution',
+  fields: [
+    requiredField('default_cache_behavior', recordType(cloudfront_cache_behavior)),
+    requiredField('enabled', BOOLEAN),
+    requiredField('origin', listType(recordType(cloudfront_origin))),
+    requiredField('restrictions', recordType(cloudfront_restrictions)),
+    requiredField('viewer_certificate', recordType(cloudfront_viewer_certificate)),
+    optionalField('aliases', listType(STRING) ),
+    optionalField('is_ipv6_enabled', BOOLEAN),
+    optionalField('custom_error_response', listType(recordType(cloudfront_custom_error_response))),
+    optionalField('tags', TAGS_MAP),
   ]
 }
 
@@ -1316,7 +1473,10 @@ function generateAws(gen: Generator) {
     'Provides an SQS queue.',
     'https://www.terraform.io/docs/providers/aws/r/sqs_queue.html',
     sqs_queue,
-    [resourceIdAttr('id', sqs_queue)],
+    [
+      resourceIdAttr('id', sqs_queue),
+      stringAttr('name'),
+    ],
     {
       arn: true,
     }
@@ -1639,6 +1799,40 @@ function generateAws(gen: Generator) {
     ]
   )
 
+  gen.generateResource(
+    'Provides a resource to manage AWS Secrets Manager secret metadata.',
+    'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html',
+    secretsmanager_secret,
+    [ resourceIdAttr('id', secretsmanager_secret) ],
+    {
+      arn: true,
+    }
+  )
+
+  gen.generateResource(
+    'Provides a resource to manage AWS Secrets Manager secret version including its secret value.',
+    'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret_version.html',
+    secretsmanager_secret_version,
+    [ resourceIdAttr('id', secretsmanager_secret) ],
+    {
+      arn: true,
+    }
+  )
+
+  gen.generateResource(
+    'Creates an Amazon CloudFront web distribution.',
+    'https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html',
+    cloudfront_distribution,
+    [
+      resourceIdAttr('id', cloudfront_distribution) ,
+      stringAttr('domain_name'),
+      stringAliasAttr('hosted_zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
+    ],
+    {
+      arn: true,
+    }
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1685,6 +1879,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_subnet_mapping);
   gen.generateParams(lb_listener);
   gen.generateParams(lb_listener_action);
+  gen.generateParams(lb_listener_action_redirect);
+  gen.generateParams(lb_listener_action_fixed_response);
   gen.generateParams(lb_target_group);
   gen.generateParams(lb_target_group_health_check);
   gen.generateParams(lb_target_group_stickiness);
@@ -1733,6 +1929,19 @@ function generateAws(gen: Generator) {
   gen.generateParams(wafregional_web_acl);
   gen.generateParams(wafregional_web_acl_association);
   gen.generateParams(elasticache_subnet_group);
+  gen.generateParams(secretsmanager_secret);
+  gen.generateParams(secretsmanager_secret_version);
+  gen.generateParams(cloudfront_cookies);
+  gen.generateParams(cloudfront_custom_origin_config);
+  gen.generateParams(cloudfront_custom_error_response);
+  gen.generateParams(cloudfront_cache_behavior);
+  gen.generateParams(cloudfront_distribution);
+  gen.generateParams(cloudfront_forwarded_values);
+  gen.generateParams(cloudfront_origin);
+  gen.generateParams(cloudfront_geo_restrictions);
+  gen.generateParams(cloudfront_restrictions);
+  gen.generateParams(cloudfront_s3_origin_config);
+  gen.generateParams(cloudfront_viewer_certificate);
 }
 
 function generateRandom(gen: Generator) {

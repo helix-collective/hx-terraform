@@ -715,17 +715,20 @@ export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQu
   const fields = fieldsFromSqsQueueParams(params);
   const resource = tfgen.createTypedResource('SqsQueue', 'aws_sqs_queue', rname, fields);
   const id: SqsQueueId =  {type: 'SqsQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const arn: SqsQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SqsQueue');
 
   return {
     ...resource,
     id,
+    name,
     arn,
   };
 }
 
 export interface SqsQueue extends TF.ResourceT<'SqsQueue'> {
   id: SqsQueueId;
+  name: string;
   arn: SqsQueueArn;
 }
 
@@ -1134,29 +1137,6 @@ type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:str
 export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 
 /**
- *  Provides an ElastiCache Subnet Group resource.
- *
- *  see https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html
- */
-export function createElasticacheSubnetGroup(tfgen: TF.Generator, rname: string, params: ElasticacheSubnetGroupParams): ElasticacheSubnetGroup {
-  const fields = fieldsFromElasticacheSubnetGroupParams(params);
-  const resource = tfgen.createTypedResource('ElasticacheSubnetGroup', 'aws_elasticache_subnet_group', rname, fields);
-  const arn: ElasticacheSubnetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheSubnetGroup');
-
-  return {
-    ...resource,
-    arn,
-  };
-}
-
-export interface ElasticacheSubnetGroup extends TF.ResourceT<'ElasticacheSubnetGroup'> {
-  arn: ElasticacheSubnetGroupArn;
-}
-
-type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
-export type ElasticacheSubnetGroupArn = AT.ArnT<"ElasticacheSubnetGroup">;
-
-/**
  *  Provides an elasticache cluster resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html
@@ -1190,32 +1170,6 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
 
 type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
 export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
-
-/**
- *  Provides an S3 bucket event notification resource.
- *
- *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html
- */
-export function createS3BucketNotification(tfgen: TF.Generator, rname: string, params: S3BucketNotificationParams): S3BucketNotification {
-  const fields = fieldsFromS3BucketNotificationParams(params);
-  const resource = tfgen.createTypedResource('S3BucketNotification', 'aws_s3_bucket_notification', rname, fields);
-  const bucket: string =  '${' + TF.resourceName(resource) + '.bucket}';
-  const arn: S3BucketNotificationArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'S3BucketNotification');
-
-  return {
-    ...resource,
-    bucket,
-    arn,
-  };
-}
-
-export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification'> {
-  bucket: string;
-  arn: S3BucketNotificationArn;
-}
-
-type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
-export type S3BucketNotificationArn = AT.ArnT<"S3BucketNotification">;
 
 /**
  *  Provides information about a Lambda Function.
@@ -1518,6 +1472,90 @@ export interface WafregionalWebAclAssociation extends TF.ResourceT<'WafregionalW
 
 type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
 
+/**
+ *  Provides a resource to manage AWS Secrets Manager secret metadata.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html
+ */
+export function createSecretsmanagerSecret(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretParams): SecretsmanagerSecret {
+  const fields = fieldsFromSecretsmanagerSecretParams(params);
+  const resource = tfgen.createTypedResource('SecretsmanagerSecret', 'aws_secretsmanager_secret', rname, fields);
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: SecretsmanagerSecretArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecret');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface SecretsmanagerSecret extends TF.ResourceT<'SecretsmanagerSecret'> {
+  id: SecretsmanagerSecretId;
+  arn: SecretsmanagerSecretArn;
+}
+
+type SecretsmanagerSecretId = {type:'SecretsmanagerSecretId',value:string};
+export type SecretsmanagerSecretArn = AT.ArnT<"SecretsmanagerSecret">;
+
+/**
+ *  Provides a resource to manage AWS Secrets Manager secret version including its secret value.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret_version.html
+ */
+export function createSecretsmanagerSecretVersion(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretVersionParams): SecretsmanagerSecretVersion {
+  const fields = fieldsFromSecretsmanagerSecretVersionParams(params);
+  const resource = tfgen.createTypedResource('SecretsmanagerSecretVersion', 'aws_secretsmanager_secret_version', rname, fields);
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: SecretsmanagerSecretVersionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecretVersion');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface SecretsmanagerSecretVersion extends TF.ResourceT<'SecretsmanagerSecretVersion'> {
+  id: SecretsmanagerSecretId;
+  arn: SecretsmanagerSecretVersionArn;
+}
+
+type SecretsmanagerSecretVersionId = {type:'SecretsmanagerSecretVersionId',value:string};
+export type SecretsmanagerSecretVersionArn = AT.ArnT<"SecretsmanagerSecretVersion">;
+
+/**
+ *  Creates an Amazon CloudFront web distribution.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html
+ */
+export function createCloudfrontDistribution(tfgen: TF.Generator, rname: string, params: CloudfrontDistributionParams): CloudfrontDistribution {
+  const fields = fieldsFromCloudfrontDistributionParams(params);
+  const resource = tfgen.createTypedResource('CloudfrontDistribution', 'aws_cloudfront_distribution', rname, fields);
+  const id: CloudfrontDistributionId =  {type: 'CloudfrontDistributionId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const domain_name: string =  '${' + TF.resourceName(resource) + '.domain_name}';
+  const hosted_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.hosted_zone_id}'};
+  const arn: CloudfrontDistributionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudfrontDistribution');
+
+  return {
+    ...resource,
+    id,
+    domain_name,
+    hosted_zone_id,
+    arn,
+  };
+}
+
+export interface CloudfrontDistribution extends TF.ResourceT<'CloudfrontDistribution'> {
+  id: CloudfrontDistributionId;
+  domain_name: string;
+  hosted_zone_id: AT.HostedZoneId;
+  arn: CloudfrontDistributionArn;
+}
+
+type CloudfrontDistributionId = {type:'CloudfrontDistributionId',value:string};
+export type CloudfrontDistributionArn = AT.ArnT<"CloudfrontDistribution">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -1537,10 +1575,10 @@ export interface AutoscalingGroupParams {
   name_prefix?: string;
   min_size: number;
   max_size: number;
-  vpc_zone_identifier?: SubnetId[];
+  vpc_zone_identifier?: (SubnetId)[];
   launch_configuration: string;
-  load_balancers?: string[];
-  tags?: AutoscalingGroupTagParams[];
+  load_balancers?: (string)[];
+  tags?: (AutoscalingGroupTagParams)[];
 }
 
 export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams) : TF.ResourceFieldMap {
@@ -1596,7 +1634,7 @@ export interface InstanceParams {
   root_block_device?: InstanceRootBlockDeviceParams;
   user_data?: string;
   iam_instance_profile?: IamInstanceProfileId;
-  vpc_security_group_ids?: SecurityGroupId[];
+  vpc_security_group_ids?: (SecurityGroupId)[];
   tags?: TF.TagsMap;
 }
 
@@ -1630,7 +1668,7 @@ export interface DbInstanceParams {
   port?: number;
   publicly_accessible?: boolean;
   backup_retention_period?: number;
-  vpc_security_group_ids?: SecurityGroupId[];
+  vpc_security_group_ids?: (SecurityGroupId)[];
   parameter_group_name?: string;
   db_subnet_group_name?: string;
   tags?: TF.TagsMap;
@@ -1643,8 +1681,6 @@ export interface DbInstanceParams {
   apply_immediately?: boolean;
   storage_encrypted?: boolean;
   storage_type?: AT.DbInstanceStorageType;
-  monitoring_interval?: '0' | '1' | '5' | '10' | '15' | '30' | '60';
-  monitoring_role_arn?: AT.ArnT<"IamRole">;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -1673,8 +1709,6 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.stringValue);
-  TF.addOptionalField(fields, "monitoring_role_arn", params.monitoring_role_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -1734,8 +1768,8 @@ export interface SecurityGroupParams {
   name?: string;
   name_prefix?: string;
   description?: string;
-  ingress?: IngressRuleParams[];
-  egress?: EgressRuleParams[];
+  ingress?: (IngressRuleParams)[];
+  egress?: (EgressRuleParams)[];
   vpc_id?: VpcId;
   tags?: TF.TagsMap;
 }
@@ -1756,7 +1790,7 @@ export interface IngressRuleParams {
   from_port: number;
   to_port: number;
   protocol: 'tcp' | 'udp' | 'icmp' | '-1';
-  cidr_blocks: AT.CidrBlock[];
+  cidr_blocks: (AT.CidrBlock)[];
 }
 
 export function fieldsFromIngressRuleParams(params: IngressRuleParams) : TF.ResourceFieldMap {
@@ -1772,7 +1806,7 @@ export interface EgressRuleParams {
   from_port: number;
   to_port: number;
   protocol: 'tcp' | 'udp' | 'icmp' | '-1';
-  cidr_blocks: AT.CidrBlock[];
+  cidr_blocks: (AT.CidrBlock)[];
 }
 
 export function fieldsFromEgressRuleParams(params: EgressRuleParams) : TF.ResourceFieldMap {
@@ -1873,8 +1907,9 @@ export interface Route53RecordParams {
   name: string;
   type: 'A' | 'AAAA' | 'CAA' | 'CNAME' | 'MX' | 'NAPTR' | 'NS' | 'PTR' | 'SOA' | 'SPF' | 'SRV' | 'TXT';
   ttl?: string;
-  records?: string[];
+  records?: (string)[];
   alias?: Route53AliasParams;
+  allow_overwrite?: boolean;
 }
 
 export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.ResourceFieldMap {
@@ -1885,6 +1920,7 @@ export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.
   TF.addOptionalField(fields, "ttl", params.ttl, TF.stringValue);
   TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "alias", params.alias, (v) => TF.mapValue(fieldsFromRoute53AliasParams(v)));
+  TF.addOptionalField(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
   return fields;
 }
 
@@ -1945,10 +1981,10 @@ export function fieldsFromLifecycleRuleParams(params: LifecycleRuleParams) : TF.
 }
 
 export interface CorsRuleParams {
-  allowed_headers?: string[];
-  allowed_methods: string[];
-  allowed_origins: string[];
-  expose_headers?: string[];
+  allowed_headers?: (string)[];
+  allowed_methods: (string)[];
+  allowed_origins: (string)[];
+  expose_headers?: (string)[];
   max_age_seconds?: number;
 }
 
@@ -2083,7 +2119,7 @@ export function fieldsFromEcrRepositoryParams(params: EcrRepositoryParams) : TF.
 export interface DbSubnetGroupParams {
   name: string;
   description?: string;
-  subnet_ids: SubnetId[];
+  subnet_ids: (SubnetId)[];
   tags?: TF.TagsMap;
 }
 
@@ -2106,11 +2142,11 @@ export interface CloudwatchMetricAlarmParams {
   statistic: 'SampleCount' | 'Average' | 'Sum' | 'Minimum' | 'Maximum';
   threshold: number;
   actions_enabled?: boolean;
-  alarm_actions?: AT.Arn[];
+  alarm_actions?: (AT.Arn)[];
   alarm_description?: string;
   dimensions?: TF.TagsMap;
-  insufficient_data_actions?: AT.Arn[];
-  ok_actions?: AT.Arn[];
+  insufficient_data_actions?: (AT.Arn)[];
+  ok_actions?: (AT.Arn)[];
   unit?: string;
 }
 
@@ -2138,7 +2174,7 @@ export interface IamInstanceProfileParams {
   name?: string;
   name_prefix?: string;
   path?: string;
-  roles?: string[];
+  roles?: (string)[];
   role?: string;
 }
 
@@ -2231,10 +2267,10 @@ export interface LbParams {
   name_prefix?: string;
   internal?: boolean;
   load_balancer_type?: 'application' | 'network';
-  security_groups?: SecurityGroupId[];
+  security_groups?: (SecurityGroupId)[];
   access_logs?: LbAccessLogsParams;
-  subnets?: SubnetId[];
-  subnet_mapping?: LbSubnetMappingParams[];
+  subnets?: (SubnetId)[];
+  subnet_mapping?: (LbSubnetMappingParams)[];
   idle_timeout?: number;
   enable_deletion_protection?: boolean;
   enable_cross_zone_load_balancing?: boolean;
@@ -2311,14 +2347,52 @@ export function fieldsFromLbListenerParams(params: LbListenerParams) : TF.Resour
 }
 
 export interface LbListenerActionParams {
-  target_group_arn: AT.ArnT<"LbTargetGroup">;
-  type: 'forward';
+  type: 'forward' | 'redirect' | 'fixed-response';
+  target_group_arn?: AT.ArnT<"LbTargetGroup">;
+  redirect?: LbListenerActionRedirectParams;
+  fixed_response?: LbListenerActionFixedResponseParams;
 }
 
 export function fieldsFromLbListenerActionParams(params: LbListenerActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "redirect", params.redirect, (v) => TF.mapValue(fieldsFromLbListenerActionRedirectParams(v)));
+  TF.addOptionalField(fields, "fixed_response", params.fixed_response, (v) => TF.mapValue(fieldsFromLbListenerActionFixedResponseParams(v)));
+  return fields;
+}
+
+export interface LbListenerActionRedirectParams {
+  host?: string;
+  path?: string;
+  port?: string;
+  protocol?: 'HTTP' | 'HTTPS' | '#{protocol}';
+  query?: string;
+  status_code: 'HTTP_301' | 'HTTP_302';
+}
+
+export function fieldsFromLbListenerActionRedirectParams(params: LbListenerActionRedirectParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "host", params.host, TF.stringValue);
+  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalField(fields, "port", params.port, TF.stringValue);
+  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalField(fields, "query", params.query, TF.stringValue);
+  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
+  return fields;
+}
+
+export interface LbListenerActionFixedResponseParams {
+  content_type: 'text/plain' | 'text/css' | 'text/html' | 'application/javascript' | 'application/json';
+  message_body?: string;
+  statusCode?: number;
+}
+
+export function fieldsFromLbListenerActionFixedResponseParams(params: LbListenerActionFixedResponseParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "content_type", params.content_type, TF.stringValue);
+  TF.addOptionalField(fields, "message_body", params.message_body, TF.stringValue);
+  TF.addOptionalField(fields, "statusCode", params.statusCode, TF.numberValue);
   return fields;
 }
 
@@ -2426,7 +2500,7 @@ export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : T
 
 export interface LbListenerRuleConditionParams {
   field: 'path-pattern' | 'host-header';
-  values: string[];
+  values: (string)[];
 }
 
 export function fieldsFromLbListenerRuleConditionParams(params: LbListenerRuleConditionParams) : TF.ResourceFieldMap {
@@ -2546,7 +2620,7 @@ export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchD
 
 export interface AcmCertificateParams {
   domain_name: string;
-  subject_alternative_names?: string[];
+  subject_alternative_names?: (string)[];
   validation_method: string;
   tags?: TF.TagsMap;
 }
@@ -2562,7 +2636,7 @@ export function fieldsFromAcmCertificateParams(params: AcmCertificateParams) : T
 
 export interface AcmCertificateValidationParams {
   certificate_arn: AT.ArnT<"AcmCertificate">;
-  validation_record_fqdns?: string[];
+  validation_record_fqdns?: (string)[];
 }
 
 export function fieldsFromAcmCertificateValidationParams(params: AcmCertificateValidationParams) : TF.ResourceFieldMap {
@@ -2591,7 +2665,7 @@ export interface LaunchConfigurationParams {
   instance_type: AT.InstanceType;
   iam_instance_profile?: IamInstanceProfileId;
   key_name?: AT.KeyName;
-  security_groups?: SecurityGroupId[];
+  security_groups?: (SecurityGroupId)[];
   associate_public_ip_address?: boolean;
   user_data?: string;
   enable_monitoring?: boolean;
@@ -2697,8 +2771,7 @@ export interface ElasticacheClusterParams {
   num_cache_nodes: number;
   parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
-  security_group_ids?: SecurityGroupId[];
-  subnet_group_name ?: AT.ElasticacheSubnetGroupName;
+  security_group_ids?: (SecurityGroupId)[];
 }
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
@@ -2710,13 +2783,12 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "subnet_group_name ", params.subnet_group_name , TF.stringAliasValue);
   return fields;
 }
 
 export interface VpcConfigParams {
-  subnet_ids: SubnetId[];
-  security_group_ids: SecurityGroupId[];
+  subnet_ids: (SubnetId)[];
+  security_group_ids: (SecurityGroupId)[];
 }
 
 export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.ResourceFieldMap {
@@ -2731,10 +2803,12 @@ export interface LambdaFunctionParams {
   filename?: string;
   s3_bucket?: string;
   s3_key?: string;
-  role?: AT.Arn;
-  handler?: string;
-  runtime?: AT.LambdaRuntime;
+  source_code_hash?: string;
+  role: AT.ArnT<"IamRole">;
+  handler: string;
+  runtime: AT.LambdaRuntime;
   vpc_config?: VpcConfigParams;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : TF.ResourceFieldMap {
@@ -2743,80 +2817,12 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addOptionalField(fields, "filename", params.filename, TF.stringValue);
   TF.addOptionalField(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalField(fields, "s3_key", params.s3_key, TF.stringValue);
-  TF.addOptionalField(fields, "role", params.role, TF.resourceIdValue);
-  TF.addOptionalField(fields, "handler", params.handler, TF.stringValue);
-  TF.addOptionalField(fields, "runtime", params.runtime, TF.stringAliasValue);
+  TF.addOptionalField(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
+  TF.addField(fields, "role", params.role, TF.resourceArnValue);
+  TF.addField(fields, "handler", params.handler, TF.stringValue);
+  TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
-  return fields;
-}
-
-export interface SnsEventNotificationTargetParams {
-  sns_arn: string;
-  id?: string;
-  events: AT.BucketEventNotificationType[];
-  filter_prefix?: string;
-  filter_suffix?: string;
-}
-
-export function fieldsFromSnsEventNotificationTargetParams(params: SnsEventNotificationTargetParams) : TF.ResourceFieldMap {
-  const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "sns_arn", params.sns_arn, TF.stringValue);
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
-  return fields;
-}
-
-export interface SqsEventNotificationTargetParams {
-  queue_arn: string;
-  id?: string;
-  events: AT.BucketEventNotificationType[];
-  filter_prefix?: string;
-  filter_suffix?: string;
-}
-
-export function fieldsFromSqsEventNotificationTargetParams(params: SqsEventNotificationTargetParams) : TF.ResourceFieldMap {
-  const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "queue_arn", params.queue_arn, TF.stringValue);
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
-  return fields;
-}
-
-export interface LambdaEventNotificationTargetParams {
-  lambda_arn: string;
-  id?: string;
-  events: AT.BucketEventNotificationType[];
-  filter_prefix?: string;
-  filter_suffix?: string;
-}
-
-export function fieldsFromLambdaEventNotificationTargetParams(params: LambdaEventNotificationTargetParams) : TF.ResourceFieldMap {
-  const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "lambda_arn", params.lambda_arn, TF.stringValue);
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
-  return fields;
-}
-
-export interface S3BucketNotificationParams {
-  bucket: string;
-  topic?: SnsEventNotificationTargetParams;
-  queue?: SqsEventNotificationTargetParams;
-  lambda_function ?: LambdaEventNotificationTargetParams;
-}
-
-export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
-  const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "topic", params.topic, (v) => TF.mapValue(fieldsFromSnsEventNotificationTargetParams(v)));
-  TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromSqsEventNotificationTargetParams(v)));
-  TF.addOptionalField(fields, "lambda_function ", params.lambda_function , (v) => TF.mapValue(fieldsFromLambdaEventNotificationTargetParams(v)));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -2853,12 +2859,14 @@ export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleP
 export interface CloudwatchEventTargetParams {
   rule: string;
   arn: AT.Arn;
+  input: string;
 }
 
 export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "rule", params.rule, TF.stringValue);
   TF.addField(fields, "arn", params.arn, TF.stringAliasValue);
+  TF.addField(fields, "input", params.input, TF.stringValue);
   return fields;
 }
 
@@ -2926,7 +2934,7 @@ export function fieldsFromWafIpsetParams(params: WafIpsetParams) : TF.ResourceFi
 
 export interface WafregionalRegexPatternSetParams {
   name: string;
-  regex_pattern_strings?: string[];
+  regex_pattern_strings?: (string)[];
 }
 
 export function fieldsFromWafregionalRegexPatternSetParams(params: WafregionalRegexPatternSetParams) : TF.ResourceFieldMap {
@@ -2964,7 +2972,7 @@ export function fieldsFromWafregionalRegexMatchSetParams(params: WafregionalRege
 
 export interface WafregionalIpsetParams {
   name: string;
-  ip_set_descriptor?: IpSetDescriptorsParams[];
+  ip_set_descriptor?: (IpSetDescriptorsParams)[];
 }
 
 export function fieldsFromWafregionalIpsetParams(params: WafregionalIpsetParams) : TF.ResourceFieldMap {
@@ -2991,7 +2999,7 @@ export function fieldsFromPredicateParams(params: PredicateParams) : TF.Resource
 export interface WafregionalRuleParams {
   name: string;
   metric_name: string;
-  predicate?: PredicateParams[];
+  predicate?: (PredicateParams)[];
 }
 
 export function fieldsFromWafregionalRuleParams(params: WafregionalRuleParams) : TF.ResourceFieldMap {
@@ -3058,16 +3066,210 @@ export function fieldsFromWafregionalWebAclAssociationParams(params: Wafregional
   return fields;
 }
 
-export interface ElasticacheSubnetGroupParams {
-  name: string;
+export interface SecretsmanagerSecretParams {
+  name?: string;
+  name_prefix?: string;
   description?: string;
-  subnet_ids: SubnetId[];
+  tags?: TF.TagsMap;
 }
 
-export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnetGroupParams) : TF.ResourceFieldMap {
+export function fieldsFromSecretsmanagerSecretParams(params: SecretsmanagerSecretParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SecretsmanagerSecretVersionParams {
+  secret_id: SecretsmanagerSecretId;
+  secret_string?: string;
+  secret_binary?: string;
+  version_stages?: (string)[];
+}
+
+export function fieldsFromSecretsmanagerSecretVersionParams(params: SecretsmanagerSecretVersionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "secret_id", params.secret_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "secret_string", params.secret_string, TF.stringValue);
+  TF.addOptionalField(fields, "secret_binary", params.secret_binary, TF.stringValue);
+  TF.addOptionalField(fields, "version_stages", params.version_stages, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface CloudfrontCookiesParams {
+  forward: 'all' | 'none' | 'whitelist';
+  whitelisted_names?: (string)[];
+}
+
+export function fieldsFromCloudfrontCookiesParams(params: CloudfrontCookiesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "forward", params.forward, TF.stringValue);
+  TF.addOptionalField(fields, "whitelisted_names", params.whitelisted_names, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface CloudfrontCustomOriginConfigParams {
+  http_port: number;
+  https_port: number;
+  origin_protocol_policy: 'http-only' | 'https-only' | 'match-viewer';
+  origin_ssl_protocols: ('SSLv3' | 'TLSv1' | 'TLSv1.1' | 'TLSv1.2')[];
+  origin_keepalive_timeout?: number;
+  origin_read_timeout?: number;
+}
+
+export function fieldsFromCloudfrontCustomOriginConfigParams(params: CloudfrontCustomOriginConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "http_port", params.http_port, TF.numberValue);
+  TF.addField(fields, "https_port", params.https_port, TF.numberValue);
+  TF.addField(fields, "origin_protocol_policy", params.origin_protocol_policy, TF.stringValue);
+  TF.addField(fields, "origin_ssl_protocols", params.origin_ssl_protocols, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "origin_keepalive_timeout", params.origin_keepalive_timeout, TF.numberValue);
+  TF.addOptionalField(fields, "origin_read_timeout", params.origin_read_timeout, TF.numberValue);
+  return fields;
+}
+
+export interface CloudfrontCustomErrorResponseParams {
+  error_code: number;
+  response_code?: number;
+  response_page_path?: string;
+  error_caching_min_ttl?: number;
+}
+
+export function fieldsFromCloudfrontCustomErrorResponseParams(params: CloudfrontCustomErrorResponseParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "error_code", params.error_code, TF.numberValue);
+  TF.addOptionalField(fields, "response_code", params.response_code, TF.numberValue);
+  TF.addOptionalField(fields, "response_page_path", params.response_page_path, TF.stringValue);
+  TF.addOptionalField(fields, "error_caching_min_ttl", params.error_caching_min_ttl, TF.numberValue);
+  return fields;
+}
+
+export interface CloudfrontCacheBehaviourParams {
+  allowed_methods: (string)[];
+  cached_methods: (string)[];
+  forwarded_values: CloudfrontForwardedValuesParams;
+  path_pattern?: string;
+  compress?: boolean;
+  default_ttl?: number;
+  min_ttl?: number;
+  max_ttl?: number;
+  target_origin_id: string;
+  viewer_protocol_policy: 'allow-all' | 'https-only' | 'redirect-to-https';
+}
+
+export function fieldsFromCloudfrontCacheBehaviourParams(params: CloudfrontCacheBehaviourParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
+  TF.addField(fields, "cached_methods", params.cached_methods, TF.listValue(TF.stringValue));
+  TF.addField(fields, "forwarded_values", params.forwarded_values, (v) => TF.mapValue(fieldsFromCloudfrontForwardedValuesParams(v)));
+  TF.addOptionalField(fields, "path_pattern", params.path_pattern, TF.stringValue);
+  TF.addOptionalField(fields, "compress", params.compress, TF.booleanValue);
+  TF.addOptionalField(fields, "default_ttl", params.default_ttl, TF.numberValue);
+  TF.addOptionalField(fields, "min_ttl", params.min_ttl, TF.numberValue);
+  TF.addOptionalField(fields, "max_ttl", params.max_ttl, TF.numberValue);
+  TF.addField(fields, "target_origin_id", params.target_origin_id, TF.stringValue);
+  TF.addField(fields, "viewer_protocol_policy", params.viewer_protocol_policy, TF.stringValue);
+  return fields;
+}
+
+export interface CloudfrontDistributionParams {
+  default_cache_behavior: CloudfrontCacheBehaviourParams;
+  enabled: boolean;
+  origin: (CloudfrontOriginParams)[];
+  restrictions: CloudfrontRestrictionsParams;
+  viewer_certificate: CloudfrontViewerCertificateParams;
+  aliases?: (string)[];
+  is_ipv6_enabled?: boolean;
+  custom_error_response?: (CloudfrontCustomErrorResponseParams)[];
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromCloudfrontDistributionParams(params: CloudfrontDistributionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "default_cache_behavior", params.default_cache_behavior, (v) => TF.mapValue(fieldsFromCloudfrontCacheBehaviourParams(v)));
+  TF.addField(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addField(fields, "origin", params.origin, TF.listValue((v) => TF.mapValue(fieldsFromCloudfrontOriginParams(v))));
+  TF.addField(fields, "restrictions", params.restrictions, (v) => TF.mapValue(fieldsFromCloudfrontRestrictionsParams(v)));
+  TF.addField(fields, "viewer_certificate", params.viewer_certificate, (v) => TF.mapValue(fieldsFromCloudfrontViewerCertificateParams(v)));
+  TF.addOptionalField(fields, "aliases", params.aliases, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "is_ipv6_enabled", params.is_ipv6_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "custom_error_response", params.custom_error_response, TF.listValue((v) => TF.mapValue(fieldsFromCloudfrontCustomErrorResponseParams(v))));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface CloudfrontForwardedValuesParams {
+  cookies: CloudfrontCookiesParams;
+  query_string: boolean;
+}
+
+export function fieldsFromCloudfrontForwardedValuesParams(params: CloudfrontForwardedValuesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "cookies", params.cookies, (v) => TF.mapValue(fieldsFromCloudfrontCookiesParams(v)));
+  TF.addField(fields, "query_string", params.query_string, TF.booleanValue);
+  return fields;
+}
+
+export interface CloudfrontOriginParams {
+  domain_name: string;
+  origin_id: string;
+  s3_origin_config?: CloudfrontS3OriginConfigParams;
+  custom_origin_config?: CloudfrontCustomOriginConfigParams;
+}
+
+export function fieldsFromCloudfrontOriginParams(params: CloudfrontOriginParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addField(fields, "origin_id", params.origin_id, TF.stringValue);
+  TF.addOptionalField(fields, "s3_origin_config", params.s3_origin_config, (v) => TF.mapValue(fieldsFromCloudfrontS3OriginConfigParams(v)));
+  TF.addOptionalField(fields, "custom_origin_config", params.custom_origin_config, (v) => TF.mapValue(fieldsFromCloudfrontCustomOriginConfigParams(v)));
+  return fields;
+}
+
+export interface CloudfrontGeoRestrictionsParams {
+  restriction_type: 'none' | 'whitelist' | 'blacklist';
+  locations?: (string)[];
+}
+
+export function fieldsFromCloudfrontGeoRestrictionsParams(params: CloudfrontGeoRestrictionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "restriction_type", params.restriction_type, TF.stringValue);
+  TF.addOptionalField(fields, "locations", params.locations, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface CloudfrontRestrictionsParams {
+  geo_restriction: CloudfrontGeoRestrictionsParams;
+}
+
+export function fieldsFromCloudfrontRestrictionsParams(params: CloudfrontRestrictionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "geo_restriction", params.geo_restriction, (v) => TF.mapValue(fieldsFromCloudfrontGeoRestrictionsParams(v)));
+  return fields;
+}
+
+export interface CloudfrontS3OriginConfigParams {
+}
+
+export function fieldsFromCloudfrontS3OriginConfigParams(params: CloudfrontS3OriginConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  return fields;
+}
+
+export interface CloudfrontViewerCertificateParams {
+  cloudfront_default_certificate?: boolean;
+  acm_certificate_arn?: AT.ArnT<"AcmCertificate">;
+  minimum_protocol_version?: 'SSLv3' | 'TLSv1' | 'TLSv1_2016' | 'TLSv1.1_2016' | 'TLSv1.2_2018';
+  ssl_support_method?: 'vip' | 'sni-only';
+}
+
+export function fieldsFromCloudfrontViewerCertificateParams(params: CloudfrontViewerCertificateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "cloudfront_default_certificate", params.cloudfront_default_certificate, TF.booleanValue);
+  TF.addOptionalField(fields, "acm_certificate_arn", params.acm_certificate_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "minimum_protocol_version", params.minimum_protocol_version, TF.stringValue);
+  TF.addOptionalField(fields, "ssl_support_method", params.ssl_support_method, TF.stringValue);
   return fields;
 }

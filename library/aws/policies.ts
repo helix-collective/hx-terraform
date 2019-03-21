@@ -24,6 +24,18 @@ export const assume_role_policy = {
         Effect: 'Allow',
         Sid: '',
       },
+      {
+        Action: 'sts:AssumeRole',
+        Principal: { Service: 'firehose.amazonaws.com' },
+        Effect: 'Allow',
+        Sid: '',
+      },
+      {
+        Action: 'sts:AssumeRole',
+        Principal: { Service: 'apigateway.amazonaws.com' },
+        Effect: 'Allow',
+        Sid: '',
+      },
     ],
   },
 };
@@ -282,4 +294,23 @@ export const ses_all_actions_policy: NamedPolicy = {
       }
     ]
   }
+}
+
+export function firehosePutRecordPolicy(name: string, stream: AR.KinesisFirehoseDeliveryStream): NamedPolicy {
+  return {
+    name,
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "firehose:PutRecord",
+            "firehose:PutRecordBatch"
+          ],
+          "Resource": stream.arn.value
+        }
+      ]
+    }
+  };
 }

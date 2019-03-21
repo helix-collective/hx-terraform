@@ -19,6 +19,7 @@ terraform_image_pushed = MarkerFile(HERE/'build/.terraform_image_pushed')
 
 provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10/8.2.2/bin/hx-provisioning-tools'
 
+local_lambda_zip_sources = HERE/'lambdas';
 lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
 
 nodemodules = YarnNodeModules(HERE / 'typescript')
@@ -45,7 +46,7 @@ def confirm_apply():
         sys.exit(1)
 
 def task_lambda_zips():
-    for f in rglobfiles(lambda_zip_sources):
+    for f in rglobfiles(local_lambda_zip_sources) + rglobfiles(lambda_zip_sources):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         yield {
             'name': f.stem,
@@ -108,7 +109,7 @@ def generate_zip(zip,paths):
 
 def lambda_zipfiles():
     zipfiles = []
-    for f in rglobfiles(lambda_zip_sources):
+    for f in rglobfiles(local_lambda_zip_sources) + rglobfiles(lambda_zip_sources):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         zipfiles.append(zipfile)
     return zipfiles

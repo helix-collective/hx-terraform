@@ -854,6 +854,13 @@ const vpc_config: RecordDecl = {
   ],
 };
 
+const lambda_function_environment: RecordDecl = {
+  name: 'lambda_function_environment',
+  fields: [
+    optionalField('variables', TAGS_MAP),
+  ]
+};
+
 const lambda_function: RecordDecl = {
   name: 'lambda_function',
   fields: [
@@ -866,6 +873,7 @@ const lambda_function: RecordDecl = {
     requiredField('handler', STRING),
     requiredField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('vpc_config', recordType(vpc_config)),
+    optionalField('environment', recordType(lambda_function_environment)),
     optionalField('tags', TAGS_MAP),
   ],
 };
@@ -1156,7 +1164,100 @@ const cloudfront_distribution: RecordDecl = {
     optionalField('custom_error_response', listType(recordType(cloudfront_custom_error_response))),
     optionalField('tags', TAGS_MAP),
   ]
-}
+};
+
+const api_gateway_rest_api: RecordDecl = {
+  name: 'api_gateway_rest_api',
+  fields: [
+    requiredField("name", STRING),
+    optionalField("description", STRING),
+  ]
+};
+
+const api_gateway_resource: RecordDecl = {
+  name: 'api_gateway_resource',
+  fields: [
+    requiredField("rest_api_id", resourceIdType('ApiGatewayRestApiId')),
+    requiredField('parent_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('path_part', STRING)
+  ]
+};
+
+const api_gateway_method: RecordDecl = {
+  name: 'api_gateway_method',
+  fields: [
+    requiredField('rest_api_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('resource_id', resourceIdType('ApiGatewayResourceId')),
+    requiredField('http_method', enumType(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'])),
+    requiredField('authorization', enumType(['NONE', 'CUSTOM', 'AWS_IAM', 'COGNITO_USER_POOLS'])),
+  ]
+};
+
+const api_gateway_method_response: RecordDecl = {
+  name: 'api_gateway_method_response',
+  fields: [
+    requiredField('rest_api_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('resource_id', resourceIdType('ApiGatewayResourceId')),
+    requiredField('http_method', enumType(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'])),
+    requiredField('status_code', STRING),
+    optionalField('response_models', TAGS_MAP),
+    optionalField('response_parameters', TAGS_MAP),
+ ]
+};
+
+const api_gateway_integration: RecordDecl = {
+  name: 'api_gateway_integration',
+  fields: [
+    requiredField('rest_api_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('resource_id', resourceIdType('ApiGatewayResourceId')),
+    requiredField('http_method', enumType(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'])),
+    optionalField('integration_http_method', enumType(['GET','POST','PUT','DELETE','HEAD','OPTION'])),
+    optionalField('uri', STRING),
+    optionalField('request_templates', TAGS_MAP),
+    requiredField('type', enumType(['HTTP', 'MOCK', 'AWS', 'AWS_PROXY', 'HTTP_PROXY'])),
+  ]
+};
+
+const api_gateway_integration_response: RecordDecl = {
+  name: 'api_gateway_integration_response',
+  fields: [
+    requiredField('rest_api_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('resource_id', resourceIdType('ApiGatewayResourceId')),
+    requiredField('http_method', enumType(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS', 'ANY'])),
+    requiredField('status_code', STRING),
+    optionalField('response_parameters', TAGS_MAP),
+    ]
+};
+
+const api_gateway_deployment: RecordDecl = {
+  name: 'api_gateway_deployment',
+  fields: [
+    requiredField('rest_api_id', resourceIdType('ApiGatewayRestApiId')),
+    requiredField('stage_name', STRING),
+    optionalField('description', STRING),
+  ]
+};
+
+
+const api_gateway_domain_name: RecordDecl = {
+  name: 'api_gateway_domain_name',
+  fields: [
+    requiredField('domain_name', STRING),
+    optionalField('certificate_arn', arnType(acm_certificate)),
+  ]
+};
+
+const api_gateway_base_path_mapping: RecordDecl = {
+  name: 'api_gateway_base_path_mapping',
+  fields: [
+    requiredField('domain_name', STRING),
+    requiredField('api_id', resourceIdType('ApiGatewayRestApiId')),
+    optionalField('stage_name', STRING),
+    optionalField('base_path', STRING),
+  ]
+};
+
+
 
 function generateAws(gen: Generator) {
   // Generate the resources
@@ -1560,7 +1661,9 @@ function generateAws(gen: Generator) {
     'Provides a Kinesis Firehose Delivery Stream resource',
     'https://www.terraform.io/docs/providers/aws/r/kinesis_firehose_delivery_stream.html',
     kinesis_firehose_delivery_stream,
-    [],
+    [
+      stringAttr('name')
+    ],
     {
       arn: true,
     }
@@ -1756,6 +1859,93 @@ function generateAws(gen: Generator) {
     }
   )
 
+
+  gen.generateResource(
+    'Provides an API Gateway REST API.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_rest_api.html',
+    api_gateway_rest_api,
+    [
+      resourceIdAttr('id', api_gateway_rest_api) ,
+      resourceIdAttr('root_resource_id', api_gateway_rest_api) ,
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an API Gateway Resource.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_resource.html',
+    api_gateway_resource,
+    [
+      resourceIdAttr('id', api_gateway_resource) ,
+      stringAttr('path'),
+    ],
+  );
+
+  gen.generateResource(
+    'Provides a HTTP Method for an API Gateway Resource.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_method.html',
+    api_gateway_method,
+    [
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an HTTP Method Response for an API Gateway Resource.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_method_response.html',
+    api_gateway_method_response,
+    [
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an HTTP Method Integration for an API Gateway Integration.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_integration.html',
+    api_gateway_integration,
+    [
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an HTTP Method Integration Response for an API Gateway Resource.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_integration_response.html',
+    api_gateway_integration_response,
+    [
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an API Gateway Deployment.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_deployment.html',
+    api_gateway_deployment,
+    [
+      resourceIdAttr('id', api_gateway_deployment) ,
+      stringAttr('invoke_url'),
+      stringAliasAttr('execution_arn', 'Arn', 'AT.Arn'),
+    ],
+  );
+
+  gen.generateResource(
+    'Registers a custom domain name for use with AWS API Gateway.',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_domain_name.html',
+    api_gateway_domain_name,
+    [
+      resourceIdAttr('id', api_gateway_domain_name) ,
+      stringAttr('cloudfront_domain_name'),
+      stringAliasAttr('cloudfront_zone_id', 'HostedZoneId', 'AT.HostedZoneId')    ],
+    );
+
+    gen.generateResource(
+    'Connects a custom domain name registered via aws_api_gateway_domain_name with a deployed API',
+    'https://www.terraform.io/docs/providers/aws/r/api_gateway_base_path_mapping.html',
+    api_gateway_base_path_mapping,
+    [
+    ],
+    );
+
+
+
+
+
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -1829,6 +2019,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticache_cluster);
   gen.generateParams(vpc_config);
   gen.generateParams(lambda_function);
+  gen.generateParams(lambda_function_environment);
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);
@@ -1860,6 +2051,15 @@ function generateAws(gen: Generator) {
   gen.generateParams(cloudfront_restrictions);
   gen.generateParams(cloudfront_s3_origin_config);
   gen.generateParams(cloudfront_viewer_certificate);
+  gen.generateParams(api_gateway_rest_api);
+  gen.generateParams(api_gateway_resource);
+  gen.generateParams(api_gateway_method);
+  gen.generateParams(api_gateway_method_response);
+  gen.generateParams(api_gateway_integration);
+  gen.generateParams(api_gateway_integration_response);
+  gen.generateParams(api_gateway_deployment);
+  gen.generateParams(api_gateway_domain_name);
+  gen.generateParams(api_gateway_base_path_mapping);
 }
 
 function generateRandom(gen: Generator) {

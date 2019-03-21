@@ -48,3 +48,10 @@ export function contextTagsWithName(
 export type Customize<T> = (v: T) => void;
 
 export function noCustomize<T>(v: T) {}
+
+export function applyCustomize<T>(customize: Customize<T> | undefined, v: T): T {
+  if(customize) {
+    customize(v);
+  }
+  return v;
+}

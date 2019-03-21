@@ -1070,15 +1070,18 @@ type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
 export function createKinesisFirehoseDeliveryStream(tfgen: TF.Generator, rname: string, params: KinesisFirehoseDeliveryStreamParams): KinesisFirehoseDeliveryStream {
   const fields = fieldsFromKinesisFirehoseDeliveryStreamParams(params);
   const resource = tfgen.createTypedResource('KinesisFirehoseDeliveryStream', 'aws_kinesis_firehose_delivery_stream', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const arn: KinesisFirehoseDeliveryStreamArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'KinesisFirehoseDeliveryStream');
 
   return {
     ...resource,
+    name,
     arn,
   };
 }
 
 export interface KinesisFirehoseDeliveryStream extends TF.ResourceT<'KinesisFirehoseDeliveryStream'> {
+  name: string;
   arn: KinesisFirehoseDeliveryStreamArn;
 }
 
@@ -1555,6 +1558,207 @@ export interface CloudfrontDistribution extends TF.ResourceT<'CloudfrontDistribu
 
 type CloudfrontDistributionId = {type:'CloudfrontDistributionId',value:string};
 export type CloudfrontDistributionArn = AT.ArnT<"CloudfrontDistribution">;
+
+/**
+ *  Provides an API Gateway REST API.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_rest_api.html
+ */
+export function createApiGatewayRestApi(tfgen: TF.Generator, rname: string, params: ApiGatewayRestApiParams): ApiGatewayRestApi {
+  const fields = fieldsFromApiGatewayRestApiParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayRestApi', 'aws_api_gateway_rest_api', rname, fields);
+  const id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const root_resource_id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: '${' + TF.resourceName(resource) + '.root_resource_id}'};
+
+  return {
+    ...resource,
+    id,
+    root_resource_id,
+  };
+}
+
+export interface ApiGatewayRestApi extends TF.ResourceT<'ApiGatewayRestApi'> {
+  id: ApiGatewayRestApiId;
+  root_resource_id: ApiGatewayRestApiId;
+}
+
+type ApiGatewayRestApiId = {type:'ApiGatewayRestApiId',value:string};
+
+/**
+ *  Provides an API Gateway Resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_resource.html
+ */
+export function createApiGatewayResource(tfgen: TF.Generator, rname: string, params: ApiGatewayResourceParams): ApiGatewayResource {
+  const fields = fieldsFromApiGatewayResourceParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayResource', 'aws_api_gateway_resource', rname, fields);
+  const id: ApiGatewayResourceId =  {type: 'ApiGatewayResourceId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const path: string =  '${' + TF.resourceName(resource) + '.path}';
+
+  return {
+    ...resource,
+    id,
+    path,
+  };
+}
+
+export interface ApiGatewayResource extends TF.ResourceT<'ApiGatewayResource'> {
+  id: ApiGatewayResourceId;
+  path: string;
+}
+
+type ApiGatewayResourceId = {type:'ApiGatewayResourceId',value:string};
+
+/**
+ *  Provides a HTTP Method for an API Gateway Resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_method.html
+ */
+export function createApiGatewayMethod(tfgen: TF.Generator, rname: string, params: ApiGatewayMethodParams): ApiGatewayMethod {
+  const fields = fieldsFromApiGatewayMethodParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayMethod', 'aws_api_gateway_method', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface ApiGatewayMethod extends TF.ResourceT<'ApiGatewayMethod'> {
+}
+
+type ApiGatewayMethodId = {type:'ApiGatewayMethodId',value:string};
+
+/**
+ *  Provides an HTTP Method Response for an API Gateway Resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_method_response.html
+ */
+export function createApiGatewayMethodResponse(tfgen: TF.Generator, rname: string, params: ApiGatewayMethodResponseParams): ApiGatewayMethodResponse {
+  const fields = fieldsFromApiGatewayMethodResponseParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayMethodResponse', 'aws_api_gateway_method_response', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface ApiGatewayMethodResponse extends TF.ResourceT<'ApiGatewayMethodResponse'> {
+}
+
+type ApiGatewayMethodResponseId = {type:'ApiGatewayMethodResponseId',value:string};
+
+/**
+ *  Provides an HTTP Method Integration for an API Gateway Integration.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_integration.html
+ */
+export function createApiGatewayIntegration(tfgen: TF.Generator, rname: string, params: ApiGatewayIntegrationParams): ApiGatewayIntegration {
+  const fields = fieldsFromApiGatewayIntegrationParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayIntegration', 'aws_api_gateway_integration', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface ApiGatewayIntegration extends TF.ResourceT<'ApiGatewayIntegration'> {
+}
+
+type ApiGatewayIntegrationId = {type:'ApiGatewayIntegrationId',value:string};
+
+/**
+ *  Provides an HTTP Method Integration Response for an API Gateway Resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_integration_response.html
+ */
+export function createApiGatewayIntegrationResponse(tfgen: TF.Generator, rname: string, params: ApiGatewayIntegrationResponseParams): ApiGatewayIntegrationResponse {
+  const fields = fieldsFromApiGatewayIntegrationResponseParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayIntegrationResponse', 'aws_api_gateway_integration_response', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface ApiGatewayIntegrationResponse extends TF.ResourceT<'ApiGatewayIntegrationResponse'> {
+}
+
+type ApiGatewayIntegrationResponseId = {type:'ApiGatewayIntegrationResponseId',value:string};
+
+/**
+ *  Provides an API Gateway Deployment.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_deployment.html
+ */
+export function createApiGatewayDeployment(tfgen: TF.Generator, rname: string, params: ApiGatewayDeploymentParams): ApiGatewayDeployment {
+  const fields = fieldsFromApiGatewayDeploymentParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayDeployment', 'aws_api_gateway_deployment', rname, fields);
+  const id: ApiGatewayDeploymentId =  {type: 'ApiGatewayDeploymentId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const invoke_url: string =  '${' + TF.resourceName(resource) + '.invoke_url}';
+  const execution_arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.execution_arn}'};
+
+  return {
+    ...resource,
+    id,
+    invoke_url,
+    execution_arn,
+  };
+}
+
+export interface ApiGatewayDeployment extends TF.ResourceT<'ApiGatewayDeployment'> {
+  id: ApiGatewayDeploymentId;
+  invoke_url: string;
+  execution_arn: AT.Arn;
+}
+
+type ApiGatewayDeploymentId = {type:'ApiGatewayDeploymentId',value:string};
+
+/**
+ *  Registers a custom domain name for use with AWS API Gateway.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_domain_name.html
+ */
+export function createApiGatewayDomainName(tfgen: TF.Generator, rname: string, params: ApiGatewayDomainNameParams): ApiGatewayDomainName {
+  const fields = fieldsFromApiGatewayDomainNameParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayDomainName', 'aws_api_gateway_domain_name', rname, fields);
+  const id: ApiGatewayDomainNameId =  {type: 'ApiGatewayDomainNameId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const cloudfront_domain_name: string =  '${' + TF.resourceName(resource) + '.cloudfront_domain_name}';
+  const cloudfront_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.cloudfront_zone_id}'};
+
+  return {
+    ...resource,
+    id,
+    cloudfront_domain_name,
+    cloudfront_zone_id,
+  };
+}
+
+export interface ApiGatewayDomainName extends TF.ResourceT<'ApiGatewayDomainName'> {
+  id: ApiGatewayDomainNameId;
+  cloudfront_domain_name: string;
+  cloudfront_zone_id: AT.HostedZoneId;
+}
+
+type ApiGatewayDomainNameId = {type:'ApiGatewayDomainNameId',value:string};
+
+/**
+ *  Connects a custom domain name registered via aws_api_gateway_domain_name with a deployed API
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/api_gateway_base_path_mapping.html
+ */
+export function createApiGatewayBasePathMapping(tfgen: TF.Generator, rname: string, params: ApiGatewayBasePathMappingParams): ApiGatewayBasePathMapping {
+  const fields = fieldsFromApiGatewayBasePathMappingParams(params);
+  const resource = tfgen.createTypedResource('ApiGatewayBasePathMapping', 'aws_api_gateway_base_path_mapping', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface ApiGatewayBasePathMapping extends TF.ResourceT<'ApiGatewayBasePathMapping'> {
+}
+
+type ApiGatewayBasePathMappingId = {type:'ApiGatewayBasePathMappingId',value:string};
 
 export interface AutoscalingGroupTagParams {
   key: string;
@@ -2808,6 +3012,7 @@ export interface LambdaFunctionParams {
   handler: string;
   runtime: AT.LambdaRuntime;
   vpc_config?: VpcConfigParams;
+  environment?: LambdaFunctionEnvironmentParams;
   tags?: TF.TagsMap;
 }
 
@@ -2822,7 +3027,18 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addField(fields, "handler", params.handler, TF.stringValue);
   TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
+  TF.addOptionalField(fields, "environment", params.environment, (v) => TF.mapValue(fieldsFromLambdaFunctionEnvironmentParams(v)));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface LambdaFunctionEnvironmentParams {
+  variables?: TF.TagsMap;
+}
+
+export function fieldsFromLambdaFunctionEnvironmentParams(params: LambdaFunctionEnvironmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "variables", params.variables, TF.tagsValue);
   return fields;
 }
 
@@ -3271,5 +3487,149 @@ export function fieldsFromCloudfrontViewerCertificateParams(params: CloudfrontVi
   TF.addOptionalField(fields, "acm_certificate_arn", params.acm_certificate_arn, TF.resourceArnValue);
   TF.addOptionalField(fields, "minimum_protocol_version", params.minimum_protocol_version, TF.stringValue);
   TF.addOptionalField(fields, "ssl_support_method", params.ssl_support_method, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayRestApiParams {
+  name: string;
+  description?: string;
+}
+
+export function fieldsFromApiGatewayRestApiParams(params: ApiGatewayRestApiParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayResourceParams {
+  rest_api_id: ApiGatewayRestApiId;
+  parent_id: ApiGatewayRestApiId;
+  path_part: string;
+}
+
+export function fieldsFromApiGatewayResourceParams(params: ApiGatewayResourceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "parent_id", params.parent_id, TF.resourceIdValue);
+  TF.addField(fields, "path_part", params.path_part, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayMethodParams {
+  rest_api_id: ApiGatewayRestApiId;
+  resource_id: ApiGatewayResourceId;
+  http_method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'ANY';
+  authorization: 'NONE' | 'CUSTOM' | 'AWS_IAM' | 'COGNITO_USER_POOLS';
+}
+
+export function fieldsFromApiGatewayMethodParams(params: ApiGatewayMethodParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addField(fields, "authorization", params.authorization, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayMethodResponseParams {
+  rest_api_id: ApiGatewayRestApiId;
+  resource_id: ApiGatewayResourceId;
+  http_method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'ANY';
+  status_code: string;
+  response_models?: TF.TagsMap;
+  response_parameters?: TF.TagsMap;
+}
+
+export function fieldsFromApiGatewayMethodResponseParams(params: ApiGatewayMethodResponseParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
+  TF.addOptionalField(fields, "response_models", params.response_models, TF.tagsValue);
+  TF.addOptionalField(fields, "response_parameters", params.response_parameters, TF.tagsValue);
+  return fields;
+}
+
+export interface ApiGatewayIntegrationParams {
+  rest_api_id: ApiGatewayRestApiId;
+  resource_id: ApiGatewayResourceId;
+  http_method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'ANY';
+  integration_http_method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTION';
+  uri?: string;
+  request_templates?: TF.TagsMap;
+  type: 'HTTP' | 'MOCK' | 'AWS' | 'AWS_PROXY' | 'HTTP_PROXY';
+}
+
+export function fieldsFromApiGatewayIntegrationParams(params: ApiGatewayIntegrationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addOptionalField(fields, "integration_http_method", params.integration_http_method, TF.stringValue);
+  TF.addOptionalField(fields, "uri", params.uri, TF.stringValue);
+  TF.addOptionalField(fields, "request_templates", params.request_templates, TF.tagsValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayIntegrationResponseParams {
+  rest_api_id: ApiGatewayRestApiId;
+  resource_id: ApiGatewayResourceId;
+  http_method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'ANY';
+  status_code: string;
+  response_parameters?: TF.TagsMap;
+}
+
+export function fieldsFromApiGatewayIntegrationResponseParams(params: ApiGatewayIntegrationResponseParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
+  TF.addOptionalField(fields, "response_parameters", params.response_parameters, TF.tagsValue);
+  return fields;
+}
+
+export interface ApiGatewayDeploymentParams {
+  rest_api_id: ApiGatewayRestApiId;
+  stage_name: string;
+  description?: string;
+}
+
+export function fieldsFromApiGatewayDeploymentParams(params: ApiGatewayDeploymentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addField(fields, "stage_name", params.stage_name, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  return fields;
+}
+
+export interface ApiGatewayDomainNameParams {
+  domain_name: string;
+  certificate_arn?: AT.ArnT<"AcmCertificate">;
+}
+
+export function fieldsFromApiGatewayDomainNameParams(params: ApiGatewayDomainNameParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface ApiGatewayBasePathMappingParams {
+  domain_name: string;
+  api_id: ApiGatewayRestApiId;
+  stage_name?: string;
+  base_path?: string;
+}
+
+export function fieldsFromApiGatewayBasePathMappingParams(params: ApiGatewayBasePathMappingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addField(fields, "api_id", params.api_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "stage_name", params.stage_name, TF.stringValue);
+  TF.addOptionalField(fields, "base_path", params.base_path, TF.stringValue);
   return fields;
 }

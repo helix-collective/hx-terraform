@@ -2775,6 +2775,7 @@ export interface ElasticsearchDomainParams {
   ebs_options?: ElasticsearchDomainEbsOptionsParams;
   cluster_config?: ElasticsearchDomainClusterConfigParams;
   snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
+  vpc_options?: ElasticsearchDomainVpcOptionsParams;
   elasticsearch_version?: string;
   tags?: TF.TagsMap;
 }
@@ -2787,6 +2788,7 @@ export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainP
   TF.addOptionalField(fields, "ebs_options", params.ebs_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainEbsOptionsParams(v)));
   TF.addOptionalField(fields, "cluster_config", params.cluster_config, (v) => TF.mapValue(fieldsFromElasticsearchDomainClusterConfigParams(v)));
   TF.addOptionalField(fields, "snapshot_options", params.snapshot_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainSnapshotOptionsParams(v)));
+  TF.addOptionalField(fields, "vpc_options", params.vpc_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainVpcOptionsParams(v)));
   TF.addOptionalField(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
@@ -2835,6 +2837,18 @@ export interface ElasticsearchDomainSnapshotOptionsParams {
 export function fieldsFromElasticsearchDomainSnapshotOptionsParams(params: ElasticsearchDomainSnapshotOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "automated_snapshot_start_hour", params.automated_snapshot_start_hour, TF.numberValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainVpcOptionsParams {
+  security_group_ids?: SecurityGroupId[];
+  subnet_ids: SubnetId[];
+}
+
+export function fieldsFromElasticsearchDomainVpcOptionsParams(params: ElasticsearchDomainVpcOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 

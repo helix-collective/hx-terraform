@@ -699,6 +699,14 @@ const elasticsearch_domain_snapshot_options: RecordDecl = {
   fields: [requiredField('automated_snapshot_start_hour', NUMBER)],
 };
 
+const elasticsearch_domain_vpc_options: RecordDecl = {
+  name: 'elasticsearch_domain_vpc_options',
+  fields: [
+    optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    requiredField('subnet_ids', listType(resourceIdType('SubnetId'))),
+  ],
+};
+
 const elasticsearch_domain: RecordDecl = {
   name: 'elasticsearch_domain',
   fields: [
@@ -714,6 +722,7 @@ const elasticsearch_domain: RecordDecl = {
       'snapshot_options',
       recordType(elasticsearch_domain_snapshot_options)
     ),
+    optionalField('vpc_options', recordType(elasticsearch_domain_vpc_options)),
     optionalField('elasticsearch_version', STRING),
     optionalField('tags', TAGS_MAP),
   ],
@@ -2029,6 +2038,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_cluster_config);
   gen.generateParams(elasticsearch_domain_ebs_options);
   gen.generateParams(elasticsearch_domain_snapshot_options);
+  gen.generateParams(elasticsearch_domain_vpc_options);
   gen.generateParams(elasticsearch_domain_policy);
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);

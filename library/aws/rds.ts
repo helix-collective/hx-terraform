@@ -200,7 +200,7 @@ function createPasswordProvisioner(tfgen: TF.Generator, sr: SharedResources, db:
     tfgen.localExecProvisioner(
       db,
       [
-        '# Generate a random password for the instance, and upload it to S3',
+        '# Generate a random password for the instance, and upload it to AWS Secret Manager',
         `export AWS_REGION=${sr.network.region.value}`,
         `hx-provisioning-tools generate-rds-password --to-secret ${db.id.value} ${passwordStore.arnSecret.value}`,
       ].join('\n')

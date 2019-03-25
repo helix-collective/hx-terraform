@@ -287,7 +287,7 @@ function createAcmCertificate(
   sr: shared.SharedResources,
   https_fqdns: string[],
   create_before_destroy: boolean
-): AT.ArnT<'AcmCertificate'> {
+): AR.AcmCertificateArn {
   const acm_certificate = AR.createAcmCertificate(tfgen, 'cert', {
     domain_name: https_fqdns[0],
     subject_alternative_names: https_fqdns.slice(1),
@@ -462,7 +462,7 @@ interface AutoscaleDeploymentParams {
   /**
    * Use this AWS ACM certificate rather than automatically generating one
    */
-  acm_certificate_arn?: AT.ArnT<"AcmCertificate">
+  acm_certificate_arn?: AR.AcmCertificateArn;
 
 }
 

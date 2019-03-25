@@ -46,6 +46,13 @@ export function arnT<R extends string>(v: string, resource: R): ArnT<R> {
   return { ...arn(v), resource };
 }
 
+/**
+ * Create a typed Arn resource specifically for an AcmCertificate
+ */
+export function acmCertificateArn(v: string): ArnT<"AcmCertificate"> {
+  return arnT(v, "AcmCertificate");
+}
+
 //----------------------------------------------------------------------
 
 export type AvailabilityZone = {

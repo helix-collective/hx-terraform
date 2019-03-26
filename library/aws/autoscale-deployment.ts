@@ -14,7 +14,7 @@ import * as C from "../../library/deploytool/adl-gen/config";
 
 import { EndPoint, getDefaultAmi, httpsFqdnsFromEndpoints } from './ec2-deployment';
 import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb, createLbTargetGroup } from '../../providers/aws/resources';
-import { contextTagsWithName } from '../util';
+import { contextTagsWithName, Customize, applyCustomize } from '../util';
 
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:
@@ -204,13 +204,14 @@ function createAppserverLoadBalancer(
 
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
-  const alb = createLb(tfgen, "alb", {
+  const albParams: AR.LbParams = {
     name: tfgen.scopedName(name).join('-'),
     load_balancer_type: 'application',
     tags: tfgen.tagsContext(),
     security_groups: [sr.load_balancer_security_group.id],
-    subnets: sr.network.azs.map(az => az.external_subnet.id)
-  });
+    subnets: sr.network.azs.map(az => az.external_subnet.id),
+  };
+  const alb = createLb(tfgen, "alb", applyCustomize(params.customize_lb, albParams));
 
   const alb_target_group = createLbTargetGroup(tfgen, "tg80", {
     port: 80,
@@ -464,6 +465,11 @@ interface AutoscaleDeploymentParams {
    */
   acm_certificate_arn?: AR.AcmCertificateArn;
 
+  /**
+   * Customise underlying load balancer (if required)
+   * https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html
+   */
+  customize_lb?: Customize<AR.LbParams>
 }
 
 interface AutoscaleDeployment {

@@ -15,6 +15,9 @@ import { SharedResources } from './shared';
 import {
   contextTagsWithName,
   Customize,
+  ingressOnPort,
+  egress_all,
+  applyCustomize
 } from '../util';
 
 export interface InstanceWithEipParams {
@@ -221,42 +224,60 @@ export function s3BucketNotificationsToLambda(tfgen: TF.Generator, name: string,
   });
 }
 
+/** Create Memcached service */
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
+  sr: SharedResources,
   params: {
-    customize?: Customize<AR.ElasticacheClusterParams>
+    node_type: AT.CacheNodeType,
+    num_cache_nodes: number,
+    customize_memcached_cluster?: Customize<AR.ElasticacheClusterParams>;
   }
 ): AR.ElasticacheCluster {
 
-  const parameter_group_name = tfgen.scopedName(name).join('-');
+  const scopedName = tfgen.scopedName(name).join('-')
 
-  const elasticache_parameter_group_params: AR.ElasticacheParameterGroupParams = {
-    name: parameter_group_name,
-    family: AT.memcached_1_5.value
-  }
-
+  // memcached parameter group
+  // TODO(jeeva): Understand why this is better/worse than simply calling
+  // parameter_group_name: AT.elasticacheParameterGroupName("default.memcached1.5"),
   const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, name, {
-    name: elasticache_parameter_group_params.name,
+    name: scopedName,
     family: AT.memcached_1_5.value
   });
 
+  // default memcached port
+  const port = 11211;
+
+  // default security group (ingress on specified port, egress all)
+  const sg = createSecurityGroupInVpc(tfgen, "ec", sr, {
+    ingress: [ingressOnPort(port)],
+    egress: [egress_all]
+  });
+
+  // limit access to internal subnets
+  const subnets = AR.createElasticacheSubnetGroup(tfgen, "ec", {
+      name: scopedName,
+      subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
+  });
+
   const elasticache_params: AR.ElasticacheClusterParams = {
-    cluster_id: name,
+    cluster_id: scopedName,
     engine: "memcached",
-    node_type: AT.cache_t2_micro,
-    num_cache_nodes: 1,
-    parameter_group_name: elasticache_parameter_group.name
+    node_type: params.node_type,
+    num_cache_nodes: params.num_cache_nodes,
+    port,
+    parameter_group_name: elasticache_parameter_group.name,
+    security_group_ids: [sg.id],
+    subnet_group_name: subnets.name,
+    tags: tfgen.tagsContext(),
   };
 
-  if (params.customize) {
-    params.customize(elasticache_params);
-  }
-
-  return AR.createElasticacheCluster(tfgen, name, elasticache_params);
+  return AR.createElasticacheCluster(
+    tfgen,
+    name,
+    applyCustomize(params.customize_memcached_cluster, elasticache_params));
 }
-
-
 
 /**
  * Include in the generated terraform configuration to store the terraform state in the

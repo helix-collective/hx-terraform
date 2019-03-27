@@ -5,7 +5,7 @@ import zipfile
 from datetime import date
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
-from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool
+from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, lambdazip_pyfile_task, lambdazip_pydir_task
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -46,15 +46,12 @@ def confirm_apply():
         sys.exit(1)
 
 def task_lambda_zips():
-    for f in rglobfiles(local_lambda_zip_sources) + rglobfiles(lambda_zip_sources):
+    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
-        yield {
-            'name': f.stem,
-            'doc' : 'Build a zip archive for a lambda function',
-            'actions': [generate_zip(zipfile, [f])],
-            'file_dep': [f],
-            'targets': [zipfile],
-        }
+        if f.suffix == '.py':
+            yield lambdazip_pyfile_task(zipfile, f)
+        elif f.is_dir() and (f/'requirements.txt').is_file():
+            yield lambdazip_pydir_task(zipfile, f)
 
 def task_plan():
     return {
@@ -99,17 +96,9 @@ def task_terraform_init():
         'uptodate': [True], # the task is up to date if its ever been run
     }
 
-def generate_zip(zip,paths):
-    def thunk():
-        os.makedirs(zip.parent, exist_ok=True)
-        with zipfile.ZipFile(str(zip), 'w') as zf:
-            for p in paths:
-                zf.write(p,arcname=p.name)
-    return thunk
-
 def lambda_zipfiles():
     zipfiles = []
-    for f in rglobfiles(local_lambda_zip_sources) + rglobfiles(lambda_zip_sources):
+    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         zipfiles.append(zipfile)
     return zipfiles

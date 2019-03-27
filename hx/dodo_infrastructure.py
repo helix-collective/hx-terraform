@@ -4,6 +4,9 @@ import shutil
 import subprocess
 from urllib.request import urlopen
 import zipfile
+import tempfile
+from pathlib import *
+from hx.dodo_helpers import rglobfiles
 
 def run_dockerized_terraform(terraform_image, args):
     """
@@ -86,3 +89,51 @@ def update_deploytool(basedir):
         'actions': [update_deploytool],
         'verbosity': 2
     }
+
+def lambdazip_pyfile_task(zipfile, frompyfile):
+    "Task to create a lambda zipfile from a single python file"
+    return {
+        'name': frompyfile.stem,
+        'doc' : 'Build a zip archive from a single python file for a lambda function',
+        'actions': [generate_zip(zipfile, [frompyfile])],
+        'file_dep': [frompyfile],
+        'targets': [zipfile],
+    } 
+
+def lambdazip_pydir_task(zipfile, frompydir):
+    "Task to create a lambda zipfile from python tree with a requirements.txt file"
+    depfiles = rglobfiles(frompydir)
+    return {
+        'name': frompydir.stem,
+        'doc' : 'Build a zip archive from a python tree for a lambda function',
+        'actions': [generate_pydir_lambda(zipfile, frompydir)],
+        'file_dep': depfiles,
+        'targets': [zipfile],
+    } 
+
+def generate_zip(zip,paths):
+    def thunk():
+        os.makedirs(zip.parent, exist_ok=True)
+        with zipfile.ZipFile(str(zip), 'w') as zf:
+            for p in paths:
+                zf.write(p,arcname=p.name)
+    return thunk
+
+def generate_pydir_lambda(zip, pydir):
+    def thunk():
+        # Create a temporary copy of pydir
+        tmpdir = Path(tempfile.mkdtemp())
+        subprocess.run( 'cp -r {}/* {}'.format(pydir, tmpdir), check=True, shell=True)
+
+        # Run pip to install the dependencies in it
+        # (assumes debian pip3 on path, which requires --system) 
+        subprocess.run( 'pip3 install -r requirements.txt --system --target .', check=True, shell=True, cwd=tmpdir)
+
+        # Zip up to create the lambda zip
+        with zipfile.ZipFile(str(zip), 'w') as zf:
+            for p in rglobfiles(tmpdir):
+                zf.write(p, arcname=p.relative_to(tmpdir))
+
+        # Remove tempdir
+        shutil.rmtree(str(tmpdir))
+    return thunk

@@ -1140,6 +1140,28 @@ type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:str
 export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 
 /**
+ *  Provides an ElastiCache Subnet Group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html
+ */
+export function createElasticacheSubnetGroup(tfgen: TF.Generator, rname: string, params: ElasticacheSubnetGroupParams): ElasticacheSubnetGroup {
+  const fields = fieldsFromElasticacheSubnetGroupParams(params);
+  const resource = tfgen.createTypedResource('ElasticacheSubnetGroup', 'aws_elasticache_subnet_group', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    name,
+  };
+}
+
+export interface ElasticacheSubnetGroup extends TF.ResourceT<'ElasticacheSubnetGroup'> {
+  name: string;
+}
+
+type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
+
+/**
  *  Provides an elasticache cluster resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html
@@ -1151,6 +1173,8 @@ export function createElasticacheCluster(tfgen: TF.Generator, rname: string, par
   const engine: string =  '${' + TF.resourceName(resource) + '.engine}';
   const node_type: string =  '${' + TF.resourceName(resource) + '.node_type}';
   const parameter_group_name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: '${' + TF.resourceName(resource) + '.parameter_group_name}'};
+  const configuration_endpoint: string =  '${' + TF.resourceName(resource) + '.configuration_endpoint}';
+  const cluster_address: string =  '${' + TF.resourceName(resource) + '.cluster_address}';
   const arn: ElasticacheClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheCluster');
 
   return {
@@ -1159,6 +1183,8 @@ export function createElasticacheCluster(tfgen: TF.Generator, rname: string, par
     engine,
     node_type,
     parameter_group_name,
+    configuration_endpoint,
+    cluster_address,
     arn,
   };
 }
@@ -1168,6 +1194,8 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
   engine: string;
   node_type: string;
   parameter_group_name: AT.ElasticacheParameterGroupName;
+  configuration_endpoint: string;
+  cluster_address: string;
   arn: ElasticacheClusterArn;
 }
 
@@ -2968,6 +2996,20 @@ export function fieldsFromElasticacheParameterGroupParams(params: ElasticachePar
   return fields;
 }
 
+export interface ElasticacheSubnetGroupParams {
+  name: string;
+  description?: string;
+  subnet_ids: (SubnetId)[];
+}
+
+export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnetGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
 export interface ElasticacheClusterParams {
   cluster_id: string;
   engine: 'memcached' | 'redis';
@@ -2976,6 +3018,8 @@ export interface ElasticacheClusterParams {
   parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
   security_group_ids?: (SecurityGroupId)[];
+  subnet_group_name?: string;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
@@ -2987,6 +3031,8 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_group_name", params.subnet_group_name, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

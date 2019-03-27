@@ -824,6 +824,15 @@ const s3_bucket_metric: RecordDecl = {
   ],
 };
 
+const elasticache_subnet_group: RecordDecl = {
+ name: 'elasticache_subnet_group',
+ fields: [
+   requiredField('name', STRING),
+   optionalField('description', STRING),
+   requiredField('subnet_ids', listType(resourceIdType('SubnetId')))
+ ],
+ };
+
 const elasticache_parameter_group: RecordDecl = {
   name: 'elasticache_parameter_group',
   fields: [
@@ -843,6 +852,8 @@ const elasticache_cluster: RecordDecl = {
     requiredField('parameter_group_name', stringAliasType('AT.ElasticacheParameterGroupName')),
     optionalField('port', NUMBER),
     optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    optionalField('subnet_group_name', STRING),
+    optionalField('tags', TAGS_MAP),
   ],
 };
 
@@ -1694,6 +1705,14 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an ElastiCache Subnet Group resource.',
+    'https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html',
+    elasticache_subnet_group,
+    [ stringAttr('name'),
+    ],
+  );
+
+  gen.generateResource(
     'Provides an elasticache cluster resource.',
     'https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html',
     elasticache_cluster,
@@ -1702,6 +1721,8 @@ function generateAws(gen: Generator) {
       stringAttr('node_type'),
       stringAliasAttr('parameter_group_name', 'ElasticacheParameterGroupName',
         'AT.ElasticacheParameterGroupName'),
+      stringAttr('configuration_endpoint'),
+​      stringAttr('cluster_address'),
     ],
     {
       arn: true,
@@ -2018,6 +2039,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(kinesis_firehose_delivery_stream);
   gen.generateParams(s3_bucket_metric);
   gen.generateParams(elasticache_parameter_group);
+  gen.generateParams(elasticache_subnet_group);
   gen.generateParams(elasticache_cluster);
   gen.generateParams(vpc_config);
   gen.generateParams(lambda_function);

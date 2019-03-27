@@ -874,6 +874,8 @@ const lambda_function: RecordDecl = {
     requiredField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('vpc_config', recordType(vpc_config)),
     optionalField('environment', recordType(lambda_function_environment)),
+    optionalField('timeout', NUMBER),
+    optionalField("memory_size", NUMBER),
     optionalField('tags', TAGS_MAP),
   ],
 };

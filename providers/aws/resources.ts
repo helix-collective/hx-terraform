@@ -3013,6 +3013,8 @@ export interface LambdaFunctionParams {
   runtime: AT.LambdaRuntime;
   vpc_config?: VpcConfigParams;
   environment?: LambdaFunctionEnvironmentParams;
+  timeout?: number;
+  memory_size?: number;
   tags?: TF.TagsMap;
 }
 
@@ -3028,6 +3030,8 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
   TF.addOptionalField(fields, "environment", params.environment, (v) => TF.mapValue(fieldsFromLambdaFunctionEnvironmentParams(v)));
+  TF.addOptionalField(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalField(fields, "memory_size", params.memory_size, TF.numberValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

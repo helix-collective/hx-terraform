@@ -1279,6 +1279,25 @@ const api_gateway_base_path_mapping: RecordDecl = {
   ]
 };
 
+const s3_bucket_notification_queue: RecordDecl = {
+  name: 's3_bucket_notification_queue',
+  fields: [
+    optionalField('id', STRING),
+    requiredField('queue_arn',arnType(sqs_queue)),
+    requiredField('events', listType(STRING)),
+    optionalField('filter_prefix', STRING),
+    optionalField('filter_suffix', STRING),
+  ]
+};
+
+const s3_bucket_notification: RecordDecl = {
+  name: 's3_bucket_notification',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('queue', recordType(s3_bucket_notification_queue)),
+  ]
+};
+
 
 
 function generateAws(gen: Generator) {
@@ -1974,9 +1993,13 @@ function generateAws(gen: Generator) {
     );
 
 
-
-
-
+  gen.generateResource(
+    'Manages a S3 Bucket Notification Configuration.',
+    'https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html',
+    s3_bucket_notification,
+    [
+    ]
+  );
 
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
@@ -2094,6 +2117,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(api_gateway_deployment);
   gen.generateParams(api_gateway_domain_name);
   gen.generateParams(api_gateway_base_path_mapping);
+  gen.generateParams(s3_bucket_notification_queue);
+  gen.generateParams(s3_bucket_notification);
 }
 
 function generateRandom(gen: Generator) {

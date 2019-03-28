@@ -1788,6 +1788,25 @@ export interface ApiGatewayBasePathMapping extends TF.ResourceT<'ApiGatewayBaseP
 
 type ApiGatewayBasePathMappingId = {type:'ApiGatewayBasePathMappingId',value:string};
 
+/**
+ *  Manages a S3 Bucket Notification Configuration.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html
+ */
+export function createS3BucketNotification(tfgen: TF.Generator, rname: string, params: S3BucketNotificationParams): S3BucketNotification {
+  const fields = fieldsFromS3BucketNotificationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketNotification', 'aws_s3_bucket_notification', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification'> {
+}
+
+type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -3695,5 +3714,35 @@ export function fieldsFromApiGatewayBasePathMappingParams(params: ApiGatewayBase
   TF.addField(fields, "api_id", params.api_id, TF.resourceIdValue);
   TF.addOptionalField(fields, "stage_name", params.stage_name, TF.stringValue);
   TF.addOptionalField(fields, "base_path", params.base_path, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketNotificationQueueParams {
+  id?: string;
+  queue_arn: AT.ArnT<"SqsQueue">;
+  events: (string)[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromS3BucketNotificationQueueParams(params: S3BucketNotificationQueueParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "queue_arn", params.queue_arn, TF.resourceArnValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketNotificationParams {
+  bucket: string;
+  queue?: S3BucketNotificationQueueParams;
+}
+
+export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromS3BucketNotificationQueueParams(v)));
   return fields;
 }

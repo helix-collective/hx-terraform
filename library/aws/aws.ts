@@ -166,6 +166,43 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
   return policies.s3ModifyPolicy('modifys3backup', sr.backup_bucket_name);
 }
 
+/**
+ *  Setup S3 event notifications from a bucket to a specified SQS queue
+ */
+export function s3BucketNotificationsToSqsQueue(tfgen: TF.Generator, name: string, params: {
+  bucket: AR.S3Bucket,
+  queue: AR.SqsQueue,
+  events: string[]
+  
+}) {
+  const qp = AR.createSqsQueuePolicy(tfgen, name, {
+    queue_url: params.queue.id.value,
+    policy: JSON.stringify({
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": "*",
+          "Action": "sqs:SendMessage",
+          "Resource": params.queue.arn.value,
+          "Condition": {
+            "ArnEquals": { "aws:SourceArn": params.bucket.arn.value }
+          }
+        }
+      ]
+    })
+  });
+  const bn = AR.createS3BucketNotification(tfgen, name, {
+    bucket: params.bucket.id,
+    queue: {
+      id: "params.queue",
+      queue_arn: params.queue.arn,
+      events: params.events,
+    }
+  });
+  tfgen.dependsOn(bn, qp);
+}
+
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,

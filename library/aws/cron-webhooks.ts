@@ -31,8 +31,9 @@ export interface CronScheduleType {
  * A ScheduleItem specifies a regular post request to a given URL
  */
 export interface ScheduleItem {
-  url: String,
-  schedule: ScheduleType
+  name: string;
+  url: string;
+  schedule: ScheduleType;
 };
 
 export type ScheduleType =  RateScheduleType | CronScheduleType;
@@ -70,10 +71,10 @@ export function createCronWebhooks(tfgen: TF.Generator, name: string, sr: Shared
   const handler: string = "post_cron_webhook.post_cron_webhook";
   const zipfile: string = '../build/lambdas/post_cron_webhook.zip';
   const lambda = AR.createLambdaFunction(tfgen, name, {
-    function_name: tfgen.scopedName(name).join("_"),
-    role: role.arn,
     runtime,
     handler,
+    function_name: tfgen.scopedName(name).join("_"),
+    role: role.arn,
     filename: zipfile,
     source_code_hash: TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`),
     tags: tfgen.tagsContext()
@@ -81,12 +82,13 @@ export function createCronWebhooks(tfgen: TF.Generator, name: string, sr: Shared
 
   // Setup cloudwatch to call the lambda function for each scheduled item
   params.schedule_items.forEach( item => {
-    const event_rule = AR.createCloudwatchEventRule(tfgen, name, {
-      name: tfgen.scopedName(name).join("_"),
+    const resourceName = `${name}_${item.name}`;
+    const event_rule = AR.createCloudwatchEventRule(tfgen, resourceName, {
+      name: tfgen.scopedName(resourceName).join("_"),
       schedule_expression: scheduleExpression(item.schedule)
     });
 
-    AR.createCloudwatchEventTarget(tfgen, name, {
+    AR.createCloudwatchEventTarget(tfgen, resourceName, {
         rule: event_rule.name,
         arn: lambda.arn,
         input: JSON.stringify({
@@ -95,7 +97,7 @@ export function createCronWebhooks(tfgen: TF.Generator, name: string, sr: Shared
         })
     });
 
-    AR.createLambdaPermission(tfgen, name, {
+    AR.createLambdaPermission(tfgen, resourceName, {
       action: AT.lambda_InvokeFunction,
       function_name: lambda.function_name,
       principal: "events.amazonaws.com",

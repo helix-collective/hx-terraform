@@ -2860,8 +2860,8 @@ export function fieldsFromElasticsearchDomainSnapshotOptionsParams(params: Elast
 }
 
 export interface ElasticsearchDomainVpcOptionsParams {
-  security_group_ids?: SecurityGroupId[];
-  subnet_ids: SubnetId[];
+  security_group_ids?: (SecurityGroupId)[];
+  subnet_ids: (SubnetId)[];
 }
 
 export function fieldsFromElasticsearchDomainVpcOptionsParams(params: ElasticsearchDomainVpcOptionsParams) : TF.ResourceFieldMap {

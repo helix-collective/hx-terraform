@@ -1,6 +1,6 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { ArnT } from '../../providers/aws/types';
 import { SharedResources } from './shared';
 import { DESTRUCTION } from 'dns';

@@ -203,6 +203,24 @@ export function s3BucketNotificationsToSqsQueue(tfgen: TF.Generator, name: strin
   tfgen.dependsOn(bn, qp);
 }
 
+/**
+ *  Setup S3 event notifications from a bucket to a specified lambda function
+ */
+export function s3BucketNotificationsToLambda(tfgen: TF.Generator, name: string, params: {
+  bucket: AR.S3Bucket,
+  lambda: AR.LambdaFunction,
+  events: string[]
+  
+}) {
+  AR.createS3BucketNotification(tfgen, name, {
+    bucket: params.bucket.id,
+    lambda_function: {
+      lambda_function_arn: params.lambda.arn,
+      events: params.events,
+    }
+  });
+}
+
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,

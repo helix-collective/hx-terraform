@@ -52,6 +52,7 @@ export interface SharedResources {
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
   load_balancer_security_group: AR.SecurityGroup;
+  lambda_security_group: AR.SecurityGroup;
   alert_topic: AR.SnsTopic;
   alarm_topic: AR.SnsTopic;
   s3_bucket_prefix: string;
@@ -142,6 +143,12 @@ export function createResources(
     tags: contextTagsWithName(tfgen, 'lb'),
   });
 
+ const lambda_security_group = AR.createSecurityGroup(tfgen, 'lambda', {
+    vpc_id: network.vpc.id,
+    egress: [egress_all],
+    tags: contextTagsWithName(tfgen, 'lambda'),
+  });
+
   if (create_buildbot_user) {
     const buildbot_user = AR.createIamUser(tfgen, 'buildbot', {
       name: tfgen.scopedName('buildbot').join('_'),
@@ -186,6 +193,7 @@ export function createResources(
     bastion_security_group,
     appserver_security_group,
     load_balancer_security_group,
+    lambda_security_group,
     alert_topic,
     alarm_topic,
     s3_bucket_prefix,

@@ -3735,14 +3735,34 @@ export function fieldsFromS3BucketNotificationQueueParams(params: S3BucketNotifi
   return fields;
 }
 
+export interface S3BucketNotificationLambdaParams {
+  id?: string;
+  lambda_function_arn: AT.ArnT<"LambdaFunction">;
+  events: (string)[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromS3BucketNotificationLambdaParams(params: S3BucketNotificationLambdaParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "lambda_function_arn", params.lambda_function_arn, TF.resourceArnValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
 export interface S3BucketNotificationParams {
   bucket: string;
   queue?: S3BucketNotificationQueueParams;
+  lambda_function?: S3BucketNotificationLambdaParams;
 }
 
 export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "bucket", params.bucket, TF.stringValue);
   TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromS3BucketNotificationQueueParams(v)));
+  TF.addOptionalField(fields, "lambda_function", params.lambda_function, (v) => TF.mapValue(fieldsFromS3BucketNotificationLambdaParams(v)));
   return fields;
 }

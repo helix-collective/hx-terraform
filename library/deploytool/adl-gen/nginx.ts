@@ -73,8 +73,8 @@ export function texprNginxHttpEndPoint(): ADL.ATypeExpr<NginxHttpEndPoint> {
 
 export interface NginxHttpsEndPoint {
   serverNames: string;
-  sslCertPath: string;
-  sslCertKeyPath: string;
+  sslCertPath: (string|null);
+  sslCertKeyPath: (string|null);
   letsencryptWwwDir: string;
   port: (number|null);
 }
@@ -82,8 +82,8 @@ export interface NginxHttpsEndPoint {
 export function makeNginxHttpsEndPoint(
   input: {
     serverNames: string,
-    sslCertPath: string,
-    sslCertKeyPath: string,
+    sslCertPath: (string|null),
+    sslCertKeyPath: (string|null),
     letsencryptWwwDir: string,
     port: (number|null),
   }
@@ -98,7 +98,7 @@ export function makeNginxHttpsEndPoint(
 }
 
 const NginxHttpsEndPoint_AST : ADL.ScopedDecl =
-  {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"sslCertPath","default":{"kind":"nothing"},"name":"sslCertPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"sslCertKeyPath","default":{"kind":"nothing"},"name":"sslCertKeyPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"nothing"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"port","default":{"kind":"nothing"},"name":"port","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}}]}},"name":"NginxHttpsEndPoint","version":{"kind":"nothing"}}};
+  {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"sslCertPath","default":{"kind":"nothing"},"name":"sslCertPath","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"sslCertKeyPath","default":{"kind":"nothing"},"name":"sslCertKeyPath","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"nothing"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"port","default":{"kind":"nothing"},"name":"port","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}}]}},"name":"NginxHttpsEndPoint","version":{"kind":"nothing"}}};
 
 export function texprNginxHttpsEndPoint(): ADL.ATypeExpr<NginxHttpsEndPoint> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxHttpsEndPoint"}}, parameters : []}};

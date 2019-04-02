@@ -209,6 +209,8 @@ function createAppserverLoadBalancer(
 
   const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, endpoints);
+  // Figure out the environment based on the deploy bucket name.
+  const env = sr.deploy_bucket_name.indexOf('uat') > 0 ? 'uat' : 'prod';
 
   const alb = createLb(tfgen, "alb", {
     load_balancer_type: 'application',
@@ -216,7 +218,7 @@ function createAppserverLoadBalancer(
     security_groups: [sr.load_balancer_security_group.id],
     subnets: sr.network.azs.map(az => az.external_subnet.id),
     access_logs: {
-      bucket: `$au-com-slyp-elb-${name}-access-logs`,
+      bucket: `$au-com-slyp-elb-${env}-${name}-access-logs`,
       enabled: true
     }
   });

@@ -214,7 +214,11 @@ function createAppserverLoadBalancer(
     load_balancer_type: 'application',
     tags: tfgen.tagsContext(),
     security_groups: [sr.load_balancer_security_group.id],
-    subnets: sr.network.azs.map(az => az.external_subnet.id)
+    subnets: sr.network.azs.map(az => az.external_subnet.id),
+    access_logs: {
+      bucket: `$au-com-slyp-elb-${name}-access-logs`,
+      enabled: true
+    }
   });
 
   const alb_target_group = createLbTargetGroup(tfgen, "tg80", {

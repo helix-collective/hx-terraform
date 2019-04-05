@@ -213,54 +213,54 @@ export function dbInstanceType(v: string): DbInstanceType {
   return { type: 'DbInstanceType', value: v };
 }
 
-export const db_m4_large: DbInstanceType = dbInstanceType('db.m4.large');
-export const db_m4_xlarge: DbInstanceType = dbInstanceType('db.m4.xlarge');
-export const db_m4_2xlarge: DbInstanceType = dbInstanceType('db.m4.2xlarge');
-export const db_m4_4xlarge: DbInstanceType = dbInstanceType('db.m4.4xlarge');
+export const db_m3_2xlarge: DbInstanceType = dbInstanceType('db.m3.2xlarge');
+export const db_m3_large: DbInstanceType = dbInstanceType('db.m3.large');
+export const db_m3_medium: DbInstanceType = dbInstanceType('db.m3.medium');
+export const db_m3_xlarge: DbInstanceType = dbInstanceType('db.m3.xlarge');
 export const db_m4_10xlarge: DbInstanceType = dbInstanceType('db.m4.10xlarge');
 export const db_m4_16xlarge: DbInstanceType = dbInstanceType('db.m4.16xlarge');
-export const db_m3_medium: DbInstanceType = dbInstanceType('db.m3.medium');
-export const db_m3_large: DbInstanceType = dbInstanceType('db.m3.large');
-export const db_m3_xlarge: DbInstanceType = dbInstanceType('db.m3.xlarge');
-export const db_m3_2xlarge: DbInstanceType = dbInstanceType('db.m3.2xlarge');
-export const db_r4_large: DbInstanceType = dbInstanceType('db.r4.large');
-export const db_r4_xlarge: DbInstanceType = dbInstanceType('db.r4.xlarge');
-export const db_r4_2xlarge: DbInstanceType = dbInstanceType('db.r4.2xlarge');
-export const db_r4_4xlarge: DbInstanceType = dbInstanceType('db.r4.4xlarge');
-export const db_r4_8xlarge: DbInstanceType = dbInstanceType('db.r4.8xlarge');
-export const db_r4_16xlarge: DbInstanceType = dbInstanceType('db.r4.16xlarge');
-export const db_x1e_xlarge: DbInstanceType = dbInstanceType('db.x1e.xlarge');
-export const db_x1e_2xlarge: DbInstanceType = dbInstanceType('db.x1e.2xlarge');
-export const db_x1e_4xlarge: DbInstanceType = dbInstanceType('db.x1e.4xlarge');
-export const db_x1e_8xlarge: DbInstanceType = dbInstanceType('db.x1e.8xlarge');
-export const db_x1e_16xlarge: DbInstanceType = dbInstanceType(
-  'db.x1e.16xlarge'
-);
-export const db_x1e_32xlarge: DbInstanceType = dbInstanceType(
-  'db.x1e.32xlarge'
-);
-export const db_x1_16xlarge: DbInstanceType = dbInstanceType('db.x1.16xlarge');
-export const db_x1_32xlarge: DbInstanceType = dbInstanceType('db.x1.32xlarge');
-export const db_r3_large: DbInstanceType = dbInstanceType('db.r3.large');
-export const db_r3_xlarge: DbInstanceType = dbInstanceType('db.r3.xlarge');
+export const db_m4_2xlarge: DbInstanceType = dbInstanceType('db.m4.2xlarge');
+export const db_m4_4xlarge: DbInstanceType = dbInstanceType('db.m4.4xlarge');
+export const db_m4_large: DbInstanceType = dbInstanceType('db.m4.large');
+export const db_m4_xlarge: DbInstanceType = dbInstanceType('db.m4.xlarge');
 export const db_r3_2xlarge: DbInstanceType = dbInstanceType('db.r3.2xlarge');
 export const db_r3_4xlarge: DbInstanceType = dbInstanceType('db.r3.4xlarge');
 export const db_r3_8xlarge: DbInstanceType = dbInstanceType('db.r3.8xlarge');
+export const db_r3_large: DbInstanceType = dbInstanceType('db.r3.large');
+export const db_r3_xlarge: DbInstanceType = dbInstanceType('db.r3.xlarge');
+export const db_r4_16xlarge: DbInstanceType = dbInstanceType('db.r4.16xlarge');
+export const db_r4_2xlarge: DbInstanceType = dbInstanceType('db.r4.2xlarge');
+export const db_r4_4xlarge: DbInstanceType = dbInstanceType('db.r4.4xlarge');
+export const db_r4_8xlarge: DbInstanceType = dbInstanceType('db.r4.8xlarge');
+export const db_r4_large: DbInstanceType = dbInstanceType('db.r4.large');
+export const db_r4_xlarge: DbInstanceType = dbInstanceType('db.r4.xlarge');
+export const db_r5_12xlarge: DbInstanceType = dbInstanceType("db.r5.12xlarge");
+export const db_r5_24xlarge: DbInstanceType = dbInstanceType("db.r5.24xlarge");
+export const db_r5_2xlarge: DbInstanceType = dbInstanceType("db.r5.2xlarge");
+export const db_r5_4xlarge: DbInstanceType = dbInstanceType("db.r5.4xlarge");
+export const db_r5_large: DbInstanceType = dbInstanceType("db.r5.large");
+export const db_r5_xlarge: DbInstanceType = dbInstanceType("db.r5.xlarge");
+export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
+export const db_t2_large: DbInstanceType = dbInstanceType('db.t2.large');
+export const db_t2_medium: DbInstanceType = dbInstanceType('db.t2.medium');
 export const db_t2_micro: DbInstanceType = dbInstanceType('db.t2.micro');
 export const db_t2_small: DbInstanceType = dbInstanceType('db.t2.small');
-export const db_t2_medium: DbInstanceType = dbInstanceType('db.t2.medium');
-export const db_t2_large: DbInstanceType = dbInstanceType('db.t2.large');
 export const db_t2_xlarge: DbInstanceType = dbInstanceType('db.t2.xlarge');
-export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
-
-export const db_t3_small: DbInstanceType = dbInstanceType('db.t3.small');
-export const db_t3_medium: DbInstanceType = dbInstanceType('db.t3.medium');
-export const db_t3_large: DbInstanceType = dbInstanceType('db.t3.large');
-export const db_t3_xlarge: DbInstanceType = dbInstanceType('db.t3.xlarge');
 export const db_t3_2xlarge: DbInstanceType = dbInstanceType('db.t3.2xlarge');
+export const db_t3_large: DbInstanceType = dbInstanceType('db.t3.large');
+export const db_t3_medium: DbInstanceType = dbInstanceType('db.t3.medium');
+export const db_t3_small: DbInstanceType = dbInstanceType('db.t3.small');
+export const db_t3_xlarge: DbInstanceType = dbInstanceType('db.t3.xlarge');
+export const db_x1_16xlarge: DbInstanceType = dbInstanceType('db.x1.16xlarge');
+export const db_x1_32xlarge: DbInstanceType = dbInstanceType('db.x1.32xlarge');
+export const db_x1e_16xlarge: DbInstanceType = dbInstanceType('db.x1e.16xlarge');
+export const db_x1e_2xlarge: DbInstanceType = dbInstanceType('db.x1e.2xlarge');
+export const db_x1e_32xlarge: DbInstanceType = dbInstanceType('db.x1e.32xlarge');
+export const db_x1e_4xlarge: DbInstanceType = dbInstanceType('db.x1e.4xlarge');
+export const db_x1e_8xlarge: DbInstanceType = dbInstanceType('db.x1e.8xlarge');
+export const db_x1e_xlarge: DbInstanceType = dbInstanceType('db.x1e.xlarge');
 
 //----------------------------------------------------------------------
-
 //-----------------------Elasticache instance types---------------------
 export type CacheNodeType = {
   type: 'CacheNodeType';

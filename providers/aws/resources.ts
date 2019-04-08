@@ -1137,6 +1137,29 @@ type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:str
 export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 
 /**
+ *  Provides an ElastiCache Subnet Group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/elasticache_subnet_group.html
+ */
+export function createElasticacheSubnetGroup(tfgen: TF.Generator, rname: string, params: ElasticacheSubnetGroupParams): ElasticacheSubnetGroup {
+  const fields = fieldsFromElasticacheSubnetGroupParams(params);
+  const resource = tfgen.createTypedResource('ElasticacheSubnetGroup', 'aws_elasticache_subnet_group', rname, fields);
+  const arn: ElasticacheSubnetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheSubnetGroup');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface ElasticacheSubnetGroup extends TF.ResourceT<'ElasticacheSubnetGroup'> {
+  arn: ElasticacheSubnetGroupArn;
+}
+
+type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
+export type ElasticacheSubnetGroupArn = AT.ArnT<"ElasticacheSubnetGroup">;
+
+/**
  *  Provides an elasticache cluster resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/elasticache_cluster.html
@@ -1170,6 +1193,32 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
 
 type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
 export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
+
+/**
+ *  Provides an S3 bucket event notification resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_notification.html
+ */
+export function createS3BucketNotification(tfgen: TF.Generator, rname: string, params: S3BucketNotificationParams): S3BucketNotification {
+  const fields = fieldsFromS3BucketNotificationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketNotification', 'aws_s3_bucket_notification', rname, fields);
+  const bucket: string =  '${' + TF.resourceName(resource) + '.bucket}';
+  const arn: S3BucketNotificationArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'S3BucketNotification');
+
+  return {
+    ...resource,
+    bucket,
+    arn,
+  };
+}
+
+export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification'> {
+  bucket: string;
+  arn: S3BucketNotificationArn;
+}
+
+type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
+export type S3BucketNotificationArn = AT.ArnT<"S3BucketNotification">;
 
 /**
  *  Provides information about a Lambda Function.
@@ -1681,6 +1730,8 @@ export interface DbInstanceParams {
   apply_immediately?: boolean;
   storage_encrypted?: boolean;
   storage_type?: AT.DbInstanceStorageType;
+  monitoring_interval?: '0' | '1' | '5' | '10' | '15' | '30' | '60';
+  monitoring_role_arn?: AT.ArnT<"IamRole">;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -1709,6 +1760,8 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.stringValue);
+  TF.addOptionalField(fields, "monitoring_role_arn", params.monitoring_role_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -1909,7 +1962,6 @@ export interface Route53RecordParams {
   ttl?: string;
   records?: (string)[];
   alias?: Route53AliasParams;
-  allow_overwrite?: boolean;
 }
 
 export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.ResourceFieldMap {
@@ -1920,7 +1972,6 @@ export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.
   TF.addOptionalField(fields, "ttl", params.ttl, TF.stringValue);
   TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "alias", params.alias, (v) => TF.mapValue(fieldsFromRoute53AliasParams(v)));
-  TF.addOptionalField(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
   return fields;
 }
 
@@ -2772,6 +2823,7 @@ export interface ElasticacheClusterParams {
   parameter_group_name: AT.ElasticacheParameterGroupName;
   port?: number;
   security_group_ids?: (SecurityGroupId)[];
+  subnet_group_name ?: AT.ElasticacheSubnetGroupName;
 }
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
@@ -2783,6 +2835,7 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_group_name ", params.subnet_group_name , TF.stringAliasValue);
   return fields;
 }
 
@@ -2803,10 +2856,9 @@ export interface LambdaFunctionParams {
   filename?: string;
   s3_bucket?: string;
   s3_key?: string;
-  source_code_hash?: string;
-  role: AT.ArnT<"IamRole">;
-  handler: string;
-  runtime: AT.LambdaRuntime;
+  role?: AT.Arn;
+  handler?: string;
+  runtime?: AT.LambdaRuntime;
   vpc_config?: VpcConfigParams;
   tags?: TF.TagsMap;
 }
@@ -2817,12 +2869,81 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addOptionalField(fields, "filename", params.filename, TF.stringValue);
   TF.addOptionalField(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalField(fields, "s3_key", params.s3_key, TF.stringValue);
-  TF.addOptionalField(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
-  TF.addField(fields, "role", params.role, TF.resourceArnValue);
-  TF.addField(fields, "handler", params.handler, TF.stringValue);
-  TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
+  TF.addOptionalField(fields, "role", params.role, TF.resourceIdValue);
+  TF.addOptionalField(fields, "handler", params.handler, TF.stringValue);
+  TF.addOptionalField(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SnsEventNotificationTargetParams {
+  sns_arn: string;
+  id?: string;
+  events: (AT.BucketEventNotificationType)[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromSnsEventNotificationTargetParams(params: SnsEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "sns_arn", params.sns_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface SqsEventNotificationTargetParams {
+  queue_arn: string;
+  id?: string;
+  events: (AT.BucketEventNotificationType)[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromSqsEventNotificationTargetParams(params: SqsEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "queue_arn", params.queue_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface LambdaEventNotificationTargetParams {
+  lambda_arn: string;
+  id?: string;
+  events: (AT.BucketEventNotificationType)[];
+  filter_prefix?: string;
+  filter_suffix?: string;
+}
+
+export function fieldsFromLambdaEventNotificationTargetParams(params: LambdaEventNotificationTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "lambda_arn", params.lambda_arn, TF.stringValue);
+  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
+  TF.addField(fields, "events", params.events, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketNotificationParams {
+  bucket: string;
+  topic?: SnsEventNotificationTargetParams;
+  queue?: SqsEventNotificationTargetParams;
+  lambda_function ?: LambdaEventNotificationTargetParams;
+}
+
+export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "topic", params.topic, (v) => TF.mapValue(fieldsFromSnsEventNotificationTargetParams(v)));
+  TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromSqsEventNotificationTargetParams(v)));
+  TF.addOptionalField(fields, "lambda_function ", params.lambda_function , (v) => TF.mapValue(fieldsFromLambdaEventNotificationTargetParams(v)));
   return fields;
 }
 
@@ -2859,14 +2980,14 @@ export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleP
 export interface CloudwatchEventTargetParams {
   rule: string;
   arn: AT.Arn;
-  input: string;
+  input?: string;
 }
 
 export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "rule", params.rule, TF.stringValue);
   TF.addField(fields, "arn", params.arn, TF.stringAliasValue);
-  TF.addField(fields, "input", params.input, TF.stringValue);
+  TF.addOptionalField(fields, "input", params.input, TF.stringValue);
   return fields;
 }
 
@@ -3063,6 +3184,20 @@ export function fieldsFromWafregionalWebAclAssociationParams(params: Wafregional
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
   TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface ElasticacheSubnetGroupParams {
+  name: string;
+  description?: string;
+  subnet_ids: (SubnetId)[];
+}
+
+export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnetGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 

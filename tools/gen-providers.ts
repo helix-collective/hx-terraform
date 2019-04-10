@@ -97,6 +97,27 @@ const db_instance: RecordDecl = {
   ],
 };
 
+const db_parameter_group_parameter: RecordDecl = {
+  name: 'db_parameter_group_parameter',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('value', STRING),
+    optionalField('apply_method', enumType(['immediate','pending-reboot'])),
+    optionalField('tags', TAGS_MAP),
+  ]
+};
+
+const db_parameter_group: RecordDecl = {
+  name: 'db_parameter_group',
+  fields: [
+    optionalField('name', STRING),
+    requiredField('family', STRING),
+    optionalField('description', STRING),
+    optionalField('tags', TAGS_MAP),
+    optionalField('parameter', listType(recordType(db_parameter_group_parameter))),
+  ]
+};
+
 const vpc: RecordDecl = {
   name: 'vpc',
   fields: [
@@ -1364,6 +1385,18 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an RDS DB parameter group resource.',
+    'https://www.terraform.io/docs/providers/aws/r/db_parameter_group.html',
+    db_parameter_group,
+    [
+      resourceIdAttr('id', db_parameter_group),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides an Elastic IP Address.',
     'https://www.terraform.io/docs/providers/aws/r/eip.html',
     eip,
@@ -2021,6 +2054,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(instance_root_block_device);
   gen.generateParams(instance);
   gen.generateParams(db_instance);
+  gen.generateParams(db_parameter_group);
+  gen.generateParams(db_parameter_group_parameter);
   gen.generateParams(eip);
   gen.generateParams(vpc);
   gen.generateParams(subnet);

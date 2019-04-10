@@ -122,6 +122,32 @@ type DbInstanceId = {type:'DbInstanceId',value:string};
 export type DbInstanceArn = AT.ArnT<"DbInstance">;
 
 /**
+ *  Provides an RDS DB parameter group resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/db_parameter_group.html
+ */
+export function createDbParameterGroup(tfgen: TF.Generator, rname: string, params: DbParameterGroupParams): DbParameterGroup {
+  const fields = fieldsFromDbParameterGroupParams(params);
+  const resource = tfgen.createTypedResource('DbParameterGroup', 'aws_db_parameter_group', rname, fields);
+  const id: DbParameterGroupId =  {type: 'DbParameterGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: DbParameterGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbParameterGroup');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface DbParameterGroup extends TF.ResourceT<'DbParameterGroup'> {
+  id: DbParameterGroupId;
+  arn: DbParameterGroupArn;
+}
+
+type DbParameterGroupId = {type:'DbParameterGroupId',value:string};
+export type DbParameterGroupArn = AT.ArnT<"DbParameterGroup">;
+
+/**
  *  Provides an Elastic IP Address.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/eip.html
@@ -1960,6 +1986,40 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
+  return fields;
+}
+
+export interface DbParameterGroupParams {
+  name?: string;
+  family: string;
+  description?: string;
+  tags?: TF.TagsMap;
+  parameter?: (DbParameterGroupParameterParams)[];
+}
+
+export function fieldsFromDbParameterGroupParams(params: DbParameterGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "family", params.family, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalField(fields, "parameter", params.parameter, TF.listValue((v) => TF.mapValue(fieldsFromDbParameterGroupParameterParams(v))));
+  return fields;
+}
+
+export interface DbParameterGroupParameterParams {
+  name: string;
+  value: string;
+  apply_method?: 'immediate' | 'pending-reboot';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromDbParameterGroupParameterParams(params: DbParameterGroupParameterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "value", params.value, TF.stringValue);
+  TF.addOptionalField(fields, "apply_method", params.apply_method, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

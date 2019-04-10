@@ -90,6 +90,9 @@ export function createEc2Deployment(
     customize_instance: (i: AR.InstanceParams) => {
       i.user_data = bs.compile();
       i.iam_instance_profile = instance_profile.id;
+      if (params.customize) {
+        params.customize(i);
+      }
     },
   });
 
@@ -267,6 +270,11 @@ export interface Ec2DeploymentParams {
     * (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
     */
    dns_ttl?: number,
+
+   /**
+    *  Customize the ec2 instance, overriding defaults as required
+    */
+    customize?: util.Customize<AR.InstanceParams>
 }
 
 // An Endpoint consists of a name and one or more connected

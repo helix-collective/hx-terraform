@@ -110,6 +110,83 @@ export function createPostgresInstance(
 }
 
 /**
+ * Create an RDS mariadb database, with suitable defaults for a uat helix environment.
+ * The defaults can be overridden via the customize parameter. A randomly master password
+ * will be generated, and stored as json in the password_s3 location.
+ */
+export function createMariaDbInstance(
+  tfgen: TF.Generator,
+  name: string,
+  sr: SharedResources,
+  params: {
+    db_name: string;
+    db_instance_type: AT.DbInstanceType;
+    password_to: PasswordStore;
+    customize?: Customize<AR.DbInstanceParams>;
+    use_external_subnets?: boolean;
+  }
+): DbInstance {
+  const sname = tfgen.scopedName(name).join('_');
+
+  const security_group = AR.createSecurityGroup(tfgen, name, {
+    vpc_id: sr.network.vpc.id,
+    ingress: [ingressOnPort(3306)],
+    egress: [egress_all],
+    tags: contextTagsWithName(tfgen, name),
+  });
+
+  const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
+    name: sname,
+    subnet_ids: sr.network.azs.map(
+      az =>
+        params.use_external_subnets
+          ? az.external_subnet.id
+          : az.internal_subnet.id
+    ),
+  });
+
+  const dbparams: AR.DbInstanceParams = {
+    allocated_storage: 5,
+    engine: AT.mariadb,
+    instance_class: params.db_instance_type,
+    username: 'mariadb',
+    password: 'REPLACEME',
+    identifier: sname.replace(/_/g, '-'),
+    name: params.db_name,
+    engine_version: '10.2.15',
+    publicly_accessible: false,
+    backup_retention_period: 3,
+    vpc_security_group_ids: [security_group.id],
+    db_subnet_group_name: db_subnet_group.name,
+    tags: tfgen.tagsContext(),
+    final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
+    skip_final_snapshot: false,
+    apply_immediately: false,
+    storage_type: AT.gp2
+  };
+
+  if (params.customize) {
+    params.customize(dbparams);
+  }
+  const db = AR.createDbInstance(tfgen, name, dbparams);
+
+  const config_json = {
+    name: db.name,
+    username: db.username,
+    address: db.address,
+    port: db.port,
+  };
+
+  createPasswordProvisioner(tfgen, sr, db, params.password_to);
+
+  return {
+    config_json,
+    password_to: params.password_to,
+    instance: db,
+  };
+}
+
+/**
  * Create an mssql database, with suitable defaults for a uat helix environment.
  * The defaults can be overridden via the customize parameter. A random master password
  * will be generated, and stored as json in the password_s3 location.
@@ -221,4 +298,15 @@ export function installMssqlTools(): bootscript.BootScript {
   );
   bs.sh('ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev');
   return bs;
+}
+
+/**
+ * Construct a db parameter group for RDS customization
+ */
+export function createDbParameterGroup(tfgen: TF.Generator, rname: string, params: AR.DbParameterGroupParams): AR.DbParameterGroup {
+  return AR.createDbParameterGroup(tfgen, rname, {
+    name: tfgen.scopedName(rname).join('-').replace(/_/g,'-'),
+    tags: tfgen.tagsContext(),
+    ...params,
+  });
 }

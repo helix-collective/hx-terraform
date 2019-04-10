@@ -218,7 +218,7 @@ function createAppserverLoadBalancer(
     security_groups: [sr.load_balancer_security_group.id],
     subnets: sr.network.azs.map(az => az.external_subnet.id),
     access_logs: {
-      bucket: `$au-com-slyp-elb-${env}-${name}-access-logs`,
+      bucket: `au-com-slyp-elb-${env}-${name}-access-logs`,
       enabled: true
     }
   });

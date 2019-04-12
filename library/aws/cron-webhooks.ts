@@ -1,11 +1,14 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
 import * as AT from '../../providers/aws/types';
+import * as aws from './aws';
+import * as util from '../util';
 
 import * as secrets from "./secrets";
 import { SharedResources } from './shared';
 import * as policies from "./policies";
 import * as roles from "./roles";
+import { createLambdaFunctionInVpc } from './lambdas';
 
 
 /**
@@ -60,9 +63,34 @@ export function createCronWebhooks(tfgen: TF.Generator, name: string, sr: Shared
   // Construct a lambda function that will be called at each periodic event. It needs
   // a role to be able to write logs and access the shared secret.
   const role = roles.createIamRoleWithPolicies(tfgen, name, [
+    policies.lambda_in_vpc_policy,
     policies.putAnyLogsPolicy("lambdalogs"),
     policies.secretReadOnlyPolicy("secretro", shared_secret.arn),
   ]);
+
+  // A memcached elasticcache cluster for caching location and useragent details
+    // deployed on the vpc private subnets
+    const port = 11211;
+    const ecachesubnets = AR.createElasticacheSubnetGroup(tfgen, "ec", {
+        name: tfgen.scopedName("ec").join("-"),
+        subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
+    });
+    const sg = aws.createSecurityGroupInVpc(tfgen, "ec", sr, {
+        ingress: [util.ingressOnPort(port)],
+        egress: [util.egress_all]
+        });
+    const ecache = AR.createElasticacheCluster(tfgen, "ec", {
+        port,
+        cluster_id: tfgen.scopedName("ec").join("-"),
+        engine: "memcached",
+        node_type: AT.cache_t2_small,
+        num_cache_nodes: 1,
+        parameter_group_name: AT.elasticacheParameterGroupName("default.memcached1.5"),
+        subnet_group_name: ecachesubnets.name,
+        security_group_ids: [sg.id],
+        tags: tfgen.tagsContext()
+    });
+
 
   // The python lambda function will have already been packed (by doit) into
   // the zipfile before terraform is run. (The lambda function will be updated
@@ -70,15 +98,23 @@ export function createCronWebhooks(tfgen: TF.Generator, name: string, sr: Shared
   const runtime: AT.LambdaRuntime = AT.python_3_7;
   const handler: string = "post_cron_webhook.post_cron_webhook";
   const zipfile: string = '../build/lambdas/post_cron_webhook.zip';
-  const lambda = AR.createLambdaFunction(tfgen, name, {
+
+  const lambda = createLambdaFunctionInVpc(tfgen, name, sr, {
     runtime,
     handler,
-    function_name: tfgen.scopedName(name).join("_"),
-    role: role.arn,
-    filename: zipfile,
-    source_code_hash: TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`),
-    tags: tfgen.tagsContext()
-  });
+    role_arn: role.arn,
+    invoke_principal: "apigateway.amazonaws.com",
+    customize: lp => {
+      lp.function_name = tfgen.scopedName(name).join("_");
+      lp.filename = zipfile;
+      lp.source_code_hash = TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`);
+      lp.environment = {
+        variables: {
+          "ECACHE_ENDPOINT": ecache.configuration_endpoint
+        }
+      };
+    },
+  })
 
   // Setup cloudwatch to call the lambda function for each scheduled item
   params.schedule_items.forEach( item => {

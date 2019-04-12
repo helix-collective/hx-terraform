@@ -7,6 +7,7 @@ import zipfile
 import tempfile
 from pathlib import *
 from hx.dodo_helpers import rglobfiles
+from sys import platform
 
 def run_dockerized_terraform(terraform_image, args):
     """
@@ -125,9 +126,12 @@ def generate_pydir_lambda(zip, pydir):
         tmpdir = Path(tempfile.mkdtemp())
         subprocess.run( 'cp -r {}/* {}'.format(pydir, tmpdir), check=True, shell=True)
 
-        # Run pip to install the dependencies in it
-        # (assumes debian pip3 on path, which requires --system) 
-        subprocess.run( 'pip3 install -r requirements.txt --system --target .', check=True, shell=True, cwd=tmpdir)
+        extra_flags = ''
+        if (platform == "linux"):
+            extra_flags = '--system'
+
+        command = 'pip3 install -r requirements.txt {} --target .'.format(extra_flags)
+        subprocess.run(command, check=True, shell=True, cwd=tmpdir)
 
         # Zip up to create the lambda zip
         with zipfile.ZipFile(str(zip), 'w') as zf:

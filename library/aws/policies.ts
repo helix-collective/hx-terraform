@@ -117,6 +117,7 @@ export function s3ModifyPolicy(name: string, bucket: string) {
           Effect: 'Allow',
           Action: ['s3:ListBucket'],
           Resource: [`arn:aws:s3:::${bucket}`],
+          Principal: '*',
         },
         {
           Action: [
@@ -128,6 +129,7 @@ export function s3ModifyPolicy(name: string, bucket: string) {
           ],
           Effect: 'Allow',
           Resource: [`arn:aws:s3:::${bucket}/*`],
+          Principal: '*',
         },
       ],
     },

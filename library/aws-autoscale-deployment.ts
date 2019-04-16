@@ -13,8 +13,10 @@ import * as deploytool from './deploytool/deploytool';
 import * as C from "../library/deploytool/adl-gen/config";
 
 import { EndPoint, getDefaultAmi } from './aws/ec2-deployment';
-import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb, createLbTargetGroup } from '../providers/aws/resources';
+import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb,
+  createLbTargetGroup } from '../providers/aws/resources';
 import { contextTagsWithName } from './util';
+import {createS3Bucket} from "./aws/aws";
 
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:
@@ -209,8 +211,13 @@ function createAppserverLoadBalancer(
 
   const endpoints: EndPoint[] = endpointsOrDefault(params.dns_name, params.endpoints);
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, endpoints);
-  // Figure out the environment based on the deploy bucket name.
-  const env = sr.deploy_bucket_name.indexOf('uat') > 0 ? 'uat' : 'prod';
+
+  // Create the S3 bucket for storing the LB access logs.
+  const access_logs_bucket_name = `${sr.s3_bucket_prefix}-${name}-access-logs`;
+  const bucket = createS3Bucket(tfgen, access_logs_bucket_name, {
+    bucket: access_logs_bucket_name,
+    policy: JSON.stringify(policies.s3ModifyPolicy(`${name}-access-logs-policy`, access_logs_bucket_name).policy)
+  });
 
   const alb = createLb(tfgen, "alb", {
     load_balancer_type: 'application',
@@ -218,10 +225,13 @@ function createAppserverLoadBalancer(
     security_groups: [sr.load_balancer_security_group.id],
     subnets: sr.network.azs.map(az => az.external_subnet.id),
     access_logs: {
-      bucket: `au-com-slyp-elb-${env}-${name}-access-logs`,
+      bucket: access_logs_bucket_name,
       enabled: true
-    }
+    },
   });
+
+  // Indicates that the application load balancer depends on the bucket to enforce creation order.
+  tfgen.dependsOn(alb, bucket);
 
   const alb_target_group = createLbTargetGroup(tfgen, "tg80", {
     port: 80,

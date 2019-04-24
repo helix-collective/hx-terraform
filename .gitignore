@@ -1,6 +1,6 @@
 .terraform/
 terraform.tfstate.backup
 build/
-.doit.db
+/.doit.*
 __pycache__/
 node_modules/

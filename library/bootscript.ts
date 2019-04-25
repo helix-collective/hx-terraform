@@ -100,7 +100,7 @@ export class BootScript {
     const params = params0 || DEFAULT_CLOUDWATCH_METRICS_PARAMS;
     this.cronJob('cloudwatch-metrics', [
       'MAILTO=""',
-      `*/5 * * * * ${username} /home/$1/aws-scripts-mon/mon-put-instance-data.pl ${
+      `*/5 * * * * ${username} /home/${username}/aws-scripts-mon/mon-put-instance-data.pl ${
         params.script_args
       }`,
     ]);

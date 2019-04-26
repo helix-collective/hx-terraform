@@ -10,10 +10,20 @@ import * as bootscript from '../bootscript';
 import * as policies from './policies';
 import * as docker from '../docker';
 import * as deploytool from '../deploytool/deploytool';
-import * as C from "../../library/deploytool/adl-gen/config";
+import * as C from '../../library/deploytool/adl-gen/config';
 
-import { EndPoint, getDefaultAmi, httpsFqdnsFromEndpoints } from './ec2-deployment';
-import { createAutoscalingGroup, createLaunchConfiguration, createAutoscalingAttachment, createLb, createLbTargetGroup } from '../../providers/aws/resources';
+import {
+  EndPoint,
+  getDefaultAmi,
+  httpsFqdnsFromEndpoints,
+} from './ec2-deployment';
+import {
+  createAutoscalingGroup,
+  createLaunchConfiguration,
+  createAutoscalingAttachment,
+  createLb,
+  createLbTargetGroup,
+} from '../../providers/aws/resources';
 import { contextTagsWithName, Customize, applyCustomize } from '../util';
 
 /**
@@ -32,15 +42,25 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-
   const controller = createController(tfgen, name, sr, params);
-  const appserverAutoScaleGroup = createAppserverAutoScaleGroup(tfgen, name, sr, params);
-  const appserverLoadBalancer = createAppserverLoadBalancer(tfgen, name, sr, params, appserverAutoScaleGroup);
+  const appserverAutoScaleGroup = createAppserverAutoScaleGroup(
+    tfgen,
+    name,
+    sr,
+    params
+  );
+  const appserverLoadBalancer = createAppserverLoadBalancer(
+    tfgen,
+    name,
+    sr,
+    params,
+    appserverAutoScaleGroup
+  );
 
   return {
     autoscaling_group: appserverAutoScaleGroup,
     target_group: appserverLoadBalancer.target_group,
-    load_balancer: appserverLoadBalancer.load_balancer
+    load_balancer: appserverLoadBalancer.load_balancer,
   };
 }
 
@@ -56,14 +76,15 @@ function createController(
   const controller_label = controllerLabel(params.controller_label);
   const subnetId = externalSubnetId(sr.network);
 
-  const deploy_contexts: C.DeployContext[] = params.controller_deploy_contexts || [];
+  const deploy_contexts: C.DeployContext[] =
+    params.controller_deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
   bs.utf8Locale();
-  bs.createUserWithKeypairAccess( app_user);
+  bs.createUserWithKeypairAccess(app_user);
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
 
   if (params.controller_extra_bootscript) {
@@ -75,13 +96,11 @@ function createController(
       app_user,
       releases_s3,
       deploy_contexts,
-      deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
+      deploytool.remoteProxyMaster(proxy_endpoints, state_s3)
     )
   );
 
-  const controller_iampolicies = [
-    aws.s3DeployBucketModifyPolicy(sr)
-  ];
+  const controller_iampolicies = [aws.s3DeployBucketModifyPolicy(sr)];
 
   const controller_instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
@@ -101,7 +120,14 @@ function createController(
     },
   });
 
-  const controller_route53 = shared.dnsARecord(tfgen, controller_label, sr, params.controller_dns_name, [controller.eip.public_ip], "3600");
+  const controller_route53 = shared.dnsARecord(
+    tfgen,
+    controller_label,
+    sr,
+    params.controller_dns_name,
+    [controller.eip.public_ip],
+    '3600'
+  );
 
   return {};
 }
@@ -110,12 +136,13 @@ function createAppserverAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleDeploymentParams): AR.AutoscalingGroup {
-
+  params: AutoscaleDeploymentParams
+): AR.AutoscalingGroup {
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
-  const deploy_contexts: C.DeployContext[] = params.appserver_deploy_contexts || [];
+  const deploy_contexts: C.DeployContext[] =
+    params.appserver_deploy_contexts || [];
   const endpoints: EndPoint[] = params.endpoints;
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
@@ -137,7 +164,7 @@ function createAppserverAutoScaleGroup(
       app_user,
       params.releases_s3,
       deploy_contexts,
-      deploytool.remoteProxySlave(proxy_endpoints, state_s3),
+      deploytool.remoteProxySlave(proxy_endpoints, state_s3)
     )
   );
 
@@ -145,10 +172,12 @@ function createAppserverAutoScaleGroup(
     policies.publish_metrics_policy,
     aws.s3DeployBucketModifyPolicy(sr),
     policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
-    policies.ecr_readonly_policy
+    policies.ecr_readonly_policy,
   ];
   if (params.appserver_extra_policies) {
-    appserver_iampolicies = appserver_iampolicies.concat(params.appserver_extra_policies);
+    appserver_iampolicies = appserver_iampolicies.concat(
+      params.appserver_extra_policies
+    );
   }
 
   const appserver_instance_profile = roles.createInstanceProfileWithPolicies(
@@ -157,34 +186,39 @@ function createAppserverAutoScaleGroup(
     appserver_iampolicies
   );
 
-  const launch_config = createLaunchConfiguration(tfgen, "appserver", {
-      name_prefix: tfgen.scopedName(name).join('-') + '-',
-      key_name: params.key_name,
-      image_id: (params.appserver_amis) ? params.appserver_amis(sr.network.region) : getDefaultAmi(sr.network.region),
-      instance_type: params.appserver_instance_type,
-      iam_instance_profile: appserver_instance_profile.id,
-      security_groups: [sr.appserver_security_group.id],
-      user_data: bs.compile(),
-      root_block_device: {
-        volume_size: 20
-      },
+  const launch_config = createLaunchConfiguration(tfgen, 'appserver', {
+    name_prefix: tfgen.scopedName(name).join('-') + '-',
+    key_name: params.key_name,
+    image_id: params.appserver_amis
+      ? params.appserver_amis(sr.network.region)
+      : getDefaultAmi(sr.network.region),
+    instance_type: params.appserver_instance_type,
+    iam_instance_profile: appserver_instance_profile.id,
+    security_groups: [sr.appserver_security_group.id],
+    user_data: bs.compile(),
+    root_block_device: {
+      volume_size: 20,
+    },
   });
 
   tfgen.createBeforeDestroy(launch_config, true);
 
-  const autoscaling_group = createAutoscalingGroup(tfgen, "appserver", {
+  const autoscaling_group = createAutoscalingGroup(tfgen, 'appserver', {
     name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size || 1,
     max_size: params.max_size || 1,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
     launch_configuration: launch_config.name,
-    tags: Object.entries(contextTagsWithName(tfgen, name)).map(([key, value]) => { // note that tag and tags parameters appear to have the same function
-      return {
-        key,
-        value,
-        propagate_at_launch: true
+    tags: Object.entries(contextTagsWithName(tfgen, name)).map(
+      ([key, value]) => {
+        // note that tag and tags parameters appear to have the same function
+        return {
+          key,
+          value,
+          propagate_at_launch: true,
+        };
       }
-    })
+    ),
   });
 
   return autoscaling_group;
@@ -193,15 +227,15 @@ function createAppserverAutoScaleGroup(
 export type LoadBalancerResources = {
   load_balancer: AR.Lb;
   target_group: AR.LbTargetGroup;
-}
+};
 
 function createAppserverLoadBalancer(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams,
-  autoscaling_group: AR.AutoscalingGroup): LoadBalancerResources {
-
+  autoscaling_group: AR.AutoscalingGroup
+): LoadBalancerResources {
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const albParams: AR.LbParams = {
@@ -211,44 +245,59 @@ function createAppserverLoadBalancer(
     security_groups: [sr.load_balancer_security_group.id],
     subnets: sr.network.azs.map(az => az.external_subnet.id),
   };
-  const alb = createLb(tfgen, "alb", applyCustomize(params.customize_lb, albParams));
+  const alb = createLb(
+    tfgen,
+    'alb',
+    applyCustomize(params.customize_lb, albParams)
+  );
 
-  const alb_target_group = createLbTargetGroup(tfgen, "tg80", {
+  const alb_target_group = createLbTargetGroup(tfgen, 'tg80', {
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
     health_check: {
-      path: '/health-check'
+      path: '/health-check',
     },
-    tags: tfgen.tagsContext()
+    tags: tfgen.tagsContext(),
   });
 
-  const autoscaling_attachment = createAutoscalingAttachment(tfgen, "appserver", {
-    autoscaling_group_name: autoscaling_group.id,
-    alb_target_group_arn: alb_target_group.arn
-  });
+  const autoscaling_attachment = createAutoscalingAttachment(
+    tfgen,
+    'appserver',
+    {
+      autoscaling_group_name: autoscaling_group.id,
+      alb_target_group_arn: alb_target_group.arn,
+    }
+  );
 
   // Create a new certificate if an existing certificate ARN isn't provided.
   // When new domains are added, the certificate is deleted and re-created, in this situation,
   // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
-  const acm_certificate_arn = params.acm_certificate_arn != undefined ?
-    params.acm_certificate_arn : createAcmCertificate(tfgen, sr, https_fqdns, true /* create before destroy */ );
+  const acm_certificate_arn =
+    params.acm_certificate_arn != undefined
+      ? params.acm_certificate_arn
+      : createAcmCertificate(
+          tfgen,
+          sr,
+          https_fqdns,
+          true /* create before destroy */
+        );
 
-  const alb_http_listener = AR.createLbListener(tfgen, "http", {
+  const alb_http_listener = AR.createLbListener(tfgen, 'http', {
     load_balancer_arn: alb.arn,
     port: 80,
-    protocol: "HTTP",
+    protocol: 'HTTP',
     default_action: {
       type: 'redirect',
       redirect: {
         protocol: 'HTTPS',
         port: '443',
-        status_code: 'HTTP_301'
+        status_code: 'HTTP_301',
       },
-    }
+    },
   });
 
-  const alb_https_listener = AR.createLbListener(tfgen, "https", {
+  const alb_https_listener = AR.createLbListener(tfgen, 'https', {
     load_balancer_arn: alb.arn,
     port: 443,
     protocol: 'HTTPS',
@@ -256,30 +305,30 @@ function createAppserverLoadBalancer(
     default_action: {
       type: 'forward',
       target_group_arn: alb_target_group.arn,
-    }
+    },
   });
 
   params.endpoints.forEach(ep => {
-    ep.urls.forEach( (url,i) => {
+    ep.urls.forEach((url, i) => {
       if (url.kind == 'https') {
         shared.dnsAliasRecord(
           tfgen,
-          'appserver_lb_' + ep.name + "_" + i,
+          'appserver_lb_' + ep.name + '_' + i,
           sr,
           url.dnsname,
           {
             name: alb.dns_name,
             zone_id: alb.zone_id,
-            evaluate_target_health: true
+            evaluate_target_health: true,
           }
-      );
+        );
       }
     });
   });
 
   return {
     load_balancer: alb,
-    target_group: alb_target_group
+    target_group: alb_target_group,
   };
 }
 
@@ -299,39 +348,74 @@ function createAcmCertificate(
 
   const arn = acm_certificate.arn;
   const r53rs = https_fqdns.map((fqdn, i) => {
-
-    const domain_validation_options = domainValidationOptions(acm_certificate, i);
-    return AR.createRoute53Record(tfgen, "cert" + i, {
+    const domain_validation_options = domainValidationOptions(
+      acm_certificate,
+      i
+    );
+    return AR.createRoute53Record(tfgen, 'cert' + i, {
       zone_id: sr.primary_dns_zone.zone_id,
       name: domain_validation_options.name,
       type: domain_validation_options.type,
-      ttl: "60",
-      records: [domain_validation_options.value]
+      ttl: '60',
+      records: [domain_validation_options.value],
     });
   });
 
-  const acm_certificate_validation = AR.createAcmCertificateValidation(tfgen, "cert", {
-    certificate_arn: acm_certificate.arn,
-    validation_record_fqdns: r53rs.map(r53r => r53r.fqdn)
-  });
+  const acm_certificate_validation = AR.createAcmCertificateValidation(
+    tfgen,
+    'cert',
+    {
+      certificate_arn: acm_certificate.arn,
+      validation_record_fqdns: r53rs.map(r53r => r53r.fqdn),
+    }
+  );
 
   return arn;
 }
 
-type DNSRecordType = 'A' | 'AAAA' | 'CAA' | 'CNAME' | 'MX' | 'NAPTR' | 'NS' | 'PTR' | 'SOA' | 'SPF' | 'SRV' | 'TXT';
+type DNSRecordType =
+  | 'A'
+  | 'AAAA'
+  | 'CAA'
+  | 'CNAME'
+  | 'MX'
+  | 'NAPTR'
+  | 'NS'
+  | 'PTR'
+  | 'SOA'
+  | 'SPF'
+  | 'SRV'
+  | 'TXT';
 
 interface DomainValidationOptions {
-  name: string,
-  type: DNSRecordType,
-  value: string
+  name: string;
+  type: DNSRecordType;
+  value: string;
 }
 
-function domainValidationOptions(acm_certificate: AR.AcmCertificate, i: number): DomainValidationOptions {
+function domainValidationOptions(
+  acm_certificate: AR.AcmCertificate,
+  i: number
+): DomainValidationOptions {
   return {
-    name: "${aws_acm_certificate." + acm_certificate.tfname.join("_") + '.domain_validation_options.' + i + '.resource_record_name}',
-    type: "${aws_acm_certificate." + acm_certificate.tfname.join("_") + '.domain_validation_options.' + i + '.resource_record_type}' as DNSRecordType,
-    value: "${aws_acm_certificate." + acm_certificate.tfname.join("_") + '.domain_validation_options.' + i + '.resource_record_value}'
-  }
+    name:
+      '${aws_acm_certificate.' +
+      acm_certificate.tfname.join('_') +
+      '.domain_validation_options.' +
+      i +
+      '.resource_record_name}',
+    type: ('${aws_acm_certificate.' +
+      acm_certificate.tfname.join('_') +
+      '.domain_validation_options.' +
+      i +
+      '.resource_record_type}') as DNSRecordType,
+    value:
+      '${aws_acm_certificate.' +
+      acm_certificate.tfname.join('_') +
+      '.domain_validation_options.' +
+      i +
+      '.resource_record_value}',
+  };
 }
 
 function appUserOrDefault(app_user?: string): string {
@@ -339,30 +423,32 @@ function appUserOrDefault(app_user?: string): string {
 }
 
 function externalSubnetId(network: shared.NetworkResources): SubnetId {
-  return network.azs.map(az => az.external_subnet.id)[0]
+  return network.azs.map(az => az.external_subnet.id)[0];
 }
 
-function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
+function deployToolEndpoints(
+  sr: shared.SharedResources,
+  endpoints: EndPoint[]
+): C.EndPoint[] {
   return endpoints.map(ep => {
-    const fqdns = ep.urls.map( url => {
-        if (url.kind === 'https') {
-          return (shared.fqdn(sr, url.dnsname));
-        } else if (url.kind === 'https-external') {
-          return (url.fqdnsname);
-        } else {
-          return (url.fqdnsname);
-        }
+    const fqdns = ep.urls.map(url => {
+      if (url.kind === 'https') {
+        return shared.fqdn(sr, url.dnsname);
+      } else if (url.kind === 'https-external') {
+        return url.fqdnsname;
+      } else {
+        return url.fqdnsname;
+      }
     });
     return deploytool.httpProxyEndpoint(ep.name, fqdns);
   });
 }
 
 function controllerLabel(label?: string) {
-  return label || "controller";
+  return label || 'controller';
 }
 
-
-type SubnetId = {type:'SubnetId',value:string};
+type SubnetId = { type: 'SubnetId'; value: string };
 
 interface AutoscaleDeploymentParams {
   /**
@@ -469,7 +555,7 @@ interface AutoscaleDeploymentParams {
    * Customise underlying load balancer (if required)
    * https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html
    */
-  customize_lb?: Customize<AR.LbParams>
+  customize_lb?: Customize<AR.LbParams>;
 }
 
 interface AutoscaleDeployment {

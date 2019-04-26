@@ -79,18 +79,18 @@ export function createInstanceProfileWithPolicies(
 export function createIamUserWithPolicies(
   tfgen: TF.Generator,
   name: string,
-  policies: NamedPolicy[],
+  policies: NamedPolicy[]
 ): AR.IamUser {
-    const u = AR.createIamUser(tfgen, name, {
-      name: tfgen.scopedName(name).join("_")
+  const u = AR.createIamUser(tfgen, name, {
+    name: tfgen.scopedName(name).join('_'),
+  });
+  policies.forEach(p => {
+    const pname = name + '_' + p.name;
+    AR.createIamUserPolicy(tfgen, pname, {
+      name: tfgen.scopedName(pname).join('_'),
+      policy: JSON.stringify(p.policy, null, 2),
+      user: u.name,
     });
-    policies.forEach( p => {
-      const pname = name + "_" + p.name;
-      AR.createIamUserPolicy(tfgen, pname, {
-        name: tfgen.scopedName(pname).join("_"),
-        policy: JSON.stringify(p.policy, null, 2),
-        user: u.name
-      });
-    });
-    return u;
+  });
+  return u;
 }

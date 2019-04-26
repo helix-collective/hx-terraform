@@ -158,9 +158,7 @@ export function putAnyLogsPolicy(name: string) {
             'logs:DescribeLogStreams',
             'logs:PutLogEvents',
           ],
-          Resource: [
-            'arn:aws:logs:*:*:*'
-          ],
+          Resource: ['arn:aws:logs:*:*:*'],
         },
       ],
     },
@@ -255,14 +253,15 @@ export const lambda_in_vpc_policy: NamedPolicy = {
       {
         Effect: 'Allow',
         Action: [
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface",
+          'ec2:CreateNetworkInterface',
+          'ec2:DescribeNetworkInterfaces',
+          'ec2:DeleteNetworkInterface',
         ],
         Resource: '*',
       },
-    ],  }
-}
+    ],
+  },
+};
 
 export function edModifyPolicy(
   name: string,
@@ -283,18 +282,21 @@ export function edModifyPolicy(
   };
 }
 
-export function secretReadOnlyPolicy(name: string, arn: ArnSecret): NamedPolicy {
+export function secretReadOnlyPolicy(
+  name: string,
+  arn: ArnSecret
+): NamedPolicy {
   return {
     name,
     policy: {
-        "Version": "2012-10-17",
-        "Statement": {
-            "Effect": "Allow",
-            "Action": "secretsmanager:GetSecretValue",
-            "Resource": `${arn.value}`
-        }
-    }
-  }
+      Version: '2012-10-17',
+      Statement: {
+        Effect: 'Allow',
+        Action: 'secretsmanager:GetSecretValue',
+        Resource: `${arn.value}`,
+      },
+    },
+  };
 }
 
 export const ses_all_actions_policy: NamedPolicy = {
@@ -303,31 +305,29 @@ export const ses_all_actions_policy: NamedPolicy = {
     Version: '2012-10-17',
     Statement: [
       {
-          'Effect': 'Allow',
-          'Action': [
-              'ses:*'
-          ],
-          'Resource': '*'
-      }
-    ]
-  }
-}
+        Effect: 'Allow',
+        Action: ['ses:*'],
+        Resource: '*',
+      },
+    ],
+  },
+};
 
-export function firehosePutRecordPolicy(name: string, stream: AR.KinesisFirehoseDeliveryStream): NamedPolicy {
+export function firehosePutRecordPolicy(
+  name: string,
+  stream: AR.KinesisFirehoseDeliveryStream
+): NamedPolicy {
   return {
     name,
     policy: {
-      "Version": "2012-10-17",
-      "Statement": [
+      Version: '2012-10-17',
+      Statement: [
         {
-          "Effect": "Allow",
-          "Action": [
-            "firehose:PutRecord",
-            "firehose:PutRecordBatch"
-          ],
-          "Resource": stream.arn.value
-        }
-      ]
-    }
+          Effect: 'Allow',
+          Action: ['firehose:PutRecord', 'firehose:PutRecordBatch'],
+          Resource: stream.arn.value,
+        },
+      ],
+    },
   };
 }

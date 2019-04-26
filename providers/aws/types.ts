@@ -49,8 +49,8 @@ export function arnT<R extends string>(v: string, resource: R): ArnT<R> {
 /**
  * Create a typed Arn resource specifically for an AcmCertificate
  */
-export function acmCertificateArn(v: string): ArnT<"AcmCertificate"> {
-  return arnT(v, "AcmCertificate");
+export function acmCertificateArn(v: string): ArnT<'AcmCertificate'> {
+  return arnT(v, 'AcmCertificate');
 }
 
 //----------------------------------------------------------------------
@@ -234,12 +234,12 @@ export const db_r4_4xlarge: DbInstanceType = dbInstanceType('db.r4.4xlarge');
 export const db_r4_8xlarge: DbInstanceType = dbInstanceType('db.r4.8xlarge');
 export const db_r4_large: DbInstanceType = dbInstanceType('db.r4.large');
 export const db_r4_xlarge: DbInstanceType = dbInstanceType('db.r4.xlarge');
-export const db_r5_12xlarge: DbInstanceType = dbInstanceType("db.r5.12xlarge");
-export const db_r5_24xlarge: DbInstanceType = dbInstanceType("db.r5.24xlarge");
-export const db_r5_2xlarge: DbInstanceType = dbInstanceType("db.r5.2xlarge");
-export const db_r5_4xlarge: DbInstanceType = dbInstanceType("db.r5.4xlarge");
-export const db_r5_large: DbInstanceType = dbInstanceType("db.r5.large");
-export const db_r5_xlarge: DbInstanceType = dbInstanceType("db.r5.xlarge");
+export const db_r5_12xlarge: DbInstanceType = dbInstanceType('db.r5.12xlarge');
+export const db_r5_24xlarge: DbInstanceType = dbInstanceType('db.r5.24xlarge');
+export const db_r5_2xlarge: DbInstanceType = dbInstanceType('db.r5.2xlarge');
+export const db_r5_4xlarge: DbInstanceType = dbInstanceType('db.r5.4xlarge');
+export const db_r5_large: DbInstanceType = dbInstanceType('db.r5.large');
+export const db_r5_xlarge: DbInstanceType = dbInstanceType('db.r5.xlarge');
 export const db_t2_2xlarge: DbInstanceType = dbInstanceType('db.t2.2xlarge');
 export const db_t2_large: DbInstanceType = dbInstanceType('db.t2.large');
 export const db_t2_medium: DbInstanceType = dbInstanceType('db.t2.medium');
@@ -253,9 +253,13 @@ export const db_t3_small: DbInstanceType = dbInstanceType('db.t3.small');
 export const db_t3_xlarge: DbInstanceType = dbInstanceType('db.t3.xlarge');
 export const db_x1_16xlarge: DbInstanceType = dbInstanceType('db.x1.16xlarge');
 export const db_x1_32xlarge: DbInstanceType = dbInstanceType('db.x1.32xlarge');
-export const db_x1e_16xlarge: DbInstanceType = dbInstanceType('db.x1e.16xlarge');
+export const db_x1e_16xlarge: DbInstanceType = dbInstanceType(
+  'db.x1e.16xlarge'
+);
 export const db_x1e_2xlarge: DbInstanceType = dbInstanceType('db.x1e.2xlarge');
-export const db_x1e_32xlarge: DbInstanceType = dbInstanceType('db.x1e.32xlarge');
+export const db_x1e_32xlarge: DbInstanceType = dbInstanceType(
+  'db.x1e.32xlarge'
+);
 export const db_x1e_4xlarge: DbInstanceType = dbInstanceType('db.x1e.4xlarge');
 export const db_x1e_8xlarge: DbInstanceType = dbInstanceType('db.x1e.8xlarge');
 export const db_x1e_xlarge: DbInstanceType = dbInstanceType('db.x1e.xlarge');
@@ -276,25 +280,55 @@ export const cache_t2_small: CacheNodeType = cacheNodeType('cache.t2.small');
 export const cache_t2_medium: CacheNodeType = cacheNodeType('cache.t2.medium');
 export const cache_m4_large: CacheNodeType = cacheNodeType('cache.m4.large');
 export const cache_m4_xlarge: CacheNodeType = cacheNodeType('cache.m4.xlarge');
-export const cache_m4_2xlarge: CacheNodeType = cacheNodeType('cache.m4.2xlarge');
-export const cache_m4_4xlarge: CacheNodeType = cacheNodeType('cache.m4.4xlarge');
-export const cache_m4_10_large: CacheNodeType = cacheNodeType('cache.m4.10xlarge');
-export const cache_m5_2xlarge: CacheNodeType = cacheNodeType('cache.m5.2xlarge');
-export const cache_m5_4xlarge: CacheNodeType = cacheNodeType('cache.m5.4xlarge');
-export const cache_m5_12xlarge: CacheNodeType = cacheNodeType('cache.m5.12xlarge');
-export const cache_m5_24xlarge: CacheNodeType = cacheNodeType('cache.m5.24xlarge');
+export const cache_m4_2xlarge: CacheNodeType = cacheNodeType(
+  'cache.m4.2xlarge'
+);
+export const cache_m4_4xlarge: CacheNodeType = cacheNodeType(
+  'cache.m4.4xlarge'
+);
+export const cache_m4_10_large: CacheNodeType = cacheNodeType(
+  'cache.m4.10xlarge'
+);
+export const cache_m5_2xlarge: CacheNodeType = cacheNodeType(
+  'cache.m5.2xlarge'
+);
+export const cache_m5_4xlarge: CacheNodeType = cacheNodeType(
+  'cache.m5.4xlarge'
+);
+export const cache_m5_12xlarge: CacheNodeType = cacheNodeType(
+  'cache.m5.12xlarge'
+);
+export const cache_m5_24xlarge: CacheNodeType = cacheNodeType(
+  'cache.m5.24xlarge'
+);
 export const cache_r4_large: CacheNodeType = cacheNodeType('cache.r4.large');
 export const cache_r4_xlarge: CacheNodeType = cacheNodeType('cache.r4.xlarge');
-export const cache_r4_2xlarge: CacheNodeType = cacheNodeType('cache.r4.2xlarge');
-export const cache_r4_4xlarge: CacheNodeType = cacheNodeType('cache.r4.4xlarge');
-export const cache_r4_8xlarge: CacheNodeType = cacheNodeType('cache.r4.8xlarge');
-export const cache_r4_16xlarge: CacheNodeType = cacheNodeType('cache.r4.16xlarge');
+export const cache_r4_2xlarge: CacheNodeType = cacheNodeType(
+  'cache.r4.2xlarge'
+);
+export const cache_r4_4xlarge: CacheNodeType = cacheNodeType(
+  'cache.r4.4xlarge'
+);
+export const cache_r4_8xlarge: CacheNodeType = cacheNodeType(
+  'cache.r4.8xlarge'
+);
+export const cache_r4_16xlarge: CacheNodeType = cacheNodeType(
+  'cache.r4.16xlarge'
+);
 export const cache_r5_large: CacheNodeType = cacheNodeType('cache.r5.large');
 export const cache_r5_xlarge: CacheNodeType = cacheNodeType('cache.r5.xlarge');
-export const cache_r5_2xlarge: CacheNodeType = cacheNodeType('cache.r5.2xlarge');
-export const cache_r5_4xlarge	: CacheNodeType = cacheNodeType('cache.r5.4xlarge');
-export const cache_r5_12xlarge: CacheNodeType = cacheNodeType('cache.r5.12xlarge');
-export const cache_r5_24xlarge: CacheNodeType = cacheNodeType('cache.r5.24xlarge');
+export const cache_r5_2xlarge: CacheNodeType = cacheNodeType(
+  'cache.r5.2xlarge'
+);
+export const cache_r5_4xlarge: CacheNodeType = cacheNodeType(
+  'cache.r5.4xlarge'
+);
+export const cache_r5_12xlarge: CacheNodeType = cacheNodeType(
+  'cache.r5.12xlarge'
+);
+export const cache_r5_24xlarge: CacheNodeType = cacheNodeType(
+  'cache.r5.24xlarge'
+);
 //----------------------------------------------------------------------
 
 export type EsInstanceType = {
@@ -308,34 +342,80 @@ export function esInstanceType(v: string): EsInstanceType {
 
 export const t2_micro_elasticsearch = esInstanceType('t2.micro.elasticsearch');
 export const t2_small_elasticsearch = esInstanceType('t2.small.elasticsearch');
-export const t2_medium_elasticsearch = esInstanceType('t2.medium.elasticsearch');
+export const t2_medium_elasticsearch = esInstanceType(
+  't2.medium.elasticsearch'
+);
 export const m4_large_elasticsearch = esInstanceType('m4.large.elasticsearch');
-export const m4_xlarge_elasticsearch = esInstanceType('m4.xlarge.elasticsearch');
-export const m4_2xlarge_elasticsearch = esInstanceType('m4.2xlarge.elasticsearch');
-export const m4_4xlarge_elasticsearch = esInstanceType('m4.4xlarge.elasticsearch');
-export const m4_10xlarge_elasticsearch = esInstanceType('m4.10xlarge.elasticsearch');
+export const m4_xlarge_elasticsearch = esInstanceType(
+  'm4.xlarge.elasticsearch'
+);
+export const m4_2xlarge_elasticsearch = esInstanceType(
+  'm4.2xlarge.elasticsearch'
+);
+export const m4_4xlarge_elasticsearch = esInstanceType(
+  'm4.4xlarge.elasticsearch'
+);
+export const m4_10xlarge_elasticsearch = esInstanceType(
+  'm4.10xlarge.elasticsearch'
+);
 export const c4_large_elasticsearch = esInstanceType('c4.large.elasticsearch');
-export const c4_xlarge_elasticsearch = esInstanceType('c4.xlarge.elasticsearch');
-export const c4_2xlarge_elasticsearch = esInstanceType('c4.2xlarge.elasticsearch');
-export const c4_4xlarge_elasticsearch = esInstanceType('c4.4xlarge.elasticsearch');
-export const c4_8xlarge_elasticsearch = esInstanceType('c4.8xlarge.elasticsearch');
+export const c4_xlarge_elasticsearch = esInstanceType(
+  'c4.xlarge.elasticsearch'
+);
+export const c4_2xlarge_elasticsearch = esInstanceType(
+  'c4.2xlarge.elasticsearch'
+);
+export const c4_4xlarge_elasticsearch = esInstanceType(
+  'c4.4xlarge.elasticsearch'
+);
+export const c4_8xlarge_elasticsearch = esInstanceType(
+  'c4.8xlarge.elasticsearch'
+);
 export const r4_large_elasticsearch = esInstanceType('r4.large.elasticsearch');
-export const r4_xlarge_elasticsearch = esInstanceType('r4.xlarge.elasticsearch');
-export const r4_2xlarge_elasticsearch = esInstanceType('r4.2xlarge.elasticsearch');
-export const r4_4xlarge_elasticsearch = esInstanceType('r4.4xlarge.elasticsearch');
-export const r4_8xlarge_elasticsearch = esInstanceType('r4.8xlarge.elasticsearch');
-export const r4_16xlarge_elasticsearch = esInstanceType('r4.16xlarge.elasticsearch');
+export const r4_xlarge_elasticsearch = esInstanceType(
+  'r4.xlarge.elasticsearch'
+);
+export const r4_2xlarge_elasticsearch = esInstanceType(
+  'r4.2xlarge.elasticsearch'
+);
+export const r4_4xlarge_elasticsearch = esInstanceType(
+  'r4.4xlarge.elasticsearch'
+);
+export const r4_8xlarge_elasticsearch = esInstanceType(
+  'r4.8xlarge.elasticsearch'
+);
+export const r4_16xlarge_elasticsearch = esInstanceType(
+  'r4.16xlarge.elasticsearch'
+);
 export const r3_large_elasticsearch = esInstanceType('r3.large.elasticsearch');
-export const r3_xlarge_elasticsearch = esInstanceType('r3.xlarge.elasticsearch');
-export const r3_2xlarge_elasticsearch = esInstanceType('r3.2xlarge.elasticsearch');
-export const r3_4xlarge_elasticsearch = esInstanceType('r3.4xlarge.elasticsearch');
-export const r3_8xlarge_elasticsearch = esInstanceType('r3.8xlarge.elasticsearch');
+export const r3_xlarge_elasticsearch = esInstanceType(
+  'r3.xlarge.elasticsearch'
+);
+export const r3_2xlarge_elasticsearch = esInstanceType(
+  'r3.2xlarge.elasticsearch'
+);
+export const r3_4xlarge_elasticsearch = esInstanceType(
+  'r3.4xlarge.elasticsearch'
+);
+export const r3_8xlarge_elasticsearch = esInstanceType(
+  'r3.8xlarge.elasticsearch'
+);
 export const i3_large_elasticsearch = esInstanceType('i3.large.elasticsearch');
-export const i3_xlarge_elasticsearch = esInstanceType('i3.xlarge.elasticsearch');
-export const i3_2xlarge_elasticsearch = esInstanceType('i3.2xlarge.elasticsearch');
-export const i3_4xlarge_elasticsearch = esInstanceType('i3.4xlarge.elasticsearch');
-export const i3_8xlarge_elasticsearch = esInstanceType('i3.8xlarge.elasticsearch');
-export const i3_16xlarge_elasticsearch = esInstanceType('i3.16xlarge.elasticsearch');
+export const i3_xlarge_elasticsearch = esInstanceType(
+  'i3.xlarge.elasticsearch'
+);
+export const i3_2xlarge_elasticsearch = esInstanceType(
+  'i3.2xlarge.elasticsearch'
+);
+export const i3_4xlarge_elasticsearch = esInstanceType(
+  'i3.4xlarge.elasticsearch'
+);
+export const i3_8xlarge_elasticsearch = esInstanceType(
+  'i3.8xlarge.elasticsearch'
+);
+export const i3_16xlarge_elasticsearch = esInstanceType(
+  'i3.16xlarge.elasticsearch'
+);
 
 //----------------------------------------------------------------------
 export type DbInstanceStorageType = {
@@ -347,9 +427,11 @@ export function dbInstanceStorageType(v: string): DbInstanceStorageType {
   return { type: 'DbInstanceStorageType', value: v };
 }
 
-export const standard: DbInstanceStorageType = dbInstanceStorageType('standard');
+export const standard: DbInstanceStorageType = dbInstanceStorageType(
+  'standard'
+);
 export const gp2: DbInstanceStorageType = dbInstanceStorageType('gp2');
-export const io1 : DbInstanceStorageType = dbInstanceStorageType('io1');
+export const io1: DbInstanceStorageType = dbInstanceStorageType('io1');
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -358,8 +440,10 @@ export type ElasticacheParameterGroupName = {
   value: string;
 };
 
-export function elasticacheParameterGroupName(v: string): ElasticacheParameterGroupName {
-  return { type: 'ElasticacheParameterGroupName', value: v};
+export function elasticacheParameterGroupName(
+  v: string
+): ElasticacheParameterGroupName {
+  return { type: 'ElasticacheParameterGroupName', value: v };
 }
 //----------------------------------------------------------------------
 
@@ -369,8 +453,10 @@ export type ElasticacheParameterGroupFamily = {
   value: string;
 };
 
-export function elasticacheParameterGroupFamily(v: string): ElasticacheParameterGroupFamily {
-  return { type: 'ElasticacheParameterGroupFamily', value: v};
+export function elasticacheParameterGroupFamily(
+  v: string
+): ElasticacheParameterGroupFamily {
+  return { type: 'ElasticacheParameterGroupFamily', value: v };
 }
 
 export const memcached_1_4 = elasticacheParameterGroupFamily('memcached1.4');
@@ -386,7 +472,7 @@ export type LambdaRuntime = {
 };
 
 export function lambdaRuntime(v: string): LambdaRuntime {
-  return { type: 'LambdaRuntime', value: v};
+  return { type: 'LambdaRuntime', value: v };
 }
 
 export const python_3_7 = lambdaRuntime('python3.7');
@@ -399,19 +485,21 @@ export type LambdaPermissionAction = {
 };
 
 export function lambdaPermissionAction(v: string): LambdaPermissionAction {
-  return { type: 'LambdaPermissionAction', value: v};
+  return { type: 'LambdaPermissionAction', value: v };
 }
 
-export const lambda_InvokeFunction = lambdaPermissionAction('lambda:InvokeFunction');
+export const lambda_InvokeFunction = lambdaPermissionAction(
+  'lambda:InvokeFunction'
+);
 //----------------------------------------------------------------------
 
 export type PositionalConstraint = {
-  type: 'PositionalConstraint',
-  value: string
-}
+  type: 'PositionalConstraint';
+  value: string;
+};
 
 export function positionalConstraint(v: string): PositionalConstraint {
-  return { type: 'PositionalConstraint', value: v }
+  return { type: 'PositionalConstraint', value: v };
 }
 
 export const contains = positionalConstraint('CONTAINS');
@@ -421,12 +509,12 @@ export const starts_with = positionalConstraint('STARTS_WITH');
 export const ends_with = positionalConstraint('ENDS_WITH');
 
 export type TextTransformation = {
-  type: 'TextTransformation',
-  value: string
-}
+  type: 'TextTransformation';
+  value: string;
+};
 
 export function textTransformation(v: string): TextTransformation {
-  return { type: 'TextTransformation', value: v }
+  return { type: 'TextTransformation', value: v };
 }
 
 export const cmd_line = textTransformation('CMD_LINE');

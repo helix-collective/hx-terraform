@@ -13,7 +13,7 @@ import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as docker from '../docker';
 import * as deploytool from '../deploytool/deploytool';
-import * as C from "../../library/deploytool/adl-gen/config";
+import * as C from '../../library/deploytool/adl-gen/config';
 
 /**
  *  Creates a logical deployment on a single EC2 instance, including:
@@ -63,7 +63,7 @@ export function createEc2Deployment(
       deploy_contexts,
       deploytool.localProxy(proxy_endpoints),
       params.ssl_cert_email,
-      params.letsencrypt_challenge_type,
+      params.letsencrypt_challenge_type
     )
   );
 
@@ -97,11 +97,11 @@ export function createEc2Deployment(
   });
 
   params.endpoints.forEach(ep => {
-    ep.urls.forEach( (url,i) => {
+    ep.urls.forEach((url, i) => {
       if (url.kind === 'https') {
         shared.dnsARecord(
           tfgen,
-          name + '_' + ep.name + "_" + i,
+          name + '_' + ep.name + '_' + i,
           sr,
           url.dnsname,
           [appserver.eip.public_ip],
@@ -129,35 +129,47 @@ export function createEc2Deployment(
 /**
  * Get the fully qualified domain names for all https urls.
  * (eg to use to generate a certificate)
- * 
+ *
  */
-export function httpsFqdnsFromEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): string[] {
+export function httpsFqdnsFromEndpoints(
+  sr: shared.SharedResources,
+  endpoints: EndPoint[]
+): string[] {
   const https_fqdns: string[] = [];
   endpoints.forEach(ep => {
-      ep.urls.forEach( url => {
+    ep.urls.forEach(url => {
       if (url.kind === 'https') {
         https_fqdns.push(shared.fqdn(sr, url.dnsname));
       } else if (url.kind === 'https-external') {
         https_fqdns.push(url.fqdnsname);
       }
-    })
+    });
   });
   return https_fqdns;
 }
 
-export function endpointUrl(sr: shared.SharedResources, url: EndPointUrl ): string {
+export function endpointUrl(
+  sr: shared.SharedResources,
+  url: EndPointUrl
+): string {
   switch (url.kind) {
-    case 'https': return "https://" + shared.fqdn(sr, url.dnsname);
-    case 'https-external': return "https://" + url.fqdnsname;
-    case 'http': return "http://" + url.fqdnsname;
+    case 'https':
+      return 'https://' + shared.fqdn(sr, url.dnsname);
+    case 'https-external':
+      return 'https://' + url.fqdnsname;
+    case 'http':
+      return 'http://' + url.fqdnsname;
   }
 }
 
-export function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPoint[]): C.EndPoint[] {
+export function deployToolEndpoints(
+  sr: shared.SharedResources,
+  endpoints: EndPoint[]
+): C.EndPoint[] {
   return endpoints.map(ep => {
-    const http_fqdns: string[] = []; 
-    const https_fqdns: string[] = []; 
-    ep.urls.forEach( url => {
+    const http_fqdns: string[] = [];
+    const https_fqdns: string[] = [];
+    ep.urls.forEach(url => {
       if (url.kind === 'https') {
         https_fqdns.push(shared.fqdn(sr, url.dnsname));
       } else if (url.kind === 'https-external') {
@@ -166,17 +178,13 @@ export function deployToolEndpoints(sr: shared.SharedResources, endpoints: EndPo
         http_fqdns.push(url.fqdnsname);
       }
     });
-    if (https_fqdns.length >0) {
-      return deploytool.httpsProxyEndpoint(
-        ep.name,
-        https_fqdns
-      ) 
+    if (https_fqdns.length > 0) {
+      return deploytool.httpsProxyEndpoint(ep.name, https_fqdns);
     } else {
       return deploytool.httpProxyEndpoint(ep.name, http_fqdns);
     }
   });
 }
-
 
 export interface Ec2DeploymentParams {
   /**
@@ -249,43 +257,45 @@ export interface Ec2DeploymentParams {
 
   /**
    * Set the letsencrypt DNS challenge mode
-   * 
+   *
    * If the endpoints require an SSL certificate to be created via letsencrypt,
    * this controls the challenge mechanism. http-01 challenges have the
    * benefit that they can be used to generate certificates for domains without
    * dns control. dns-01 challenges have the benefit that they can be generated
    * off-line, ie the system doesn't need to be connected via dns before certs
-   * can be generated. 
+   * can be generated.
    */
 
-   letsencrypt_challenge_type?: 'http-01' | 'dns-01';
+  letsencrypt_challenge_type?: 'http-01' | 'dns-01';
 
-   /**
-    * Specify the DNS ttl value.
-    * 
-    * This defaults to 3 minutes, on the assumption that when initially being setup
-    * a short TTL is useful to ensure the fast propagation of changes. Once a system
-    * has stabilised this should be increased to a much larger value.
-    * 
-    * (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
-    */
-   dns_ttl?: number,
+  /**
+   * Specify the DNS ttl value.
+   *
+   * This defaults to 3 minutes, on the assumption that when initially being setup
+   * a short TTL is useful to ensure the fast propagation of changes. Once a system
+   * has stabilised this should be increased to a much larger value.
+   *
+   * (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
+   */
+  dns_ttl?: number;
 
-   /**
-    *  Customize the ec2 instance, overriding defaults as required
-    */
-    customize?: util.Customize<AR.InstanceParams>
+  /**
+   *  Customize the ec2 instance, overriding defaults as required
+   */
+  customize?: util.Customize<AR.InstanceParams>;
 }
 
 // An Endpoint consists of a name and one or more connected
-// URLs. 
+// URLs.
 export interface EndPoint {
-  name: string,
-  urls: EndPointUrl[]
-};
+  name: string;
+  urls: EndPointUrl[];
+}
 
-export type EndPointUrl = EndPointHttpsUrl | EndPointHttpUrl | EndPointHttpsExternalUrl;
-
+export type EndPointUrl =
+  | EndPointHttpsUrl
+  | EndPointHttpUrl
+  | EndPointHttpsExternalUrl;
 
 // An http endpoint
 export interface EndPointHttpUrl {

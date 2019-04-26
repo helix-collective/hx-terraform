@@ -17,7 +17,7 @@ import {
   Customize,
   ingressOnPort,
   egress_all,
-  applyCustomize
+  applyCustomize,
 } from '../util';
 
 export interface InstanceWithEipParams {
@@ -172,36 +172,39 @@ export function s3BackupBucketModifyPolicy(sr: SharedResources) {
 /**
  *  Setup S3 event notifications from a bucket to a specified SQS queue
  */
-export function s3BucketNotificationsToSqsQueue(tfgen: TF.Generator, name: string, params: {
-  bucket: AR.S3Bucket,
-  queue: AR.SqsQueue,
-  events: string[]
-  
-}) {
+export function s3BucketNotificationsToSqsQueue(
+  tfgen: TF.Generator,
+  name: string,
+  params: {
+    bucket: AR.S3Bucket;
+    queue: AR.SqsQueue;
+    events: string[];
+  }
+) {
   const qp = AR.createSqsQueuePolicy(tfgen, name, {
     queue_url: params.queue.id.value,
     policy: JSON.stringify({
-      "Version": "2012-10-17",
-      "Statement": [
+      Version: '2012-10-17',
+      Statement: [
         {
-          "Effect": "Allow",
-          "Principal": "*",
-          "Action": "sqs:SendMessage",
-          "Resource": params.queue.arn.value,
-          "Condition": {
-            "ArnEquals": { "aws:SourceArn": params.bucket.arn.value }
-          }
-        }
-      ]
-    })
+          Effect: 'Allow',
+          Principal: '*',
+          Action: 'sqs:SendMessage',
+          Resource: params.queue.arn.value,
+          Condition: {
+            ArnEquals: { 'aws:SourceArn': params.bucket.arn.value },
+          },
+        },
+      ],
+    }),
   });
   const bn = AR.createS3BucketNotification(tfgen, name, {
     bucket: params.bucket.id,
     queue: {
-      id: "params.queue",
+      id: 'params.queue',
       queue_arn: params.queue.arn,
       events: params.events,
-    }
+    },
   });
   tfgen.dependsOn(bn, qp);
 }
@@ -209,18 +212,21 @@ export function s3BucketNotificationsToSqsQueue(tfgen: TF.Generator, name: strin
 /**
  *  Setup S3 event notifications from a bucket to a specified lambda function
  */
-export function s3BucketNotificationsToLambda(tfgen: TF.Generator, name: string, params: {
-  bucket: AR.S3Bucket,
-  lambda: AR.LambdaFunction,
-  events: string[]
-  
-}) {
+export function s3BucketNotificationsToLambda(
+  tfgen: TF.Generator,
+  name: string,
+  params: {
+    bucket: AR.S3Bucket;
+    lambda: AR.LambdaFunction;
+    events: string[];
+  }
+) {
   AR.createS3BucketNotification(tfgen, name, {
     bucket: params.bucket.id,
     lambda_function: {
       lambda_function_arn: params.lambda.arn,
       events: params.events,
-    }
+    },
   });
 }
 
@@ -230,40 +236,43 @@ export function createMemcachedCluster(
   name: string,
   sr: SharedResources,
   params: {
-    node_type: AT.CacheNodeType,
-    num_cache_nodes: number,
+    node_type: AT.CacheNodeType;
+    num_cache_nodes: number;
     customize_memcached_cluster?: Customize<AR.ElasticacheClusterParams>;
   }
 ): AR.ElasticacheCluster {
-
-  const scopedName = tfgen.scopedName(name).join('-')
+  const scopedName = tfgen.scopedName(name).join('-');
 
   // memcached parameter group
   // TODO(jeeva): Understand why this is better/worse than simply calling
   // parameter_group_name: AT.elasticacheParameterGroupName("default.memcached1.5"),
-  const elasticache_parameter_group = AR.createElasticacheParameterGroup(tfgen, name, {
-    name: scopedName,
-    family: AT.memcached_1_5.value
-  });
+  const elasticache_parameter_group = AR.createElasticacheParameterGroup(
+    tfgen,
+    name,
+    {
+      name: scopedName,
+      family: AT.memcached_1_5.value,
+    }
+  );
 
   // default memcached port
   const port = 11211;
 
   // default security group (ingress on specified port, egress all)
-  const sg = createSecurityGroupInVpc(tfgen, "ec", sr, {
+  const sg = createSecurityGroupInVpc(tfgen, 'ec', sr, {
     ingress: [ingressOnPort(port)],
-    egress: [egress_all]
+    egress: [egress_all],
   });
 
   // limit access to internal subnets
-  const subnets = AR.createElasticacheSubnetGroup(tfgen, "ec", {
-      name: scopedName,
-      subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
+  const subnets = AR.createElasticacheSubnetGroup(tfgen, 'ec', {
+    name: scopedName,
+    subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
   });
 
   const elasticache_params: AR.ElasticacheClusterParams = {
     cluster_id: scopedName,
-    engine: "memcached",
+    engine: 'memcached',
     node_type: params.node_type,
     num_cache_nodes: params.num_cache_nodes,
     port,
@@ -276,20 +285,28 @@ export function createMemcachedCluster(
   return AR.createElasticacheCluster(
     tfgen,
     name,
-    applyCustomize(params.customize_memcached_cluster, elasticache_params));
+    applyCustomize(params.customize_memcached_cluster, elasticache_params)
+  );
 }
 
 /**
  * Include in the generated terraform configuration to store the terraform state in the
  * specified S3 bucket.
  */
-export function enableTerraformS3RemoteState(tfgen: TF.Generator, bucket: string, region: AT.Region) {
-  tfgen.createAdhocFile("state-backend.tf", `\
+export function enableTerraformS3RemoteState(
+  tfgen: TF.Generator,
+  bucket: string,
+  region: AT.Region
+) {
+  tfgen.createAdhocFile(
+    'state-backend.tf',
+    `\
 terraform {
    backend "s3" {
      bucket = "${bucket}"
      key    = "terraform/state"
      region = "${region.value}"
    }
-}`);
+}`
+  );
 }

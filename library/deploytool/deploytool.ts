@@ -8,7 +8,6 @@ import { RESOLVER } from './adl-gen/resolver';
 import { Maybe } from './adl-gen/runtime/sys/types';
 import { ArnSecret } from '../aws/secrets';
 
-
 export interface ContextFile {
   name: string;
   source_name: string;
@@ -18,7 +17,7 @@ export function httpProxyEndpoint(
   label: string,
   serverNames: string[]
 ): C.EndPoint {
-  return { 
+  return {
     label,
     serverNames,
     etype: { kind: 'httpOnly' },
@@ -42,14 +41,20 @@ export function httpsProxyEndpoint(
 export type ProxyConfig =
   | { kind: 'none' }
   | { kind: 'local'; endpoints: C.EndPoint[] }
-  | { kind: 'remoteSlave'; endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref }
-  | { kind: 'remoteMaster'; endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref };
+  | { kind: 'remoteSlave'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref }
+  | { kind: 'remoteMaster'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref };
 
-export function remoteProxyMaster(endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref): ProxyConfig {
+export function remoteProxyMaster(
+  endpoints: C.EndPoint[],
+  remoteStateS3: s3.S3Ref
+): ProxyConfig {
   return { endpoints, kind: 'remoteMaster', remoteStateS3 };
 }
 
-export function remoteProxySlave(endpoints: C.EndPoint[], remoteStateS3: s3.S3Ref): ProxyConfig {
+export function remoteProxySlave(
+  endpoints: C.EndPoint[],
+  remoteStateS3: s3.S3Ref
+): ProxyConfig {
   return { endpoints, kind: 'remoteSlave', remoteStateS3 };
 }
 
@@ -57,35 +62,49 @@ export function localProxy(endpoints: C.EndPoint[]): ProxyConfig {
   return { endpoints, kind: 'local' };
 }
 
-export function contextFromS3(name: string, s3Ref: s3.S3Ref) : C.DeployContext {
-  return {name, source:{kind:"s3", value: s3Ref.url() }};
+export function contextFromS3(name: string, s3Ref: s3.S3Ref): C.DeployContext {
+  return { name, source: { kind: 's3', value: s3Ref.url() } };
 }
 
-export function contextFromSecret(name: string, arn: ArnSecret): C.DeployContext {
-  return {name, source:{kind:"awsSecretArn", value: arn.value}};
-} 
+export function contextFromSecret(
+  name: string,
+  arn: ArnSecret
+): C.DeployContext {
+  return { name, source: { kind: 'awsSecretArn', value: arn.value } };
+}
 
-export function contextFromDb(name: string, db: rds.DbInstance): C.DeployContext {
+export function contextFromDb(
+  name: string,
+  db: rds.DbInstance
+): C.DeployContext {
   switch (db.password_to.kind) {
     case 's3':
-      return {name, source:{kind:"s3", value: db.password_to.s3Ref.url()}};
+      return {
+        name,
+        source: { kind: 's3', value: db.password_to.s3Ref.url() },
+      };
     case 'secret':
-    return {name, source:{kind:"awsSecretArn", value: db.password_to.arnSecret.value}}
+      return {
+        name,
+        source: { kind: 'awsSecretArn', value: db.password_to.arnSecret.value },
+      };
   }
-
 }
 
 function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {
   if (proxy.kind == 'none' || proxy.kind == 'local') {
-    throw Error("hx-deploy-tool not configured with proxy mode");
+    throw Error('hx-deploy-tool not configured with proxy mode');
   }
   const endPoints: { [key: string]: C.EndPoint } = {};
-  const remoteStateS3: Maybe<string> = { kind: 'just', value: proxy.remoteStateS3.url() };
+  const remoteStateS3: Maybe<string> = {
+    kind: 'just',
+    value: proxy.remoteStateS3.url(),
+  };
   proxy.endpoints.forEach(ep => {
     endPoints[ep.label] = ep;
   });
   return {
-    kind: "proxy",
+    kind: 'proxy',
     value: C.makeProxyModeConfig({ endPoints, remoteStateS3 }),
   };
 }
@@ -100,7 +119,7 @@ export function install(
   deployContexts: C.DeployContext[],
   proxy: ProxyConfig,
   ssl_cert_email?: string,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
 ): bootscript.BootScript {
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure hx-deploy-tool');
@@ -116,7 +135,7 @@ export function install(
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
 
-  let deployMode : C.DeployMode;
+  let deployMode: C.DeployMode;
 
   switch (proxy.kind) {
     case 'none':
@@ -129,7 +148,7 @@ export function install(
           endPoints[ep.label] = ep;
         });
         deployMode = {
-          kind: "proxy",
+          kind: 'proxy',
           value: C.makeProxyModeConfig({ endPoints }),
         };
       }
@@ -170,12 +189,17 @@ export function install(
   return bs;
 }
 
-function letsEncryptSSL(config: C.ToolConfig, proxy: ProxyConfig, bs: bootscript.BootScript, letsencrypt_challenge_mode?: 'http-01' | 'dns-01') {
+function letsEncryptSSL(
+  config: C.ToolConfig,
+  proxy: ProxyConfig,
+  bs: bootscript.BootScript,
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
+) {
   const certdnsnames: string[] = [];
-  
+
   if (proxy.kind === 'local') {
     for (const ep of proxy.endpoints) {
-       if (
+      if (
         ep.etype.kind === 'httpsWithRedirect' &&
         ep.etype.value.kind === 'generated'
       ) {
@@ -192,27 +216,35 @@ function letsEncryptSSL(config: C.ToolConfig, proxy: ProxyConfig, bs: bootscript
   }
 
   switch (challenge_mode) {
-  case 'http-01':
-    const cmd = '/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate';
-    bs.comment('generate an ssl certificate');
-    bs.sh('sudo -u app ' + cmd);
-    bs.cronJob('ssl-renewal', [
-      `MAILTO=""`,
-      `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
-    ]);
-    break;
-  case 'dns-01':
-    bs.letsencyptAwsRoute53(config.autoCertContactEmail, certdnsnames, '/opt', config.autoCertName);
-    break;
+    case 'http-01':
+      const cmd = '/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate';
+      bs.comment('generate an ssl certificate');
+      bs.sh('sudo -u app ' + cmd);
+      bs.cronJob('ssl-renewal', [
+        `MAILTO=""`,
+        `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
+      ]);
+      break;
+    case 'dns-01':
+      bs.letsencyptAwsRoute53(
+        config.autoCertContactEmail,
+        certdnsnames,
+        '/opt',
+        config.autoCertName
+      );
+      break;
   }
 }
 
-function bootscriptProxySlaveUpdate(bs: bootscript.BootScript, username: string): void {
-  bs.cronJob("proxy-nginx-reload", [
+function bootscriptProxySlaveUpdate(
+  bs: bootscript.BootScript,
+  username: string
+): void {
+  bs.cronJob('proxy-nginx-reload', [
     `MAILTO=""`,
     `15 0 * * * ${username} docker kill --signal=SIGHUP frontendproxy`,
   ]);
-  bs.systemd("proxy-slave-update", [
+  bs.systemd('proxy-slave-update', [
     `[Unit]`,
     `Description=Periodically refresh local hx-deploy-tool proxy state from S3`,
     ``,

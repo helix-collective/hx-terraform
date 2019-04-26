@@ -195,7 +195,7 @@ export function fileGenerator(): FileGenerator {
     providers: ProviderDetails[];
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
-    adhocFiles:  { [path: string]: string };
+    adhocFiles: { [path: string]: string };
     outputs: OutputDetails[];
   }
 
@@ -344,7 +344,13 @@ export function fileGenerator(): FileGenerator {
   }
 
   function emptyGenerated(): Generated {
-    return { providers: [], resources: [], resourcesByName: {}, outputs: [], adhocFiles: {} };
+    return {
+      providers: [],
+      resources: [],
+      resourcesByName: {},
+      outputs: [],
+      adhocFiles: {},
+    };
   }
 
   function addProviderDetails(generated: Generated, provider: ProviderDetails) {
@@ -506,8 +512,8 @@ export function fileGenerator(): FileGenerator {
         if (resource.createBeforeDestroy) {
           lifecycleFieldMap.push({
             key: 'create_before_destroy',
-            value: { kind: 'text', text: "true" }
-          })
+            value: { kind: 'text', text: 'true' },
+          });
         }
         const lifecycleField: ResourceField = {
           key: 'lifecycle',
@@ -549,8 +555,8 @@ export function fileGenerator(): FileGenerator {
     for (const path in fileResources) {
       writeGenerated(outdir + '/' + path, fileResources[path]);
     }
-    for(const path of Object.keys(generated.adhocFiles)) {
-      fs.writeFileSync(outdir + '/' + path, generated.adhocFiles[path])
+    for (const path of Object.keys(generated.adhocFiles)) {
+      fs.writeFileSync(outdir + '/' + path, generated.adhocFiles[path]);
     }
   }
 
@@ -560,11 +566,11 @@ export function fileGenerator(): FileGenerator {
   };
 }
 
-const RAW_EXPR_PREFIX = "TFRAWEXPR:"
+const RAW_EXPR_PREFIX = 'TFRAWEXPR:';
 
 /**
  * Create a raw string that will be passed to terraform as is.
- * 
+ *
  * Useful as a workaround to produce terraform expression that
  * we can't currently generate.
  */
@@ -574,7 +580,7 @@ export function rawExpr(s: string): string {
 
 function quotedText(s: string) {
   if (s.startsWith(RAW_EXPR_PREFIX)) {
-    return s.slice(RAW_EXPR_PREFIX.length)
+    return s.slice(RAW_EXPR_PREFIX.length);
   }
 
   const needsQuoting = s.includes('\n') || s.includes('"');

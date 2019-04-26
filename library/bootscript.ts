@@ -126,10 +126,15 @@ export class BootScript {
    *
    * Run it now, and schedule a cron job to run it periodically.
    */
-  letsencyptAwsRoute53(contact_email: string, dns_domains: string[], letsencrypt_prefix_dir? : string, certname?: string) {
+  letsencyptAwsRoute53(
+    contact_email: string,
+    dns_domains: string[],
+    letsencrypt_prefix_dir?: string,
+    certname?: string
+  ) {
     const script_path = '/opt/bin/get-ssl-certificates';
-    const ledir = letsencrypt_prefix_dir || "";
-    const certnamearg = certname ? '--cert-name ' + certname : ""; 
+    const ledir = letsencrypt_prefix_dir || '';
+    const certnamearg = certname ? '--cert-name ' + certname : '';
     const script = [
       `#!/bin/bash`,
       `# Request SSL certificates for ${dns_domains.join(', ')}`,

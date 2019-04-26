@@ -13,7 +13,13 @@ export function createUatScalingAlarms(
   hosts_alarm_threshold: number = 3
 ) {
   createScalingHighCpuAlarm(tfgen, sr.alert_topic, autoscaling_group);
-  createScalingLowHostsAlarm(tfgen, sr.alert_topic, load_balancer, target_group, hosts_alarm_threshold);
+  createScalingLowHostsAlarm(
+    tfgen,
+    sr.alert_topic,
+    load_balancer,
+    target_group,
+    hosts_alarm_threshold
+  );
 }
 
 export function createProdScalingAlarms(
@@ -24,7 +30,13 @@ export function createProdScalingAlarms(
   target_group: AR.LbTargetGroup
 ) {
   createScalingHighCpuAlarm(tfgen, sr.alarm_topic, autoscaling_group);
-  createScalingLowHostsAlarm(tfgen, sr.alarm_topic, load_balancer, target_group, 3);
+  createScalingLowHostsAlarm(
+    tfgen,
+    sr.alarm_topic,
+    load_balancer,
+    target_group,
+    3
+  );
 }
 
 /**
@@ -94,11 +106,11 @@ export function createScalingHighCpuAlarm(
     statistic: 'Average',
     threshold: 90,
     dimensions: {
-      AutoScalingGroupName: autoscaling_group.name
+      AutoScalingGroupName: autoscaling_group.name,
     },
     alarm_description: 'Sustained high cpu usage across an autoscaling group',
     alarm_actions: [topic.arn],
-  })
+  });
 }
 
 export function createScalingLowHostsAlarm(
@@ -119,12 +131,20 @@ export function createScalingLowHostsAlarm(
     statistic: 'Average',
     threshold: hosts_threshold,
     dimensions: {
-      LoadBalancer:  TF.rawExpr(`"\${replace("${load_balancer.arn.value}", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`),
-      TargetGroup: TF.rawExpr(`"\${replace("${target_group.arn.value}", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`),
+      LoadBalancer: TF.rawExpr(
+        `"\${replace("${
+          load_balancer.arn.value
+        }", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`
+      ),
+      TargetGroup: TF.rawExpr(
+        `"\${replace("${
+          target_group.arn.value
+        }", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`
+      ),
     },
     alarm_description: 'Less than configured hosts across an autoscaling group',
     alarm_actions: [topic.arn],
-  })
+  });
 }
 
 export function createHighDiskAlarm(

@@ -80,6 +80,13 @@ def task_generate():
         'uptodate': [False],
     }
 
+def task_output():
+    return {
+        'doc' : 'Run terraform to show terraform outputs',
+        'actions': [ dockerized_terraform(['output']) ],
+        'verbosity' : 2,
+        'uptodate': [False],
+    }
 def task_update_deploytool():
     return update_deploytool(HERE)
 

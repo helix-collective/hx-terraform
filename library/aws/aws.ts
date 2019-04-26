@@ -271,11 +271,11 @@ export function createMemcachedCluster(
   });
 
   const elasticache_params: AR.ElasticacheClusterParams = {
+    port,
     cluster_id: scopedName,
     engine: 'memcached',
     node_type: params.node_type,
     num_cache_nodes: params.num_cache_nodes,
-    port,
     parameter_group_name: elasticache_parameter_group.name,
     security_group_ids: [sg.id],
     subnet_group_name: subnets.name,

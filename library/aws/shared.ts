@@ -315,10 +315,10 @@ export function dnsAliasRecord(
   alias: AR.Route53AliasParams
 ) {
   AR.createRoute53Record(tfgen, name, {
+    alias,
     zone_id: sr.primary_dns_zone.zone_id,
     name: dnsname,
     type: 'A',
-    alias,
   });
 }
 

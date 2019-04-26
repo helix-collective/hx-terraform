@@ -180,9 +180,8 @@ export function deployToolEndpoints(
     });
     if (https_fqdns.length > 0) {
       return deploytool.httpsProxyEndpoint(ep.name, https_fqdns);
-    } else {
-      return deploytool.httpProxyEndpoint(ep.name, http_fqdns);
     }
+    return deploytool.httpProxyEndpoint(ep.name, http_fqdns);
   });
 }
 

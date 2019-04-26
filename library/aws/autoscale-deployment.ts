@@ -17,13 +17,6 @@ import {
   getDefaultAmi,
   httpsFqdnsFromEndpoints,
 } from './ec2-deployment';
-import {
-  createAutoscalingGroup,
-  createLaunchConfiguration,
-  createAutoscalingAttachment,
-  createLb,
-  createLbTargetGroup,
-} from '../../providers/aws/resources';
 import { contextTagsWithName, Customize, applyCustomize } from '../util';
 
 /**
@@ -186,7 +179,7 @@ function createAppserverAutoScaleGroup(
     appserver_iampolicies
   );
 
-  const launch_config = createLaunchConfiguration(tfgen, 'appserver', {
+  const launch_config = AR.createLaunchConfiguration(tfgen, 'appserver', {
     name_prefix: tfgen.scopedName(name).join('-') + '-',
     key_name: params.key_name,
     image_id: params.appserver_amis
@@ -203,7 +196,7 @@ function createAppserverAutoScaleGroup(
 
   tfgen.createBeforeDestroy(launch_config, true);
 
-  const autoscaling_group = createAutoscalingGroup(tfgen, 'appserver', {
+  const autoscaling_group = AR.createAutoscalingGroup(tfgen, 'appserver', {
     name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size || 1,
     max_size: params.max_size || 1,
@@ -245,13 +238,13 @@ function createAppserverLoadBalancer(
     security_groups: [sr.load_balancer_security_group.id],
     subnets: sr.network.azs.map(az => az.external_subnet.id),
   };
-  const alb = createLb(
+  const alb = AR.createLb(
     tfgen,
     'alb',
     applyCustomize(params.customize_lb, albParams)
   );
 
-  const alb_target_group = createLbTargetGroup(tfgen, 'tg80', {
+  const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
@@ -261,7 +254,7 @@ function createAppserverLoadBalancer(
     tags: tfgen.tagsContext(),
   });
 
-  const autoscaling_attachment = createAutoscalingAttachment(
+  const autoscaling_attachment = AR.createAutoscalingAttachment(
     tfgen,
     'appserver',
     {
@@ -274,7 +267,7 @@ function createAppserverLoadBalancer(
   // When new domains are added, the certificate is deleted and re-created, in this situation,
   // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
   const acm_certificate_arn =
-    params.acm_certificate_arn != undefined
+    params.acm_certificate_arn !== undefined
       ? params.acm_certificate_arn
       : createAcmCertificate(
           tfgen,
@@ -310,7 +303,7 @@ function createAppserverLoadBalancer(
 
   params.endpoints.forEach(ep => {
     ep.urls.forEach((url, i) => {
-      if (url.kind == 'https') {
+      if (url.kind === 'https') {
         shared.dnsAliasRecord(
           tfgen,
           'appserver_lb_' + ep.name + '_' + i,
@@ -434,11 +427,13 @@ function deployToolEndpoints(
     const fqdns = ep.urls.map(url => {
       if (url.kind === 'https') {
         return shared.fqdn(sr, url.dnsname);
-      } else if (url.kind === 'https-external') {
-        return url.fqdnsname;
-      } else {
+      }
+
+      if (url.kind === 'https-external') {
         return url.fqdnsname;
       }
+
+      return url.fqdnsname;
     });
     return deploytool.httpProxyEndpoint(ep.name, fqdns);
   });

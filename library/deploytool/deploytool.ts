@@ -48,14 +48,14 @@ export function remoteProxyMaster(
   endpoints: C.EndPoint[],
   remoteStateS3: s3.S3Ref
 ): ProxyConfig {
-  return { endpoints, kind: 'remoteMaster', remoteStateS3 };
+  return { remoteStateS3, endpoints, kind: 'remoteMaster' };
 }
 
 export function remoteProxySlave(
   endpoints: C.EndPoint[],
   remoteStateS3: s3.S3Ref
 ): ProxyConfig {
-  return { endpoints, kind: 'remoteSlave', remoteStateS3 };
+  return { remoteStateS3, endpoints, kind: 'remoteSlave' };
 }
 
 export function localProxy(endpoints: C.EndPoint[]): ProxyConfig {
@@ -92,7 +92,7 @@ export function contextFromDb(
 }
 
 function remoteDeployMode(proxy: ProxyConfig): C.DeployMode {
-  if (proxy.kind == 'none' || proxy.kind == 'local') {
+  if (proxy.kind === 'none' || proxy.kind === 'local') {
     throw Error('hx-deploy-tool not configured with proxy mode');
   }
   const endPoints: { [key: string]: C.EndPoint } = {};
@@ -165,12 +165,12 @@ export function install(
 
   const jb = createJsonBinding(RESOLVER, C.texprToolConfig());
   const config = C.makeToolConfig({
+    deployContexts,
     deployMode,
     releases: {
       kind: 's3',
       value: releases.url(),
     },
-    deployContexts: deployContexts,
     contextCache: '/opt/config',
     autoCertContactEmail: ssl_cert_email,
   });
@@ -179,10 +179,10 @@ export function install(
     JSON.stringify(jb.toJson(config), null, 2)
   );
 
-  if (proxy.kind == 'none' || proxy.kind == 'local') {
+  if (proxy.kind === 'none' || proxy.kind === 'local') {
     // If not in proxy mode, use letsEncrypt SSL
     letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
-  } else if (proxy.kind == 'remoteSlave') {
+  } else if (proxy.kind === 'remoteSlave') {
     // Install tools necessary for the slaves to poll the S3 state file
     bootscriptProxySlaveUpdate(bs, username);
   }
@@ -211,7 +211,7 @@ function letsEncryptSSL(
   }
   const challenge_mode = letsencrypt_challenge_mode || 'http-01';
 
-  if (certdnsnames.length == 0) {
+  if (certdnsnames.length === 0) {
     return;
   }
 

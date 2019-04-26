@@ -69,7 +69,7 @@ export function createPostgresInstance(
   });
 
   const dbparams: AR.DbInstanceParams = {
-    allocated_storage: 5,
+    allocated_storage: 5,   // The allocated storage size in gibibytes
     engine: AT.postgres,
     instance_class: params.db_instance_type,
     username: 'postgres',

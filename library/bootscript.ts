@@ -141,7 +141,7 @@ export class BootScript {
       `  ${certnamearg} \\`,
       `  -m ${contact_email} -n --agree-tos \\`,
       `  ${dns_domains.map(d => '-d ' + d).join(' ')}`,
-      `chmod -R ag+rX /etc/letsencrypt`,
+      `chmod -R ag+rX ${ledir}/etc/letsencrypt`,
     ];
 
     this.comment('Install and run certbot/dns-route53 to get SSL certificates');

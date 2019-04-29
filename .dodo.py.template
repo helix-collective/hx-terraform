@@ -80,6 +80,14 @@ def task_generate():
         'uptodate': [False],
     }
 
+def task_refresh():
+    return {
+        'doc' : 'Run terraform refresh to update state from current deployed resources',
+        'actions': [ dockerized_terraform(['refresh']) ],
+        'verbosity' : 2,
+        'uptodate': [False],
+    }
+
 def task_output():
     return {
         'doc' : 'Run terraform to show terraform outputs',
@@ -87,6 +95,7 @@ def task_output():
         'verbosity' : 2,
         'uptodate': [False],
     }
+
 def task_update_deploytool():
     return update_deploytool(HERE)
 

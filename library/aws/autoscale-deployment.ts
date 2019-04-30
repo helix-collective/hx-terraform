@@ -22,12 +22,15 @@ import { contextTagsWithName, Customize, applyCustomize } from '../util';
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:
  *
- *      - the autoscale group itelf
+ *      - the autoscale group itself
+ *      - a controller machine
  *      - AWS generated SSL certificates
  *      - DNS entries for the endpoints
  *      - Load balancer in front of autoscaling group
  *
  * hx-deploy-tool is configured onto the group, running in remote proxy mode.
+ *
+ * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoScaleappServer instead
  */
 export function createAutoscaleDeployment(
   tfgen: TF.Generator,
@@ -35,16 +38,17 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-  const controller = createController(tfgen, name, sr, params);
+  const controller = createController(tfgen, "controller", sr, params, []);
   const appserverAutoScaleGroup = createAppserverAutoScaleGroup(
     tfgen,
-    name,
+    "appserver",
     sr,
-    params
+    params,
+    params.endpoints
   );
   const appserverLoadBalancer = createAppserverLoadBalancer(
     tfgen,
-    name,
+    "appserver",
     sr,
     params,
     appserverAutoScaleGroup
@@ -57,22 +61,76 @@ export function createAutoscaleDeployment(
   };
 }
 
-function createController(
+/**
+ *  Creates a logical application service on an aws EC2 autoscaling group, including:
+ *
+ *      - the autoscale group itself
+ *      - a controller machine
+ *      - AWS generated SSL certificatesAppserver
+ *      - DNS entries for the endpoints
+ *      - Load balancer in front of autoscaling group
+ *
+ * hx-deploy-tool is configured onto the group, running in remote proxy mode.
+ */
+export function createAutoscaleAppserver(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
+): AutoscaleDeployment {
+
+  return TF.withLocalNameScope(tfgen, name, tfgen => {
+    const controller = createController(tfgen, "controller", sr, params, params.endpoints);
+    const appserverAutoScaleGroup = createAppserverAutoScaleGroup(tfgen, "asg", sr, params, params.endpoints);
+    const appserverLoadBalancer = createAppserverLoadBalancer(tfgen, "lb", sr, params, appserverAutoScaleGroup);
+
+    return {
+      autoscaling_group: appserverAutoScaleGroup,
+      target_group: appserverLoadBalancer.target_group,
+      load_balancer: appserverLoadBalancer.load_balancer
+    };
+  });
+}
+
+/**
+ * Create a processor on an AWS EC2 autoscaling group, including
+ *
+ *      - the autoscale group itself
+ *      - a controller machine
+ *
+ * hx-deploy-tool is configured onto the group, running in remote proxy mode.
+ */
+
+export function createAutoscaleProcessor(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  params: AutoscaleProcessorParams
+): AR.AutoscalingGroup {
+
+  return TF.withLocalNameScope(tfgen, name, tfgen => {
+     const controller = createController(tfgen, "controller", sr, params, []);
+     return  createAppserverAutoScaleGroup(tfgen, "asg", sr, params, []);
+  });
+}
+
+function createController(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  params: AutoscaleProcessorParams,
+  endpoints: EndPoint[]
 ) {
   const app_user = appUserOrDefault(params.app_user);
   const releases_s3 = params.releases_s3;
   const state_s3 = params.state_s3;
-  const controller_label = controllerLabel(params.controller_label);
+  const controller_label = params.controller_label || name;
   const subnetId = externalSubnetId(sr.network);
 
   const deploy_contexts: C.DeployContext[] =
     params.controller_deploy_contexts || [];
 
-  const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
+  const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
@@ -129,14 +187,14 @@ function createAppserverAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleDeploymentParams
+  params: AutoscaleProcessorParams,
+  endpoints: EndPoint[]
 ): AR.AutoscalingGroup {
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
   const deploy_contexts: C.DeployContext[] =
     params.appserver_deploy_contexts || [];
-  const endpoints: EndPoint[] = params.endpoints;
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
   // Build the bootscript for the instance
@@ -175,11 +233,11 @@ function createAppserverAutoScaleGroup(
 
   const appserver_instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
-    'appserver',
+    name,
     appserver_iampolicies
   );
 
-  const launch_config = AR.createLaunchConfiguration(tfgen, 'appserver', {
+  const launch_config = AR.createLaunchConfiguration(tfgen, name, {
     name_prefix: tfgen.scopedName(name).join('-') + '-',
     key_name: params.key_name,
     image_id: params.appserver_amis
@@ -196,7 +254,7 @@ function createAppserverAutoScaleGroup(
 
   tfgen.createBeforeDestroy(launch_config, true);
 
-  const autoscaling_group = AR.createAutoscalingGroup(tfgen, 'appserver', {
+  const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, {
     name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size || 1,
     max_size: params.max_size || 1,
@@ -256,7 +314,7 @@ function createAppserverLoadBalancer(
 
   const autoscaling_attachment = AR.createAutoscalingAttachment(
     tfgen,
-    'appserver',
+    name,
     {
       autoscaling_group_name: autoscaling_group.id,
       alb_target_group_arn: alb_target_group.arn,
@@ -306,7 +364,7 @@ function createAppserverLoadBalancer(
       if (url.kind === 'https') {
         shared.dnsAliasRecord(
           tfgen,
-          'appserver_lb_' + ep.name + '_' + i,
+          name + '_lb_' + ep.name + '_' + i,
           sr,
           url.dnsname,
           {
@@ -439,13 +497,10 @@ function deployToolEndpoints(
   });
 }
 
-function controllerLabel(label?: string) {
-  return label || 'controller';
-}
 
 type SubnetId = { type: 'SubnetId'; value: string };
 
-interface AutoscaleDeploymentParams {
+interface AutoscaleProcessorParams {
   /**
    * The AWS keyname used for the EC2 instance.
    */
@@ -473,11 +528,6 @@ interface AutoscaleDeploymentParams {
    * Defaults to "app".
    */
   app_user?: string;
-
-  /**
-   * The endpoints configured for http/https access.
-   */
-  endpoints: EndPoint[];
 
   /**
    * Additional operations for the controller first boot can be passed vis the operation.
@@ -540,6 +590,14 @@ interface AutoscaleDeploymentParams {
    * Override the default docker config.
    */
   docker_config?: docker.DockerConfig;
+
+}
+
+interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
+  /**
+   * The endpoints configured for http/https access.
+   */
+  endpoints: EndPoint[];
 
   /**
    * Use this AWS ACM certificate rather than automatically generating one

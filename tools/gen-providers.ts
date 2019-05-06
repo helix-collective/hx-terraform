@@ -809,6 +809,20 @@ const autoscaling_group_tag: RecordDecl = {
   ],
 };
 
+const autoscaling_schedule: RecordDecl = {
+  name: "autoscaling_schedule",
+  fields: [
+    requiredField('autoscaling_group_name', STRING),
+    requiredField('scheduled_action_name', STRING),
+    optionalField('start_time', STRING),
+    optionalField("end_time", STRING),
+    optionalField("recurrence", STRING),
+    optionalField("min_size", NUMBER),
+    optionalField("max_size", NUMBER),
+    optionalField("desired_capacity", NUMBER)
+  ]
+};
+
 const autoscaling_group: RecordDecl = {
   name: 'autoscaling_group',
   fields: [
@@ -1440,6 +1454,16 @@ function generateAws(gen: Generator) {
     'https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html',
     autoscaling_group,
     [resourceIdAttr('id', autoscaling_group), stringAttr('name')],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides an AutoScaling Schedule resource.',
+    'https://www.terraform.io/docs/providers/aws/r/autoscaling_schedule.html',
+    autoscaling_schedule,
+    [],
     {
       arn: true,
     }
@@ -2131,6 +2155,7 @@ function generateAws(gen: Generator) {
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
+  gen.generateParams(autoscaling_schedule);
   gen.generateParams(autoscaling_attachment);
 
   gen.generateParams(instance_root_block_device);

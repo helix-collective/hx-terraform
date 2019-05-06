@@ -53,6 +53,29 @@ type AutoscalingGroupId = {type:'AutoscalingGroupId',value:string};
 export type AutoscalingGroupArn = AT.ArnT<"AutoscalingGroup">;
 
 /**
+ *  Provides an AutoScaling Schedule resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/autoscaling_schedule.html
+ */
+export function createAutoscalingSchedule(tfgen: TF.Generator, rname: string, params: AutoscalingScheduleParams): AutoscalingSchedule {
+  const fields = fieldsFromAutoscalingScheduleParams(params);
+  const resource = tfgen.createTypedResource('AutoscalingSchedule', 'aws_autoscaling_schedule', rname, fields);
+  const arn: AutoscalingScheduleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingSchedule');
+
+  return {
+    ...resource,
+    arn,
+  };
+}
+
+export interface AutoscalingSchedule extends TF.ResourceT<'AutoscalingSchedule'> {
+  arn: AutoscalingScheduleArn;
+}
+
+type AutoscalingScheduleId = {type:'AutoscalingScheduleId',value:string};
+export type AutoscalingScheduleArn = AT.ArnT<"AutoscalingSchedule">;
+
+/**
  *  Provides an EC2 instance resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/instance.html
@@ -1868,6 +1891,30 @@ export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams)
   TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
   TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
+  return fields;
+}
+
+export interface AutoscalingScheduleParams {
+  autoscaling_group_name: string;
+  scheduled_action_name: string;
+  start_time?: string;
+  end_time?: string;
+  recurrence?: string;
+  min_size?: number;
+  max_size?: number;
+  desired_capacity?: number;
+}
+
+export function fieldsFromAutoscalingScheduleParams(params: AutoscalingScheduleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.stringValue);
+  TF.addField(fields, "scheduled_action_name", params.scheduled_action_name, TF.stringValue);
+  TF.addOptionalField(fields, "start_time", params.start_time, TF.stringValue);
+  TF.addOptionalField(fields, "end_time", params.end_time, TF.stringValue);
+  TF.addOptionalField(fields, "recurrence", params.recurrence, TF.stringValue);
+  TF.addOptionalField(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addOptionalField(fields, "max_size", params.max_size, TF.numberValue);
+  TF.addOptionalField(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
   return fields;
 }
 

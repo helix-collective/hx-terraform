@@ -616,3 +616,36 @@ interface AutoscaleDeployment {
   target_group: AR.LbTargetGroup;
   load_balancer: AR.Lb;
 }
+
+/**
+ * Creates a set of cron based scaling rules for the specified autoscaling group
+ */
+export function createAutoscalingCronSchedule(tfgen: TF.Generator, name: string, params: AutoscalingCronScheduleParams) {
+  params.rules.forEach( (rule,i) => {
+    const rname = name + "_" + (i+1);
+    const sname = tfgen.scopedName(rname).join("_");
+    AR.createAutoscalingSchedule(tfgen, rname, {
+      autoscaling_group_name: params.autoscaling_group.name,
+      scheduled_action_name: sname,
+      recurrence: rule.recurrence,
+      // Need -1 here to say leave the existing value unchanged.
+      min_size: rule.min_size == undefined ? -1 : rule.min_size,
+      max_size: rule.max_size == undefined ? -1 : rule.max_size,
+      desired_capacity: rule.desired_capacity == undefined ? -1 : rule.desired_capacity,
+    });
+  });
+}
+
+interface AutoscalingCronScheduleParams {
+  autoscaling_group: AR.AutoscalingGroup,
+  rules: AutoscalingCronRule[],
+};
+
+
+interface AutoscalingCronRule {
+  recurrence: string, // in cron syntax
+  min_size?: number,
+  max_size?: number,
+  desired_capacity?: number
+};
+

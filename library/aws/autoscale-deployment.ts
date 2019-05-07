@@ -482,16 +482,28 @@ function deployToolEndpoints(
   endpoints: EndPoint[]
 ): C.EndPoint[] {
   return endpoints.map(ep => {
-    const fqdns = ep.urls.map(url => {
+    const fqdns: string[] = [];
+    ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        return shared.fqdn(sr, url.dnsname);
+        fqdns.push(shared.fqdn(sr, url.dnsname));
+        if (url.proxied_from != undefined) {
+          url.proxied_from.forEach( pfqdns => {
+            fqdns.push(pfqdns);
+          });
+        }
+      }
+      else if (url.kind === 'https-external') {
+        fqdns.push(url.fqdnsname);
+        if (url.proxied_from != undefined) {
+          url.proxied_from.forEach( pfqdns => {
+            fqdns.push(pfqdns);
+          });
+        }
+      }
+      else if (url.kind == 'http') {
+        fqdns.push(url.fqdnsname);
       }
 
-      if (url.kind === 'https-external') {
-        return url.fqdnsname;
-      }
-
-      return url.fqdnsname;
     });
     return deploytool.httpProxyEndpoint(ep.name, fqdns);
   });

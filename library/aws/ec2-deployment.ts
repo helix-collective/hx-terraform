@@ -172,8 +172,14 @@ export function deployToolEndpoints(
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
         https_fqdns.push(shared.fqdn(sr, url.dnsname));
+        if (url.proxied_from != undefined) {
+          url.proxied_from.forEach(fqdns => https_fqdns.push(fqdns));
+        }
       } else if (url.kind === 'https-external') {
         https_fqdns.push(url.fqdnsname);
+        if (url.proxied_from != undefined) {
+          url.proxied_from.forEach(fqdns => https_fqdns.push(fqdns));
+        }
       } else if (url.kind === 'http') {
         http_fqdns.push(url.fqdnsname);
       }
@@ -296,22 +302,35 @@ export type EndPointUrl =
   | EndPointHttpUrl
   | EndPointHttpsExternalUrl;
 
+
 // An http endpoint
 export interface EndPointHttpUrl {
   kind: 'http';
   fqdnsname: string;
 }
 
-// An https endpoints for which we create a dns entry
+// An https endpoints in the repo shared DNS zone:
+//  - A DNS entry in the shared zone WILL be created
+//  - The fq dns name WILL be included on the SSL certificate
+//  - The fq dns name WILL be used for host routing in the hx-deploy-tool controlled nginx
+//  - Any of the fq dns names in proxied_from WILL also be used for host routing
+//
 export interface EndPointHttpsUrl {
   kind: 'https';
   dnsname: string;
+  proxied_from?: string[]
 }
 
 // An https endpoints for an externally configured dns entry
+//  - A DNS entry in the shared zone WILL NOT be created
+//  - The fq dns name WILL be included on the SSL certificate
+//  - The fq dns name WILL be used for host routing in the hx-deploy-tool controlled nginx
+//  - Any of the fq dns names in proxied_from WILL also be used for host routing
+//
 export interface EndPointHttpsExternalUrl {
   kind: 'https-external';
   fqdnsname: string;
+  proxied_from?: string[]
 }
 
 interface Ec2Deployment {

@@ -254,6 +254,7 @@ services:
       - /home/app:/fluend/buffer
     environment:
       - FLUENTD_CONF=fluentd.conf
+    restart: always
 `;
 
 function fluentdConfigFile(ed: AR.ElasticsearchDomain) {

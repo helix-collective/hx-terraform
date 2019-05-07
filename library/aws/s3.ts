@@ -8,14 +8,18 @@ export class S3Ref {
   constructor(public readonly bucket: string, public readonly key: string) {}
 
   url() {
-    return 's3://' + this.bucket + '/' + this.key;
+    return 's3://' + this.bucket + this.normalizeKey(this.key);
   }
 
   extendKey(extra: string): S3Ref {
     return new S3Ref(
       this.bucket,
-      this.key + (extra.startsWith('/') ? '' : '/') + extra
+      this.key + this.normalizeKey(extra)
     );
+  }
+
+  private normalizeKey(key: string): string {
+    return (key.startsWith('/') ? '' : '/') + key;
   }
 }
 

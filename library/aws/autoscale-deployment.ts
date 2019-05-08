@@ -237,7 +237,7 @@ function createAppserverAutoScaleGroup(
     appserver_iampolicies
   );
 
-  const launch_config = AR.createLaunchConfiguration(tfgen, name, {
+  const launch_config_params = {
     name_prefix: tfgen.scopedName(name).join('-') + '-',
     key_name: params.key_name,
     image_id: params.appserver_amis
@@ -250,7 +250,13 @@ function createAppserverAutoScaleGroup(
     root_block_device: {
       volume_size: 20,
     },
-  });
+  }
+
+  if (params.customize_launch_config) {
+    params.customize_launch_config(launch_config_params);
+  }
+
+  const launch_config = AR.createLaunchConfiguration(tfgen, name, launch_config_params);
 
   tfgen.createBeforeDestroy(launch_config, true);
 
@@ -603,6 +609,10 @@ interface AutoscaleProcessorParams {
    */
   docker_config?: docker.DockerConfig;
 
+  /**
+   * Customize the launch configuration
+   */
+   customize_launch_config?: Customize<AR.LaunchConfigurationParams>,
 }
 
 interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {

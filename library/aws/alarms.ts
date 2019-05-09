@@ -27,7 +27,8 @@ export function createProdScalingAlarms(
   sr: SharedResources,
   autoscaling_group: AR.AutoscalingGroup,
   load_balancer: AR.Lb,
-  target_group: AR.LbTargetGroup
+  target_group: AR.LbTargetGroup,
+  hosts_alarm_threshold: number = 3
 ) {
   createScalingHighCpuAlarm(tfgen, sr.alarm_topic, autoscaling_group);
   createScalingLowHostsAlarm(
@@ -35,7 +36,7 @@ export function createProdScalingAlarms(
     sr.alarm_topic,
     load_balancer,
     target_group,
-    3
+    hosts_alarm_threshold
   );
 }
 
@@ -263,3 +264,27 @@ export function createHighDbCpuAlarm(
     alarm_actions: [topic.arn],
   });
 }
+
+export function createQueueLengthAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  queue: AR.SqsQueue,
+  maxlength: number
+) {
+  const name = "queuelength";
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanThreshold',
+    evaluation_periods: 2,
+    metric_name: 'ApproximateNumberOfMessagesVisible',
+    namespace: 'AWS/SQS',
+    period: 60,
+    statistic: 'Average',
+    threshold: maxlength,
+    dimensions: {
+      QueueName: queue.name,
+    },
+    alarm_description: `The sustained length of the message queue is greater than ${maxlength}`,
+    alarm_actions: [topic.arn],
+  });}
+

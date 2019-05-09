@@ -252,7 +252,7 @@ interface CloudwatchMetricsParams {
   script_args: string;
 }
 
-const DEFAULT_CLOUDWATCH_METRICS_PARAMS: CloudwatchMetricsParams = {
+export const DEFAULT_CLOUDWATCH_METRICS_PARAMS: CloudwatchMetricsParams = {
   script_args:
     '--mem-util --mem-used --mem-avail  --disk-path=/ --disk-space-util --disk-space-avail --disk-space-used',
 };

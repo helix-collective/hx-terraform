@@ -205,7 +205,9 @@ function createProcessorAutoScaleGroup(
   bs.createUserWithKeypairAccess(app_user);
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   bs.addUserToGroup(app_user, 'docker');
-  bs.cloudwatchMetrics(app_user);
+  bs.cloudwatchMetrics(app_user, {
+    script_args: bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args + ' --auto-scaling'
+  });
   if (params.appserver_extra_bootscript) {
     bs.include(params.appserver_extra_bootscript);
   }

@@ -39,7 +39,7 @@ export function createAutoscaleDeployment(
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
   const controller = createController(tfgen, "controller", sr, params, []);
-  const appserverAutoScaleGroup = createAppserverAutoScaleGroup(
+  const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
     tfgen,
     "appserver",
     sr,
@@ -62,7 +62,7 @@ export function createAutoscaleDeployment(
 }
 
 /**
- *  Creates a logical application service on an aws EC2 autoscaling group, including:
+ *  Creates a logical application frontend service on an aws EC2 autoscaling group, including:
  *
  *      - the autoscale group itself
  *      - a controller machine
@@ -72,7 +72,7 @@ export function createAutoscaleDeployment(
  *
  * hx-deploy-tool is configured onto the group, running in remote proxy mode.
  */
-export function createAutoscaleAppserver(
+export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
@@ -81,7 +81,7 @@ export function createAutoscaleAppserver(
 
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(tfgen, "controller", sr, params, params.endpoints);
-    const appserverAutoScaleGroup = createAppserverAutoScaleGroup(tfgen, "asg", sr, params, params.endpoints);
+    const appserverAutoScaleGroup = createProcessorAutoScaleGroup(tfgen, "asg", sr, params, params.endpoints);
     const appserverLoadBalancer = createAppserverLoadBalancer(tfgen, "lb", sr, params, appserverAutoScaleGroup);
 
     return {
@@ -110,7 +110,7 @@ export function createAutoscaleProcessor(
 
   return TF.withLocalNameScope(tfgen, name, tfgen => {
      const controller = createController(tfgen, "controller", sr, params, []);
-     return  createAppserverAutoScaleGroup(tfgen, "asg", sr, params, []);
+     return  createProcessorAutoScaleGroup(tfgen, "asg", sr, params, []);
   });
 }
 
@@ -183,7 +183,7 @@ function createController(
   return {};
 }
 
-function createAppserverAutoScaleGroup(
+function createProcessorAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,

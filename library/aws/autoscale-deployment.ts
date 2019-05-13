@@ -333,14 +333,10 @@ function createAppserverLoadBalancer(
   // When new domains are added, the certificate is deleted and re-created, in this situation,
   // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
   const acm_certificate_arn =
-    params.acm_certificate_arn !== undefined
-      ? params.acm_certificate_arn
-      : createAcmCertificate(
-          tfgen,
-          sr,
-          https_fqdns,
-          true /* create before destroy */
-        );
+     params.acm_certificate == undefined ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
+     params.acm_certificate.kind == 'generate' ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
+     params.acm_certificate.kind == 'generate_with_manual_verify' ? createAcmCertificate(tfgen, sr, https_fqdns, false ) :
+     params.acm_certificate.arn;
 
   const alb_http_listener = AR.createLbListener(tfgen, 'http', {
     load_balancer_arn: alb.arn,
@@ -395,8 +391,9 @@ function createAcmCertificate(
   tfgen: TF.Generator,
   sr: shared.SharedResources,
   https_fqdns: string[],
-  create_before_destroy: boolean
+  auto_verify: boolean
 ): AR.AcmCertificateArn {
+  const create_before_destroy = true;
   const acm_certificate = AR.createAcmCertificate(tfgen, 'cert', {
     domain_name: https_fqdns[0],
     subject_alternative_names: https_fqdns.slice(1),
@@ -406,29 +403,30 @@ function createAcmCertificate(
   tfgen.createBeforeDestroy(acm_certificate, create_before_destroy);
 
   const arn = acm_certificate.arn;
-  const r53rs = https_fqdns.map((fqdn, i) => {
-    const domain_validation_options = domainValidationOptions(
-      acm_certificate,
-      i
-    );
-    return AR.createRoute53Record(tfgen, 'cert' + i, {
-      zone_id: sr.primary_dns_zone.zone_id,
-      name: domain_validation_options.name,
-      type: domain_validation_options.type,
-      ttl: '60',
-      records: [domain_validation_options.value],
+  if (auto_verify) {
+    const r53rs = https_fqdns.map((fqdn, i) => {
+      const domain_validation_options = domainValidationOptions(
+        acm_certificate,
+        i
+      );
+      return AR.createRoute53Record(tfgen, 'cert' + i, {
+        zone_id: sr.primary_dns_zone.zone_id,
+        name: domain_validation_options.name,
+        type: domain_validation_options.type,
+        ttl: '60',
+        records: [domain_validation_options.value],
+      });
     });
-  });
 
-  const acm_certificate_validation = AR.createAcmCertificateValidation(
-    tfgen,
-    'cert',
-    {
-      certificate_arn: acm_certificate.arn,
-      validation_record_fqdns: r53rs.map(r53r => r53r.fqdn),
-    }
-  );
-
+    const acm_certificate_validation = AR.createAcmCertificateValidation(
+      tfgen,
+      'cert',
+      {
+        certificate_arn: acm_certificate.arn,
+        validation_record_fqdns: r53rs.map(r53r => r53r.fqdn),
+      }
+    );
+  }
   return arn;
 }
 
@@ -624,9 +622,9 @@ interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
   endpoints: EndPoint[];
 
   /**
-   * Use this AWS ACM certificate rather than automatically generating one
+   * Specify the means by which we obtain/generate the SSL certificate
    */
-  acm_certificate_arn?: AR.AcmCertificateArn;
+  acm_certificate?: AcmCertificateSource;
 
   /**
    * Customise underlying load balancer (if required)
@@ -634,6 +632,12 @@ interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
    */
   customize_lb?: Customize<AR.LbParams>;
 }
+
+type AcmCertificateSource
+   = {kind: 'existing', arn: AR.AcmCertificateArn}
+   | {kind: 'generate' }
+   | {kind: 'generate_with_manual_verify'}
+   ;
 
 interface AutoscaleDeployment {
   autoscaling_group: AR.AutoscalingGroup;

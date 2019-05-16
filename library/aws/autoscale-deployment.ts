@@ -286,8 +286,8 @@ function createProcessorAutoScaleGroup(
 
   const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, {
     name: tfgen.scopedName(name).join('-'),
-    min_size: params.min_size || 1,
-    max_size: params.max_size || 1,
+    min_size: params.min_size === undefined ? 1 : params.min_size,
+    max_size: params.max_size === undefined ? 1 : params.max_size,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
     launch_configuration: launch_config.name,
     tags: Object.entries(contextTagsWithName(tfgen, name)).map(

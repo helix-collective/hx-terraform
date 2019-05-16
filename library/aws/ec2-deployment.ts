@@ -172,12 +172,12 @@ export function deployToolEndpoints(
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
         https_fqdns.push(shared.fqdn(sr, url.dnsname));
-        if (url.proxied_from != undefined) {
+        if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(fqdns => https_fqdns.push(fqdns));
         }
       } else if (url.kind === 'https-external') {
         https_fqdns.push(url.fqdnsname);
-        if (url.proxied_from != undefined) {
+        if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(fqdns => https_fqdns.push(fqdns));
         }
       } else if (url.kind === 'http') {

@@ -333,9 +333,9 @@ function createAppserverLoadBalancer(
   // When new domains are added, the certificate is deleted and re-created, in this situation,
   // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
   const acm_certificate_arn =
-     params.acm_certificate == undefined ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
-     params.acm_certificate.kind == 'generate' ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
-     params.acm_certificate.kind == 'generate_with_manual_verify' ? createAcmCertificate(tfgen, sr, https_fqdns, false ) :
+     params.acm_certificate === undefined ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
+     params.acm_certificate.kind === 'generate' ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
+     params.acm_certificate.kind === 'generate_with_manual_verify' ? createAcmCertificate(tfgen, sr, https_fqdns, false ) :
      params.acm_certificate.arn;
 
   const alb_http_listener = AR.createLbListener(tfgen, 'http', {
@@ -492,7 +492,7 @@ function deployToolEndpoints(
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
         fqdns.push(shared.fqdn(sr, url.dnsname));
-        if (url.proxied_from != undefined) {
+        if (url.proxied_from !== undefined) {
           url.proxied_from.forEach( pfqdns => {
             fqdns.push(pfqdns);
           });
@@ -500,13 +500,13 @@ function deployToolEndpoints(
       }
       else if (url.kind === 'https-external') {
         fqdns.push(url.fqdnsname);
-        if (url.proxied_from != undefined) {
+        if (url.proxied_from !== undefined) {
           url.proxied_from.forEach( pfqdns => {
             fqdns.push(pfqdns);
           });
         }
       }
-      else if (url.kind == 'http') {
+      else if (url.kind === 'http') {
         fqdns.push(url.fqdnsname);
       }
 
@@ -657,9 +657,9 @@ export function createAutoscalingCronSchedule(tfgen: TF.Generator, name: string,
       scheduled_action_name: sname,
       recurrence: rule.recurrence,
       // Need -1 here to say leave the existing value unchanged.
-      min_size: rule.min_size == undefined ? -1 : rule.min_size,
-      max_size: rule.max_size == undefined ? -1 : rule.max_size,
-      desired_capacity: rule.desired_capacity == undefined ? -1 : rule.desired_capacity,
+      min_size: rule.min_size === undefined ? -1 : rule.min_size,
+      max_size: rule.max_size === undefined ? -1 : rule.max_size,
+      desired_capacity: rule.desired_capacity === undefined ? -1 : rule.desired_capacity,
     });
   });
 }

@@ -829,6 +829,7 @@ const autoscaling_group: RecordDecl = {
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
     requiredField('min_size', NUMBER),
+    //  optionalField('desired_capacity', NUMBER),  // dont use desired_capacity just use min & max
     requiredField('max_size', NUMBER),
     optionalField('vpc_zone_identifier', listType(resourceIdType('SubnetId'))),
 

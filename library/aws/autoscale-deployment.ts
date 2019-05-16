@@ -30,7 +30,7 @@ import { contextTagsWithName, Customize, applyCustomize } from '../util';
  *
  * hx-deploy-tool is configured onto the group, running in remote proxy mode.
  *
- * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoScaleappServer instead
+ * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoscaleFrontend instead
  */
 export function createAutoscaleDeployment(
   tfgen: TF.Generator,

@@ -38,17 +38,17 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-  const controller = createController(tfgen, "controller", sr, params, []);
+  const controller = createController(tfgen, 'controller', sr, params, []);
   const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
     tfgen,
-    "appserver",
+    'appserver',
     sr,
     params,
     params.endpoints
   );
   const appserverLoadBalancer = createAppserverLoadBalancer(
     tfgen,
-    "appserver",
+    'appserver',
     sr,
     params,
     appserverAutoScaleGroup
@@ -78,16 +78,33 @@ export function createAutoscaleFrontend(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-    const controller = createController(tfgen, "controller", sr, params, params.endpoints);
-    const appserverAutoScaleGroup = createProcessorAutoScaleGroup(tfgen, "asg", sr, params, params.endpoints);
-    const appserverLoadBalancer = createAppserverLoadBalancer(tfgen, "lb", sr, params, appserverAutoScaleGroup);
+    const controller = createController(
+      tfgen,
+      'controller',
+      sr,
+      params,
+      params.endpoints
+    );
+    const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
+      tfgen,
+      'asg',
+      sr,
+      params,
+      params.endpoints
+    );
+    const appserverLoadBalancer = createAppserverLoadBalancer(
+      tfgen,
+      'lb',
+      sr,
+      params,
+      appserverAutoScaleGroup
+    );
 
     return {
       autoscaling_group: appserverAutoScaleGroup,
       target_group: appserverLoadBalancer.target_group,
-      load_balancer: appserverLoadBalancer.load_balancer
+      load_balancer: appserverLoadBalancer.load_balancer,
     };
   });
 }
@@ -107,10 +124,9 @@ export function createAutoscaleProcessor(
   sr: shared.SharedResources,
   params: AutoscaleProcessorParams
 ): AR.AutoscalingGroup {
-
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-     const controller = createController(tfgen, "controller", sr, params, []);
-     return  createProcessorAutoScaleGroup(tfgen, "asg", sr, params, []);
+    const controller = createController(tfgen, 'controller', sr, params, []);
+    return createProcessorAutoScaleGroup(tfgen, 'asg', sr, params, []);
   });
 }
 
@@ -206,7 +222,9 @@ function createProcessorAutoScaleGroup(
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user, {
-    script_args: bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args + ' --auto-scaling'
+    script_args:
+      bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
+      ' --auto-scaling',
   });
   if (params.appserver_extra_bootscript) {
     bs.include(params.appserver_extra_bootscript);
@@ -252,13 +270,17 @@ function createProcessorAutoScaleGroup(
     root_block_device: {
       volume_size: 20,
     },
-  }
+  };
 
   if (params.customize_launch_config) {
     params.customize_launch_config(launch_config_params);
   }
 
-  const launch_config = AR.createLaunchConfiguration(tfgen, name, launch_config_params);
+  const launch_config = AR.createLaunchConfiguration(
+    tfgen,
+    name,
+    launch_config_params
+  );
 
   tfgen.createBeforeDestroy(launch_config, true);
 
@@ -320,23 +342,22 @@ function createAppserverLoadBalancer(
     tags: tfgen.tagsContext(),
   });
 
-  const autoscaling_attachment = AR.createAutoscalingAttachment(
-    tfgen,
-    name,
-    {
-      autoscaling_group_name: autoscaling_group.id,
-      alb_target_group_arn: alb_target_group.arn,
-    }
-  );
+  const autoscaling_attachment = AR.createAutoscalingAttachment(tfgen, name, {
+    autoscaling_group_name: autoscaling_group.id,
+    alb_target_group_arn: alb_target_group.arn,
+  });
 
   // Create a new certificate if an existing certificate ARN isn't provided.
   // When new domains are added, the certificate is deleted and re-created, in this situation,
   // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
   const acm_certificate_arn =
-     params.acm_certificate === undefined ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
-     params.acm_certificate.kind === 'generate' ? createAcmCertificate(tfgen, sr, https_fqdns, true ) :
-     params.acm_certificate.kind === 'generate_with_manual_verify' ? createAcmCertificate(tfgen, sr, https_fqdns, false ) :
-     params.acm_certificate.arn;
+    params.acm_certificate === undefined
+      ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+      : params.acm_certificate.kind === 'generate'
+        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+        : params.acm_certificate.kind === 'generate_with_manual_verify'
+          ? createAcmCertificate(tfgen, sr, https_fqdns, false)
+          : params.acm_certificate.arn;
 
   const alb_http_listener = AR.createLbListener(tfgen, 'http', {
     load_balancer_arn: alb.arn,
@@ -493,28 +514,24 @@ function deployToolEndpoints(
       if (url.kind === 'https') {
         fqdns.push(shared.fqdn(sr, url.dnsname));
         if (url.proxied_from !== undefined) {
-          url.proxied_from.forEach( pfqdns => {
+          url.proxied_from.forEach(pfqdns => {
             fqdns.push(pfqdns);
           });
         }
-      }
-      else if (url.kind === 'https-external') {
+      } else if (url.kind === 'https-external') {
         fqdns.push(url.fqdnsname);
         if (url.proxied_from !== undefined) {
-          url.proxied_from.forEach( pfqdns => {
+          url.proxied_from.forEach(pfqdns => {
             fqdns.push(pfqdns);
           });
         }
-      }
-      else if (url.kind === 'http') {
+      } else if (url.kind === 'http') {
         fqdns.push(url.fqdnsname);
       }
-
     });
     return deploytool.httpProxyEndpoint(ep.name, fqdns);
   });
 }
-
 
 type SubnetId = { type: 'SubnetId'; value: string };
 
@@ -612,7 +629,7 @@ interface AutoscaleProcessorParams {
   /**
    * Customize the launch configuration
    */
-   customize_launch_config?: Customize<AR.LaunchConfigurationParams>,
+  customize_launch_config?: Customize<AR.LaunchConfigurationParams>;
 }
 
 interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
@@ -633,11 +650,10 @@ interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
   customize_lb?: Customize<AR.LbParams>;
 }
 
-type AcmCertificateSource
-   = {kind: 'existing', arn: AR.AcmCertificateArn}
-   | {kind: 'generate' }
-   | {kind: 'generate_with_manual_verify'}
-   ;
+type AcmCertificateSource =
+  | { kind: 'existing'; arn: AR.AcmCertificateArn }
+  | { kind: 'generate' }
+  | { kind: 'generate_with_manual_verify' };
 
 interface AutoscaleDeployment {
   autoscaling_group: AR.AutoscalingGroup;
@@ -648,10 +664,14 @@ interface AutoscaleDeployment {
 /**
  * Creates a set of cron based scaling rules for the specified autoscaling group
  */
-export function createAutoscalingCronSchedule(tfgen: TF.Generator, name: string, params: AutoscalingCronScheduleParams) {
-  params.rules.forEach( (rule,i) => {
-    const rname = name + "_" + (i+1);
-    const sname = tfgen.scopedName(rname).join("_");
+export function createAutoscalingCronSchedule(
+  tfgen: TF.Generator,
+  name: string,
+  params: AutoscalingCronScheduleParams
+) {
+  params.rules.forEach((rule, i) => {
+    const rname = name + '_' + (i + 1);
+    const sname = tfgen.scopedName(rname).join('_');
     AR.createAutoscalingSchedule(tfgen, rname, {
       autoscaling_group_name: params.autoscaling_group.name,
       scheduled_action_name: sname,
@@ -659,21 +679,20 @@ export function createAutoscalingCronSchedule(tfgen: TF.Generator, name: string,
       // Need -1 here to say leave the existing value unchanged.
       min_size: rule.min_size === undefined ? -1 : rule.min_size,
       max_size: rule.max_size === undefined ? -1 : rule.max_size,
-      desired_capacity: rule.desired_capacity === undefined ? -1 : rule.desired_capacity,
+      desired_capacity:
+        rule.desired_capacity === undefined ? -1 : rule.desired_capacity,
     });
   });
 }
 
 interface AutoscalingCronScheduleParams {
-  autoscaling_group: AR.AutoscalingGroup,
-  rules: AutoscalingCronRule[],
-};
-
+  autoscaling_group: AR.AutoscalingGroup;
+  rules: AutoscalingCronRule[];
+}
 
 interface AutoscalingCronRule {
-  recurrence: string, // in cron syntax
-  min_size?: number,
-  max_size?: number,
-  desired_capacity?: number
-};
-
+  recurrence: string; // in cron syntax
+  min_size?: number;
+  max_size?: number;
+  desired_capacity?: number;
+}

@@ -12,10 +12,7 @@ export class S3Ref {
   }
 
   extendKey(extra: string): S3Ref {
-    return new S3Ref(
-      this.bucket,
-      this.key + this.normalizeKey(extra)
-    );
+    return new S3Ref(this.bucket, this.key + this.normalizeKey(extra));
   }
 
   private normalizeKey(key: string): string {

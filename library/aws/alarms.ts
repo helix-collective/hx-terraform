@@ -271,7 +271,7 @@ export function createQueueLengthAlarm(
   queue: AR.SqsQueue,
   maxlength: number
 ) {
-  const name = "queuelength";
+  const name = 'queuelength';
   return AR.createCloudwatchMetricAlarm(tfgen, name, {
     alarm_name: tfgen.scopedName(name).join('_'),
     comparison_operator: 'GreaterThanThreshold',
@@ -286,5 +286,5 @@ export function createQueueLengthAlarm(
     },
     alarm_description: `The sustained length of the message queue is greater than ${maxlength}`,
     alarm_actions: [topic.arn],
-  });}
-
+  });
+}

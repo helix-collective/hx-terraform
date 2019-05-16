@@ -302,7 +302,6 @@ export type EndPointUrl =
   | EndPointHttpUrl
   | EndPointHttpsExternalUrl;
 
-
 // An http endpoint
 export interface EndPointHttpUrl {
   kind: 'http';
@@ -318,7 +317,7 @@ export interface EndPointHttpUrl {
 export interface EndPointHttpsUrl {
   kind: 'https';
   dnsname: string;
-  proxied_from?: string[]
+  proxied_from?: string[];
 }
 
 // An https endpoints for an externally configured dns entry
@@ -330,7 +329,7 @@ export interface EndPointHttpsUrl {
 export interface EndPointHttpsExternalUrl {
   kind: 'https-external';
   fqdnsname: string;
-  proxied_from?: string[]
+  proxied_from?: string[];
 }
 
 interface Ec2Deployment {

@@ -810,17 +810,17 @@ const autoscaling_group_tag: RecordDecl = {
 };
 
 const autoscaling_schedule: RecordDecl = {
-  name: "autoscaling_schedule",
+  name: 'autoscaling_schedule',
   fields: [
     requiredField('autoscaling_group_name', STRING),
     requiredField('scheduled_action_name', STRING),
     optionalField('start_time', STRING),
-    optionalField("end_time", STRING),
-    optionalField("recurrence", STRING),
-    optionalField("min_size", NUMBER),
-    optionalField("max_size", NUMBER),
-    optionalField("desired_capacity", NUMBER)
-  ]
+    optionalField('end_time', STRING),
+    optionalField('recurrence', STRING),
+    optionalField('min_size', NUMBER),
+    optionalField('max_size', NUMBER),
+    optionalField('desired_capacity', NUMBER),
+  ],
 };
 
 const autoscaling_group: RecordDecl = {

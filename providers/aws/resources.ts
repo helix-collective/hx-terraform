@@ -1874,6 +1874,7 @@ export interface AutoscalingGroupParams {
   name?: string;
   name_prefix?: string;
   min_size: number;
+  desired_capacity?: number;
   max_size: number;
   vpc_zone_identifier?: (SubnetId)[];
   launch_configuration: string;
@@ -1886,6 +1887,7 @@ export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams)
   TF.addOptionalField(fields, "name", params.name, TF.stringValue);
   TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addField(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addOptionalField(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
   TF.addField(fields, "max_size", params.max_size, TF.numberValue);
   TF.addOptionalField(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
   TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);

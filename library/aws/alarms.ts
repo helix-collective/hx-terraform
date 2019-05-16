@@ -67,15 +67,15 @@ export function createUatAlarms(
 }
 
 /**
- *  Create alarm resources on the given RDS instance suitable for use in a UAT environment
+ *  Create alarm resources on the given RDS instance suitable for use in a Prod environment
  */
 export function createProdDbAlarms(
   tfgen: TF.Generator,
   sr: SharedResources,
   db: AR.DbInstance
 ) {
-  createHighDbCpuAlarm(tfgen, sr.alert_topic, db);
-  createLowDbSpaceAlarm(tfgen, sr.alert_topic, db);
+  createHighDbCpuAlarm(tfgen, sr.alarm_topic, db);
+  createLowDbSpaceAlarm(tfgen, sr.alarm_topic, db);
 }
 
 /**

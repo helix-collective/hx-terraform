@@ -94,6 +94,8 @@ const db_instance: RecordDecl = {
     optionalField('apply_immediately', BOOLEAN),
     optionalField('storage_encrypted', BOOLEAN),
     optionalField('storage_type', stringAliasType('AT.DbInstanceStorageType')),
+    optionalField('iops', NUMBER),
+    optionalField('monitoring_interval', NUMBER),
   ],
 };
 

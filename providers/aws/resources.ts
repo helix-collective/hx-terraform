@@ -2007,6 +2007,8 @@ export interface DbInstanceParams {
   apply_immediately?: boolean;
   storage_encrypted?: boolean;
   storage_type?: AT.DbInstanceStorageType;
+  iops?: number;
+  monitoring_interval?: number;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -2035,6 +2037,8 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
   return fields;
 }
 

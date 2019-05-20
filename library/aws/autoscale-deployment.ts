@@ -38,7 +38,7 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-  const controller = createController(tfgen, 'controller', sr, params, []);
+  const controller = createController(tfgen, "controller", sr, params, params.endpoints);
   const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
     tfgen,
     'appserver',

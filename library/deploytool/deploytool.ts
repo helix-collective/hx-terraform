@@ -222,6 +222,7 @@ function letsEncryptSSL(
       bs.sh('sudo -u app ' + cmd);
       bs.cronJob('ssl-renewal', [
         `MAILTO=""`,
+        `PATH=/bin:/usr/bin:/opt/bin:/usr/local/bin`,
         `0 0 * * * app ${cmd} 2>&1 | systemd-cat`,
       ]);
       break;

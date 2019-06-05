@@ -288,3 +288,30 @@ export function createQueueLengthAlarm(
     alarm_actions: [topic.arn],
   });
 }
+
+export function createLambdaFunctionErrorAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  lambda: AR.LambdaFunction,
+  name: string,
+  maxErrorsPerMin: number,
+  overNumMins: number
+) {
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanOrEqualToThreshold',
+    evaluation_periods: overNumMins,
+    metric_name: 'Errors',
+    namespace: 'AWS/Lambda',
+    period: 60,
+    statistic: 'Sum',
+    threshold: maxErrorsPerMin,
+    dimensions: {
+      FunctionName: lambda.function_name,
+      Resource: lambda.function_name,
+    },
+    alarm_description: `More than ${maxErrorsPerMin} lambda invocations fail in ${overNumMins} minute(s)`,
+    alarm_actions: [topic.arn],
+  });
+}
+

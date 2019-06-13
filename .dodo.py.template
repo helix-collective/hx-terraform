@@ -3,9 +3,11 @@ import uuid
 import sys
 import zipfile
 from datetime import date
+from datetime import timedelta
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules
 from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, lambdazip_pyfile_task, lambdazip_pydir_task
+from doit.tools import timeout
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -21,6 +23,8 @@ provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10
 
 local_lambda_zip_sources = HERE/'lambdas';
 lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
+
+tfplan = HERE / 'terraform/tfplan'
 
 nodemodules = YarnNodeModules(HERE / 'typescript')
 
@@ -45,6 +49,20 @@ def confirm_apply():
         print("terraform apply aborted")
         sys.exit(1)
 
+def check_plan():
+    """ Ensure the plan is not expired """
+    with open(tfplan,'rb') as f:
+        content = f.read(7)
+        if(content==b'expired'):
+            print("Plan has expired - please try again.")
+            tfplan.unlink()
+            exit(1)
+
+def expire_plan():
+    """ Invalidate the plan - (keeping the file existing to keep doit happy) """
+    with open(tfplan,'w') as f:
+        f.write('expired\n')
+
 def task_lambda_zips():
     for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
@@ -55,18 +73,24 @@ def task_lambda_zips():
 
 def task_plan():
     return {
-        'doc' : 'Execute terraform plan to show pending infrastructure changes',
-        'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan']) ],
+        'doc' : 'Execute terraform plan to show pending infrastructure changes and save the plan',
+        'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan','-out=tfplan']) ],
         'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep() + lambda_zipfiles(),
         'verbosity' : 2,
-        'uptodate': [False],
+        'uptodate': [timeout(timedelta(minutes=2))],   # plan is ok for a small time interval after being generated - for original use running doit plan; doit apply
+        'targets': [ tfplan ],
     }
 
 def task_apply():
   return {
-      'doc' : 'Execute terraform apply to make any pending infrastructure changes',
-      'actions': [ confirm_apply, generate_tf(), dockerized_terraform(['apply', '-auto-approve']) ],
-      'file_dep': [ terraform_initialized.path ] + lambda_zipfiles(),
+      'doc' : 'Execute terraform apply to make any pending infrastructure changes according to the plan',
+      'actions': [
+          check_plan,
+          confirm_apply,
+          dockerized_terraform(['apply', 'tfplan']),
+          expire_plan   # invalidate the plan after using it
+        ],
+      'file_dep': [ tfplan ] + lambda_zipfiles(),
       'verbosity' : 2,
       'uptodate': [False],
   }

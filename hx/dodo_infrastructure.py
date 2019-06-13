@@ -16,11 +16,18 @@ def run_dockerized_terraform(terraform_image, args):
     using_nix = os.environ.get('NIX_PATH') != None
 
     cmd =  "docker run -it --rm "
+
+    # run as user for writing out the plan
+    cmd += "--volume /etc/passwd:/etc/passwd "
+    cmd += "--volume /etc/group:/etc/group "
+    cmd += "--user $(id -u):$(id -g) "
+
     cmd += "-v `pwd`:/src -w /src/terraform "
     cmd += "-v {0}:{0} ".format(os.environ['HOME'])
     if using_nix:
         cmd += "-v /nix:/nix "
     cmd += "-e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SHARED_CREDENTIALS_FILE -e AWS_PROFILE "
+    cmd += "-e TF_LOG "
     cmd += "{} ".format(terraform_image)
     cmd += "terraform "
     cmd += ' '.join(args)
@@ -98,7 +105,7 @@ def lambdazip_pyfile_task(zipfile, frompyfile):
         'actions': [generate_zip(zipfile, [frompyfile])],
         'file_dep': [frompyfile],
         'targets': [zipfile],
-    } 
+    }
 
 def lambdazip_pydir_task(zipfile, frompydir):
     "Task to create a lambda zipfile from python tree with a requirements.txt file"
@@ -109,7 +116,7 @@ def lambdazip_pydir_task(zipfile, frompydir):
         'actions': [generate_pydir_lambda(zipfile, frompydir)],
         'file_dep': depfiles,
         'targets': [zipfile],
-    } 
+    }
 
 def generate_zip(zip,paths):
     def thunk():
@@ -126,7 +133,7 @@ def generate_pydir_lambda(zip, pydir):
         subprocess.run( 'cp -r {}/* {}'.format(pydir, tmpdir), check=True, shell=True)
 
         # Run pip to install the dependencies in it
-        # (assumes debian pip3 on path, which requires --system) 
+        # (assumes debian pip3 on path, which requires --system)
         subprocess.run( 'pip3 install -r requirements.txt --system --target .', check=True, shell=True, cwd=tmpdir)
 
         # Zip up to create the lambda zip

@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import subprocess
 import uuid
+import time
 from datetime import datetime
 from doit.action import CmdAction
 from pathlib import *
@@ -627,3 +628,7 @@ def bytesWithReplacements(replacements, bs):
     for (fromv, tov) in replacements:
         bs = bs.replace(bytes(fromv,'utf-8'), bytes(tov,'utf-8'))
     return bs
+
+def fileAge(filepath):
+    """ Get age of a file in seconds """
+    return time.time() - os.path.getmtime(filepath)

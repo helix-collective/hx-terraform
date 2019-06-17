@@ -328,3 +328,33 @@ export function createLambdaFunctionErrorAlarm(
   });
 }
 
+export function createAutoScaleGroupHighDiskAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  autoscaling_group: AR.AutoscalingGroup,
+  Filesystem: string,        // linux filesystem as seen by the instances (todo: how to automate this for different types of instances and storage devices?)
+  threshold: number = 50,    // threshold on DiskSpaceUtilization (%)
+  MountPath: string = "/",
+  evaluation_periods: number = 2,
+  period: number = 120
+) {
+  // Assumes an autoscaling group won't be used with an ec2 instance on the same namespace
+  const name = 'highdisk';
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    evaluation_periods,
+    period,
+    threshold,
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanThreshold',
+    metric_name: 'DiskSpaceUtilization',
+    namespace: 'System/Linux',
+    statistic: 'Average',
+    dimensions: {
+      Filesystem,   // custom to what the processor instances actually have in use depending on instance type/storage type - todo: how to figure it out?
+      MountPath,
+      AutoScalingGroupName: autoscaling_group.name,
+    },
+    alarm_description: 'High disk utilisation across the autoscaling group',
+    alarm_actions: [topic.arn],
+  });
+}

@@ -4,6 +4,19 @@ import * as AR from '../../providers/aws/resources';
 
 import { SharedResources } from './shared';
 
+// How to prepare alarms:
+//    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc
+//    The metric should be able to be plotted before creating a new alarm for it.
+//
+//    Use "Source" tab to preview the json source of the metric.
+//    "metrics": [
+//      [ "System/Linux", "DiskSpaceUtilization", "MountPath", "/", "Filesystem", "/dev/nvme0n1p1"]
+//    ]
+//    The 'dimensions' parameter in CloudwatchMetricAlarmParams is a map and the "metrics" array in the source is a list that alternates keys/values
+//    (except dimensions for "namespace" and "metric_name" are done separately)
+//
+//  After creating - ensure that the alarm does not stay in state INSUFFICIENT_DATA for longer than reasonable.
+
 export function createUatScalingAlarms(
   tfgen: TF.Generator,
   sr: SharedResources,

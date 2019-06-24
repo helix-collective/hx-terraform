@@ -421,6 +421,19 @@ function createAcmCertificate(
     validation_method: 'DNS',
     tags: tfgen.tagsContext(),
   });
+
+  // Unfortanately AWS and the existing terraform provider have a problem
+  // where the order of the SANs keeps being re-arranged, and hence terraform
+  // wants to keep recreating the certificate, when then would need to be
+  // re-verified. Here's the github issue:
+  //
+  //    https://github.com/terraform-providers/terraform-provider-aws/issues/8531
+  //
+  // As a short term workaround, we ignore changes in this field, which means
+  // that the cert resource will need to be manually terraform tainted when
+  // the names actually do change.
+  tfgen.ignoreChanges(acm_certificate, 'subject_alternative_names');
+
   tfgen.createBeforeDestroy(acm_certificate, create_before_destroy);
 
   const arn = acm_certificate.arn;

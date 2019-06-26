@@ -123,7 +123,11 @@ def generate_zip(zip,paths):
         os.makedirs(zip.parent, exist_ok=True)
         with zipfile.ZipFile(str(zip), 'w') as zf:
             for p in paths:
-                zf.write(p,arcname=p.name)
+                with open(p) as cf:
+                  content = cf.read()
+                  # Fix the file create time to make zip files reproduceable
+                  zinfo = zipfile.ZipInfo(p.name,(2000,1,1,0,0,0))
+                  zf.writestr(zinfo,content)
     return thunk
 
 def generate_pydir_lambda(zip, pydir):

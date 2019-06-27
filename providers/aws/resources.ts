@@ -1856,6 +1856,58 @@ export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification
 
 type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
 
+/**
+ *  Provides a Cognito User Pool resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cognito_user_pool.html
+ */
+export function createCognitoUserPool(tfgen: TF.Generator, rname: string, params: CognitoUserPoolParams): CognitoUserPool {
+  const fields = fieldsFromCognitoUserPoolParams(params);
+  const resource = tfgen.createTypedResource('CognitoUserPool', 'aws_cognito_user_pool', rname, fields);
+  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: CognitoUserPoolArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoUserPool');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface CognitoUserPool extends TF.ResourceT<'CognitoUserPool'> {
+  id: CognitoUserPoolId;
+  arn: CognitoUserPoolArn;
+}
+
+type CognitoUserPoolId = {type:'CognitoUserPoolId',value:string};
+export type CognitoUserPoolArn = AT.ArnT<"CognitoUserPool">;
+
+/**
+ *  Provides an AWS Cognito Identity Pool.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool.html
+ */
+export function createCognitoIdentityPool(tfgen: TF.Generator, rname: string, params: CognitoIdentityPoolParams): CognitoIdentityPool {
+  const fields = fieldsFromCognitoIdentityPoolParams(params);
+  const resource = tfgen.createTypedResource('CognitoIdentityPool', 'aws_cognito_identity_pool', rname, fields);
+  const id: CognitoIdentityPoolId =  {type: 'CognitoIdentityPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: CognitoIdentityPoolArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoIdentityPool');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface CognitoIdentityPool extends TF.ResourceT<'CognitoIdentityPool'> {
+  id: CognitoIdentityPoolId;
+  arn: CognitoIdentityPoolArn;
+}
+
+type CognitoIdentityPoolId = {type:'CognitoIdentityPoolId',value:string};
+export type CognitoIdentityPoolArn = AT.ArnT<"CognitoIdentityPool">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2907,6 +2959,7 @@ export interface ElasticsearchDomainParams {
   ebs_options?: ElasticsearchDomainEbsOptionsParams;
   cluster_config?: ElasticsearchDomainClusterConfigParams;
   snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
+  cognito_options?: ElasticsearchDomainCognitoOptionsParams;
   vpc_options?: ElasticsearchDomainVpcOptionsParams;
   elasticsearch_version?: string;
   tags?: TF.TagsMap;
@@ -2920,6 +2973,7 @@ export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainP
   TF.addOptionalField(fields, "ebs_options", params.ebs_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainEbsOptionsParams(v)));
   TF.addOptionalField(fields, "cluster_config", params.cluster_config, (v) => TF.mapValue(fieldsFromElasticsearchDomainClusterConfigParams(v)));
   TF.addOptionalField(fields, "snapshot_options", params.snapshot_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainSnapshotOptionsParams(v)));
+  TF.addOptionalField(fields, "cognito_options", params.cognito_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainCognitoOptionsParams(v)));
   TF.addOptionalField(fields, "vpc_options", params.vpc_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainVpcOptionsParams(v)));
   TF.addOptionalField(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
@@ -2981,6 +3035,22 @@ export function fieldsFromElasticsearchDomainVpcOptionsParams(params: Elasticsea
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
   TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
+export interface ElasticsearchDomainCognitoOptionsParams {
+  enabled?: boolean;
+  user_pool_id: CognitoUserPoolId;
+  identity_pool_id: CognitoIdentityPoolId;
+  role_arn: AT.ArnT<"IamRole">;
+}
+
+export function fieldsFromElasticsearchDomainCognitoOptionsParams(params: ElasticsearchDomainCognitoOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addField(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
+  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -3877,5 +3947,27 @@ export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificatio
   TF.addField(fields, "bucket", params.bucket, TF.stringValue);
   TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromS3BucketNotificationQueueParams(v)));
   TF.addOptionalField(fields, "lambda_function", params.lambda_function, (v) => TF.mapValue(fieldsFromS3BucketNotificationLambdaParams(v)));
+  return fields;
+}
+
+export interface CognitoUserPoolParams {
+  name: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromCognitoUserPoolParams(params: CognitoUserPoolParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface CognitoIdentityPoolParams {
+  identity_pool_name: string;
+}
+
+export function fieldsFromCognitoIdentityPoolParams(params: CognitoIdentityPoolParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
   return fields;
 }

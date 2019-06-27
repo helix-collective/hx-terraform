@@ -21,6 +21,7 @@ export interface LoggingInfrastructureParams {
   domain_name: string;
   aggregator_key_name: AT.KeyName;
   customize?: util.Customize<AR.ElasticsearchDomainParams>;
+  custom_domain_policy?: string,
   logging_ip_whitelist?: AT.IpAddress[];
 }
 
@@ -180,11 +181,12 @@ export function createLoggingInfrastructure(
 
   AR.createElasticsearchDomainPolicy(tfgen, 'logging_ed_policy', {
     domain_name: params.domain_name,
-    access_policies: JSON.stringify(
-      es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr),
-      null,
-      2
-    ),
+    access_policies: params.custom_domain_policy
+      ? params.custom_domain_policy
+      : JSON.stringify(
+         es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr),
+         null, 2
+        ),
   });
 
   return {

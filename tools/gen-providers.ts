@@ -747,6 +747,16 @@ const elasticsearch_domain_vpc_options: RecordDecl = {
   ],
 };
 
+const elasticsearch_domain_cognito_options: RecordDecl = {
+  name: 'elasticsearch_domain_cognito_options',
+  fields: [
+    optionalField('enabled', BOOLEAN),
+    requiredField('user_pool_id', resourceIdType('CognitoUserPoolId')),
+    requiredField('identity_pool_id', resourceIdType('CognitoIdentityPoolId')),
+    requiredField('role_arn', arnType(iam_role)),
+  ],
+};
+
 const elasticsearch_domain: RecordDecl = {
   name: 'elasticsearch_domain',
   fields: [
@@ -761,6 +771,10 @@ const elasticsearch_domain: RecordDecl = {
     optionalField(
       'snapshot_options',
       recordType(elasticsearch_domain_snapshot_options)
+    ),
+    optionalField(
+      'cognito_options',
+      recordType(elasticsearch_domain_cognito_options)
     ),
     optionalField('vpc_options', recordType(elasticsearch_domain_vpc_options)),
     optionalField('elasticsearch_version', STRING),
@@ -1441,6 +1455,23 @@ const s3_bucket_notification: RecordDecl = {
     optionalField('queue', recordType(s3_bucket_notification_queue)),
     optionalField('lambda_function', recordType(s3_bucket_notification_lambda)),
   ],
+};
+
+const cognito_user_pool: RecordDecl = {
+  name: 'cognito_user_pool',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('tags', TAGS_MAP),
+    // TODO(timd): complete
+  ]
+};
+
+const cognito_identity_pool: RecordDecl = {
+  name: 'cognito_identity_pool',
+  fields: [
+    requiredField('identity_pool_name', STRING),
+    // TODO(timd): complete
+  ]
 };
 
 function generateAws(gen: Generator) {
@@ -2155,6 +2186,30 @@ function generateAws(gen: Generator) {
     []
   );
 
+  gen.generateResource(
+    'Provides a Cognito User Pool resource.',
+    'https://www.terraform.io/docs/providers/aws/r/cognito_user_pool.html',
+    cognito_user_pool,
+    [
+      resourceIdAttr('id', cognito_user_pool),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides an AWS Cognito Identity Pool.',
+    'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool.html',
+    cognito_identity_pool,
+    [
+      resourceIdAttr('id', cognito_identity_pool),
+    ],
+    {
+      arn: true,
+    }
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -2219,6 +2274,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_ebs_options);
   gen.generateParams(elasticsearch_domain_snapshot_options);
   gen.generateParams(elasticsearch_domain_vpc_options);
+  gen.generateParams(elasticsearch_domain_cognito_options);
   gen.generateParams(elasticsearch_domain_policy);
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);
@@ -2277,6 +2333,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_notification_queue);
   gen.generateParams(s3_bucket_notification_lambda);
   gen.generateParams(s3_bucket_notification);
+  gen.generateParams(cognito_user_pool);
+  gen.generateParams(cognito_identity_pool);
 }
 
 function generateRandom(gen: Generator) {

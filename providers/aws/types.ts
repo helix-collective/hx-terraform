@@ -438,8 +438,14 @@ export function dbInstanceStorageType(v: string): DbInstanceStorageType {
 export const standard: DbInstanceStorageType = dbInstanceStorageType(
   'standard'
 );
+
+/// General purpose SSD storage
 export const gp2: DbInstanceStorageType = dbInstanceStorageType('gp2');
+export const generalPurposeSSD = gp2;
+
+/// Provisioned IOPS  storage
 export const io1: DbInstanceStorageType = dbInstanceStorageType('io1');
+export const provisionedIOPS = io1;
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------

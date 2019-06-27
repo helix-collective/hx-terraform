@@ -319,7 +319,7 @@ export function fileGenerator(
     }
     lines.push('}');
     lines.push('');
-    lines.push(`type ${name}Id = {type:'${name}Id',value:string};`);
+    lines.push(`export type ${name}Id = {type:'${name}Id',value:string};`);
     if (options && options.arn) {
       lines.push(`export type ${name}Arn = AT.ArnT<"${name}">;`);
     }

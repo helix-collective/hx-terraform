@@ -21,7 +21,7 @@ export function createAutoscalingAttachment(tfgen: TF.Generator, rname: string, 
 export interface AutoscalingAttachment extends TF.ResourceT<'AutoscalingAttachment'> {
 }
 
-type AutoscalingAttachmentId = {type:'AutoscalingAttachmentId',value:string};
+export type AutoscalingAttachmentId = {type:'AutoscalingAttachmentId',value:string};
 
 /**
  *  Provides aws_autoscaling_group
@@ -49,7 +49,7 @@ export interface AutoscalingGroup extends TF.ResourceT<'AutoscalingGroup'> {
   arn: AutoscalingGroupArn;
 }
 
-type AutoscalingGroupId = {type:'AutoscalingGroupId',value:string};
+export type AutoscalingGroupId = {type:'AutoscalingGroupId',value:string};
 export type AutoscalingGroupArn = AT.ArnT<"AutoscalingGroup">;
 
 /**
@@ -72,7 +72,7 @@ export interface AutoscalingSchedule extends TF.ResourceT<'AutoscalingSchedule'>
   arn: AutoscalingScheduleArn;
 }
 
-type AutoscalingScheduleId = {type:'AutoscalingScheduleId',value:string};
+export type AutoscalingScheduleId = {type:'AutoscalingScheduleId',value:string};
 export type AutoscalingScheduleArn = AT.ArnT<"AutoscalingSchedule">;
 
 /**
@@ -101,7 +101,7 @@ export interface Instance extends TF.ResourceT<'Instance'> {
   availability_zone: AT.AvailabilityZone;
 }
 
-type InstanceId = {type:'InstanceId',value:string};
+export type InstanceId = {type:'InstanceId',value:string};
 
 /**
  *  Provides an RDS instance resource.
@@ -141,7 +141,7 @@ export interface DbInstance extends TF.ResourceT<'DbInstance'> {
   arn: DbInstanceArn;
 }
 
-type DbInstanceId = {type:'DbInstanceId',value:string};
+export type DbInstanceId = {type:'DbInstanceId',value:string};
 export type DbInstanceArn = AT.ArnT<"DbInstance">;
 
 /**
@@ -167,7 +167,7 @@ export interface DbParameterGroup extends TF.ResourceT<'DbParameterGroup'> {
   arn: DbParameterGroupArn;
 }
 
-type DbParameterGroupId = {type:'DbParameterGroupId',value:string};
+export type DbParameterGroupId = {type:'DbParameterGroupId',value:string};
 export type DbParameterGroupArn = AT.ArnT<"DbParameterGroup">;
 
 /**
@@ -196,7 +196,7 @@ export interface Eip extends TF.ResourceT<'Eip'> {
   private_ip: AT.IpAddress;
 }
 
-type EipId = {type:'EipId',value:string};
+export type EipId = {type:'EipId',value:string};
 
 /**
  *  Provides a VPC.
@@ -218,7 +218,7 @@ export interface Vpc extends TF.ResourceT<'Vpc'> {
   id: VpcId;
 }
 
-type VpcId = {type:'VpcId',value:string};
+export type VpcId = {type:'VpcId',value:string};
 
 /**
  *  Provides a VPC Subnet.
@@ -240,7 +240,7 @@ export interface Subnet extends TF.ResourceT<'Subnet'> {
   id: SubnetId;
 }
 
-type SubnetId = {type:'SubnetId',value:string};
+export type SubnetId = {type:'SubnetId',value:string};
 
 /**
  *  Provides a security group resource.
@@ -265,7 +265,7 @@ export interface SecurityGroup extends TF.ResourceT<'SecurityGroup'> {
   owner_id: string;
 }
 
-type SecurityGroupId = {type:'SecurityGroupId',value:string};
+export type SecurityGroupId = {type:'SecurityGroupId',value:string};
 
 /**
  *  Provides a resource to create a VPC Internet Gateway.
@@ -287,7 +287,7 @@ export interface InternetGateway extends TF.ResourceT<'InternetGateway'> {
   id: InternetGatewayId;
 }
 
-type InternetGatewayId = {type:'InternetGatewayId',value:string};
+export type InternetGatewayId = {type:'InternetGatewayId',value:string};
 
 /**
  *  Provides a resource to create a VPC NAT Gateway.
@@ -309,7 +309,7 @@ export interface NatGateway extends TF.ResourceT<'NatGateway'> {
   id: NatGatewayId;
 }
 
-type NatGatewayId = {type:'NatGatewayId',value:string};
+export type NatGatewayId = {type:'NatGatewayId',value:string};
 
 /**
  *  Provides a resource to create a VPC routing table.
@@ -331,7 +331,7 @@ export interface RouteTable extends TF.ResourceT<'RouteTable'> {
   id: RouteTableId;
 }
 
-type RouteTableId = {type:'RouteTableId',value:string};
+export type RouteTableId = {type:'RouteTableId',value:string};
 
 /**
  *  Provides a resource to create a routing table entry (a route) in a VPC routing table.
@@ -350,7 +350,7 @@ export function createRoute(tfgen: TF.Generator, rname: string, params: RoutePar
 export interface Route extends TF.ResourceT<'Route'> {
 }
 
-type RouteId = {type:'RouteId',value:string};
+export type RouteId = {type:'RouteId',value:string};
 
 /**
  *  Provides a resource to create an association between a subnet and routing table.
@@ -372,7 +372,7 @@ export interface RouteTableAssociation extends TF.ResourceT<'RouteTableAssociati
   id: RouteTableAssociationId;
 }
 
-type RouteTableAssociationId = {type:'RouteTableAssociationId',value:string};
+export type RouteTableAssociationId = {type:'RouteTableAssociationId',value:string};
 
 /**
  *  Provides a Route53 Hosted Zone resource.
@@ -394,7 +394,7 @@ export interface Route53Zone extends TF.ResourceT<'Route53Zone'> {
   zone_id: AT.HostedZoneId;
 }
 
-type Route53ZoneId = {type:'Route53ZoneId',value:string};
+export type Route53ZoneId = {type:'Route53ZoneId',value:string};
 
 /**
  *  Provides a Route53 record resource.
@@ -419,7 +419,7 @@ export interface Route53Record extends TF.ResourceT<'Route53Record'> {
   fqdn: string;
 }
 
-type Route53RecordId = {type:'Route53RecordId',value:string};
+export type Route53RecordId = {type:'Route53RecordId',value:string};
 
 /**
  *  Provides a S3 bucket resource.
@@ -444,7 +444,7 @@ export interface S3Bucket extends TF.ResourceT<'S3Bucket'> {
   arn: S3BucketArn;
 }
 
-type S3BucketId = {type:'S3BucketId',value:string};
+export type S3BucketId = {type:'S3BucketId',value:string};
 export type S3BucketArn = AT.ArnT<"S3Bucket">;
 
 /**
@@ -473,7 +473,7 @@ export interface S3BucketObject extends TF.ResourceT<'S3BucketObject'> {
   version_id: string;
 }
 
-type S3BucketObjectId = {type:'S3BucketObjectId',value:string};
+export type S3BucketObjectId = {type:'S3BucketObjectId',value:string};
 
 /**
  *  Provides an SNS topic resource
@@ -498,7 +498,7 @@ export interface SnsTopic extends TF.ResourceT<'SnsTopic'> {
   arn: SnsTopicArn;
 }
 
-type SnsTopicId = {type:'SnsTopicId',value:string};
+export type SnsTopicId = {type:'SnsTopicId',value:string};
 export type SnsTopicArn = AT.ArnT<"SnsTopic">;
 
 /**
@@ -527,7 +527,7 @@ export interface IamUser extends TF.ResourceT<'IamUser'> {
   arn: IamUserArn;
 }
 
-type IamUserId = {type:'IamUserId',value:string};
+export type IamUserId = {type:'IamUserId',value:string};
 export type IamUserArn = AT.ArnT<"IamUser">;
 
 /**
@@ -547,7 +547,7 @@ export function createIamUserPolicy(tfgen: TF.Generator, rname: string, params: 
 export interface IamUserPolicy extends TF.ResourceT<'IamUserPolicy'> {
 }
 
-type IamUserPolicyId = {type:'IamUserPolicyId',value:string};
+export type IamUserPolicyId = {type:'IamUserPolicyId',value:string};
 
 /**
  *  Attaches a Managed IAM Policy to an IAM user
@@ -566,7 +566,7 @@ export function createIamUserPolicyAttachment(tfgen: TF.Generator, rname: string
 export interface IamUserPolicyAttachment extends TF.ResourceT<'IamUserPolicyAttachment'> {
 }
 
-type IamUserPolicyAttachmentId = {type:'IamUserPolicyAttachmentId',value:string};
+export type IamUserPolicyAttachmentId = {type:'IamUserPolicyAttachmentId',value:string};
 
 /**
  *  Provides an EC2 Container Registry Repository
@@ -597,7 +597,7 @@ export interface EcrRepository extends TF.ResourceT<'EcrRepository'> {
   arn: EcrRepositoryArn;
 }
 
-type EcrRepositoryId = {type:'EcrRepositoryId',value:string};
+export type EcrRepositoryId = {type:'EcrRepositoryId',value:string};
 export type EcrRepositoryArn = AT.ArnT<"EcrRepository">;
 
 /**
@@ -626,7 +626,7 @@ export interface DbSubnetGroup extends TF.ResourceT<'DbSubnetGroup'> {
   arn: DbSubnetGroupArn;
 }
 
-type DbSubnetGroupId = {type:'DbSubnetGroupId',value:string};
+export type DbSubnetGroupId = {type:'DbSubnetGroupId',value:string};
 export type DbSubnetGroupArn = AT.ArnT<"DbSubnetGroup">;
 
 /**
@@ -649,7 +649,7 @@ export interface CloudwatchMetricAlarm extends TF.ResourceT<'CloudwatchMetricAla
   id: CloudwatchMetricAlarmId;
 }
 
-type CloudwatchMetricAlarmId = {type:'CloudwatchMetricAlarmId',value:string};
+export type CloudwatchMetricAlarmId = {type:'CloudwatchMetricAlarmId',value:string};
 
 /**
  *  Provides an IAM role.
@@ -686,7 +686,7 @@ export interface IamRole extends TF.ResourceT<'IamRole'> {
   arn: IamRoleArn;
 }
 
-type IamRoleId = {type:'IamRoleId',value:string};
+export type IamRoleId = {type:'IamRoleId',value:string};
 export type IamRoleArn = AT.ArnT<"IamRole">;
 
 /**
@@ -718,7 +718,7 @@ export interface IamRolePolicy extends TF.ResourceT<'IamRolePolicy'> {
   role: string;
 }
 
-type IamRolePolicyId = {type:'IamRolePolicyId',value:string};
+export type IamRolePolicyId = {type:'IamRolePolicyId',value:string};
 
 /**
  *  Provides an IAM instance profile.
@@ -752,7 +752,7 @@ export interface IamInstanceProfile extends TF.ResourceT<'IamInstanceProfile'> {
   arn: IamInstanceProfileArn;
 }
 
-type IamInstanceProfileId = {type:'IamInstanceProfileId',value:string};
+export type IamInstanceProfileId = {type:'IamInstanceProfileId',value:string};
 export type IamInstanceProfileArn = AT.ArnT<"IamInstanceProfile">;
 
 /**
@@ -781,7 +781,7 @@ export interface SqsQueue extends TF.ResourceT<'SqsQueue'> {
   arn: SqsQueueArn;
 }
 
-type SqsQueueId = {type:'SqsQueueId',value:string};
+export type SqsQueueId = {type:'SqsQueueId',value:string};
 export type SqsQueueArn = AT.ArnT<"SqsQueue">;
 
 /**
@@ -801,7 +801,7 @@ export function createSqsQueuePolicy(tfgen: TF.Generator, rname: string, params:
 export interface SqsQueuePolicy extends TF.ResourceT<'SqsQueuePolicy'> {
 }
 
-type SqsQueuePolicyId = {type:'SqsQueuePolicyId',value:string};
+export type SqsQueuePolicyId = {type:'SqsQueuePolicyId',value:string};
 
 /**
  *  Provides a Load Balancer resource.
@@ -832,7 +832,7 @@ export interface Lb extends TF.ResourceT<'Lb'> {
   arn: LbArn;
 }
 
-type LbId = {type:'LbId',value:string};
+export type LbId = {type:'LbId',value:string};
 export type LbArn = AT.ArnT<"Lb">;
 
 /**
@@ -858,7 +858,7 @@ export interface LbListener extends TF.ResourceT<'LbListener'> {
   arn: LbListenerArn;
 }
 
-type LbListenerId = {type:'LbListenerId',value:string};
+export type LbListenerId = {type:'LbListenerId',value:string};
 export type LbListenerArn = AT.ArnT<"LbListener">;
 
 /**
@@ -884,7 +884,7 @@ export interface AcmCertificate extends TF.ResourceT<'AcmCertificate'> {
   arn: AcmCertificateArn;
 }
 
-type AcmCertificateId = {type:'AcmCertificateId',value:string};
+export type AcmCertificateId = {type:'AcmCertificateId',value:string};
 export type AcmCertificateArn = AT.ArnT<"AcmCertificate">;
 
 /**
@@ -904,7 +904,7 @@ export function createAcmCertificateValidation(tfgen: TF.Generator, rname: strin
 export interface AcmCertificateValidation extends TF.ResourceT<'AcmCertificateValidation'> {
 }
 
-type AcmCertificateValidationId = {type:'AcmCertificateValidationId',value:string};
+export type AcmCertificateValidationId = {type:'AcmCertificateValidationId',value:string};
 
 /**
  *  Provides a Load Balancer Listener Certificate resource.
@@ -929,7 +929,7 @@ export interface LbListenerCertificate extends TF.ResourceT<'LbListenerCertifica
   arn: LbListenerCertificateArn;
 }
 
-type LbListenerCertificateId = {type:'LbListenerCertificateId',value:string};
+export type LbListenerCertificateId = {type:'LbListenerCertificateId',value:string};
 export type LbListenerCertificateArn = AT.ArnT<"LbListenerCertificate">;
 
 /**
@@ -961,7 +961,7 @@ export interface LbTargetGroup extends TF.ResourceT<'LbTargetGroup'> {
   arn: LbTargetGroupArn;
 }
 
-type LbTargetGroupId = {type:'LbTargetGroupId',value:string};
+export type LbTargetGroupId = {type:'LbTargetGroupId',value:string};
 export type LbTargetGroupArn = AT.ArnT<"LbTargetGroup">;
 
 /**
@@ -984,7 +984,7 @@ export interface LbTargetGroupAttachment extends TF.ResourceT<'LbTargetGroupAtta
   id: LbTargetGroupAttachmentId;
 }
 
-type LbTargetGroupAttachmentId = {type:'LbTargetGroupAttachmentId',value:string};
+export type LbTargetGroupAttachmentId = {type:'LbTargetGroupAttachmentId',value:string};
 
 /**
  *  Provides a Load Balancer Listener Rule resource.
@@ -1009,7 +1009,7 @@ export interface LbListenerRule extends TF.ResourceT<'LbListenerRule'> {
   arn: AT.Arn;
 }
 
-type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
+export type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
 
 /**
  *  Provides an elasticsearch cluster
@@ -1040,7 +1040,7 @@ export interface ElasticsearchDomain extends TF.ResourceT<'ElasticsearchDomain'>
   endpoint: string;
 }
 
-type ElasticsearchDomainId = {type:'ElasticsearchDomainId',value:string};
+export type ElasticsearchDomainId = {type:'ElasticsearchDomainId',value:string};
 
 /**
  *  Allows setting policy to an Elasticsearch domain while referencing domain attributes (e.g. ARN)
@@ -1062,7 +1062,7 @@ export interface ElasticsearchDomainPolicy extends TF.ResourceT<'ElasticsearchDo
   arn: AT.Arn;
 }
 
-type ElasticsearchDomainPolicyId = {type:'ElasticsearchDomainPolicyId',value:string};
+export type ElasticsearchDomainPolicyId = {type:'ElasticsearchDomainPolicyId',value:string};
 
 /**
  *  Provides a CloudWatch Log Group resource.
@@ -1084,7 +1084,7 @@ export interface CloudwatchLogGroup extends TF.ResourceT<'CloudwatchLogGroup'> {
   arn: AT.Arn;
 }
 
-type CloudwatchLogGroupId = {type:'CloudwatchLogGroupId',value:string};
+export type CloudwatchLogGroupId = {type:'CloudwatchLogGroupId',value:string};
 
 /**
  *  Provides aws_launch_configuration
@@ -1109,7 +1109,7 @@ export interface LaunchConfiguration extends TF.ResourceT<'LaunchConfiguration'>
   name: string;
 }
 
-type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
+export type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
 
 /**
  *  Provides a Kinesis Firehose Delivery Stream resource
@@ -1134,7 +1134,7 @@ export interface KinesisFirehoseDeliveryStream extends TF.ResourceT<'KinesisFire
   arn: KinesisFirehoseDeliveryStreamArn;
 }
 
-type KinesisFirehoseDeliveryStreamId = {type:'KinesisFirehoseDeliveryStreamId',value:string};
+export type KinesisFirehoseDeliveryStreamId = {type:'KinesisFirehoseDeliveryStreamId',value:string};
 export type KinesisFirehoseDeliveryStreamArn = AT.ArnT<"KinesisFirehoseDeliveryStream">;
 
 /**
@@ -1154,7 +1154,7 @@ export function createS3BucketMetric(tfgen: TF.Generator, rname: string, params:
 export interface S3BucketMetric extends TF.ResourceT<'S3BucketMetric'> {
 }
 
-type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
+export type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
 
 /**
  *  Provides an ElastiCache parameter group resource.
@@ -1185,7 +1185,7 @@ export interface ElasticacheParameterGroup extends TF.ResourceT<'ElasticachePara
   arn: ElasticacheParameterGroupArn;
 }
 
-type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:string};
+export type ElasticacheParameterGroupId = {type:'ElasticacheParameterGroupId',value:string};
 export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 
 /**
@@ -1208,7 +1208,7 @@ export interface ElasticacheSubnetGroup extends TF.ResourceT<'ElasticacheSubnetG
   name: string;
 }
 
-type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
+export type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:string};
 
 /**
  *  Provides an elasticache cluster resource.
@@ -1248,7 +1248,7 @@ export interface ElasticacheCluster extends TF.ResourceT<'ElasticacheCluster'> {
   arn: ElasticacheClusterArn;
 }
 
-type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
+export type ElasticacheClusterId = {type:'ElasticacheClusterId',value:string};
 export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
 
 /**
@@ -1277,7 +1277,7 @@ export interface LambdaFunction extends TF.ResourceT<'LambdaFunction'> {
   arn: LambdaFunctionArn;
 }
 
-type LambdaFunctionId = {type:'LambdaFunctionId',value:string};
+export type LambdaFunctionId = {type:'LambdaFunctionId',value:string};
 export type LambdaFunctionArn = AT.ArnT<"LambdaFunction">;
 
 /**
@@ -1310,7 +1310,7 @@ export interface LambdaPermission extends TF.ResourceT<'LambdaPermission'> {
   arn: LambdaPermissionArn;
 }
 
-type LambdaPermissionId = {type:'LambdaPermissionId',value:string};
+export type LambdaPermissionId = {type:'LambdaPermissionId',value:string};
 export type LambdaPermissionArn = AT.ArnT<"LambdaPermission">;
 
 /**
@@ -1342,7 +1342,7 @@ export interface CloudwatchEventRule extends TF.ResourceT<'CloudwatchEventRule'>
   arn: CloudwatchEventRuleArn;
 }
 
-type CloudwatchEventRuleId = {type:'CloudwatchEventRuleId',value:string};
+export type CloudwatchEventRuleId = {type:'CloudwatchEventRuleId',value:string};
 export type CloudwatchEventRuleArn = AT.ArnT<"CloudwatchEventRule">;
 
 /**
@@ -1365,7 +1365,7 @@ export interface CloudwatchEventTarget extends TF.ResourceT<'CloudwatchEventTarg
   arn: CloudwatchEventTargetArn;
 }
 
-type CloudwatchEventTargetId = {type:'CloudwatchEventTargetId',value:string};
+export type CloudwatchEventTargetId = {type:'CloudwatchEventTargetId',value:string};
 export type CloudwatchEventTargetArn = AT.ArnT<"CloudwatchEventTarget">;
 
 /**
@@ -1388,7 +1388,7 @@ export interface WafByteMatchSet extends TF.ResourceT<'WafByteMatchSet'> {
   id: WafByteMatchSetId;
 }
 
-type WafByteMatchSetId = {type:'WafByteMatchSetId',value:string};
+export type WafByteMatchSetId = {type:'WafByteMatchSetId',value:string};
 
 /**
  *  Provides a WAF IPSet Resource
@@ -1413,7 +1413,7 @@ export interface WafIpset extends TF.ResourceT<'WafIpset'> {
   arn: WafIpsetArn;
 }
 
-type WafIpsetId = {type:'WafIpsetId',value:string};
+export type WafIpsetId = {type:'WafIpsetId',value:string};
 export type WafIpsetArn = AT.ArnT<"WafIpset">;
 
 /**
@@ -1436,7 +1436,7 @@ export interface WafregionalRegexMatchSet extends TF.ResourceT<'WafregionalRegex
   id: WafregionalRegexMatchSetId;
 }
 
-type WafregionalRegexMatchSetId = {type:'WafregionalRegexMatchSetId',value:string};
+export type WafregionalRegexMatchSetId = {type:'WafregionalRegexMatchSetId',value:string};
 
 /**
  *  Provides a WAF Regional Regex Pattern Set Resource
@@ -1458,7 +1458,7 @@ export interface WafregionalRegexPatternSet extends TF.ResourceT<'WafregionalReg
   id: WafregionalRegexPatternSetId;
 }
 
-type WafregionalRegexPatternSetId = {type:'WafregionalRegexPatternSetId',value:string};
+export type WafregionalRegexPatternSetId = {type:'WafregionalRegexPatternSetId',value:string};
 
 /**
  *  Provides a WAF Regional IPSet Resource for use with Application Load Balancer.
@@ -1483,7 +1483,7 @@ export interface WafregionalIpset extends TF.ResourceT<'WafregionalIpset'> {
   arn: WafregionalIpsetArn;
 }
 
-type WafregionalIpsetId = {type:'WafregionalIpsetId',value:string};
+export type WafregionalIpsetId = {type:'WafregionalIpsetId',value:string};
 export type WafregionalIpsetArn = AT.ArnT<"WafregionalIpset">;
 
 /**
@@ -1506,7 +1506,7 @@ export interface WafregionalRule extends TF.ResourceT<'WafregionalRule'> {
   id: WafregionalRuleId;
 }
 
-type WafregionalRuleId = {type:'WafregionalRuleId',value:string};
+export type WafregionalRuleId = {type:'WafregionalRuleId',value:string};
 
 /**
  *  Provides a WAF Regional Web ACL Resource for use with Application Load Balancer.
@@ -1528,7 +1528,7 @@ export interface WafregionalWebAcl extends TF.ResourceT<'WafregionalWebAcl'> {
   id: WafregionalWebAclId;
 }
 
-type WafregionalWebAclId = {type:'WafregionalWebAclId',value:string};
+export type WafregionalWebAclId = {type:'WafregionalWebAclId',value:string};
 
 /**
  *  Provides a resource to create an association between a WAF Regional WebACL and Application Load Balancer.
@@ -1550,7 +1550,7 @@ export interface WafregionalWebAclAssociation extends TF.ResourceT<'WafregionalW
   id: WafregionalWebAclAssociationId;
 }
 
-type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
+export type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
 
 /**
  *  Provides a resource to manage AWS Secrets Manager secret metadata.
@@ -1575,7 +1575,7 @@ export interface SecretsmanagerSecret extends TF.ResourceT<'SecretsmanagerSecret
   arn: SecretsmanagerSecretArn;
 }
 
-type SecretsmanagerSecretId = {type:'SecretsmanagerSecretId',value:string};
+export type SecretsmanagerSecretId = {type:'SecretsmanagerSecretId',value:string};
 export type SecretsmanagerSecretArn = AT.ArnT<"SecretsmanagerSecret">;
 
 /**
@@ -1601,7 +1601,7 @@ export interface SecretsmanagerSecretVersion extends TF.ResourceT<'Secretsmanage
   arn: SecretsmanagerSecretVersionArn;
 }
 
-type SecretsmanagerSecretVersionId = {type:'SecretsmanagerSecretVersionId',value:string};
+export type SecretsmanagerSecretVersionId = {type:'SecretsmanagerSecretVersionId',value:string};
 export type SecretsmanagerSecretVersionArn = AT.ArnT<"SecretsmanagerSecretVersion">;
 
 /**
@@ -1633,7 +1633,7 @@ export interface CloudfrontDistribution extends TF.ResourceT<'CloudfrontDistribu
   arn: CloudfrontDistributionArn;
 }
 
-type CloudfrontDistributionId = {type:'CloudfrontDistributionId',value:string};
+export type CloudfrontDistributionId = {type:'CloudfrontDistributionId',value:string};
 export type CloudfrontDistributionArn = AT.ArnT<"CloudfrontDistribution">;
 
 /**
@@ -1659,7 +1659,7 @@ export interface ApiGatewayRestApi extends TF.ResourceT<'ApiGatewayRestApi'> {
   root_resource_id: ApiGatewayRestApiId;
 }
 
-type ApiGatewayRestApiId = {type:'ApiGatewayRestApiId',value:string};
+export type ApiGatewayRestApiId = {type:'ApiGatewayRestApiId',value:string};
 
 /**
  *  Provides an API Gateway Resource.
@@ -1684,7 +1684,7 @@ export interface ApiGatewayResource extends TF.ResourceT<'ApiGatewayResource'> {
   path: string;
 }
 
-type ApiGatewayResourceId = {type:'ApiGatewayResourceId',value:string};
+export type ApiGatewayResourceId = {type:'ApiGatewayResourceId',value:string};
 
 /**
  *  Provides a HTTP Method for an API Gateway Resource.
@@ -1703,7 +1703,7 @@ export function createApiGatewayMethod(tfgen: TF.Generator, rname: string, param
 export interface ApiGatewayMethod extends TF.ResourceT<'ApiGatewayMethod'> {
 }
 
-type ApiGatewayMethodId = {type:'ApiGatewayMethodId',value:string};
+export type ApiGatewayMethodId = {type:'ApiGatewayMethodId',value:string};
 
 /**
  *  Provides an HTTP Method Response for an API Gateway Resource.
@@ -1722,7 +1722,7 @@ export function createApiGatewayMethodResponse(tfgen: TF.Generator, rname: strin
 export interface ApiGatewayMethodResponse extends TF.ResourceT<'ApiGatewayMethodResponse'> {
 }
 
-type ApiGatewayMethodResponseId = {type:'ApiGatewayMethodResponseId',value:string};
+export type ApiGatewayMethodResponseId = {type:'ApiGatewayMethodResponseId',value:string};
 
 /**
  *  Provides an HTTP Method Integration for an API Gateway Integration.
@@ -1741,7 +1741,7 @@ export function createApiGatewayIntegration(tfgen: TF.Generator, rname: string, 
 export interface ApiGatewayIntegration extends TF.ResourceT<'ApiGatewayIntegration'> {
 }
 
-type ApiGatewayIntegrationId = {type:'ApiGatewayIntegrationId',value:string};
+export type ApiGatewayIntegrationId = {type:'ApiGatewayIntegrationId',value:string};
 
 /**
  *  Provides an HTTP Method Integration Response for an API Gateway Resource.
@@ -1760,7 +1760,7 @@ export function createApiGatewayIntegrationResponse(tfgen: TF.Generator, rname: 
 export interface ApiGatewayIntegrationResponse extends TF.ResourceT<'ApiGatewayIntegrationResponse'> {
 }
 
-type ApiGatewayIntegrationResponseId = {type:'ApiGatewayIntegrationResponseId',value:string};
+export type ApiGatewayIntegrationResponseId = {type:'ApiGatewayIntegrationResponseId',value:string};
 
 /**
  *  Provides an API Gateway Deployment.
@@ -1788,7 +1788,7 @@ export interface ApiGatewayDeployment extends TF.ResourceT<'ApiGatewayDeployment
   execution_arn: AT.Arn;
 }
 
-type ApiGatewayDeploymentId = {type:'ApiGatewayDeploymentId',value:string};
+export type ApiGatewayDeploymentId = {type:'ApiGatewayDeploymentId',value:string};
 
 /**
  *  Registers a custom domain name for use with AWS API Gateway.
@@ -1816,7 +1816,7 @@ export interface ApiGatewayDomainName extends TF.ResourceT<'ApiGatewayDomainName
   cloudfront_zone_id: AT.HostedZoneId;
 }
 
-type ApiGatewayDomainNameId = {type:'ApiGatewayDomainNameId',value:string};
+export type ApiGatewayDomainNameId = {type:'ApiGatewayDomainNameId',value:string};
 
 /**
  *  Connects a custom domain name registered via aws_api_gateway_domain_name with a deployed API
@@ -1835,7 +1835,7 @@ export function createApiGatewayBasePathMapping(tfgen: TF.Generator, rname: stri
 export interface ApiGatewayBasePathMapping extends TF.ResourceT<'ApiGatewayBasePathMapping'> {
 }
 
-type ApiGatewayBasePathMappingId = {type:'ApiGatewayBasePathMappingId',value:string};
+export type ApiGatewayBasePathMappingId = {type:'ApiGatewayBasePathMappingId',value:string};
 
 /**
  *  Manages a S3 Bucket Notification Configuration.
@@ -1854,7 +1854,7 @@ export function createS3BucketNotification(tfgen: TF.Generator, rname: string, p
 export interface S3BucketNotification extends TF.ResourceT<'S3BucketNotification'> {
 }
 
-type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
+export type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string};
 
 /**
  *  Provides a Cognito User Pool resource.
@@ -1879,7 +1879,7 @@ export interface CognitoUserPool extends TF.ResourceT<'CognitoUserPool'> {
   arn: CognitoUserPoolArn;
 }
 
-type CognitoUserPoolId = {type:'CognitoUserPoolId',value:string};
+export type CognitoUserPoolId = {type:'CognitoUserPoolId',value:string};
 export type CognitoUserPoolArn = AT.ArnT<"CognitoUserPool">;
 
 /**
@@ -1905,7 +1905,7 @@ export interface CognitoIdentityPool extends TF.ResourceT<'CognitoIdentityPool'>
   arn: CognitoIdentityPoolArn;
 }
 
-type CognitoIdentityPoolId = {type:'CognitoIdentityPoolId',value:string};
+export type CognitoIdentityPoolId = {type:'CognitoIdentityPoolId',value:string};
 export type CognitoIdentityPoolArn = AT.ArnT<"CognitoIdentityPool">;
 
 export interface AutoscalingGroupTagParams {

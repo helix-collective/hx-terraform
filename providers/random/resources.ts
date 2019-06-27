@@ -23,7 +23,7 @@ export interface String extends TF.ResourceT<'String'> {
   result: string;
 }
 
-type StringId = {type:'StringId',value:string};
+export type StringId = {type:'StringId',value:string};
 
 export interface RandomStringParams {
   length: number;

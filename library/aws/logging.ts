@@ -21,9 +21,20 @@ export interface LoggingInfrastructureParams {
   domain_name: string;
   aggregator_key_name: AT.KeyName;
   customize?: util.Customize<AR.ElasticsearchDomainParams>;
-  custom_domain_policy?: string,
+  cognito?: LoggingCognitoParams;
   logging_ip_whitelist?: AT.IpAddress[];
 }
+
+export interface LoggingCognitoParams {
+  // The cognito user pool being given access to kibana
+  user_pool_id: AR.CognitoUserPoolId,
+
+  // The cognito identity pool being given access to kibana
+  identity_pool_id: AR.CognitoIdentityPoolId,
+
+  role1_arn: AR.IamRoleArn,
+  role2_arn: AR.IamRoleArn,
+};
 
 export interface LoggingInfrastructure {
   aggregator_ipaddresses: AT.IpAddress[];
@@ -90,6 +101,15 @@ export function createLoggingInfrastructure(
     },
     tags: tfgen.tagsContext(),
   };
+  if (params.cognito) {
+    edparams.cognito_options = {
+      enabled: true,
+      user_pool_id: params.cognito.user_pool_id,
+      identity_pool_id: params.cognito.identity_pool_id,
+      role_arn: params.cognito.role1_arn,
+    }
+  }
+
   if (params.customize) {
     params.customize(edparams);
   }
@@ -181,12 +201,10 @@ export function createLoggingInfrastructure(
 
   AR.createElasticsearchDomainPolicy(tfgen, 'logging_ed_policy', {
     domain_name: params.domain_name,
-    access_policies: params.custom_domain_policy
-      ? params.custom_domain_policy
-      : JSON.stringify(
-         es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr),
-         null, 2
-        ),
+    access_policies: JSON.stringify(
+      es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr, params.cognito && params.cognito.role2_arn ),
+      null, 2
+      ),
   });
 
   return {
@@ -197,33 +215,45 @@ export function createLoggingInfrastructure(
 function es_access_policy(
   domain: AR.ElasticsearchDomain,
   static_ip_whitelist: string[],
-  role: AR.IamRole
+  logging_role: AR.IamRole,
+  cognito_role: AR.IamRoleArn | undefined
 ): {} {
+  const Statement = [
+    {
+      Effect: 'Allow',
+      Principal: {
+        AWS: '*',
+      },
+      Action: 'es:*',
+      Resource: `${domain.arn.value}/*`,
+      Condition: {
+        IpAddress: {
+          'aws:SourceIp': static_ip_whitelist,
+        },
+      },
+    },
+    {
+      Effect: 'Allow',
+      Principal: {
+        AWS: logging_role.arn.value,
+      },
+      Action: 'es:*',
+      Resource: `${domain.arn.value}/*`,
+    },
+  ];
+  if (cognito_role) {
+    Statement.push({
+      Effect: "Allow",
+      Principal: {
+        AWS: cognito_role.value
+      },
+      Action: "es:ESHttp*",
+      Resource: `${domain.arn.value}/*`,
+    });
+  }
   return {
     Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Principal: {
-          AWS: '*',
-        },
-        Action: 'es:*',
-        Resource: `${domain.arn.value}/*`,
-        Condition: {
-          IpAddress: {
-            'aws:SourceIp': static_ip_whitelist,
-          },
-        },
-      },
-      {
-        Effect: 'Allow',
-        Principal: {
-          AWS: role.arn.value,
-        },
-        Action: 'es:*',
-        Resource: `${domain.arn.value}/*`,
-      },
-    ],
+    Statement,
   };
 }
 

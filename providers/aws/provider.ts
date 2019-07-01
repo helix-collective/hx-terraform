@@ -20,10 +20,12 @@ export interface Provider extends TF.Provider {}
 
 export interface AwsParams {
   region?: AT.Region;
+  version?: string;
 }
 
 export function fieldsFromAwsParams(params: AwsParams): TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, 'region', params.region, TF.stringAliasValue);
+  TF.addOptionalField(fields, 'version', params.version, TF.stringValue);
   return fields;
 }

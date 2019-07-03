@@ -1915,6 +1915,25 @@ export type CognitoUserPoolClientId = {type:'CognitoUserPoolClientId',value:stri
 export type CognitoUserPoolClientArn = AT.ArnT<"CognitoUserPoolClient">;
 
 /**
+ *  Provides a Cognito User Pool Domain resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cognito_user_pool_domain.html
+ */
+export function createCognitoUserPoolDomain(tfgen: TF.Generator, rname: string, params: CognitoUserPoolDomainParams): CognitoUserPoolDomain {
+  const fields = fieldsFromCognitoUserPoolDomainParams(params);
+  const resource = tfgen.createTypedResource('CognitoUserPoolDomain', 'aws_cognito_user_pool_domain', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface CognitoUserPoolDomain extends TF.ResourceT<'CognitoUserPoolDomain'> {
+}
+
+export type CognitoUserPoolDomainId = {type:'CognitoUserPoolDomainId',value:string};
+
+/**
  *  Provides an AWS Cognito Identity Pool.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool.html
@@ -1939,6 +1958,25 @@ export interface CognitoIdentityPool extends TF.ResourceT<'CognitoIdentityPool'>
 
 export type CognitoIdentityPoolId = {type:'CognitoIdentityPoolId',value:string};
 export type CognitoIdentityPoolArn = AT.ArnT<"CognitoIdentityPool">;
+
+/**
+ *  Provides an AWS Cognito Identity Pool Roles Attachment.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool_roles_attachment.html
+ */
+export function createCognitoIdentityPoolRolesAttachment(tfgen: TF.Generator, rname: string, params: CognitoIdentityPoolRolesAttachmentParams): CognitoIdentityPoolRolesAttachment {
+  const fields = fieldsFromCognitoIdentityPoolRolesAttachmentParams(params);
+  const resource = tfgen.createTypedResource('CognitoIdentityPoolRolesAttachment', 'aws_cognito_identity_pool_roles_attachment', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface CognitoIdentityPoolRolesAttachment extends TF.ResourceT<'CognitoIdentityPoolRolesAttachment'> {
+}
+
+export type CognitoIdentityPoolRolesAttachmentId = {type:'CognitoIdentityPoolRolesAttachmentId',value:string};
 
 export interface AutoscalingGroupTagParams {
   key: string;
@@ -4112,6 +4150,20 @@ export function fieldsFromCognitoUserPoolClientParams(params: CognitoUserPoolCli
   return fields;
 }
 
+export interface CognitoUserPoolDomainParams {
+  domain: string;
+  user_pool_id: CognitoUserPoolId;
+  certificate_arn?: AT.ArnT<"AcmCertificate">;
+}
+
+export function fieldsFromCognitoUserPoolDomainParams(params: CognitoUserPoolDomainParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "domain", params.domain, TF.stringValue);
+  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  return fields;
+}
+
 export interface CognitoIdentityProviderParams {
   client_id?: CognitoUserPoolId;
   provider_name?: string;
@@ -4137,5 +4189,29 @@ export function fieldsFromCognitoIdentityPoolParams(params: CognitoIdentityPoolP
   TF.addField(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
   TF.addField(fields, "allow_unauthenticated_identities", params.allow_unauthenticated_identities, TF.booleanValue);
   TF.addOptionalField(fields, "cognito_identity_providers", params.cognito_identity_providers, TF.listValue((v) => TF.mapValue(fieldsFromCognitoIdentityProviderParams(v))));
+  return fields;
+}
+
+export interface CognitoIdentityPoolRolesAttachmentParams {
+  identity_pool_id: CognitoIdentityPoolId;
+  roles: CognitoIdentityPoolRolesAttachmentRolesParams;
+}
+
+export function fieldsFromCognitoIdentityPoolRolesAttachmentParams(params: CognitoIdentityPoolRolesAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
+  TF.addField(fields, "roles", params.roles, (v) => TF.mapValue(fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(v)));
+  return fields;
+}
+
+export interface CognitoIdentityPoolRolesAttachmentRolesParams {
+  authenticated?: AT.ArnT<"IamRole">;
+  unauthenticated?: AT.ArnT<"IamRole">;
+}
+
+export function fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(params: CognitoIdentityPoolRolesAttachmentRolesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "authenticated", params.authenticated, TF.resourceArnValue);
+  TF.addOptionalField(fields, "unauthenticated", params.unauthenticated, TF.resourceArnValue);
   return fields;
 }

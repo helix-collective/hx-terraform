@@ -114,6 +114,7 @@ export function createLoggingInfrastructure(
     params.customize(edparams);
   }
   const ed = AR.createElasticsearchDomain(tfgen, 'logging', edparams);
+  tfgen.ignoreChanges(ed, 'cognito_options');
 
   const instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
@@ -210,6 +211,181 @@ export function createLoggingInfrastructure(
   return {
     aggregator_ipaddresses: log_aggregator_ips,
   };
+}
+
+interface CognitoResourceParams {
+  user_pool_name: string,
+  identity_pool_name: string,
+};
+
+/**
+ * Create the AWS cognito resources to support user login for elasticsearch's
+ * kibana user interface
+ */
+export function createCognitoResources(
+  tfgen: TF.Generator,
+  sr: SharedResources,
+  params: CognitoResourceParams
+): LoggingCognitoParams {
+    // Manual imports of a user_pool resource hit this bug, and required the workaround described:
+    //
+    //  https://github.com/terraform-providers/terraform-provider-aws/pull/8845
+
+    const user_pool = AR.createCognitoUserPool(tfgen, "kibana_users", {
+      name: params.user_pool_name,
+      admin_create_user_config: {
+        allow_admin_create_user_only: true,
+        invite_message_template: {
+          email_message: `Your username for ${params.user_pool_name} access is {username} and temporary password is {####}. `,
+          email_subject: `Your temporary password for ${params.user_pool_name}`,
+          sms_message: `Your username for ${params.user_pool_name} access is {username} and temporary password is {####}. `,
+        }
+      },
+      schema: [
+        {
+          name: 'email',
+          attribute_data_type: 'String',
+          mutable: true,
+          developer_only_attribute: false,
+          required: true,
+          string_attribute_constraints: { min_length: 0, max_length: 2048 },
+        },
+      ],
+      sms_authentication_message: 'Your authentication code is {####}. ',
+      sms_verification_message: 'Your verification code is {####}. ',
+      auto_verified_attributes: ['email'],
+      username_attributes: ['email'],
+    });
+
+    const client1 = AR.createCognitoUserPoolClient(tfgen, 'client1', {
+      name: 'Kibana',
+      user_pool_id: user_pool.id,
+      read_attributes: [
+        "given_name",
+        "email_verified",
+        "zoneinfo",
+        "website",
+        "preferred_username",
+        "name",
+        "locale",
+        "phone_number",
+        "family_name",
+        "birthdate",
+        "middle_name",
+        "phone_number_verified",
+        "profile",
+        "picture",
+        "address",
+        "gender",
+        "updated_at",
+        "nickname",
+        "email",
+      ],
+      write_attributes: [
+        "given_name",
+        "zoneinfo",
+        "website",
+        "preferred_username",
+        "name",
+        "locale",
+        "phone_number",
+        "family_name",
+        "birthdate",
+        "middle_name",
+        "profile",
+        "picture",
+        "address",
+        "gender",
+        "updated_at",
+        "nickname",
+        "email",
+      ]
+    });
+
+// *** Automatically created by AWS when Elasticearch is connected to cognito
+//
+// see: https://github.com/terraform-providers/terraform-provider-aws/issues/5557
+//
+// const client2 = AR.createCognitoUserPoolClient(tfgen, 'client2', {
+//       name: 'AWSElasticsearch-es-logging-ap-southeast-2-qkcbwp4nzagr6qieeryenbhvpy',
+//       user_pool_id: user_pool.id,
+//       allowed_oauth_flows: ['code'],
+//       allowed_oauth_flows_user_pool_client: true,
+//       allowed_oauth_scopes: ['openid', 'phone', 'profile', 'email'],
+//       callback_urls: [
+//         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
+//       ],
+//       logout_urls: [
+//         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
+//       ],
+//       supported_identity_providers: ['COGNITO'],
+//     });
+
+    const identity_pool = AR.createCognitoIdentityPool(tfgen, "kibana_identities", {
+      identity_pool_name: params.identity_pool_name,
+      allow_unauthenticated_identities: false,
+      cognito_identity_providers: [
+        {
+          client_id: client1.id,
+          provider_name: user_pool.endpoint,
+          server_side_token_check: false,
+        },
+//    see *** above
+//
+//        {
+//          client_id: client2.id,
+//          provider_name: user_pool.endpoint,
+//          server_side_token_check: true,
+//        }
+      ]
+    });
+
+    // see *** above
+    tfgen.ignoreChanges(identity_pool, 'cognito_identity_providers');
+
+    const role1 = AR.createIamRole(tfgen, 'role1', {
+      name: "CognitoAccessForAmazonES",
+      path: "/service-role/",
+      assume_role_policy: JSON.stringify({
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "es.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      }),
+      description: "Amazon Elasticsearch role for Kibana authentication."
+    });
+
+    const role2 = AR.createIamRole(tfgen, 'role2', {
+      name: "Cognito_NSWHealthadminAuth_Role",
+      assume_role_policy: JSON.stringify({
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Federated": "cognito-identity.amazonaws.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+              "StringEquals": {
+                "cognito-identity.amazonaws.com:aud": identity_pool.id.value,
+              },
+              "ForAnyValue:StringLike": {
+                "cognito-identity.amazonaws.com:amr": "authenticated"
+              }
+            }
+          }
+        ]
+      })
+    });
+
+    return {user_pool_id:user_pool.id, identity_pool_id:identity_pool.id, role1_arn:role1.arn, role2_arn:role2.arn};
 }
 
 function es_access_policy(

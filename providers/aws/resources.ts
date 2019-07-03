@@ -1865,22 +1865,54 @@ export function createCognitoUserPool(tfgen: TF.Generator, rname: string, params
   const fields = fieldsFromCognitoUserPoolParams(params);
   const resource = tfgen.createTypedResource('CognitoUserPool', 'aws_cognito_user_pool', rname, fields);
   const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
   const arn: CognitoUserPoolArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoUserPool');
 
   return {
     ...resource,
     id,
+    endpoint,
     arn,
   };
 }
 
 export interface CognitoUserPool extends TF.ResourceT<'CognitoUserPool'> {
   id: CognitoUserPoolId;
+  endpoint: string;
   arn: CognitoUserPoolArn;
 }
 
 export type CognitoUserPoolId = {type:'CognitoUserPoolId',value:string};
 export type CognitoUserPoolArn = AT.ArnT<"CognitoUserPool">;
+
+/**
+ *  Provides a Cognito User Pool Client resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/cognito_user_pool_client.html
+ */
+export function createCognitoUserPoolClient(tfgen: TF.Generator, rname: string, params: CognitoUserPoolClientParams): CognitoUserPoolClient {
+  const fields = fieldsFromCognitoUserPoolClientParams(params);
+  const resource = tfgen.createTypedResource('CognitoUserPoolClient', 'aws_cognito_user_pool_client', rname, fields);
+  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const client_secret: string =  '${' + TF.resourceName(resource) + '.client_secret}';
+  const arn: CognitoUserPoolClientArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoUserPoolClient');
+
+  return {
+    ...resource,
+    id,
+    client_secret,
+    arn,
+  };
+}
+
+export interface CognitoUserPoolClient extends TF.ResourceT<'CognitoUserPoolClient'> {
+  id: CognitoUserPoolId;
+  client_secret: string;
+  arn: CognitoUserPoolClientArn;
+}
+
+export type CognitoUserPoolClientId = {type:'CognitoUserPoolClientId',value:string};
+export type CognitoUserPoolClientArn = AT.ArnT<"CognitoUserPoolClient">;
 
 /**
  *  Provides an AWS Cognito Identity Pool.
@@ -2611,6 +2643,7 @@ export interface IamRoleParams {
   name_prefix?: string;
   assume_role_policy: string;
   path?: string;
+  description?: string;
 }
 
 export function fieldsFromIamRoleParams(params: IamRoleParams) : TF.ResourceFieldMap {
@@ -2619,6 +2652,7 @@ export function fieldsFromIamRoleParams(params: IamRoleParams) : TF.ResourceFiel
   TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addField(fields, "assume_role_policy", params.assume_role_policy, TF.stringValue);
   TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -3952,24 +3986,156 @@ export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificatio
   return fields;
 }
 
+export interface CognitoInviteMessageTemplateParams {
+  email_message?: string;
+  email_subject?: string;
+  sms_message?: string;
+}
+
+export function fieldsFromCognitoInviteMessageTemplateParams(params: CognitoInviteMessageTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "email_message", params.email_message, TF.stringValue);
+  TF.addOptionalField(fields, "email_subject", params.email_subject, TF.stringValue);
+  TF.addOptionalField(fields, "sms_message", params.sms_message, TF.stringValue);
+  return fields;
+}
+
+export interface CognitoAdminCreateUsersParams {
+  allow_admin_create_user_only?: boolean;
+  invite_message_template?: CognitoInviteMessageTemplateParams;
+  unused_account_Validity_days?: number;
+}
+
+export function fieldsFromCognitoAdminCreateUsersParams(params: CognitoAdminCreateUsersParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "allow_admin_create_user_only", params.allow_admin_create_user_only, TF.booleanValue);
+  TF.addOptionalField(fields, "invite_message_template", params.invite_message_template, (v) => TF.mapValue(fieldsFromCognitoInviteMessageTemplateParams(v)));
+  TF.addOptionalField(fields, "unused_account_Validity_days", params.unused_account_Validity_days, TF.numberValue);
+  return fields;
+}
+
+export interface CognitoSchemaAttributesParams {
+  name: string;
+  attribute_data_type: 'Boolean' | 'Number' | 'String' | 'DateTime';
+  developer_only_attribute?: boolean;
+  string_attribute_constraints?: CognitoSchemaStringAttributeConstraintsParams;
+  number_attribute_constraints?: CognitoSchemaNumberAttributeConstraintsParams;
+  mutable?: boolean;
+  required?: boolean;
+}
+
+export function fieldsFromCognitoSchemaAttributesParams(params: CognitoSchemaAttributesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "attribute_data_type", params.attribute_data_type, TF.stringValue);
+  TF.addOptionalField(fields, "developer_only_attribute", params.developer_only_attribute, TF.booleanValue);
+  TF.addOptionalField(fields, "string_attribute_constraints", params.string_attribute_constraints, (v) => TF.mapValue(fieldsFromCognitoSchemaStringAttributeConstraintsParams(v)));
+  TF.addOptionalField(fields, "number_attribute_constraints", params.number_attribute_constraints, (v) => TF.mapValue(fieldsFromCognitoSchemaNumberAttributeConstraintsParams(v)));
+  TF.addOptionalField(fields, "mutable", params.mutable, TF.booleanValue);
+  TF.addOptionalField(fields, "required", params.required, TF.booleanValue);
+  return fields;
+}
+
+export interface CognitoSchemaStringAttributeConstraintsParams {
+  min_length?: number;
+  max_length?: number;
+}
+
+export function fieldsFromCognitoSchemaStringAttributeConstraintsParams(params: CognitoSchemaStringAttributeConstraintsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "min_length", params.min_length, TF.numberValue);
+  TF.addOptionalField(fields, "max_length", params.max_length, TF.numberValue);
+  return fields;
+}
+
+export interface CognitoSchemaNumberAttributeConstraintsParams {
+  min_value?: number;
+  max_value?: number;
+}
+
+export function fieldsFromCognitoSchemaNumberAttributeConstraintsParams(params: CognitoSchemaNumberAttributeConstraintsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "min_value", params.min_value, TF.numberValue);
+  TF.addOptionalField(fields, "max_value", params.max_value, TF.numberValue);
+  return fields;
+}
+
 export interface CognitoUserPoolParams {
   name: string;
+  admin_create_user_config?: CognitoAdminCreateUsersParams;
+  auto_verified_attributes?: ('email' | 'phone_number')[];
+  schema?: (CognitoSchemaAttributesParams)[];
+  username_attributes?: ('email' | 'phone_number')[];
+  sms_authentication_message?: string;
+  sms_verification_message?: string;
   tags?: TF.TagsMap;
 }
 
 export function fieldsFromCognitoUserPoolParams(params: CognitoUserPoolParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "admin_create_user_config", params.admin_create_user_config, (v) => TF.mapValue(fieldsFromCognitoAdminCreateUsersParams(v)));
+  TF.addOptionalField(fields, "auto_verified_attributes", params.auto_verified_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "schema", params.schema, TF.listValue((v) => TF.mapValue(fieldsFromCognitoSchemaAttributesParams(v))));
+  TF.addOptionalField(fields, "username_attributes", params.username_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "sms_authentication_message", params.sms_authentication_message, TF.stringValue);
+  TF.addOptionalField(fields, "sms_verification_message", params.sms_verification_message, TF.stringValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface CognitoUserPoolClientParams {
+  name: string;
+  user_pool_id: CognitoUserPoolId;
+  read_attributes?: (string)[];
+  write_attributes?: (string)[];
+  allowed_oauth_flows?: ('code' | 'implicit' | 'client_credentials')[];
+  allowed_oauth_flows_user_pool_client?: boolean;
+  allowed_oauth_scopes?: ('phone' | 'email' | 'openid' | 'profile' | 'aws.cognito.signin.user.admin')[];
+  callback_urls?: (string)[];
+  logout_urls?: (string)[];
+  supported_identity_providers?: (string)[];
+}
+
+export function fieldsFromCognitoUserPoolClientParams(params: CognitoUserPoolClientParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "read_attributes", params.read_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "write_attributes", params.write_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "allowed_oauth_flows", params.allowed_oauth_flows, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "allowed_oauth_flows_user_pool_client", params.allowed_oauth_flows_user_pool_client, TF.booleanValue);
+  TF.addOptionalField(fields, "allowed_oauth_scopes", params.allowed_oauth_scopes, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "callback_urls", params.callback_urls, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "logout_urls", params.logout_urls, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "supported_identity_providers", params.supported_identity_providers, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface CognitoIdentityProviderParams {
+  client_id?: CognitoUserPoolId;
+  provider_name?: string;
+  server_side_token_check?: boolean;
+}
+
+export function fieldsFromCognitoIdentityProviderParams(params: CognitoIdentityProviderParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "client_id", params.client_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "provider_name", params.provider_name, TF.stringValue);
+  TF.addOptionalField(fields, "server_side_token_check", params.server_side_token_check, TF.booleanValue);
   return fields;
 }
 
 export interface CognitoIdentityPoolParams {
   identity_pool_name: string;
+  allow_unauthenticated_identities: boolean;
+  cognito_identity_providers?: (CognitoIdentityProviderParams)[];
 }
 
 export function fieldsFromCognitoIdentityPoolParams(params: CognitoIdentityPoolParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
+  TF.addField(fields, "allow_unauthenticated_identities", params.allow_unauthenticated_identities, TF.booleanValue);
+  TF.addOptionalField(fields, "cognito_identity_providers", params.cognito_identity_providers, TF.listValue((v) => TF.mapValue(fieldsFromCognitoIdentityProviderParams(v))));
   return fields;
 }

@@ -32,8 +32,8 @@ export interface LoggingCognitoParams {
   // The cognito identity pool being given access to kibana
   identity_pool_id: AR.CognitoIdentityPoolId,
 
-  role1_arn: AR.IamRoleArn,
-  role2_arn: AR.IamRoleArn,
+  // The role that needs to be able to access elasticsearch
+  auth_role_arn: AR.IamRoleArn,
 };
 
 export interface LoggingInfrastructure {
@@ -101,14 +101,15 @@ export function createLoggingInfrastructure(
     },
     tags: tfgen.tagsContext(),
   };
-  if (params.cognito) {
-    edparams.cognito_options = {
-      enabled: true,
-      user_pool_id: params.cognito.user_pool_id,
-      identity_pool_id: params.cognito.identity_pool_id,
-      role_arn: params.cognito.role1_arn,
-    }
-  }
+  // See ***
+  // if (params.cognito) {
+  //  edparams.cognito_options = {
+  //    enabled: true,
+  //    user_pool_id: params.cognito.user_pool_id,
+  //    identity_pool_id: params.cognito.identity_pool_id,
+  //    role_arn: params.cognito.role1_arn,
+  //  }
+  // }
 
   if (params.customize) {
     params.customize(edparams);
@@ -203,7 +204,7 @@ export function createLoggingInfrastructure(
   AR.createElasticsearchDomainPolicy(tfgen, 'logging_ed_policy', {
     domain_name: params.domain_name,
     access_policies: JSON.stringify(
-      es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr, params.cognito && params.cognito.role2_arn ),
+      es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr, params.cognito && params.cognito.auth_role_arn ),
       null, 2
       ),
   });
@@ -215,12 +216,17 @@ export function createLoggingInfrastructure(
 
 interface CognitoResourceParams {
   user_pool_name: string,
+  user_pool_domain: string,
   identity_pool_name: string,
+  auth_role_name: string,
 };
 
 /**
  * Create the AWS cognito resources to support user login for elasticsearch's
  * kibana user interface
+ *
+ * Currently this function can only be called once within an account
+ * (TODO: fix this)
  */
 export function createCognitoResources(
   tfgen: TF.Generator,
@@ -302,6 +308,11 @@ export function createCognitoResources(
       ]
     });
 
+    AR.createCognitoUserPoolDomain(tfgen, 'domain', {
+      domain: params.user_pool_domain,
+      user_pool_id: user_pool.id,
+    });
+
 // *** Automatically created by AWS when Elasticearch is connected to cognito
 //
 // see: https://github.com/terraform-providers/terraform-provider-aws/issues/5557
@@ -343,26 +354,26 @@ export function createCognitoResources(
     // see *** above
     tfgen.ignoreChanges(identity_pool, 'cognito_identity_providers');
 
-    const role1 = AR.createIamRole(tfgen, 'role1', {
-      name: "CognitoAccessForAmazonES",
-      path: "/service-role/",
-      assume_role_policy: JSON.stringify({
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "es.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
-          }
-        ]
-      }),
-      description: "Amazon Elasticsearch role for Kibana authentication."
-    });
+//    const role1 = AR.createIamRole(tfgen, 'role1', {
+//      name: "CognitoAccessForAmazonES",
+//      path: "/service-role/",
+//      assume_role_policy: JSON.stringify({
+//        "Version": "2012-10-17",
+//        "Statement": [
+//          {
+//            "Effect": "Allow",
+//            "Principal": {
+//              "Service": "es.amazonaws.com"
+//            },
+//            "Action": "sts:AssumeRole"
+//          }
+//        ]
+//      }),
+//      description: "Amazon Elasticsearch role for Kibana authentication."
+//    });
 
-    const role2 = AR.createIamRole(tfgen, 'role2', {
-      name: "Cognito_NSWHealthadminAuth_Role",
+    const kibana_auth_role = AR.createIamRole(tfgen, 'kibana_auth', {
+      name: params.auth_role_name,
       assume_role_policy: JSON.stringify({
         "Version": "2012-10-17",
         "Statement": [
@@ -385,7 +396,14 @@ export function createCognitoResources(
       })
     });
 
-    return {user_pool_id:user_pool.id, identity_pool_id:identity_pool.id, role1_arn:role1.arn, role2_arn:role2.arn};
+    AR.createCognitoIdentityPoolRolesAttachment(tfgen, "kibana_identities", {
+      identity_pool_id: identity_pool.id,
+      roles: {
+        authenticated: kibana_auth_role.arn,
+      }
+    });
+
+    return {user_pool_id:user_pool.id, identity_pool_id:identity_pool.id, auth_role_arn:kibana_auth_role.arn};
 }
 
 function es_access_policy(

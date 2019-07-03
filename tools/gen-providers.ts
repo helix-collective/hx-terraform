@@ -1540,6 +1540,15 @@ const cognito_user_pool_client: RecordDecl = {
   ]
 };
 
+const cognito_user_pool_domain: RecordDecl = {
+  name: 'cognito_user_pool_domain',
+  fields: [
+    requiredField('domain', STRING),
+    requiredField('user_pool_id', resourceIdType('CognitoUserPoolId')),
+    optionalField('certificate_arn', arnType(acm_certificate)),
+  ]
+};
+
 const cognito_identity_provider: RecordDecl = {
   name: 'cognito_identity_provider',
   fields: [
@@ -1558,6 +1567,22 @@ const cognito_identity_pool: RecordDecl = {
     // TODO(timd): complete
   ]
 };
+
+const cognito_identity_pool_roles_attachment_roles: RecordDecl = {
+  name: 'cognito_identity_pool_roles_attachment_roles',
+  fields: [
+    optionalField('authenticated', arnType(iam_role)),
+    optionalField('unauthenticated', arnType(iam_role)),
+  ],
+}
+
+const cognito_identity_pool_roles_attachment: RecordDecl = {
+  name: 'cognito_identity_pool_roles_attachment',
+  fields: [
+    requiredField('identity_pool_id', resourceIdType('CognitoIdentityPoolId')),
+    requiredField('roles', recordType(cognito_identity_pool_roles_attachment_roles)),
+  ],
+}
 
 function generateAws(gen: Generator) {
   // Generate the resources
@@ -2298,6 +2323,14 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a Cognito User Pool Domain resource.',
+    'https://www.terraform.io/docs/providers/aws/r/cognito_user_pool_domain.html',
+    cognito_user_pool_domain,
+    [
+    ],
+  );
+
+  gen.generateResource(
     'Provides an AWS Cognito Identity Pool.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool.html',
     cognito_identity_pool,
@@ -2308,6 +2341,14 @@ function generateAws(gen: Generator) {
       arn: true,
     }
   );
+
+  gen.generateResource(
+    'Provides an AWS Cognito Identity Pool Roles Attachment.',
+    'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool_roles_attachment.html',
+    cognito_identity_pool_roles_attachment,
+    [
+    ]
+    );
 
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
@@ -2439,8 +2480,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_schema_number_attribute_constraints),
   gen.generateParams(cognito_user_pool);
   gen.generateParams(cognito_user_pool_client);
+  gen.generateParams(cognito_user_pool_domain);
   gen.generateParams(cognito_identity_provider);
   gen.generateParams(cognito_identity_pool);
+  gen.generateParams(cognito_identity_pool_roles_attachment);
+  gen.generateParams(cognito_identity_pool_roles_attachment_roles);
 }
 
 function generateRandom(gen: Generator) {

@@ -851,6 +851,10 @@ const autoscaling_group: RecordDecl = {
 
     requiredField('launch_configuration', STRING), // launch_configuration.name
     optionalField('load_balancers', listType(STRING)),
+    optionalField('enabled_metrics', listType(enumType([
+      "GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances",
+      "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"
+    ]))),
 
     optionalField('tags', listType(recordType(autoscaling_group_tag))),
   ],

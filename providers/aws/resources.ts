@@ -1931,6 +1931,7 @@ export interface AutoscalingGroupParams {
   vpc_zone_identifier?: (SubnetId)[];
   launch_configuration: string;
   load_balancers?: (string)[];
+  enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
   tags?: (AutoscalingGroupTagParams)[];
 }
 
@@ -1944,6 +1945,7 @@ export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams)
   TF.addOptionalField(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
   TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
   TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
   return fields;
 }

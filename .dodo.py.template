@@ -16,12 +16,15 @@ HERE = Path('.')
 terraform_initialized = MarkerFile(HERE/'build/.terraform_initialized')
 terraform_image_built = MarkerFile(HERE/'build/.terraform_image_built')
 terraform_image_pushed = MarkerFile(HERE/'build/.terraform_image_pushed')
+es_tool_build_file = (HERE/'typescript/build/hx-terraform/tools/es-tool.js')
 
 provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10/8.2.2/bin/hx-provisioning-tools'
 
 local_lambda_zip_sources = HERE/'lambdas';
 lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
-lambda_es_tool = HERE/'typescript/hx-terraform/tools/es-tool.ts'
+lambda_es_tool = HERE/'typescript/build/hx-terraform/tools/es-tool.js'
+
+lambda_source_files = (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*")) + [ lambda_es_tool ])
 
 tfplan = HERE / 'terraform/tfplan'
 
@@ -38,6 +41,9 @@ def generate_providers():
 
 def generate_tf():
     return '(cd typescript; ./node_modules/.bin/ts-node main.ts)'
+
+def yarn_build():
+    return '(cd typescript; yarn build)'
 
 def confirm_apply():
     print("You are about to apply changes to live infrastructure.")
@@ -65,12 +71,22 @@ def expire_plan():
     tfplan.unlink()
 
 def task_lambda_zips():
-    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*")) + [ lambda_es_tool ]):
+    # Required for compiling typescript
+    yield {
+        'name': 'yarn build',
+        'actions': [ yarn_build() ],
+        'targets': [ es_tool_build_file ],
+        'file_dep': [ (HERE/'typescript/hx-terraform/tools/es-tool.ts') ]
+    }
+    for f in lambda_source_files:
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         if f.suffix == '.py':
             yield lambdazip_file_task(zipfile, f)
-        elif f.suffix == '.ts':
-            yield lambdazip_file_task(zipfile, f)
+        elif f.suffix == '.js':
+            yield {
+                **lambdazip_file_task(zipfile, f),
+                'file_dep': [ es_tool_build_file ],
+            }
         elif f.is_dir() and (f/'requirements.txt').is_file():
             yield lambdazip_pydir_task(zipfile, f)
 
@@ -140,7 +156,7 @@ def task_terraform_init():
 
 def lambda_zipfiles():
     zipfiles = []
-    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
+    for f in lambda_source_files:
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         zipfiles.append(zipfile)
     return zipfiles

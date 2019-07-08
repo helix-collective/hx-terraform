@@ -127,6 +127,8 @@ def generate_zip(zip,paths):
                   content = cf.read()
                   # Fix the file create time to make zip files reproduceable
                   zinfo = zipfile.ZipInfo(p.name,(2000,1,1,0,0,0))
+                  # Set the file permissions within the zipfile to be 644 - necessary to upload to lambda
+                  zinfo.external_attr = 0o0644 << 16
                   zf.writestr(zinfo,content)
     return thunk
 

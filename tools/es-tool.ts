@@ -258,6 +258,7 @@ async function main(argv: string[]) {
 
   const client = new AwsClient(region, baseUrl);
 
+  //comment
   if (argv.length === 3 && argv[2] === 'summary') {
     await printSummary(client);
   } else if (argv.length === 5 && argv[2] === 'delete' && argv[3] === '--older-than-date' && isIsoDate(argv[4])) {

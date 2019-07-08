@@ -159,6 +159,14 @@ async function deleteOlderThanDate(client: Client, keepFrom: string, dryRun: boo
   }
 }
 
+async function deleteOlderThanMonths(client: AwsClient, months: number, dryRun: boolean) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - months);
+    const dateStr = date.toISOString().substring(0,10);
+    await deleteOlderThanDate(client, dateStr, false);
+}
+
+
 function isIsoDate(s: string) : boolean {
   const re = /^\d{4}-\d{2}-\d{2}$/;
   const m = re.exec(s);
@@ -256,13 +264,28 @@ async function main(argv: string[]) {
     const dateStr = argv[4];
     await deleteOlderThanDate(client, dateStr, false);
   } else if (argv.length === 5 && argv[2] === 'delete' && argv[3] === '--older-than-months' && isNumber(argv[4])) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - parseInt(argv[4]));
-    const dateStr = date.toISOString().substring(0,10);
-    await deleteOlderThanDate(client, dateStr, false);
+    await deleteOlderThanMonths(client, parseInt(argv[4]), false);
   } else {
     usage();
   }
 };
+
+interface CloudWatchEventInput {
+  months: number
+};
+
+async function cronDelete(event: CloudWatchEventInput) {
+  const baseUrl = process.env['ES_ENDPOINT'];
+  if (baseUrl === undefined) {
+    throw new Error('ES_ENDPOINT environment variable is not defined');
+  }
+  const region = process.env['AWS_DEFAULT_REGION'];
+  if (region === undefined) {
+    throw new Error('AWS_DEFAULT_REGION environment variable is not defined');
+  }
+  const client = new AwsClient(region, baseUrl);
+
+  await deleteOlderThanMonths(client, event.months, false);
+}
 
 main(process.argv).catch(console.log)

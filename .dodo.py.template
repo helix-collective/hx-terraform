@@ -21,6 +21,7 @@ provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10
 
 local_lambda_zip_sources = HERE/'lambdas';
 lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
+lambda_es_tool = HERE/'typescript/hx-terraform/tools/es-tool.ts'
 
 tfplan = HERE / 'terraform/tfplan'
 
@@ -64,7 +65,7 @@ def expire_plan():
     tfplan.unlink()
 
 def task_lambda_zips():
-    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
+    for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*")) + [ lambda_es_tool ]):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         if f.suffix == '.py':
             yield lambdazip_file_task(zipfile, f)

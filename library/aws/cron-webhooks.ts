@@ -116,7 +116,11 @@ export function createCronWebhooks(
 export function scheduleExpression(schedule_type: ScheduleType): string {
   switch (schedule_type.kind) {
     case 'rate':
-      return `rate(${schedule_type.period} ${schedule_type.period_units})`;
+      let period_units: string = schedule_type.period_units;
+      if (schedule_type.period === 1 && period_units.endsWith('s')) {
+        period_units = period_units.substr(0, period_units.length - 1);
+      }
+      return `rate(${schedule_type.period} ${period_units})`;
     case 'cron':
       return `cron(${schedule_type.fields})`;
   }

@@ -5,7 +5,7 @@ import zipfile
 from datetime import date
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules, fileAge
-from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, lambdazip_pyfile_task, lambdazip_pydir_task
+from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, lambdazip_file_task, lambdazip_pydir_task
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -67,7 +67,9 @@ def task_lambda_zips():
     for f in (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*"))):
         zipfile = (HERE/'build/lambdas/'/f.stem).with_suffix('.zip')
         if f.suffix == '.py':
-            yield lambdazip_pyfile_task(zipfile, f)
+            yield lambdazip_file_task(zipfile, f)
+        elif f.suffix == '.ts':
+            yield lambdazip_file_task(zipfile, f)
         elif f.is_dir() and (f/'requirements.txt').is_file():
             yield lambdazip_pydir_task(zipfile, f)
 

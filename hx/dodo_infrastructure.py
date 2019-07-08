@@ -97,13 +97,13 @@ def update_deploytool(basedir):
         'verbosity': 2
     }
 
-def lambdazip_pyfile_task(zipfile, frompyfile):
-    "Task to create a lambda zipfile from a single python file"
+def lambdazip_file_task(zipfile, fromfile):
+    "Task to create a lambda zipfile from a single file"
     return {
-        'name': frompyfile.stem,
-        'doc' : 'Build a zip archive from a single python file for a lambda function',
-        'actions': [generate_zip(zipfile, [frompyfile])],
-        'file_dep': [frompyfile],
+        'name': fromfile.stem,
+        'doc' : 'Build a zip archive from a single file for a lambda function',
+        'actions': [generate_zip(zipfile, [fromfile])],
+        'file_dep': [fromfile],
         'targets': [zipfile],
     }
 

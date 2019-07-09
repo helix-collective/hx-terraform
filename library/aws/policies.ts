@@ -275,7 +275,7 @@ export function edModifyPolicy(
         {
           Effect: 'Allow',
           Action: ['es:*'],
-          Resource: `${esdomain.arn.value}`,
+          Resource: `${esdomain.arn.value}/*`,
         },
       ],
     },

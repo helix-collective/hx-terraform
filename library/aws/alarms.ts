@@ -1,8 +1,5 @@
 import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
-
-import { SharedResources } from './shared';
 
 // How to prepare alarms:
 //    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc
@@ -17,36 +14,18 @@ import { SharedResources } from './shared';
 //
 //  After creating - ensure that the alarm does not stay in state INSUFFICIENT_DATA for longer than reasonable.
 
-export function createUatScalingAlarms(
+export function createScalingAlarms(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  topic: AR.SnsTopic,
   autoscaling_group: AR.AutoscalingGroup,
   load_balancer: AR.Lb,
   target_group: AR.LbTargetGroup,
   hosts_alarm_threshold: number = 3
 ) {
-  createScalingHighCpuAlarm(tfgen, sr.alert_topic, autoscaling_group);
+  createScalingHighCpuAlarm(tfgen, topic, autoscaling_group);
   createScalingLowHostsAlarm(
     tfgen,
-    sr.alert_topic,
-    load_balancer,
-    target_group,
-    hosts_alarm_threshold
-  );
-}
-
-export function createProdScalingAlarms(
-  tfgen: TF.Generator,
-  sr: SharedResources,
-  autoscaling_group: AR.AutoscalingGroup,
-  load_balancer: AR.Lb,
-  target_group: AR.LbTargetGroup,
-  hosts_alarm_threshold: number = 3
-) {
-  createScalingHighCpuAlarm(tfgen, sr.alarm_topic, autoscaling_group);
-  createScalingLowHostsAlarm(
-    tfgen,
-    sr.alarm_topic,
+    topic,
     load_balancer,
     target_group,
     hosts_alarm_threshold
@@ -54,53 +33,28 @@ export function createProdScalingAlarms(
 }
 
 /**
- *  Create alarm resources on the given EC2 instance suitable for use in a Prod environment
+ *  Create alarm resources on the given EC2 instance
  */
-export function createProdAlarms(
+export function createEc2Alarms(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  topic: AR.SnsTopic,
   ec2: AR.Instance
 ) {
-  createHighCpuAlarm(tfgen, sr.alarm_topic, ec2);
-  createHighDiskAlarm(tfgen, sr.alarm_topic, ec2);
-  createHighMemAlarm(tfgen, sr.alarm_topic, ec2);
+  createEc2HighCpuAlarm(tfgen, topic, ec2);
+  createEc2HighDiskAlarm(tfgen, topic, ec2);
+  createEc2HighMemAlarm(tfgen, topic, ec2);
 }
 
 /**
- *  Create alarm resources on the given EC2 instance suitable for use in a UAT environment
+ *  Create alarm resources on the given RDS instance
  */
-export function createUatAlarms(
+export function createDbAlarms(
   tfgen: TF.Generator,
-  sr: SharedResources,
-  ec2: AR.Instance
-) {
-  createHighCpuAlarm(tfgen, sr.alert_topic, ec2);
-  createHighDiskAlarm(tfgen, sr.alert_topic, ec2);
-  createHighMemAlarm(tfgen, sr.alert_topic, ec2);
-}
-
-/**
- *  Create alarm resources on the given RDS instance suitable for use in a Prod environment
- */
-export function createProdDbAlarms(
-  tfgen: TF.Generator,
-  sr: SharedResources,
+  topic: AR.SnsTopic,
   db: AR.DbInstance
 ) {
-  createHighDbCpuAlarm(tfgen, sr.alarm_topic, db);
-  createLowDbSpaceAlarm(tfgen, sr.alarm_topic, db);
-}
-
-/**
- *  Create alarm resources on the given RDS instance suitable for use in a UAT environment
- */
-export function createUatDbAlarms(
-  tfgen: TF.Generator,
-  sr: SharedResources,
-  db: AR.DbInstance
-) {
-  createHighDbCpuAlarm(tfgen, sr.alert_topic, db);
-  createLowDbSpaceAlarm(tfgen, sr.alert_topic, db);
+  createHighDbCpuAlarm(tfgen, topic, db);
+  createLowDbSpaceAlarm(tfgen, topic, db);
 }
 
 export function createScalingHighCpuAlarm(
@@ -147,12 +101,12 @@ export function createScalingLowHostsAlarm(
     dimensions: {
       LoadBalancer: TF.rawExpr(
         `"\${replace("${
-          load_balancer.arn.value
+        load_balancer.arn.value
         }", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`
       ),
       TargetGroup: TF.rawExpr(
         `"\${replace("${
-          target_group.arn.value
+        target_group.arn.value
         }", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`
       ),
     },
@@ -161,7 +115,7 @@ export function createScalingLowHostsAlarm(
   });
 }
 
-export function createHighDiskAlarm(
+export function createEc2HighDiskAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   ec2: AR.Instance
@@ -186,7 +140,7 @@ export function createHighDiskAlarm(
   });
 }
 
-export function createHighCpuAlarm(
+export function createEc2HighCpuAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   ec2: AR.Instance
@@ -209,7 +163,7 @@ export function createHighCpuAlarm(
   });
 }
 
-export function createHighMemAlarm(
+export function createEc2HighMemAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   ec2: AR.Instance

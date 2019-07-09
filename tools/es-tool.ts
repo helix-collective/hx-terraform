@@ -274,7 +274,7 @@ interface CloudWatchEventInput {
   months: number
 };
 
-async function cronDelete(event: CloudWatchEventInput) {
+export async function cronDelete(event: CloudWatchEventInput) {
   const baseUrl = process.env['ES_ENDPOINT'];
   if (baseUrl === undefined) {
     throw new Error('ES_ENDPOINT environment variable is not defined');

@@ -15,6 +15,7 @@ import * as bootscript from '../bootscript';
 import * as util from '../util';
 import { SharedResources } from './shared';
 import * as docker from '../docker';
+import { scheduleExpression } from '../aws/cron-webhooks';
 
 export interface LoggingInfrastructureParams {
   secrets_s3_ref: s3.S3Ref;
@@ -23,7 +24,10 @@ export interface LoggingInfrastructureParams {
   customize?: util.Customize<AR.ElasticsearchDomainParams>;
   cognito?: LoggingCognitoParams;
   logging_ip_whitelist?: AT.IpAddress[];
+  log_cleanup?: LogCleanupMode;
 }
+
+export type LogCleanupMode = { kind: 'older_than_months', months: number };
 
 export interface LoggingCognitoParams {
   // The cognito user pool being given access to kibana
@@ -209,9 +213,80 @@ export function createLoggingInfrastructure(
       ),
   });
 
+  if (params.log_cleanup !== undefined) {
+    createLoggingCleanupLambda(tfgen, sr, {
+      ed,
+      months: params.log_cleanup.months
+    });
+  }
+
   return {
     aggregator_ipaddresses: log_aggregator_ips,
   };
+}
+
+interface LoggingCleanupLambdaParams {
+  months: number;
+  ed: AR.ElasticsearchDomain;
+}
+
+function createLoggingCleanupLambda(
+  tfgen: TF.Generator,
+  sr: SharedResources,
+  params: LoggingCleanupLambdaParams
+) {
+
+  const name = 'logging_cleanup';
+
+  // Construct a lambda function that will be called at each periodic event.
+  // All lambdas need a role to be able to write logs to Cloudwatch.
+  // This lambda needs read/write access to the elastisearch instance
+  const role = roles.createIamRoleWithPolicies(tfgen, name, [
+    policies.putAnyLogsPolicy('lambdalogs'),
+    policies.edModifyPolicy('lambdaelasticsearch', params.ed),
+  ]);
+
+  // The lambda function will have already been packed (by doit) into
+  // the zipfile before terraform is run. (The lambda function will be updated
+  // whenever the hash of the zipfile changes).
+  const runtime: AT.LambdaRuntime = AT.nodejs_8_10;
+  const handler: string = 'es-tool.cronDelete';
+  const zipfile: string = '../build/lambdas/es-tool.zip';
+  const lambda = AR.createLambdaFunction(tfgen, name, {
+    runtime,
+    handler,
+    function_name: tfgen.scopedName(name).join('_'),
+    role: role.arn,
+    filename: zipfile,
+    source_code_hash: TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`),
+    tags: tfgen.tagsContext(),
+    environment: {
+      variables: {
+        ES_ENDPOINT: params.ed.endpoint,
+      }
+    }
+  });
+
+  // Setup cloudwatch to call the lambda function
+  const event_rule = AR.createCloudwatchEventRule(tfgen, name, {
+    name: tfgen.scopedName(name).join('_'),
+    schedule_expression: scheduleExpression({kind:'rate', period: 1, period_units: 'days'}),
+  });
+
+  AR.createCloudwatchEventTarget(tfgen, name, {
+    rule: event_rule.name,
+    arn: lambda.arn,
+    input: JSON.stringify({
+      months: params.months,
+    }),
+  });
+
+  AR.createLambdaPermission(tfgen, name, {
+    action: AT.lambda_InvokeFunction,
+    function_name: lambda.function_name,
+    principal: 'events.amazonaws.com',
+    source_arn: event_rule.arn,
+  });
 }
 
 interface CognitoResourceParams {

@@ -816,6 +816,128 @@ const launch_configuration: RecordDecl = {
   ],
 };
 
+const launch_template_iam_instance_profile: RecordDecl = {
+  name: 'launch_template_iam_instance_profile',
+  fields: [requiredField('arn', arnType(iam_instance_profile))],
+};
+
+const launch_template_network_interfaces: RecordDecl = {
+  name: 'launch_template_network_interfaces',
+  fields: [
+    /*
+    delete_on_termination - Whether the network interface should be destroyed on instance termination.
+    description - Description of the network interface.
+    device_index - The integer index of the network interface attachment.
+    ipv6_addresses - One or more specific IPv6 addresses from the IPv6 CIDR block range of your subnet. Conflicts with ipv6_address_count
+    ipv6_address_count - The number of IPv6 addresses to assign to a network interface. Conflicts with ipv6_addresses
+    network_interface_id - The ID of the network interface to attach.
+    private_ip_address - The primary private IPv4 address.
+    ipv4_address_count - The number of secondary private IPv4 addresses to assign to a network interface. Conflicts with ipv4_address_count
+    ipv4_addresses - One or more private IPv4 addresses to associate. Conflicts with ipv4_addresses
+    subnet_id - The VPC Subnet ID to associate.
+    */
+    optionalField('associate_public_ip_address', BOOLEAN),
+    optionalField(
+      'security_groups',
+      listType(resourceIdType('SecurityGroupId'))
+    ),
+  ],
+};
+
+const launch_template_block_device_mappings_ebs: RecordDecl = {
+  name: 'launch_template_block_device_mappings_ebs',
+  fields: [
+    /*
+    delete_on_termination - Whether the volume should be destroyed on instance termination (Default: true).
+    encrypted - Enables EBS encryption on the volume (Default: false). Cannot be used with snapshot_id.
+    iops - The amount of provisioned IOPS. This must be set with a volume_type of "io1".
+    kms_key_id - AWS Key Management Service (AWS KMS) customer master key (CMK) to use when creating the encrypted volume. encrypted must be set to true when this is set.
+    snapshot_id - The Snapshot ID to mount.
+    */
+
+    optionalField('volume_type', enumType(['standard', 'gp2', 'io1'])),
+    optionalField('volume_size', NUMBER),
+  ],
+};
+
+const launch_template_block_device_mappings: RecordDecl = {
+  name: 'launch_template_block_device_mappings',
+  fields: [
+    //device_name - The name of the device to mount.
+    //ebs - Configure EBS volume properties.
+    //no_device - Suppresses the specified device included in the AMI's block device mapping.
+    //virtual_name - The Instance Store Device Name (e.g. "ephemeral0").
+
+    optionalField('ebs', recordType(launch_template_block_device_mappings_ebs)),
+  ],
+};
+
+const launch_template: RecordDecl = {
+  name: 'launch_template',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    requiredField('image_id', stringAliasType('AT.Ami')),
+    requiredField('instance_type', stringAliasType('AT.InstanceType')),
+    optionalField(
+      'iam_instance_profile',
+      recordType(launch_template_iam_instance_profile)
+    ),
+    optionalField('key_name', stringAliasType('AT.KeyName')),
+    optionalField(
+      'network_interfaces',
+      recordType(launch_template_network_interfaces)
+    ),
+    optionalField('user_data', STRING),
+    optionalField('enable_monitoring', BOOLEAN),
+
+    optionalField('ebs_optimized', BOOLEAN),
+    optionalField(
+      'block_device_mappings',
+      recordType(launch_template_block_device_mappings)
+    ),
+  ],
+};
+
+// https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#mixed_instances_policy-launch_template-launch_template_specification
+const mixed_instances_policy_launch_template_specification: RecordDecl = {
+  name: 'mixed_instances_policy_launch_template_specification',
+  fields: [
+    requiredField('launch_template_id', resourceIdType('LaunchTemplateId')),
+  ],
+};
+
+// https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#mixed_instances_policy-launch_template-override
+const mixed_instances_policy_launch_template_override: RecordDecl = {
+  name: 'mixed_instances_policy_launch_template_override',
+  fields: [requiredField('instance_type', stringAliasType('AT.InstanceType'))],
+};
+
+const mixed_instances_policy_launch_template: RecordDecl = {
+  name: 'mixed_instances_policy_launch_template',
+  fields: [
+    requiredField(
+      'launch_template_specification',
+      recordType(mixed_instances_policy_launch_template_specification)
+    ),
+    optionalField(
+      'override',
+      listType(recordType(mixed_instances_policy_launch_template_override))
+    ),
+  ],
+};
+
+const mixed_instances_policy: RecordDecl = {
+  name: 'mixed_instances_policy',
+  fields: [
+    // optionalField instances_distribution
+    requiredField(
+      'launch_template',
+      recordType(mixed_instances_policy_launch_template)
+    ),
+  ],
+};
+
 // https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#tag-and-tags
 const autoscaling_group_tag: RecordDecl = {
   name: 'autoscaling_group_tag',
@@ -840,6 +962,11 @@ const autoscaling_schedule: RecordDecl = {
   ],
 };
 
+const autoscaling_group_launch_template: RecordDecl = {
+  name: 'autoscaling_group_launch_template',
+  fields: [requiredField('id', resourceIdType('LaunchTemplateId'))],
+};
+
 const autoscaling_group: RecordDecl = {
   name: 'autoscaling_group',
   fields: [
@@ -850,7 +977,14 @@ const autoscaling_group: RecordDecl = {
     requiredField('max_size', NUMBER),
     optionalField('vpc_zone_identifier', listType(resourceIdType('SubnetId'))),
 
-    requiredField('launch_configuration', STRING), // launch_configuration.name
+    // one of:
+    optionalField('launch_configuration', STRING), // launch_configuration.name
+    optionalField(
+      'launch_template',
+      recordType(autoscaling_group_launch_template)
+    ),
+    optionalField('mixed_instances_policy', recordType(mixed_instances_policy)),
+
     optionalField('load_balancers', listType(STRING)),
     optionalField(
       'enabled_metrics',
@@ -2392,6 +2526,20 @@ function generateAws(gen: Generator) {
     []
   );
 
+  gen.generateResource(
+    'Provides an launch_template resource.',
+    'https://www.terraform.io/docs/providers/aws/r/launch_template.html',
+    launch_template,
+    [
+      resourceIdAttr('id', launch_template),
+      // default_version - The default version of the launch template
+      // latest_version - The latest version of the launch template.
+    ],
+    {
+      arn: true,
+    }
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -2527,6 +2675,17 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_identity_pool);
   gen.generateParams(cognito_identity_pool_roles_attachment);
   gen.generateParams(cognito_identity_pool_roles_attachment_roles);
+  gen.generateParams(mixed_instances_policy_launch_template_override);
+  gen.generateParams(mixed_instances_policy_launch_template_specification);
+  gen.generateParams(mixed_instances_policy_launch_template);
+  gen.generateParams(mixed_instances_policy);
+  gen.generateParams(launch_template);
+  gen.generateParams(autoscaling_group_launch_template);
+
+  gen.generateParams(launch_template_iam_instance_profile);
+  gen.generateParams(launch_template_network_interfaces);
+  gen.generateParams(launch_template_block_device_mappings_ebs);
+  gen.generateParams(launch_template_block_device_mappings);
 }
 
 function generateRandom(gen: Generator) {

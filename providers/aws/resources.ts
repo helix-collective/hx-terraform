@@ -1978,6 +1978,32 @@ export interface CognitoIdentityPoolRolesAttachment extends TF.ResourceT<'Cognit
 
 export type CognitoIdentityPoolRolesAttachmentId = {type:'CognitoIdentityPoolRolesAttachmentId',value:string};
 
+/**
+ *  Provides an launch_template resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/launch_template.html
+ */
+export function createLaunchTemplate(tfgen: TF.Generator, rname: string, params: LaunchTemplateParams): LaunchTemplate {
+  const fields = fieldsFromLaunchTemplateParams(params);
+  const resource = tfgen.createTypedResource('LaunchTemplate', 'aws_launch_template', rname, fields);
+  const id: LaunchTemplateId =  {type: 'LaunchTemplateId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: LaunchTemplateArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LaunchTemplate');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface LaunchTemplate extends TF.ResourceT<'LaunchTemplate'> {
+  id: LaunchTemplateId;
+  arn: LaunchTemplateArn;
+}
+
+export type LaunchTemplateId = {type:'LaunchTemplateId',value:string};
+export type LaunchTemplateArn = AT.ArnT<"LaunchTemplate">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -1999,7 +2025,9 @@ export interface AutoscalingGroupParams {
   desired_capacity?: number;
   max_size: number;
   vpc_zone_identifier?: (SubnetId)[];
-  launch_configuration: string;
+  launch_configuration?: string;
+  launch_template?: AutoscalingGroupLaunchTemplateParams;
+  mixed_instances_policy?: MixedInstancesPolicyParams;
   load_balancers?: (string)[];
   enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
   tags?: (AutoscalingGroupTagParams)[];
@@ -2013,7 +2041,9 @@ export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams)
   TF.addOptionalField(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
   TF.addField(fields, "max_size", params.max_size, TF.numberValue);
   TF.addOptionalField(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
-  TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
+  TF.addOptionalField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
+  TF.addOptionalField(fields, "launch_template", params.launch_template, (v) => TF.mapValue(fieldsFromAutoscalingGroupLaunchTemplateParams(v)));
+  TF.addOptionalField(fields, "mixed_instances_policy", params.mixed_instances_policy, (v) => TF.mapValue(fieldsFromMixedInstancesPolicyParams(v)));
   TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
@@ -4213,5 +4243,131 @@ export function fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(params: 
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "authenticated", params.authenticated, TF.resourceArnValue);
   TF.addOptionalField(fields, "unauthenticated", params.unauthenticated, TF.resourceArnValue);
+  return fields;
+}
+
+export interface MixedInstancesPolicyLaunchTemplateOverrideParams {
+  instance_type: AT.InstanceType;
+}
+
+export function fieldsFromMixedInstancesPolicyLaunchTemplateOverrideParams(params: MixedInstancesPolicyLaunchTemplateOverrideParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  return fields;
+}
+
+export interface MixedInstancesPolicyLaunchTemplateSpecificationParams {
+  launch_template_id: LaunchTemplateId;
+}
+
+export function fieldsFromMixedInstancesPolicyLaunchTemplateSpecificationParams(params: MixedInstancesPolicyLaunchTemplateSpecificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "launch_template_id", params.launch_template_id, TF.resourceIdValue);
+  return fields;
+}
+
+export interface MixedInstancesPolicyLaunchTemplateParams {
+  launch_template_specification: MixedInstancesPolicyLaunchTemplateSpecificationParams;
+  override?: (MixedInstancesPolicyLaunchTemplateOverrideParams)[];
+}
+
+export function fieldsFromMixedInstancesPolicyLaunchTemplateParams(params: MixedInstancesPolicyLaunchTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "launch_template_specification", params.launch_template_specification, (v) => TF.mapValue(fieldsFromMixedInstancesPolicyLaunchTemplateSpecificationParams(v)));
+  TF.addOptionalField(fields, "override", params.override, TF.listValue((v) => TF.mapValue(fieldsFromMixedInstancesPolicyLaunchTemplateOverrideParams(v))));
+  return fields;
+}
+
+export interface MixedInstancesPolicyParams {
+  launch_template: MixedInstancesPolicyLaunchTemplateParams;
+}
+
+export function fieldsFromMixedInstancesPolicyParams(params: MixedInstancesPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "launch_template", params.launch_template, (v) => TF.mapValue(fieldsFromMixedInstancesPolicyLaunchTemplateParams(v)));
+  return fields;
+}
+
+export interface LaunchTemplateParams {
+  name?: string;
+  name_prefix?: string;
+  image_id: AT.Ami;
+  instance_type: AT.InstanceType;
+  iam_instance_profile?: LaunchTemplateIamInstanceProfileParams;
+  key_name?: AT.KeyName;
+  network_interfaces?: LaunchTemplateNetworkInterfacesParams;
+  user_data?: string;
+  enable_monitoring?: boolean;
+  ebs_optimized?: boolean;
+  block_device_mappings?: LaunchTemplateBlockDeviceMappingsParams;
+}
+
+export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addField(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, (v) => TF.mapValue(fieldsFromLaunchTemplateIamInstanceProfileParams(v)));
+  TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
+  TF.addOptionalField(fields, "network_interfaces", params.network_interfaces, (v) => TF.mapValue(fieldsFromLaunchTemplateNetworkInterfacesParams(v)));
+  TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
+  TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
+  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
+  TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsParams(v)));
+  return fields;
+}
+
+export interface AutoscalingGroupLaunchTemplateParams {
+  id: LaunchTemplateId;
+}
+
+export function fieldsFromAutoscalingGroupLaunchTemplateParams(params: AutoscalingGroupLaunchTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "id", params.id, TF.resourceIdValue);
+  return fields;
+}
+
+export interface LaunchTemplateIamInstanceProfileParams {
+  arn: AT.ArnT<"IamInstanceProfile">;
+}
+
+export function fieldsFromLaunchTemplateIamInstanceProfileParams(params: LaunchTemplateIamInstanceProfileParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "arn", params.arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface LaunchTemplateNetworkInterfacesParams {
+  associate_public_ip_address?: boolean;
+  security_groups?: (SecurityGroupId)[];
+}
+
+export function fieldsFromLaunchTemplateNetworkInterfacesParams(params: LaunchTemplateNetworkInterfacesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
+  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
+export interface LaunchTemplateBlockDeviceMappingsEbsParams {
+  volume_type?: 'standard' | 'gp2' | 'io1';
+  volume_size?: number;
+}
+
+export function fieldsFromLaunchTemplateBlockDeviceMappingsEbsParams(params: LaunchTemplateBlockDeviceMappingsEbsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
+  return fields;
+}
+
+export interface LaunchTemplateBlockDeviceMappingsParams {
+  ebs?: LaunchTemplateBlockDeviceMappingsEbsParams;
+}
+
+export function fieldsFromLaunchTemplateBlockDeviceMappingsParams(params: LaunchTemplateBlockDeviceMappingsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "ebs", params.ebs, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsEbsParams(v)));
   return fields;
 }

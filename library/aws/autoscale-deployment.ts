@@ -58,6 +58,7 @@ export function createAutoscaleDeployment(
     autoscaling_group: appserverAutoScaleGroup,
     target_group: appserverLoadBalancer.target_group,
     load_balancer: appserverLoadBalancer.load_balancer,
+    lb_https_listener: appserverLoadBalancer.lb_https_listener,
   };
 }
 
@@ -105,6 +106,7 @@ export function createAutoscaleFrontend(
       autoscaling_group: appserverAutoScaleGroup,
       target_group: appserverLoadBalancer.target_group,
       load_balancer: appserverLoadBalancer.load_balancer,
+      lb_https_listener: appserverLoadBalancer.lb_https_listener,
     };
   });
 }
@@ -312,6 +314,7 @@ function createProcessorAutoScaleGroup(
 export type LoadBalancerResources = {
   load_balancer: AR.Lb;
   target_group: AR.LbTargetGroup;
+  lb_https_listener: AR.LbListener;
 };
 
 function createAppserverLoadBalancer(
@@ -409,6 +412,7 @@ function createAppserverLoadBalancer(
   return {
     load_balancer: alb,
     target_group: alb_target_group,
+    lb_https_listener: alb_https_listener,
   };
 }
 
@@ -676,6 +680,7 @@ interface AutoscaleDeployment {
   autoscaling_group: AR.AutoscalingGroup;
   target_group: AR.LbTargetGroup;
   load_balancer: AR.Lb;
+  lb_https_listener: AR.LbListener;
 }
 
 /**

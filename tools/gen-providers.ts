@@ -852,10 +852,21 @@ const autoscaling_group: RecordDecl = {
 
     requiredField('launch_configuration', STRING), // launch_configuration.name
     optionalField('load_balancers', listType(STRING)),
-    optionalField('enabled_metrics', listType(enumType([
-      "GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances",
-      "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"
-    ]))),
+    optionalField(
+      'enabled_metrics',
+      listType(
+        enumType([
+          'GroupMinSize',
+          'GroupMaxSize',
+          'GroupDesiredCapacity',
+          'GroupInServiceInstances',
+          'GroupPendingInstances',
+          'GroupStandbyInstances',
+          'GroupTerminatingInstances',
+          'GroupTotalInstances',
+        ])
+      )
+    ),
 
     optionalField('tags', listType(recordType(autoscaling_group_tag))),
   ],
@@ -1468,14 +1479,17 @@ const cognito_invite_message_template: RecordDecl = {
     optionalField('email_message', STRING),
     optionalField('email_subject', STRING),
     optionalField('sms_message', STRING),
-  ]
+  ],
 };
 
 const cognito_admin_create_users: RecordDecl = {
   name: 'cognito_admin_create_users',
   fields: [
     optionalField('allow_admin_create_user_only', BOOLEAN),
-    optionalField('invite_message_template', recordType(cognito_invite_message_template)),
+    optionalField(
+      'invite_message_template',
+      recordType(cognito_invite_message_template)
+    ),
     optionalField('unused_account_Validity_days', NUMBER),
   ],
 };
@@ -1485,7 +1499,7 @@ const cognito_schema_string_attribute_constraints: RecordDecl = {
   fields: [
     optionalField('min_length', NUMBER),
     optionalField('max_length', NUMBER),
-  ]
+  ],
 };
 
 const cognito_schema_number_attribute_constraints: RecordDecl = {
@@ -1493,35 +1507,53 @@ const cognito_schema_number_attribute_constraints: RecordDecl = {
   fields: [
     optionalField('min_value', NUMBER),
     optionalField('max_value', NUMBER),
-  ]
+  ],
 };
 
 const cognito_schema_attributes: RecordDecl = {
   name: 'cognito_schema_attributes',
   fields: [
     requiredField('name', STRING),
-    requiredField('attribute_data_type', enumType(['Boolean','Number', 'String', 'DateTime'])),
+    requiredField(
+      'attribute_data_type',
+      enumType(['Boolean', 'Number', 'String', 'DateTime'])
+    ),
     optionalField('developer_only_attribute', BOOLEAN),
-    optionalField('string_attribute_constraints', recordType(cognito_schema_string_attribute_constraints)),
-    optionalField('number_attribute_constraints', recordType(cognito_schema_number_attribute_constraints)),
+    optionalField(
+      'string_attribute_constraints',
+      recordType(cognito_schema_string_attribute_constraints)
+    ),
+    optionalField(
+      'number_attribute_constraints',
+      recordType(cognito_schema_number_attribute_constraints)
+    ),
     optionalField('mutable', BOOLEAN),
     optionalField('required', BOOLEAN),
-  ]
+  ],
 };
 
 const cognito_user_pool: RecordDecl = {
   name: 'cognito_user_pool',
   fields: [
     requiredField('name', STRING),
-    optionalField('admin_create_user_config', recordType(cognito_admin_create_users)),
-    optionalField('auto_verified_attributes', listType(enumType(['email','phone_number']))),
+    optionalField(
+      'admin_create_user_config',
+      recordType(cognito_admin_create_users)
+    ),
+    optionalField(
+      'auto_verified_attributes',
+      listType(enumType(['email', 'phone_number']))
+    ),
     optionalField('schema', listType(recordType(cognito_schema_attributes))),
-    optionalField('username_attributes', listType(enumType(['email','phone_number']))),
+    optionalField(
+      'username_attributes',
+      listType(enumType(['email', 'phone_number']))
+    ),
     optionalField('sms_authentication_message', STRING),
     optionalField('sms_verification_message', STRING),
     optionalField('tags', TAGS_MAP),
     // TODO(timd): complete
-  ]
+  ],
 };
 
 const cognito_user_pool_client: RecordDecl = {
@@ -1531,13 +1563,27 @@ const cognito_user_pool_client: RecordDecl = {
     requiredField('user_pool_id', resourceIdType('CognitoUserPoolId')),
     optionalField('read_attributes', listType(STRING)),
     optionalField('write_attributes', listType(STRING)),
-    optionalField('allowed_oauth_flows', listType(enumType(['code', 'implicit', 'client_credentials']))),
+    optionalField(
+      'allowed_oauth_flows',
+      listType(enumType(['code', 'implicit', 'client_credentials']))
+    ),
     optionalField('allowed_oauth_flows_user_pool_client', BOOLEAN),
-    optionalField('allowed_oauth_scopes', listType(enumType(['phone', 'email', 'openid', 'profile', 'aws.cognito.signin.user.admin' ]))),
+    optionalField(
+      'allowed_oauth_scopes',
+      listType(
+        enumType([
+          'phone',
+          'email',
+          'openid',
+          'profile',
+          'aws.cognito.signin.user.admin',
+        ])
+      )
+    ),
     optionalField('callback_urls', listType(STRING)),
     optionalField('logout_urls', listType(STRING)),
     optionalField('supported_identity_providers', listType(STRING)),
-  ]
+  ],
 };
 
 const cognito_user_pool_domain: RecordDecl = {
@@ -1546,7 +1592,7 @@ const cognito_user_pool_domain: RecordDecl = {
     requiredField('domain', STRING),
     requiredField('user_pool_id', resourceIdType('CognitoUserPoolId')),
     optionalField('certificate_arn', arnType(acm_certificate)),
-  ]
+  ],
 };
 
 const cognito_identity_provider: RecordDecl = {
@@ -1555,7 +1601,7 @@ const cognito_identity_provider: RecordDecl = {
     optionalField('client_id', resourceIdType('CognitoUserPoolId')),
     optionalField('provider_name', STRING),
     optionalField('server_side_token_check', BOOLEAN),
-  ]
+  ],
 };
 
 const cognito_identity_pool: RecordDecl = {
@@ -1563,9 +1609,12 @@ const cognito_identity_pool: RecordDecl = {
   fields: [
     requiredField('identity_pool_name', STRING),
     requiredField('allow_unauthenticated_identities', BOOLEAN),
-    optionalField('cognito_identity_providers', listType(recordType(cognito_identity_provider))),
+    optionalField(
+      'cognito_identity_providers',
+      listType(recordType(cognito_identity_provider))
+    ),
     // TODO(timd): complete
-  ]
+  ],
 };
 
 const cognito_identity_pool_roles_attachment_roles: RecordDecl = {
@@ -1574,15 +1623,18 @@ const cognito_identity_pool_roles_attachment_roles: RecordDecl = {
     optionalField('authenticated', arnType(iam_role)),
     optionalField('unauthenticated', arnType(iam_role)),
   ],
-}
+};
 
 const cognito_identity_pool_roles_attachment: RecordDecl = {
   name: 'cognito_identity_pool_roles_attachment',
   fields: [
     requiredField('identity_pool_id', resourceIdType('CognitoIdentityPoolId')),
-    requiredField('roles', recordType(cognito_identity_pool_roles_attachment_roles)),
+    requiredField(
+      'roles',
+      recordType(cognito_identity_pool_roles_attachment_roles)
+    ),
   ],
-}
+};
 
 function generateAws(gen: Generator) {
   // Generate the resources
@@ -2300,10 +2352,7 @@ function generateAws(gen: Generator) {
     'Provides a Cognito User Pool resource.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_user_pool.html',
     cognito_user_pool,
-    [
-      resourceIdAttr('id', cognito_user_pool),
-      stringAttr('endpoint'),
-    ],
+    [resourceIdAttr('id', cognito_user_pool), stringAttr('endpoint')],
     {
       arn: true,
     }
@@ -2313,10 +2362,7 @@ function generateAws(gen: Generator) {
     'Provides a Cognito User Pool Client resource.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_user_pool_client.html',
     cognito_user_pool_client,
-    [
-      resourceIdAttr('id', cognito_user_pool),
-      stringAttr('client_secret')
-    ],
+    [resourceIdAttr('id', cognito_user_pool), stringAttr('client_secret')],
     {
       arn: true,
     }
@@ -2326,17 +2372,14 @@ function generateAws(gen: Generator) {
     'Provides a Cognito User Pool Domain resource.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_user_pool_domain.html',
     cognito_user_pool_domain,
-    [
-    ],
+    []
   );
 
   gen.generateResource(
     'Provides an AWS Cognito Identity Pool.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool.html',
     cognito_identity_pool,
-    [
-      resourceIdAttr('id', cognito_identity_pool),
-    ],
+    [resourceIdAttr('id', cognito_identity_pool)],
     {
       arn: true,
     }
@@ -2346,9 +2389,8 @@ function generateAws(gen: Generator) {
     'Provides an AWS Cognito Identity Pool Roles Attachment.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool_roles_attachment.html',
     cognito_identity_pool_roles_attachment,
-    [
-    ]
-    );
+    []
+  );
 
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
@@ -2476,8 +2518,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_invite_message_template);
   gen.generateParams(cognito_admin_create_users);
   gen.generateParams(cognito_schema_attributes);
-  gen.generateParams(cognito_schema_string_attribute_constraints),
-  gen.generateParams(cognito_schema_number_attribute_constraints),
+  gen.generateParams(cognito_schema_string_attribute_constraints);
+  gen.generateParams(cognito_schema_number_attribute_constraints);
   gen.generateParams(cognito_user_pool);
   gen.generateParams(cognito_user_pool_client);
   gen.generateParams(cognito_user_pool_domain);

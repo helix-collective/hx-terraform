@@ -38,7 +38,13 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleDeploymentParams
 ): AutoscaleDeployment {
-  const controller = createController(tfgen, "controller", sr, params, params.endpoints);
+  const controller = createController(
+    tfgen,
+    'controller',
+    sr,
+    params,
+    params.endpoints
+  );
   const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
     tfgen,
     'appserver',
@@ -292,10 +298,7 @@ function createProcessorAutoScaleGroup(
     max_size: params.max_size === undefined ? 1 : params.max_size,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
     launch_configuration: launch_config.name,
-    enabled_metrics: [
-      'GroupInServiceInstances',
-      'GroupDesiredCapacity',
-    ],
+    enabled_metrics: ['GroupInServiceInstances', 'GroupDesiredCapacity'],
     tags: Object.entries(contextTagsWithName(tfgen, name)).map(
       ([key, value]) => {
         // note that tag and tags parameters appear to have the same function

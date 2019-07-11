@@ -265,39 +265,119 @@ function createProcessorAutoScaleGroup(
     appserver_iampolicies
   );
 
-  const launch_config_params = {
-    name_prefix: tfgen.scopedName(name).join('-') + '-',
-    key_name: params.key_name,
-    image_id: params.appserver_amis
-      ? params.appserver_amis(sr.network.region)
-      : getDefaultAmi(sr.network.region),
-    instance_type: params.appserver_instance_type,
-    iam_instance_profile: appserver_instance_profile.id,
-    security_groups: [sr.appserver_security_group.id],
-    user_data: bs.compile(),
-    root_block_device: {
-      volume_size: 20,
-    },
-  };
+  // Prepare for one of the possible launch methods to be destructured into AutoscalingGroupParams:
+  let launch_method:
+    | {
+        launch_configuration: string;
+      }
+    | {
+        launch_template: AR.AutoscalingGroupLaunchTemplateParams;
+      }
+    | {
+        mixed_instances_policy: AR.MixedInstancesPolicyParams;
+      }
+    | null = null;
 
-  if (params.customize_launch_config) {
-    params.customize_launch_config(launch_config_params);
+  // in future: switch default over to using aws_launch_template
+  const default_customize_launch:
+    | CustomizeLaunchConfig
+    | CustomizeLaunchTemplate = customizeLaunchConfig(() => {});
+
+  const customize_launch: CustomizeLaunchConfig | CustomizeLaunchTemplate =
+    params.customize_launch || default_customize_launch;
+
+  if (
+    customize_launch &&
+    customize_launch.kind === 'customize_launch_template'
+  ) {
+    /// Build aws_launch_template:
+    const launch_template_params: AR.LaunchTemplateParams = {
+      name_prefix: tfgen.scopedName(name).join('-') + '-',
+      key_name: params.key_name,
+      image_id: params.appserver_amis
+        ? params.appserver_amis(sr.network.region)
+        : getDefaultAmi(sr.network.region),
+      instance_type: params.appserver_instance_type,
+      iam_instance_profile: {
+        arn: appserver_instance_profile.arn,
+      },
+      network_interfaces: {
+        security_groups: [sr.appserver_security_group.id],
+      },
+      block_device_mappings: {
+        ebs: {
+          volume_size: 20,
+        },
+      },
+      user_data: bs.compile(),
+    };
+
+    if (customize_launch.customize) {
+      customize_launch.customize(launch_template_params);
+    }
+
+    const launch_template = AR.createLaunchTemplate(
+      tfgen,
+      name,
+      launch_template_params
+    );
+
+    tfgen.createBeforeDestroy(launch_template, true);
+
+    if (customize_launch.mixed_instance_types !== undefined) {
+      /// Support autoscale group mixed instances policy.
+      const mixed_instances_policy: AR.MixedInstancesPolicyParams = {
+        launch_template: {
+          launch_template_specification: {
+            launch_template_id: launch_template.id,
+          },
+          override: customize_launch.mixed_instance_types.map(x => {
+            return { instance_type: x };
+          }),
+        },
+      };
+      launch_method = { mixed_instances_policy };
+    } else {
+      launch_method = { launch_template };
+    }
+  } else {
+    const launch_config_params = {
+      name_prefix: tfgen.scopedName(name).join('-') + '-',
+      key_name: params.key_name,
+      image_id: params.appserver_amis
+        ? params.appserver_amis(sr.network.region)
+        : getDefaultAmi(sr.network.region),
+      instance_type: params.appserver_instance_type,
+      iam_instance_profile: appserver_instance_profile.id,
+      security_groups: [sr.appserver_security_group.id],
+      user_data: bs.compile(),
+      root_block_device: {
+        volume_size: 20,
+      },
+    };
+
+    if (customize_launch.customize) {
+      customize_launch.customize(launch_config_params);
+    }
+
+    const launch_config = AR.createLaunchConfiguration(
+      tfgen,
+      name,
+      launch_config_params
+    );
+
+    tfgen.createBeforeDestroy(launch_config, true);
+
+    const launch_configuration = launch_config.name;
+    launch_method = { launch_configuration };
   }
 
-  const launch_config = AR.createLaunchConfiguration(
-    tfgen,
-    name,
-    launch_config_params
-  );
-
-  tfgen.createBeforeDestroy(launch_config, true);
-
   const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, {
+    ...launch_method,
     name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
-    launch_configuration: launch_config.name,
     enabled_metrics: ['GroupInServiceInstances', 'GroupDesiredCapacity'],
     tags: Object.entries(contextTagsWithName(tfgen, name)).map(
       ([key, value]) => {
@@ -559,6 +639,45 @@ function deployToolEndpoints(
 
 type SubnetId = { type: 'SubnetId'; value: string };
 
+// Union type for customize_launch:  Either customize launch config (original way)  or customize launch template (updated way including mixed_instance_types option)
+export type CustomizeLaunchMethod =
+  | CustomizeLaunchConfig
+  | CustomizeLaunchTemplate;
+
+export type CustomizeLaunchConfig = {
+  kind: 'customize_launch_config';
+  customize?: Customize<AR.LaunchConfigurationParams>;
+};
+
+/** Customize the launch template: Supports a customize function on LaunchTemplateParams.
+  as well as a list of instance types that become mixed instance types in an autoscale group.
+*/
+export type CustomizeLaunchTemplate = {
+  kind: 'customize_launch_template';
+  customize?: Customize<AR.LaunchTemplateParams>;
+  mixed_instance_types?: AT.InstanceType[];
+};
+
+export function customizeLaunchConfig(
+  customize: Customize<AR.LaunchConfigurationParams>
+): CustomizeLaunchConfig {
+  return {
+    kind: 'customize_launch_config',
+    customize,
+  };
+}
+
+export function customizeLaunchTemplate(
+  customize: Customize<AR.LaunchTemplateParams>,
+  mixed_instance_types: AT.InstanceType[] = []
+): CustomizeLaunchTemplate {
+  return {
+    kind: 'customize_launch_template',
+    mixed_instance_types,
+    customize: customize,
+  };
+}
+
 interface AutoscaleProcessorParams {
   /**
    * The AWS keyname used for the EC2 instance.
@@ -651,9 +770,9 @@ interface AutoscaleProcessorParams {
   docker_config?: docker.DockerConfig;
 
   /**
-   * Customize the launch configuration
+   * Customize the launch configuration / launch template:
    */
-  customize_launch_config?: Customize<AR.LaunchConfigurationParams>;
+  customize_launch?: CustomizeLaunchMethod;
 }
 
 interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {

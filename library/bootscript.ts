@@ -246,6 +246,11 @@ export class BootScript {
     lines = lines.concat(this.script_lines);
     return lines.join('\n');
   }
+
+  base64() : string {
+    /// TODO: use terraform's base64encode so that the .tf file's contain mostly human readable userdata.
+    return Buffer.from(this.compile()).toString('base64')
+  }
 }
 
 interface CloudwatchMetricsParams {

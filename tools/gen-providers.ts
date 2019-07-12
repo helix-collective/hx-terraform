@@ -867,8 +867,11 @@ const launch_template_block_device_mappings: RecordDecl = {
     //ebs - Configure EBS volume properties.
     //no_device - Suppresses the specified device included in the AMI's block device mapping.
     //virtual_name - The Instance Store Device Name (e.g. "ephemeral0").
+    
+    // https://stackoverflow.com/questions/52875487/terraform-aws-override-root-device-size-using-aws-launch-template-and-block-dev
 
-    optionalField('ebs', recordType(launch_template_block_device_mappings_ebs)),
+    requiredField('device_name', STRING),
+    requiredField('ebs', recordType(launch_template_block_device_mappings_ebs)),
   ],
 };
 
@@ -886,7 +889,7 @@ const launch_template: RecordDecl = {
     optionalField('key_name', stringAliasType('AT.KeyName')),
     optionalField(
       'network_interfaces',
-      recordType(launch_template_network_interfaces)
+      listType(recordType(launch_template_network_interfaces))
     ),
     optionalField('user_data', STRING),
     optionalField('enable_monitoring', BOOLEAN),
@@ -894,7 +897,7 @@ const launch_template: RecordDecl = {
     optionalField('ebs_optimized', BOOLEAN),
     optionalField(
       'block_device_mappings',
-      recordType(launch_template_block_device_mappings)
+      listType(recordType(launch_template_block_device_mappings))
     ),
   ],
 };

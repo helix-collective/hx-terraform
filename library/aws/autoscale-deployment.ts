@@ -301,15 +301,16 @@ function createProcessorAutoScaleGroup(
       iam_instance_profile: {
         arn: appserver_instance_profile.arn,
       },
-      network_interfaces: {
+      network_interfaces: [{
         security_groups: [sr.appserver_security_group.id],
-      },
-      block_device_mappings: {
+      }],
+      block_device_mappings: [{
+        device_name:"/dev/sda1",
         ebs: {
           volume_size: 20,
         },
-      },
-      user_data: bs.compile(),
+      }],
+      user_data: bs.base64()
     };
 
     if (customize_launch.customize) {
@@ -340,6 +341,9 @@ function createProcessorAutoScaleGroup(
     } else {
       launch_method = { launch_template };
     }
+
+    throw new Error("Incomplete - Error updating Autoscaling group: ValidationError: You must use a valid fully-formed launch template. Missing device name");
+
   } else {
     const launch_config_params = {
       name_prefix: tfgen.scopedName(name).join('-') + '-',

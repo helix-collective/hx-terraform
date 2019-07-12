@@ -4295,11 +4295,11 @@ export interface LaunchTemplateParams {
   instance_type: AT.InstanceType;
   iam_instance_profile?: LaunchTemplateIamInstanceProfileParams;
   key_name?: AT.KeyName;
-  network_interfaces?: LaunchTemplateNetworkInterfacesParams;
+  network_interfaces?: (LaunchTemplateNetworkInterfacesParams)[];
   user_data?: string;
   enable_monitoring?: boolean;
   ebs_optimized?: boolean;
-  block_device_mappings?: LaunchTemplateBlockDeviceMappingsParams;
+  block_device_mappings?: (LaunchTemplateBlockDeviceMappingsParams)[];
 }
 
 export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
@@ -4310,11 +4310,11 @@ export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : T
   TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
   TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, (v) => TF.mapValue(fieldsFromLaunchTemplateIamInstanceProfileParams(v)));
   TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
-  TF.addOptionalField(fields, "network_interfaces", params.network_interfaces, (v) => TF.mapValue(fieldsFromLaunchTemplateNetworkInterfacesParams(v)));
+  TF.addOptionalField(fields, "network_interfaces", params.network_interfaces, TF.listValue((v) => TF.mapValue(fieldsFromLaunchTemplateNetworkInterfacesParams(v))));
   TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
   TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
   TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
-  TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsParams(v)));
+  TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, TF.listValue((v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsParams(v))));
   return fields;
 }
 
@@ -4363,11 +4363,13 @@ export function fieldsFromLaunchTemplateBlockDeviceMappingsEbsParams(params: Lau
 }
 
 export interface LaunchTemplateBlockDeviceMappingsParams {
-  ebs?: LaunchTemplateBlockDeviceMappingsEbsParams;
+  device_name: string;
+  ebs: LaunchTemplateBlockDeviceMappingsEbsParams;
 }
 
 export function fieldsFromLaunchTemplateBlockDeviceMappingsParams(params: LaunchTemplateBlockDeviceMappingsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "ebs", params.ebs, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsEbsParams(v)));
+  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addField(fields, "ebs", params.ebs, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingsEbsParams(v)));
   return fields;
 }

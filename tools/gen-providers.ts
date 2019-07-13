@@ -858,6 +858,18 @@ const autoscaling_group: RecordDecl = {
     ]))),
 
     optionalField('tags', listType(recordType(autoscaling_group_tag))),
+
+    optionalField('termination_policies',
+      listType(enumType([
+        'OldestInstance',
+        'NewestInstance',
+        'OldestLaunchConfiguration',
+        'ClosestToNextInstanceHour',
+        'OldestLaunchTemplate',
+        'AllocationStrategy',
+        'Default'])
+      )
+    )
   ],
 };
 

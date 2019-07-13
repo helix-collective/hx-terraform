@@ -2003,6 +2003,7 @@ export interface AutoscalingGroupParams {
   load_balancers?: (string)[];
   enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
   tags?: (AutoscalingGroupTagParams)[];
+  termination_policies?: ('OldestInstance' | 'NewestInstance' | 'OldestLaunchConfiguration' | 'ClosestToNextInstanceHour' | 'OldestLaunchTemplate' | 'AllocationStrategy' | 'Default')[];
 }
 
 export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams) : TF.ResourceFieldMap {
@@ -2017,6 +2018,7 @@ export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams)
   TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
+  TF.addOptionalField(fields, "termination_policies", params.termination_policies, TF.listValue(TF.stringValue));
   return fields;
 }
 

@@ -286,7 +286,7 @@ function createProcessorAutoScaleGroup(
 
   tfgen.createBeforeDestroy(launch_config, true);
 
-  const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, {
+  const autoscaling_group_params : AR.AutoscalingGroupParams = {
     name: tfgen.scopedName(name).join('-'),
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
@@ -306,7 +306,13 @@ function createProcessorAutoScaleGroup(
         };
       }
     ),
-  });
+  };
+
+  if (params.customize_autoscaling_group) {
+    params.customize_autoscaling_group(autoscaling_group_params);
+  }
+
+  const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, autoscaling_group_params);
 
   return autoscaling_group;
 }
@@ -651,6 +657,11 @@ interface AutoscaleProcessorParams {
    * Customize the launch configuration
    */
   customize_launch_config?: Customize<AR.LaunchConfigurationParams>;
+
+  /**
+   * Customize the autoscaling group
+   */
+  customize_autoscaling_group?: Customize<AR.AutoscalingGroupParams>;
 }
 
 interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {

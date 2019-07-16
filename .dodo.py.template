@@ -30,6 +30,19 @@ tfplan = HERE / 'terraform/tfplan'
 
 nodemodules = YarnNodeModules(HERE / 'typescript')
 
+def task_terraform():
+    def terraform_cmd(pos):
+        return dockerized_terraform([pos])
+
+    return {
+        'doc' : 'Execute a custom terraform command',
+        'actions': [ 'echo terraform %(pos)s', terraform_cmd('%(pos)s') ],
+        'pos_arg': 'pos',
+        'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep() + lambda_zipfiles(),
+        'verbosity': 2,
+        'uptodate': [ False ],
+    }
+
 def dockerized_terraform(cmd):
     return run_dockerized_terraform(TERRAFORM_IMAGE, cmd)
 

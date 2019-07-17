@@ -164,7 +164,7 @@ export function createLoggingInfrastructure(
     '/opt/etc/secrets/fluentd-sender.crt',
     10
   );
-  bs.catToFile('/opt/etc/fluentd.conf', fluentdConfigFile(ed));
+  bs.catToFile('/opt/etc/fluentd.conf', fluentdConfigFile(ed, sr.network.region));
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
@@ -558,7 +558,7 @@ services:
     restart: always
 `;
 
-function fluentdConfigFile(ed: AR.ElasticsearchDomain) {
+function fluentdConfigFile(ed: AR.ElasticsearchDomain, region: AT.Region) {
   return `\
 <source>
   @type forward
@@ -595,7 +595,7 @@ function fluentdConfigFile(ed: AR.ElasticsearchDomain) {
     reload_on_failure false
     <endpoint>
       url https://${ed.endpoint}
-      region ap-southeast-2
+      region ${region.value}
     </endpoint>
   </store>
   <store>

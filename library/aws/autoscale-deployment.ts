@@ -241,11 +241,20 @@ function createProcessorAutoScaleGroup(
     )
   );
 
+  const asgName = tfgen.scopedName(name).join('-');
+
   let appserver_iampolicies = [
     policies.publish_metrics_policy,
     aws.s3DeployBucketModifyPolicy(sr),
     policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
     policies.ecr_readonly_policy,
+
+    // due to cyclic dependency we dont know the final asg ARN yet
+    // cycle is autoscaling_group -depends-on-> launch_config -depends-on-> appserver_iampolicies -depends-on-> arn of the asg
+    // break cycle by using partially wildcarded arn string
+    policies.autoscalingGroupEnableSetInstanceProtection("modifyasginstanceprotection",
+      `arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/${asgName}`
+    ),
   ];
   if (params.appserver_extra_policies) {
     appserver_iampolicies = appserver_iampolicies.concat(
@@ -287,7 +296,7 @@ function createProcessorAutoScaleGroup(
   tfgen.createBeforeDestroy(launch_config, true);
 
   const autoscaling_group_params : AR.AutoscalingGroupParams = {
-    name: tfgen.scopedName(name).join('-'),
+    name: asgName,
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
@@ -315,6 +324,9 @@ function createProcessorAutoScaleGroup(
   if (params.customize_autoscaling_group) {
     params.customize_autoscaling_group(autoscaling_group_params);
   }
+
+  // prevent customization of the name
+  autoscaling_group_params.name = asgName;
 
   const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, autoscaling_group_params);
 

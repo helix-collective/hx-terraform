@@ -165,7 +165,8 @@ function createController(
       app_user,
       releases_s3,
       deploy_contexts,
-      deploytool.remoteProxyMaster(proxy_endpoints, state_s3)
+      deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
+      params.frontendproxy_nginx_conf_tpl
     )
   );
 
@@ -237,7 +238,8 @@ function createProcessorAutoScaleGroup(
       app_user,
       params.releases_s3,
       deploy_contexts,
-      deploytool.remoteProxySlave(proxy_endpoints, state_s3)
+      deploytool.remoteProxySlave(proxy_endpoints, state_s3),
+      params.frontendproxy_nginx_conf_tpl
     )
   );
 
@@ -678,6 +680,11 @@ interface AutoscaleProcessorParams {
    * Customize the autoscaling group
    */
   customize_autoscaling_group?: Customize<AR.AutoscalingGroupParams>;
+
+  /**
+   * Substitute the default nginx template used.
+   */
+  frontendproxy_nginx_conf_tpl?: string;
 }
 
 interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {

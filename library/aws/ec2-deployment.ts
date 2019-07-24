@@ -62,6 +62,7 @@ export function createEc2Deployment(
       params.releases_s3,
       deploy_contexts,
       deploytool.localProxy(proxy_endpoints),
+      params.frontendproxy_nginx_conf_tpl,
       params.ssl_cert_email,
       params.letsencrypt_challenge_type
     )
@@ -288,6 +289,11 @@ export interface Ec2DeploymentParams {
    *  Customize the ec2 instance, overriding defaults as required
    */
   customize?: util.Customize<AR.InstanceParams>;
+
+  /**
+   * Substitute the default nginx template used.
+   */
+  frontendproxy_nginx_conf_tpl?: string;
 }
 
 // An Endpoint consists of a name and one or more connected

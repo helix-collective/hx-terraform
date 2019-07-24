@@ -62,8 +62,9 @@ export function remoteProxySlave(
 
 export function localProxy(
   endpoints: C.EndPoint[],
+  nginxConfTemplatePath?: string
   ): ProxyConfig {
-  return { endpoints, kind: 'local' };
+  return { endpoints, kind: 'local', nginxConfTemplatePath };
 }
 
 export function contextFromS3(name: string, s3Ref: s3.S3Ref): C.DeployContext {

@@ -36,7 +36,7 @@ export function createAutoscaleDeployment(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleDeploymentParams
+  params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
   const controller = createController(tfgen, "controller", sr, params, params.endpoints);
   const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
@@ -77,7 +77,7 @@ export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleDeploymentParams
+  params: AutoscaleFrontendParams,
 ): AutoscaleDeployment {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(
@@ -166,7 +166,8 @@ function createController(
       releases_s3,
       deploy_contexts,
       deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
-      params.frontendproxy_nginx_conf_tpl
+      params.health_check,
+      params.frontendproxy_nginx_conf_tpl,
     )
   );
 
@@ -239,6 +240,7 @@ function createProcessorAutoScaleGroup(
       params.releases_s3,
       deploy_contexts,
       deploytool.remoteProxySlave(proxy_endpoints, state_s3),
+      params.health_check,
       params.frontendproxy_nginx_conf_tpl
     )
   );
@@ -345,7 +347,7 @@ function createAppserverLoadBalancer(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleDeploymentParams,
+  params: AutoscaleFrontendParams,
   autoscaling_group: AR.AutoscalingGroup
 ): LoadBalancerResources {
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
@@ -368,7 +370,7 @@ function createAppserverLoadBalancer(
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
     health_check: {
-      path: '/health-check',
+      path: params.health_check.incomingPath,
     },
     tags: tfgen.tagsContext(),
   });
@@ -685,9 +687,14 @@ interface AutoscaleProcessorParams {
    * Substitute the default nginx template used.
    */
   frontendproxy_nginx_conf_tpl?: string;
+
+  /**
+   * Health check config
+   */
+  health_check?: C.HealthCheckConfig;
 }
 
-interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
+interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
   /**
    * The endpoints configured for http/https access.
    */
@@ -703,6 +710,11 @@ interface AutoscaleDeploymentParams extends AutoscaleProcessorParams {
    * https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html
    */
   customize_lb?: Customize<AR.LbParams>;
+
+  /**
+   * Health check config
+   */
+  health_check: C.HealthCheckConfig;
 }
 
 type AcmCertificateSource =

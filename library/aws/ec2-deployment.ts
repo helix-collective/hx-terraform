@@ -56,12 +56,15 @@ export function createEc2Deployment(
 
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
+  const health_check = undefined;
+
   bs.include(
     deploytool.install(
       app_user,
       params.releases_s3,
       deploy_contexts,
       deploytool.localProxy(proxy_endpoints),
+      health_check,
       params.frontendproxy_nginx_conf_tpl,
       params.ssl_cert_email,
       params.letsencrypt_challenge_type

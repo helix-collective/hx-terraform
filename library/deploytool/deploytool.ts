@@ -123,6 +123,7 @@ export function install(
   releases: s3.S3Ref,
   deployContexts: C.DeployContext[],
   proxy: ProxyConfig,
+  healthCheck?: C.HealthCheckConfig,
   frontendproxy_nginx_conf_tpl?: string,
   ssl_cert_email?: string,
   letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
@@ -183,6 +184,7 @@ export function install(
   const config = C.makeToolConfig({
     deployContexts,
     deployMode,
+    healthCheck: healthCheck ? { kind: "just", value: healthCheck} : { kind: "nothing" },
     releases: {
       kind: 's3',
       value: releases.url(),

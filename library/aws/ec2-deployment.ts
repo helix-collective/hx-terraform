@@ -50,9 +50,6 @@ export function createEc2Deployment(
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user);
-  if (params.extra_bootscript) {
-    bs.include(params.extra_bootscript);
-  }
 
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
@@ -70,6 +67,10 @@ export function createEc2Deployment(
       params.letsencrypt_challenge_type
     )
   );
+
+  if (params.extra_bootscript) {
+    bs.include(params.extra_bootscript);
+  }
 
   let iampolicies = [
     policies.publish_metrics_policy,

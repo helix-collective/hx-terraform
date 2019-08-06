@@ -156,10 +156,6 @@ function createController(
   bs.createUserWithKeypairAccess(app_user);
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
 
-  if (params.controller_extra_bootscript) {
-    bs.include(params.controller_extra_bootscript);
-  }
-
   bs.include(
     deploytool.install(
       app_user,
@@ -170,6 +166,10 @@ function createController(
       params.frontendproxy_nginx_conf_tpl,
     )
   );
+
+  if (params.controller_extra_bootscript) {
+    bs.include(params.controller_extra_bootscript);
+  }
 
   const controller_iampolicies = [aws.s3DeployBucketModifyPolicy(sr)];
 
@@ -230,9 +230,6 @@ function createProcessorAutoScaleGroup(
       bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
       ' --auto-scaling',
   });
-  if (params.appserver_extra_bootscript) {
-    bs.include(params.appserver_extra_bootscript);
-  }
 
   bs.include(
     deploytool.install(
@@ -244,6 +241,10 @@ function createProcessorAutoScaleGroup(
       params.frontendproxy_nginx_conf_tpl
     )
   );
+
+  if (params.appserver_extra_bootscript) {
+    bs.include(params.appserver_extra_bootscript);
+  }
 
   const asgName = tfgen.scopedName(name).join('-');
 

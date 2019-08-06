@@ -1867,6 +1867,7 @@ function generateAws(gen: Generator) {
       stringAttr('name'),
       stringAttr('create_date'),
       stringAttr('unique_id'),
+      stringAttr('role'),
     ],
     {
       arn: true,

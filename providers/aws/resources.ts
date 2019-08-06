@@ -732,6 +732,7 @@ export function createIamInstanceProfile(tfgen: TF.Generator, rname: string, par
   const name: string =  '${' + TF.resourceName(resource) + '.name}';
   const create_date: string =  '${' + TF.resourceName(resource) + '.create_date}';
   const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
+  const role: string =  '${' + TF.resourceName(resource) + '.role}';
   const arn: IamInstanceProfileArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamInstanceProfile');
 
   return {
@@ -740,6 +741,7 @@ export function createIamInstanceProfile(tfgen: TF.Generator, rname: string, par
     name,
     create_date,
     unique_id,
+    role,
     arn,
   };
 }
@@ -749,6 +751,7 @@ export interface IamInstanceProfile extends TF.ResourceT<'IamInstanceProfile'> {
   name: string;
   create_date: string;
   unique_id: string;
+  role: string;
   arn: IamInstanceProfileArn;
 }
 

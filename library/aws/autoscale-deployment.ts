@@ -39,7 +39,7 @@ export function createAutoscaleDeployment(
   params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
   const controller = createController(tfgen, "controller", sr, params, params.endpoints);
-  const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
+  const autoscale_processor = createProcessorAutoScaleGroup(
     tfgen,
     'appserver',
     sr,
@@ -51,11 +51,11 @@ export function createAutoscaleDeployment(
     'appserver',
     sr,
     params,
-    appserverAutoScaleGroup
+    autoscale_processor.autoscaling_group
   );
 
   return {
-    autoscaling_group: appserverAutoScaleGroup,
+    autoscale_processor,
     target_group: appserverLoadBalancer.target_group,
     load_balancer: appserverLoadBalancer.load_balancer,
     lb_https_listener: appserverLoadBalancer.lb_https_listener,
@@ -87,7 +87,7 @@ export function createAutoscaleFrontend(
       params,
       params.endpoints
     );
-    const appserverAutoScaleGroup = createProcessorAutoScaleGroup(
+    const autoscale_processor = createProcessorAutoScaleGroup(
       tfgen,
       'asg',
       sr,
@@ -99,11 +99,11 @@ export function createAutoscaleFrontend(
       'lb',
       sr,
       params,
-      appserverAutoScaleGroup
+      autoscale_processor.autoscaling_group
     );
 
     return {
-      autoscaling_group: appserverAutoScaleGroup,
+      autoscale_processor,
       target_group: appserverLoadBalancer.target_group,
       load_balancer: appserverLoadBalancer.load_balancer,
       lb_https_listener: appserverLoadBalancer.lb_https_listener,
@@ -125,7 +125,7 @@ export function createAutoscaleProcessor(
   name: string,
   sr: shared.SharedResources,
   params: AutoscaleProcessorParams
-): AR.AutoscalingGroup {
+): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(tfgen, 'controller', sr, params, []);
     return createProcessorAutoScaleGroup(tfgen, 'asg', sr, params, []);
@@ -209,7 +209,7 @@ function createProcessorAutoScaleGroup(
   sr: shared.SharedResources,
   params: AutoscaleProcessorParams,
   endpoints: EndPoint[]
-): AR.AutoscalingGroup {
+): AutoscaleProcessor {
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
@@ -266,7 +266,7 @@ function createProcessorAutoScaleGroup(
     );
   }
 
-  const appserver_instance_profile = roles.createInstanceProfileWithPolicies(
+  const instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
     name,
     appserver_iampolicies
@@ -279,7 +279,7 @@ function createProcessorAutoScaleGroup(
       ? params.appserver_amis(sr.network.region)
       : getDefaultAmi(sr.network.region),
     instance_type: params.appserver_instance_type,
-    iam_instance_profile: appserver_instance_profile.id,
+    iam_instance_profile: instance_profile.id,
     security_groups: [sr.appserver_security_group.id],
     user_data: bs.compile(),
     root_block_device: {
@@ -334,7 +334,10 @@ function createProcessorAutoScaleGroup(
 
   const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, autoscaling_group_params);
 
-  return autoscaling_group;
+  return {
+    autoscaling_group,
+    instance_profile,
+  }
 }
 
 export type LoadBalancerResources = {
@@ -723,11 +726,16 @@ type AcmCertificateSource =
   | { kind: 'generate_with_manual_verify' };
 
 interface AutoscaleDeployment {
-  autoscaling_group: AR.AutoscalingGroup;
+  autoscale_processor: AutoscaleProcessor;
   target_group: AR.LbTargetGroup;
   load_balancer: AR.Lb;
   lb_https_listener: AR.LbListener;
 }
+
+interface AutoscaleProcessor {
+  autoscaling_group: AR.AutoscalingGroup,
+  instance_profile: AR.IamInstanceProfile,
+};
 
 /**
  * Creates a set of cron based scaling rules for the specified autoscaling group

@@ -23,6 +23,8 @@ export function createScalingAlarms(
   hosts_alarm_threshold: number = 3
 ) {
   createScalingHighCpuAlarm(tfgen, topic, autoscaling_group);
+  createScalingHighMemAlarm(tfgen, topic, "Maximum", 90, autoscaling_group);
+  createScalingHighMemAlarm(tfgen, topic, "Average", 70, autoscaling_group);
   createScalingLowHostsAlarm(
     tfgen,
     topic,
@@ -77,6 +79,32 @@ export function createScalingHighCpuAlarm(
       AutoScalingGroupName: autoscaling_group.name,
     },
     alarm_description: 'Sustained high cpu usage across an autoscaling group',
+    alarm_actions: [topic.arn],
+  });
+}
+
+export function createScalingHighMemAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  statistic: 'SampleCount' | 'Average' | 'Sum' | 'Minimum' | 'Maximum',
+  threshold: number,
+  autoscaling_group: AR.AutoscalingGroup
+) {
+  // Assumes an autoscaling group won't be used with an ec2 instance on the same namespace
+  const name = 'highmem_' + statistic.toLowerCase();
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    statistic,
+    threshold,
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanThreshold',
+    evaluation_periods: 4,
+    metric_name: 'MemoryUtilization',
+    namespace: 'System/Linux',
+    period: 300,
+    dimensions: {
+      AutoScalingGroupName: autoscaling_group.name,
+    },
+    alarm_description: 'Sustained high memory ' + statistic + ' across an autoscaling group',
     alarm_actions: [topic.arn],
   });
 }

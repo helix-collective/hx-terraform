@@ -416,7 +416,11 @@ export function fileGenerator(): FileGenerator {
   ): string[] {
     let result = [indent + prefix0 + ' {'];
     for (const field of fields) {
-      const prefix = indent + field.key;
+
+      // Quote the field key if required
+      const fieldkey = field.key.match(/\//) ? `"${field.key}"` : field.key;
+
+      const prefix = indent + fieldkey;
       switch (field.value.kind) {
         case 'text':
           result = result.concat(

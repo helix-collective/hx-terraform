@@ -188,6 +188,20 @@ const security_group: RecordDecl = {
   ],
 };
 
+const security_group_rule: RecordDecl = {
+  name: 'security_group_rule',
+  fields: [
+    requiredField('type', enumType(['ingress','egress'])),
+    optionalField('cidr_blocks', listType(stringAliasType('AT.CidrBlock'))),
+    optionalField('description', STRING),
+    requiredField('from_port', NUMBER),
+    requiredField('protocol', enumType(['tcp', 'udp', 'icmp', 'all', "-1"])),
+    optionalField('security_group_id', resourceIdType('SecurityGroupId')),
+    optionalField('source_security_group_id', resourceIdType('SecurityGroupId')),
+    requiredField('to_port', NUMBER),
+  ],
+};
+
 const internet_gateway: RecordDecl = {
   name: 'internet_gateway',
   fields: [
@@ -455,6 +469,25 @@ const iam_role: RecordDecl = {
     requiredField('assume_role_policy', STRING),
     optionalField('path', STRING),
     optionalField('description', STRING),
+  ],
+};
+
+const iam_policy: RecordDecl = {
+  name: 'iam_policy',
+  fields: [
+    optionalField('description', STRING),
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    optionalField('path', STRING),
+    requiredField('policy', STRING),
+  ],
+};
+
+const iam_role_policy_attachment: RecordDecl = {
+  name: 'iam_role_policy_attachment',
+  fields: [
+    requiredField('role', STRING),
+    requiredField('policy_arn', arnType(iam_policy)),
   ],
 };
 
@@ -1596,6 +1629,27 @@ const cognito_identity_pool_roles_attachment: RecordDecl = {
   ],
 }
 
+const eks_cluster_vpc_config: RecordDecl = {
+  name: 'eks_cluster_vpc_config',
+  fields: [
+   optionalField('endpoint_private_access', BOOLEAN),
+   optionalField('endpoint_public_access', BOOLEAN),
+   optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+   requiredField('subnet_ids', listType(resourceIdType('SubnetId'))),
+  ]
+};
+
+const eks_cluster: RecordDecl = {
+  name: 'eks_cluster',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('role_arn', arnType(iam_role)),
+    requiredField('vpc_config', recordType(eks_cluster_vpc_config)),
+    optionalField('enabled_cluster_log_Types', listType(enumType(['api','audit','authenticator','controllerManager','scheduler']))),
+    optionalField('version', STRING),
+  ]
+};
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -1697,6 +1751,13 @@ function generateAws(gen: Generator) {
     'https://www.terraform.io/docs/providers/aws/r/security_group.html',
     security_group,
     [resourceIdAttr('id', security_group), stringAttr('owner_id')]
+  );
+
+  gen.generateResource(
+    'Provides a security group rule resource.',
+    'https://www.terraform.io/docs/providers/aws/r/security_group_rule.html',
+    security_group_rule,
+    [resourceIdAttr('id', security_group)]
   );
 
   gen.generateResource(
@@ -1855,6 +1916,26 @@ function generateAws(gen: Generator) {
       stringAttr('name'),
       stringAttr('policy'),
       stringAttr('role'),
+    ]
+  );
+
+  gen.generateResource(
+    'Provides an IAM policy.',
+    'https://www.terraform.io/docs/providers/aws/r/iam_policy.html',
+    iam_policy,
+    [
+      resourceIdAttr('id', iam_policy),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Attaches a Managed IAM Policy to an IAM role',
+    'https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html',
+    iam_role_policy_attachment,
+    [
     ]
   );
 
@@ -2363,6 +2444,23 @@ function generateAws(gen: Generator) {
     ]
     );
 
+  gen.generateResource(
+    'Manages an EKS Cluster.',
+    'https://www.terraform.io/docs/providers/aws/r/eks_cluster.html',
+    eks_cluster,
+    [
+      resourceIdAttr('id', eks_cluster),
+      stringAttr('endpoint'),
+      stringAttr('platform_version'),
+      stringAttr('status'),
+      stringAttr('version'),
+      stringAttr('certificate_authority'),
+    ],
+    {
+      arn: true,
+    }
+    );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -2378,6 +2476,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(vpc);
   gen.generateParams(subnet);
   gen.generateParams(security_group);
+  gen.generateParams(security_group_rule);
   gen.generateParams(ingress_rule);
   gen.generateParams(egress_rule);
   gen.generateParams(internet_gateway);
@@ -2405,6 +2504,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_instance_profile);
   gen.generateParams(iam_role);
   gen.generateParams(iam_role_policy);
+  gen.generateParams(iam_policy);
+  gen.generateParams(iam_role_policy_attachment);
   gen.generateParams(sqs_queue);
   gen.generateParams(sqs_queue_policy);
   gen.generateParams(lb);
@@ -2498,6 +2599,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_identity_pool);
   gen.generateParams(cognito_identity_pool_roles_attachment);
   gen.generateParams(cognito_identity_pool_roles_attachment_roles);
+  gen.generateParams(eks_cluster);
+  gen.generateParams(eks_cluster_vpc_config);
 }
 
 function generateRandom(gen: Generator) {

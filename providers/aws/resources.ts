@@ -268,6 +268,28 @@ export interface SecurityGroup extends TF.ResourceT<'SecurityGroup'> {
 export type SecurityGroupId = {type:'SecurityGroupId',value:string};
 
 /**
+ *  Provides a security group rule resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/security_group_rule.html
+ */
+export function createSecurityGroupRule(tfgen: TF.Generator, rname: string, params: SecurityGroupRuleParams): SecurityGroupRule {
+  const fields = fieldsFromSecurityGroupRuleParams(params);
+  const resource = tfgen.createTypedResource('SecurityGroupRule', 'aws_security_group_rule', rname, fields);
+  const id: SecurityGroupId =  {type: 'SecurityGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface SecurityGroupRule extends TF.ResourceT<'SecurityGroupRule'> {
+  id: SecurityGroupId;
+}
+
+export type SecurityGroupRuleId = {type:'SecurityGroupRuleId',value:string};
+
+/**
  *  Provides a resource to create a VPC Internet Gateway.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/internet_gateway.html
@@ -719,6 +741,51 @@ export interface IamRolePolicy extends TF.ResourceT<'IamRolePolicy'> {
 }
 
 export type IamRolePolicyId = {type:'IamRolePolicyId',value:string};
+
+/**
+ *  Provides an IAM policy.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/iam_policy.html
+ */
+export function createIamPolicy(tfgen: TF.Generator, rname: string, params: IamPolicyParams): IamPolicy {
+  const fields = fieldsFromIamPolicyParams(params);
+  const resource = tfgen.createTypedResource('IamPolicy', 'aws_iam_policy', rname, fields);
+  const id: IamPolicyId =  {type: 'IamPolicyId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: IamPolicyArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamPolicy');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface IamPolicy extends TF.ResourceT<'IamPolicy'> {
+  id: IamPolicyId;
+  arn: IamPolicyArn;
+}
+
+export type IamPolicyId = {type:'IamPolicyId',value:string};
+export type IamPolicyArn = AT.ArnT<"IamPolicy">;
+
+/**
+ *  Attaches a Managed IAM Policy to an IAM role
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/iam_role_policy_attachment.html
+ */
+export function createIamRolePolicyAttachment(tfgen: TF.Generator, rname: string, params: IamRolePolicyAttachmentParams): IamRolePolicyAttachment {
+  const fields = fieldsFromIamRolePolicyAttachmentParams(params);
+  const resource = tfgen.createTypedResource('IamRolePolicyAttachment', 'aws_iam_role_policy_attachment', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface IamRolePolicyAttachment extends TF.ResourceT<'IamRolePolicyAttachment'> {
+}
+
+export type IamRolePolicyAttachmentId = {type:'IamRolePolicyAttachmentId',value:string};
 
 /**
  *  Provides an IAM instance profile.
@@ -1981,6 +2048,47 @@ export interface CognitoIdentityPoolRolesAttachment extends TF.ResourceT<'Cognit
 
 export type CognitoIdentityPoolRolesAttachmentId = {type:'CognitoIdentityPoolRolesAttachmentId',value:string};
 
+/**
+ *  Manages an EKS Cluster.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/eks_cluster.html
+ */
+export function createEksCluster(tfgen: TF.Generator, rname: string, params: EksClusterParams): EksCluster {
+  const fields = fieldsFromEksClusterParams(params);
+  const resource = tfgen.createTypedResource('EksCluster', 'aws_eks_cluster', rname, fields);
+  const id: EksClusterId =  {type: 'EksClusterId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
+  const platform_version: string =  '${' + TF.resourceName(resource) + '.platform_version}';
+  const status: string =  '${' + TF.resourceName(resource) + '.status}';
+  const version: string =  '${' + TF.resourceName(resource) + '.version}';
+  const certificate_authority: string =  '${' + TF.resourceName(resource) + '.certificate_authority}';
+  const arn: EksClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EksCluster');
+
+  return {
+    ...resource,
+    id,
+    endpoint,
+    platform_version,
+    status,
+    version,
+    certificate_authority,
+    arn,
+  };
+}
+
+export interface EksCluster extends TF.ResourceT<'EksCluster'> {
+  id: EksClusterId;
+  endpoint: string;
+  platform_version: string;
+  status: string;
+  version: string;
+  certificate_authority: string;
+  arn: EksClusterArn;
+}
+
+export type EksClusterId = {type:'EksClusterId',value:string};
+export type EksClusterArn = AT.ArnT<"EksCluster">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -2276,6 +2384,30 @@ export function fieldsFromSecurityGroupParams(params: SecurityGroupParams) : TF.
   TF.addOptionalField(fields, "egress", params.egress, TF.listValue((v) => TF.mapValue(fieldsFromEgressRuleParams(v))));
   TF.addOptionalField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SecurityGroupRuleParams {
+  type: 'ingress' | 'egress';
+  cidr_blocks?: (AT.CidrBlock)[];
+  description?: string;
+  from_port: number;
+  protocol: 'tcp' | 'udp' | 'icmp' | 'all' | '-1';
+  security_group_id?: SecurityGroupId;
+  source_security_group_id?: SecurityGroupId;
+  to_port: number;
+}
+
+export function fieldsFromSecurityGroupRuleParams(params: SecurityGroupRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addField(fields, "from_port", params.from_port, TF.numberValue);
+  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalField(fields, "security_group_id", params.security_group_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "source_security_group_id", params.source_security_group_id, TF.resourceIdValue);
+  TF.addField(fields, "to_port", params.to_port, TF.numberValue);
   return fields;
 }
 
@@ -2710,6 +2842,36 @@ export function fieldsFromIamRolePolicyParams(params: IamRolePolicyParams) : TF.
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "policy", params.policy, TF.stringValue);
   TF.addField(fields, "role", params.role, TF.resourceIdValue);
+  return fields;
+}
+
+export interface IamPolicyParams {
+  description?: string;
+  name?: string;
+  name_prefix?: string;
+  path?: string;
+  policy: string;
+}
+
+export function fieldsFromIamPolicyParams(params: IamPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addField(fields, "policy", params.policy, TF.stringValue);
+  return fields;
+}
+
+export interface IamRolePolicyAttachmentParams {
+  role: string;
+  policy_arn: AT.ArnT<"IamPolicy">;
+}
+
+export function fieldsFromIamRolePolicyAttachmentParams(params: IamRolePolicyAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "role", params.role, TF.stringValue);
+  TF.addField(fields, "policy_arn", params.policy_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -4218,5 +4380,39 @@ export function fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(params: 
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "authenticated", params.authenticated, TF.resourceArnValue);
   TF.addOptionalField(fields, "unauthenticated", params.unauthenticated, TF.resourceArnValue);
+  return fields;
+}
+
+export interface EksClusterParams {
+  name: string;
+  role_arn: AT.ArnT<"IamRole">;
+  vpc_config: EksClusterVpcConfigParams;
+  enabled_cluster_log_Types?: ('api' | 'audit' | 'authenticator' | 'controllerManager' | 'scheduler')[];
+  version?: string;
+}
+
+export function fieldsFromEksClusterParams(params: EksClusterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromEksClusterVpcConfigParams(v)));
+  TF.addOptionalField(fields, "enabled_cluster_log_Types", params.enabled_cluster_log_Types, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "version", params.version, TF.stringValue);
+  return fields;
+}
+
+export interface EksClusterVpcConfigParams {
+  endpoint_private_access?: boolean;
+  endpoint_public_access?: boolean;
+  security_group_ids?: (SecurityGroupId)[];
+  subnet_ids: (SubnetId)[];
+}
+
+export function fieldsFromEksClusterVpcConfigParams(params: EksClusterVpcConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "endpoint_private_access", params.endpoint_private_access, TF.booleanValue);
+  TF.addOptionalField(fields, "endpoint_public_access", params.endpoint_public_access, TF.booleanValue);
+  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }

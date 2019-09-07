@@ -45,7 +45,7 @@ const instance: RecordDecl = {
     requiredField('ami', stringAliasType('AT.Ami')),
     requiredField('instance_type', stringAliasType('AT.InstanceType')),
     optionalField('availability_zone', stringAliasType('AT.AvailabilityZone')),
-    optionalField('ebs_optimised', BOOLEAN),
+    optionalField('ebs_optimized', BOOLEAN),
     optionalField('key_name', stringAliasType('AT.KeyName')),
     optionalField('monitoring', BOOLEAN),
     optionalField('subnet_id', resourceIdType('SubnetId')),

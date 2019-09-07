@@ -2189,7 +2189,7 @@ export interface InstanceParams {
   ami: AT.Ami;
   instance_type: AT.InstanceType;
   availability_zone?: AT.AvailabilityZone;
-  ebs_optimised?: boolean;
+  ebs_optimized?: boolean;
   key_name?: AT.KeyName;
   monitoring?: boolean;
   subnet_id?: SubnetId;
@@ -2206,7 +2206,7 @@ export function fieldsFromInstanceParams(params: InstanceParams) : TF.ResourceFi
   TF.addField(fields, "ami", params.ami, TF.stringAliasValue);
   TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
   TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
-  TF.addOptionalField(fields, "ebs_optimised", params.ebs_optimised, TF.booleanValue);
+  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
   TF.addOptionalField(fields, "monitoring", params.monitoring, TF.booleanValue);
   TF.addOptionalField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);

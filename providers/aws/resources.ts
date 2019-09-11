@@ -405,15 +405,18 @@ export function createRoute53Zone(tfgen: TF.Generator, rname: string, params: Ro
   const fields = fieldsFromRoute53ZoneParams(params);
   const resource = tfgen.createTypedResource('Route53Zone', 'aws_route53_zone', rname, fields);
   const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
 
   return {
     ...resource,
     zone_id,
+    name,
   };
 }
 
 export interface Route53Zone extends TF.ResourceT<'Route53Zone'> {
   zone_id: AT.HostedZoneId;
+  name: string;
 }
 
 export type Route53ZoneId = {type:'Route53ZoneId',value:string};

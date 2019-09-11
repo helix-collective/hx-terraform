@@ -1799,7 +1799,7 @@ function generateAws(gen: Generator) {
     'Provides a Route53 Hosted Zone resource.',
     'https://www.terraform.io/docs/providers/aws/r/route53_zone.html',
     route53_zone,
-    [stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId')]
+    [stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'), stringAttr('name')]
   );
 
   gen.generateResource(

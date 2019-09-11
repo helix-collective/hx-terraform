@@ -335,6 +335,29 @@ export function dnsAliasRecord(
 }
 
 /**
+ * Make a route53 dns zone a subdomain in the primary dns zone
+ */
+export function dnsSubdomain(
+  tfgen: TF.Generator,
+  name: string,
+  sr: SharedResources,
+  subzone: AR.Route53Zone,
+) {
+  AR.createRoute53Record(tfgen, name, {
+    zone_id: sr.primary_dns_zone.zone_id,
+    name: subzone.name,
+    ttl: "60",
+    type: 'NS',
+    records: [
+      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.0}",
+      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.1}",
+      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.2}",
+      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.3}",
+    ]
+  });
+}
+
+/**
  * Return the full qualified domain name for a host in the primary dns zone
  */
 export function fqdn(sr: SharedResources, dnsname: string) {

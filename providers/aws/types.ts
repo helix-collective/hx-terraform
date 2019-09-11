@@ -23,6 +23,7 @@ export const us_west_1 = region('us-west-1');
 export const us_west_2 = region('us-west-2');
 export const ap_southeast_1 = region('ap-southeast-1');
 export const ap_southeast_2 = region('ap-southeast-2');
+export const ca_central_1 = region('ca-central-1');
 
 //----------------------------------------------------------------------
 
@@ -67,6 +68,9 @@ export function availabilityZone(v: string): AvailabilityZone {
 export const ap_southeast_2a = availabilityZone('ap-southeast-2a');
 export const ap_southeast_2b = availabilityZone('ap-southeast-2b');
 export const ap_southeast_2c = availabilityZone('ap-southeast-2c');
+
+export const ca_central_1a = availabilityZone('ca-central-1a');
+export const ca_central_1b = availabilityZone('ca-central-1b');
 
 export const us_east_1a = availabilityZone('us-east-1a');
 export const us_east_1b = availabilityZone('us-east-1b');

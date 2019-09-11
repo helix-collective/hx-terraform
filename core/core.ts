@@ -1,9 +1,7 @@
 /**
  *  Core types and logic for TSTF, Helix's EDSL for terraform generation
  */
-import * as _ from 'lodash';
 import * as fs from 'fs';
-import { EOF } from 'dns';
 
 /**
  * The interface for generating terraform
@@ -57,6 +55,9 @@ export interface Generator {
 
   /** Return a generator with the given name pushed onto the name scope */
   localNameScope(name: string): Generator;
+
+  /** Return a generator with the given provider alias configured */
+  providerAlias(provider: string, alias: string): Generator;
 
   /** Return a generator with the specified tags pushhed onto the name scope */
   localTags(map: TagsMap): Generator;
@@ -176,12 +177,26 @@ export function withLocalNameScope<T>(
   return createfn(tfgen0.localNameScope(name));
 }
 
+/**
+ *  Ensure that all resources created by createfn for the given provider
+ *  type reference the specified provider alias
+ */
+export function withProviderAlias<T>(
+  tfgen0: Generator,
+  providerType: string,
+  alias: string,
+  createfn: (tfgen: Generator) => T
+): T {
+  return createfn(tfgen0.providerAlias(providerType,alias));
+}
+
 export function fileGenerator(): FileGenerator {
   interface ResourceDetails extends Resource {
     fields: ResourceFieldMap;
     ignoreChanges: string[];
     dependsOn: ResourceDetails[];
     provisioners: Provisioner[];
+    provider: string;
     createBeforeDestroy: boolean;
   }
   type Provisioner = { kind: 'local-exec'; script: string };
@@ -201,9 +216,12 @@ export function fileGenerator(): FileGenerator {
 
   const generated: Generated = emptyGenerated();
 
+  type ProviderAliasMap = { [providerType: string]: string };
+
   function generator(
     nameContext0: ResourceName,
-    tagsContext0: TagsMap
+    tagsContext0: TagsMap,
+    providerAliases0: ProviderAliasMap,
   ): Generator {
     function createProvider(
       tftype: string,
@@ -226,6 +244,8 @@ export function fileGenerator(): FileGenerator {
       fields: ResourceFieldMap
     ): Resource {
       const tfname = nameContext0.concat(name);
+      const providerType = getProviderType(tftype);
+      const provider = providerAliases0[providerType] ? providerType + "." + providerAliases0[providerType] : "";
       const details = {
         tftype,
         tfname,
@@ -233,10 +253,19 @@ export function fileGenerator(): FileGenerator {
         ignoreChanges: [],
         dependsOn: [],
         provisioners: [],
+        provider,
         createBeforeDestroy: false,
       };
+
       addResourceDetails(generated, details);
       return { tftype, tfname };
+    }
+
+    function getProviderType(tftype: string): string {
+      // The terraform convention is that the provider given by the
+      // resource type up to the first underscore
+      const match = tftype.match(/[^_]*/);
+      return match && match[0] || "";
     }
 
     function createAdhocFile(path: string, content: string): void {
@@ -303,7 +332,15 @@ export function fileGenerator(): FileGenerator {
     }
 
     function localNameScope(name: string): Generator {
-      return generator(nameContext0.concat(name), tagsContext0);
+      return generator(nameContext0.concat(name), tagsContext0, providerAliases0);
+    }
+
+    function providerAlias(providerType: string, alias:string): Generator {
+      const providerAliases = {
+        ...providerAliases0,
+      };
+      providerAliases[providerType] = alias;
+      return generator(nameContext0, tagsContext0, providerAliases);
     }
 
     function localTags(tagsMap: TagsMap): Generator {
@@ -311,7 +348,7 @@ export function fileGenerator(): FileGenerator {
         ...tagsContext0,
         ...tagsMap,
       };
-      return generator(nameContext0, mergedTagsContext);
+      return generator(nameContext0, mergedTagsContext, providerAliases0);
     }
 
     return {
@@ -328,6 +365,7 @@ export function fileGenerator(): FileGenerator {
       tagsContext,
       scopedName,
       localNameScope,
+      providerAlias,
       localTags,
     };
   }
@@ -504,6 +542,12 @@ export function fileGenerator(): FileGenerator {
           value: { kind: 'text', text: `[${dependsOn.join(', ')}]` },
         });
       }
+      if (resource.provider != "") {
+        fields.push({
+          key: 'provider',
+          value: { kind: 'text', text: `"${resource.provider}"`},
+        });
+      }
       if (resource.ignoreChanges.length > 0 || resource.createBeforeDestroy) {
         const lifecycleFieldMap: ResourceField[] = [];
         if (resource.ignoreChanges.length > 0) {
@@ -565,7 +609,7 @@ export function fileGenerator(): FileGenerator {
   }
 
   return {
-    ...generator([], {}),
+    ...generator([], {}, {}),
     writeFiles,
   };
 }

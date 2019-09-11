@@ -362,5 +362,8 @@ export function getDefaultAmi(region: AT.Region): AT.Ami {
   if (region.value === AT.us_east_2.value) {
     return AT.ami('ami-5e8bb23b');
   }
+  if (region.value === AT.ca_central_1.value) {
+    return AT.ami('ami-01957f6afe4e49edd');
+  }
   throw new Error('No AMI specified for region ' + region.value);
 }

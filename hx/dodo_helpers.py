@@ -448,7 +448,7 @@ class ZipElement(object):
 class ReleaseZip(object):
     """
     helper class to build a release zip file, intended for installation with
-    hx-deploy-tool
+    camus2
     """
     def __init__(self, releasename, zipPath, prestartCommand, startCommand, stopCommand):
         self.releasename = releasename
@@ -521,7 +521,7 @@ DOCKER_PRESTART_COMMAND="""
 set -e
 
 # docker login, so we can access images from AWS ECRs
-eval $(/opt/bin/hx-deploy-tool aws-docker-login-cmd)
+eval $(/opt/bin/camus2 aws-docker-login-cmd)
 
 # and pull the ones we need
 docker-compose pull

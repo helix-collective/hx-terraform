@@ -37,7 +37,7 @@ export function createEc2Deployment(
   const bs = bootscript.newBootscript();
   const app_user = params.app_user || 'app';
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-  let deploy_contexts: C.DeployContext[];
+  let deploy_contexts: deploytool.DeployContext[];
   if (params.deploy_contexts) {
     deploy_contexts = params.deploy_contexts;
   } else {
@@ -170,8 +170,10 @@ export function endpointUrl(
 export function deployToolEndpoints(
   sr: shared.SharedResources,
   endpoints: EndPoint[]
-): C.EndPoint[] {
-  return endpoints.map(ep => {
+): deploytool.EndPointMap {
+  const endPointMap: deploytool.EndPointMap = {};
+
+  endpoints.forEach(ep => {
     const http_fqdns: string[] = [];
     const https_fqdns: string[] = [];
     ep.urls.forEach(url => {
@@ -190,10 +192,13 @@ export function deployToolEndpoints(
       }
     });
     if (https_fqdns.length > 0) {
-      return deploytool.httpsProxyEndpoint(ep.name, https_fqdns);
+      endPointMap[ep.name] = deploytool.httpsProxyEndpoint(ep.name, https_fqdns);
+    } else {
+      endPointMap[ep.name] = deploytool.httpProxyEndpoint(ep.name, http_fqdns);
     }
-    return deploytool.httpProxyEndpoint(ep.name, http_fqdns);
   });
+
+  return endPointMap;
 }
 
 export interface Ec2DeploymentParams {
@@ -253,7 +258,7 @@ export interface Ec2DeploymentParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  deploy_contexts?: C.DeployContext[];
+  deploy_contexts?: {name: string, source: C.JsonSource}[];
 
   /**
    * Additional operations for the EC2 instances first boot can be passed vis the operation.

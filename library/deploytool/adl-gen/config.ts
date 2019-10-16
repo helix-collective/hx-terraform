@@ -8,7 +8,7 @@ import * as types from './types';
  * Configuration file for the deployment tool
  */
 export interface ToolConfig {
-  releasesDir: types.FilePath;
+  deploysDir: types.FilePath;
   contextCache: types.FilePath;
   logFile: types.FilePath;
   letsencryptPrefixDir: types.FilePath;
@@ -23,14 +23,21 @@ export interface ToolConfig {
    * The storage location for release zip files
    */
   releases: BlobStoreConfig;
-  deployContexts: DeployContext[];
+  /**
+   * Static config sources
+   */
+  configSources: types.StringKeyMap<types.StaticConfigName, JsonSource>;
+  /**
+   * Dynamic config sources
+   */
+  dynamicConfigSources: types.StringKeyMap<types.DynamicConfigName, DynamicJsonSource>;
   deployMode: DeployMode;
   healthCheck: sys_types.Maybe<HealthCheckConfig>;
 }
 
 export function makeToolConfig(
   input: {
-    releasesDir?: types.FilePath,
+    deploysDir?: types.FilePath,
     contextCache?: types.FilePath,
     logFile?: types.FilePath,
     letsencryptPrefixDir?: types.FilePath,
@@ -38,45 +45,47 @@ export function makeToolConfig(
     autoCertName?: string,
     autoCertContactEmail?: string,
     releases: BlobStoreConfig,
-    deployContexts: DeployContext[],
+    configSources?: types.StringKeyMap<types.StaticConfigName, JsonSource>,
+    dynamicConfigSources?: types.StringKeyMap<types.DynamicConfigName, DynamicJsonSource>,
     deployMode?: DeployMode,
     healthCheck?: sys_types.Maybe<HealthCheckConfig>,
   }
 ): ToolConfig {
   return {
-    releasesDir: input.releasesDir === undefined ? "/opt/releases" : input.releasesDir,
-    contextCache: input.contextCache === undefined ? "/opt/etc/deployment" : input.contextCache,
-    logFile: input.logFile === undefined ? "/opt/var/log/hx-deploy-tool.log" : input.logFile,
+    deploysDir: input.deploysDir === undefined ? "/opt/deploys" : input.deploysDir,
+    contextCache: input.contextCache === undefined ? "/opt/config" : input.contextCache,
+    logFile: input.logFile === undefined ? "/opt/var/log/camus2.log" : input.logFile,
     letsencryptPrefixDir: input.letsencryptPrefixDir === undefined ? "/opt" : input.letsencryptPrefixDir,
     letsencryptWwwDir: input.letsencryptWwwDir === undefined ? "/opt/var/www" : input.letsencryptWwwDir,
-    autoCertName: input.autoCertName === undefined ? "hxdeploytoolcert" : input.autoCertName,
+    autoCertName: input.autoCertName === undefined ? "camus2cert" : input.autoCertName,
     autoCertContactEmail: input.autoCertContactEmail === undefined ? "" : input.autoCertContactEmail,
     releases: input.releases,
-    deployContexts: input.deployContexts,
-    deployMode: input.deployMode === undefined ? {kind : "select"} : input.deployMode,
+    configSources: input.configSources === undefined ? {} : input.configSources,
+    dynamicConfigSources: input.dynamicConfigSources === undefined ? {} : input.dynamicConfigSources,
+    deployMode: input.deployMode === undefined ? {kind : "noproxy"} : input.deployMode,
     healthCheck: input.healthCheck === undefined ? {kind : "just", value : {incomingPath : "/health-check", outgoingPath : "/"}} : input.healthCheck,
   };
 }
 
 const ToolConfig_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"releasesDir","default":{"kind":"just","value":"/opt/releases"},"name":"releasesDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/etc/deployment"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/hx-deploy-tool.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"hxdeploytoolcert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"deployContexts","default":{"kind":"nothing"},"name":"deployContexts","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContext"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"select"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}},{"annotations":[],"serializedName":"healthCheck","default":{"kind":"just","value":{"just":{"outgoingPath":"/","incomingPath":"/health-check"}}},"name":"healthCheck","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"HealthCheckConfig"}},"parameters":[]}]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"deploysDir","default":{"kind":"just","value":"/opt/deploys"},"name":"deploysDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"contextCache","default":{"kind":"just","value":"/opt/config"},"name":"contextCache","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"logFile","default":{"kind":"just","value":"/opt/var/log/camus2.log"},"name":"logFile","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptPrefixDir","default":{"kind":"just","value":"/opt"},"name":"letsencryptPrefixDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"just","value":"/opt/var/www"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"autoCertName","default":{"kind":"just","value":"camus2cert"},"name":"autoCertName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"autoCertContactEmail","default":{"kind":"just","value":""},"name":"autoCertContactEmail","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"releases","default":{"kind":"nothing"},"name":"releases","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"BlobStoreConfig"}},"parameters":[]}},{"annotations":[],"serializedName":"configSources","default":{"kind":"just","value":{}},"name":"configSources","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StringKeyMap"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StaticConfigName"}},"parameters":[]},{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"JsonSource"}},"parameters":[]}]}},{"annotations":[],"serializedName":"dynamicConfigSources","default":{"kind":"just","value":{}},"name":"dynamicConfigSources","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StringKeyMap"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"DynamicConfigName"}},"parameters":[]},{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DynamicJsonSource"}},"parameters":[]}]}},{"annotations":[],"serializedName":"deployMode","default":{"kind":"just","value":"noproxy"},"name":"deployMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployMode"}},"parameters":[]}},{"annotations":[],"serializedName":"healthCheck","default":{"kind":"just","value":{"just":{"outgoingPath":"/","incomingPath":"/health-check"}}},"name":"healthCheck","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"HealthCheckConfig"}},"parameters":[]}]}}]}},"name":"ToolConfig","version":{"kind":"nothing"}}};
 
 export function texprToolConfig(): ADL.ATypeExpr<ToolConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ToolConfig"}}, parameters : []}};
 }
 
-export interface DeployMode_Select {
-  kind: 'select';
+export interface DeployMode_Noproxy {
+  kind: 'noproxy';
 }
 export interface DeployMode_Proxy {
   kind: 'proxy';
   value: ProxyModeConfig;
 }
 
-export type DeployMode = DeployMode_Select | DeployMode_Proxy;
+export type DeployMode = DeployMode_Noproxy | DeployMode_Proxy;
 
 const DeployMode_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"select","default":{"kind":"nothing"},"name":"select","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}},{"annotations":[],"serializedName":"proxy","default":{"kind":"nothing"},"name":"proxy","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"ProxyModeConfig"}},"parameters":[]}}]}},"name":"DeployMode","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"noproxy","default":{"kind":"nothing"},"name":"noproxy","typeExpr":{"typeRef":{"kind":"primitive","value":"Void"},"parameters":[]}},{"annotations":[],"serializedName":"proxy","default":{"kind":"nothing"},"name":"proxy","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"ProxyModeConfig"}},"parameters":[]}}]}},"name":"DeployMode","version":{"kind":"nothing"}}};
 
 export function texprDeployMode(): ADL.ATypeExpr<DeployMode> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployMode"}}, parameters : []}};
@@ -104,7 +113,7 @@ export interface ProxyModeConfig {
   /**
    * The configured endpoints.
    */
-  endPoints: {[key: string]: EndPoint};
+  endPoints: types.StringKeyMap<types.EndPointLabel, EndPoint>;
   /**
    * If set, we are in remote mode, with state stored at this S3 path
    */
@@ -117,6 +126,7 @@ export interface ProxyModeConfig {
    * How we generate identifiers for slave machines
    */
   slaveLabel: MachineLabel;
+  slaveInterfaceName: string;
   /**
    * The mustache template to used be for the proxy nginx configuration
    * If not provided the builtin template will be used.
@@ -126,10 +136,11 @@ export interface ProxyModeConfig {
 
 export function makeProxyModeConfig(
   input: {
-    endPoints: {[key: string]: EndPoint},
+    endPoints: types.StringKeyMap<types.EndPointLabel, EndPoint>,
     remoteStateS3?: sys_types.Maybe<types.S3Path>,
     dynamicPortRange?: sys_types.Pair<number, number>,
     slaveLabel?: MachineLabel,
+    slaveInterfaceName?: string,
     nginxConfTemplatePath?: sys_types.Maybe<types.FilePath>,
   }
 ): ProxyModeConfig {
@@ -138,12 +149,13 @@ export function makeProxyModeConfig(
     remoteStateS3: input.remoteStateS3 === undefined ? {kind : "nothing"} : input.remoteStateS3,
     dynamicPortRange: input.dynamicPortRange === undefined ? {v1 : 8000, v2 : 8100} : input.dynamicPortRange,
     slaveLabel: input.slaveLabel === undefined ? {kind : "ec2InstanceId"} : input.slaveLabel,
+    slaveInterfaceName: input.slaveInterfaceName === undefined ? "eth0" : input.slaveInterfaceName,
     nginxConfTemplatePath: input.nginxConfTemplatePath === undefined ? {kind : "nothing"} : input.nginxConfTemplatePath,
   };
 }
 
 const ProxyModeConfig_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"endPoints","default":{"kind":"nothing"},"name":"endPoints","typeExpr":{"typeRef":{"kind":"primitive","value":"StringMap"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPoint"}},"parameters":[]}]}},{"annotations":[],"serializedName":"remoteStateS3","default":{"kind":"just","value":"nothing"},"name":"remoteStateS3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}]}},{"annotations":[],"serializedName":"dynamicPortRange","default":{"kind":"just","value":{"v1":8000,"v2":8100}},"name":"dynamicPortRange","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Pair"}},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]},{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}},{"annotations":[],"serializedName":"slaveLabel","default":{"kind":"just","value":"ec2InstanceId"},"name":"slaveLabel","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"MachineLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"nginxConfTemplatePath","default":{"kind":"just","value":"nothing"},"name":"nginxConfTemplatePath","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}]}}]}},"name":"ProxyModeConfig","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"endPoints","default":{"kind":"nothing"},"name":"endPoints","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StringKeyMap"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]},{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPoint"}},"parameters":[]}]}},{"annotations":[],"serializedName":"remoteStateS3","default":{"kind":"just","value":"nothing"},"name":"remoteStateS3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}]}},{"annotations":[],"serializedName":"dynamicPortRange","default":{"kind":"just","value":{"v1":8000,"v2":8100}},"name":"dynamicPortRange","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Pair"}},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]},{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}},{"annotations":[],"serializedName":"slaveLabel","default":{"kind":"just","value":"ec2InstanceId"},"name":"slaveLabel","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"MachineLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"slaveInterfaceName","default":{"kind":"just","value":"eth0"},"name":"slaveInterfaceName","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"nginxConfTemplatePath","default":{"kind":"just","value":"nothing"},"name":"nginxConfTemplatePath","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Maybe"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}]}}]}},"name":"ProxyModeConfig","version":{"kind":"nothing"}}};
 
 export function texprProxyModeConfig(): ADL.ATypeExpr<ProxyModeConfig> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "ProxyModeConfig"}}, parameters : []}};
@@ -198,27 +210,24 @@ export function texprMachineLabel(): ADL.ATypeExpr<MachineLabel> {
 }
 
 export interface EndPoint {
-  label: types.EndPointLabel;
   serverNames: string[];
   etype: EndPointType;
 }
 
 export function makeEndPoint(
   input: {
-    label: types.EndPointLabel,
     serverNames: string[],
     etype: EndPointType,
   }
 ): EndPoint {
   return {
-    label: input.label,
     serverNames: input.serverNames,
     etype: input.etype,
   };
 }
 
 const EndPoint_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"label","default":{"kind":"nothing"},"name":"label","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"EndPointLabel"}},"parameters":[]}},{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"etype","default":{"kind":"nothing"},"name":"etype","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"EndPointType"}},"parameters":[]}}]}},"name":"EndPoint","version":{"kind":"nothing"}}};
 
 export function texprEndPoint(): ADL.ATypeExpr<EndPoint> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "EndPoint"}}, parameters : []}};
@@ -282,50 +291,68 @@ export function texprSslCertPaths(): ADL.ATypeExpr<SslCertPaths> {
   return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "SslCertPaths"}}, parameters : []}};
 }
 
-export interface DeployContext {
-  name: string;
-  source: DeployContextSource;
-}
-
-export function makeDeployContext(
-  input: {
-    name: string,
-    source: DeployContextSource,
-  }
-): DeployContext {
-  return {
-    name: input.name,
-    source: input.source,
-  };
-}
-
-const DeployContext_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"name","default":{"kind":"nothing"},"name":"name","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"source","default":{"kind":"nothing"},"name":"source","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"DeployContextSource"}},"parameters":[]}}]}},"name":"DeployContext","version":{"kind":"nothing"}}};
-
-export function texprDeployContext(): ADL.ATypeExpr<DeployContext> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployContext"}}, parameters : []}};
-}
-
-export interface DeployContextSource_File {
+export interface JsonSource_File {
   kind: 'file';
   value: types.FilePath;
 }
-export interface DeployContextSource_S3 {
+export interface JsonSource_S3 {
   kind: 's3';
   value: types.S3Path;
 }
-export interface DeployContextSource_AwsSecretArn {
+export interface JsonSource_AwsSecretArn {
   kind: 'awsSecretArn';
   value: string;
 }
 
-export type DeployContextSource = DeployContextSource_File | DeployContextSource_S3 | DeployContextSource_AwsSecretArn;
+/**
+ * Methods of providing text for a config context
+ */
+export type JsonSource = JsonSource_File | JsonSource_S3 | JsonSource_AwsSecretArn;
 
-const DeployContextSource_AST : ADL.ScopedDecl =
-  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"file","default":{"kind":"nothing"},"name":"file","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"s3","default":{"kind":"nothing"},"name":"s3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}},{"annotations":[],"serializedName":"awsSecretArn","default":{"kind":"nothing"},"name":"awsSecretArn","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"DeployContextSource","version":{"kind":"nothing"}}};
+const JsonSource_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"file","default":{"kind":"nothing"},"name":"file","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"FilePath"}},"parameters":[]}},{"annotations":[],"serializedName":"s3","default":{"kind":"nothing"},"name":"s3","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"S3Path"}},"parameters":[]}},{"annotations":[],"serializedName":"awsSecretArn","default":{"kind":"nothing"},"name":"awsSecretArn","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}]}},"name":"JsonSource","version":{"kind":"nothing"}}};
 
-export function texprDeployContextSource(): ADL.ATypeExpr<DeployContextSource> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DeployContextSource"}}, parameters : []}};
+export function texprJsonSource(): ADL.ATypeExpr<JsonSource> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "JsonSource"}}, parameters : []}};
+}
+
+/**
+ * A config source that can be changed to different named Modes at runtime.
+ */
+export interface DynamicJsonSource {
+  defaultMode: types.DynamicConfigMode;
+  modes: types.StringKeyMap<types.DynamicConfigMode, JsonSource>;
+}
+
+export function makeDynamicJsonSource(
+  input: {
+    defaultMode: types.DynamicConfigMode,
+    modes: types.StringKeyMap<types.DynamicConfigMode, JsonSource>,
+  }
+): DynamicJsonSource {
+  return {
+    defaultMode: input.defaultMode,
+    modes: input.modes,
+  };
+}
+
+const DynamicJsonSource_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"defaultMode","default":{"kind":"nothing"},"name":"defaultMode","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"DynamicConfigMode"}},"parameters":[]}},{"annotations":[],"serializedName":"modes","default":{"kind":"nothing"},"name":"modes","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StringKeyMap"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"DynamicConfigMode"}},"parameters":[]},{"typeRef":{"kind":"reference","value":{"moduleName":"config","name":"JsonSource"}},"parameters":[]}]}}]}},"name":"DynamicJsonSource","version":{"kind":"nothing"}}};
+
+export function texprDynamicJsonSource(): ADL.ATypeExpr<DynamicJsonSource> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DynamicJsonSource"}}, parameters : []}};
+}
+
+/**
+ * Listing of available modes per configName
+ */
+export type DynamicConfigOptions = types.StringKeyMap<types.DynamicConfigName, sys_types.Set<types.DynamicConfigMode>>;
+
+const DynamicConfigOptions_AST : ADL.ScopedDecl =
+  {"moduleName":"config","decl":{"annotations":[],"type_":{"kind":"type_","value":{"typeParams":[],"typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"StringKeyMap"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"DynamicConfigName"}},"parameters":[]},{"typeRef":{"kind":"reference","value":{"moduleName":"sys.types","name":"Set"}},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"types","name":"DynamicConfigMode"}},"parameters":[]}]}]}}},"name":"DynamicConfigOptions","version":{"kind":"nothing"}}};
+
+export function texprDynamicConfigOptions(): ADL.ATypeExpr<DynamicConfigOptions> {
+  return {value : {typeRef : {kind: "reference", value : {moduleName : "config",name : "DynamicConfigOptions"}}, parameters : []}};
 }
 
 export enum Verbosity {
@@ -409,8 +436,9 @@ export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {
   "config.EndPointType" : EndPointType_AST,
   "config.SslCertMode" : SslCertMode_AST,
   "config.SslCertPaths" : SslCertPaths_AST,
-  "config.DeployContext" : DeployContext_AST,
-  "config.DeployContextSource" : DeployContextSource_AST,
+  "config.JsonSource" : JsonSource_AST,
+  "config.DynamicJsonSource" : DynamicJsonSource_AST,
+  "config.DynamicConfigOptions" : DynamicConfigOptions_AST,
   "config.Verbosity" : Verbosity_AST,
   "config.LetsEncryptConfig" : LetsEncryptConfig_AST
 };

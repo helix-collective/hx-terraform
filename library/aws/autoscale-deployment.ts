@@ -145,7 +145,7 @@ function createController(
   const controller_label = params.controller_label || name;
   const subnetId = externalSubnetId(sr.network);
 
-  const deploy_contexts: C.DeployContext[] =
+  const deploy_contexts: deploytool.DeployContext[] =
     params.controller_deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
@@ -213,7 +213,7 @@ function createProcessorAutoScaleGroup(
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
-  const deploy_contexts: C.DeployContext[] =
+  const deploy_contexts: deploytool.DeployContext[] =
     params.appserver_deploy_contexts || [];
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
@@ -558,8 +558,9 @@ function externalSubnetId(network: shared.NetworkResources): SubnetId {
 function deployToolEndpoints(
   sr: shared.SharedResources,
   endpoints: EndPoint[]
-): C.EndPoint[] {
-  return endpoints.map(ep => {
+): deploytool.EndPointMap {
+  const endPointMap: deploytool.EndPointMap = {};
+  endpoints.forEach(ep => {
     const fqdns: string[] = [];
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
@@ -580,8 +581,9 @@ function deployToolEndpoints(
         fqdns.push(url.fqdnsname);
       }
     });
-    return deploytool.httpProxyEndpoint(ep.name, fqdns);
+    endPointMap[ep.name] = deploytool.httpProxyEndpoint(ep.name, fqdns);
   });
+  return endPointMap;
 }
 
 type SubnetId = { type: 'SubnetId'; value: string };
@@ -630,7 +632,7 @@ interface AutoscaleProcessorParams {
    * The context files are fetched from S3 and made available to the controller instance for
    * interpolation into the deployed application configuration.
    */
-  controller_deploy_contexts?: C.DeployContext[];
+  controller_deploy_contexts?: deploytool.DeployContext[];
 
   /**
    * Label the deploy master instance and associated resources for client convenience
@@ -657,7 +659,7 @@ interface AutoscaleProcessorParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  appserver_deploy_contexts?: C.DeployContext[];
+  appserver_deploy_contexts?: deploytool.DeployContext[];
 
   /**
    * The EC2 instance created is given an IAM profile with sufficient access policies to

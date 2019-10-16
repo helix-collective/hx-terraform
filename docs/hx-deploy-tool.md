@@ -1,6 +1,6 @@
 # hx-deploy-tool
 
-This repository is commonly used with the hx-deploy-tool, a deployment automation tool
+This repository is commonly used with camus2, a deployment automation tool
 
 ## Releasing a build
 
@@ -21,13 +21,13 @@ Normally projects making use of this repo will also make use of Helix's deploy t
 Login to the machine of interest (usually an Amazon EC2 instance), and run the following:
 
 ```
-/opt/bin/hx-deploy-tool list-releases
+/opt/bin/camus2 list-releases
 ```
 
 Then take the release name of choice (including `.zip`), and perform the following command.
 
 ```
-/opt/bin/hx-deploy-tool proxy-deploy <release name>
+/opt/bin/camus2 start <release name>
 ```
 
 This process unpackages the application and injects secrets into the config files from the release.
@@ -35,17 +35,17 @@ It then stands up docker containers using the docker images uploaded from [Relea
 
 Then find out which endpoints exist with
 ```
-/opt/bin/hx-deploy-tool proxy-status
+/opt/bin/camus2 status
 ```
 
 Finally, point an endpoint to your deploy
 
 ```
-/opt/bin/hx-deploy-tool proxy-connect <endpoint> <release name>
+/opt/bin/camus2 connect <endpoint> <release name>
 ```
 
 If a previous deploy exists, take down that deploy
 
 ```
-/opt/bin/hx-deploy-tool proxy-undeploy <old release>
+/opt/bin/camus2 stop <old release>
 ```

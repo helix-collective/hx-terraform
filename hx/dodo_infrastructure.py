@@ -55,11 +55,11 @@ def update_deploytool(basedir):
         if not version:
             raise RuntimeError("A --version argument is required")
         print( "Fetching src...")
-        with urlopen('https://github.com/helix-collective/hx-deploy-tool/archive/{}.zip'.format(version)) as zf:
+        with urlopen('https://github.com/helix-collective/camus2/archive/{}.zip'.format(version)) as zf:
             zip = zipfile.ZipFile(io.BytesIO(zf.read()))
             zip.extractall(deploytooldir)
         print( "Extracting adl...")
-        unpackdir = deploytooldir/'hx-deploy-tool-{}'.format(version)
+        unpackdir = deploytooldir/'camus2-{}'.format(version)
         shutil.rmtree(str(deploytooldir/'adl'), ignore_errors=True)
         shutil.rmtree(str(deploytooldir/'adl-gen'), ignore_errors=True)
         shutil.move(str(unpackdir/'adl'), str(deploytooldir))
@@ -80,7 +80,7 @@ def update_deploytool(basedir):
         ] + adlstdlib), shell=True)
 
         with open('typescript/hx-terraform/library/deploytool/releaseurl.ts', 'w') as f:
-            f.write('export const release_url: string = "https://github.com/helix-collective/hx-deploy-tool/releases/download/{}/hx-deploy-tool.x86_64-linux.gz -O /opt/bin/hx-deploy-tool.gz";\n'.format(version))
+            f.write('export const release_url: string = "https://github.com/helix-collective/camus2/releases/download/{}/camus2.x86_64-linux.gz -O /opt/bin/camus2.gz";\n'.format(version))
 
 
     return {

@@ -13,12 +13,16 @@ export interface ContextFile {
   source_name: string;
 }
 
+export interface DeployContext {
+  name: string,
+  source: C.JsonSource
+};
+
 export function httpProxyEndpoint(
   label: string,
   serverNames: string[]
 ): C.EndPoint {
   return {
-    label,
     serverNames,
     etype: { kind: 'httpOnly' },
   };
@@ -29,7 +33,6 @@ export function httpsProxyEndpoint(
   serverNames: string[]
 ): C.EndPoint {
   return {
-    label,
     serverNames,
     etype: {
       kind: 'httpsWithRedirect',
@@ -38,14 +41,16 @@ export function httpsProxyEndpoint(
   };
 }
 
+export type EndPointMap = {[name:string]: C.EndPoint};
+
 export type ProxyConfig =
   | { kind: 'none' }
-  | { kind: 'local'; endpoints: C.EndPoint[]; nginxConfTemplatePath?: string }
-  | { kind: 'remoteSlave'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string }
-  | { kind: 'remoteMaster'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string };
+  | { kind: 'local'; endpoints: EndPointMap; nginxConfTemplatePath?: string }
+  | { kind: 'remoteSlave'; endpoints: EndPointMap; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string }
+  | { kind: 'remoteMaster'; endpoints: EndPointMap; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string };
 
 export function remoteProxyMaster(
-  endpoints: C.EndPoint[],
+  endpoints: EndPointMap,
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
@@ -53,7 +58,7 @@ export function remoteProxyMaster(
 }
 
 export function remoteProxySlave(
-  endpoints: C.EndPoint[],
+  endpoints: EndPointMap,
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
@@ -61,67 +66,57 @@ export function remoteProxySlave(
 }
 
 export function localProxy(
-  endpoints: C.EndPoint[],
+  endpoints: EndPointMap,
   nginxConfTemplatePath?: string
   ): ProxyConfig {
   return { endpoints, kind: 'local', nginxConfTemplatePath };
 }
 
-export function contextFromS3(name: string, s3Ref: s3.S3Ref): C.DeployContext {
-  return { name, source: { kind: 's3', value: s3Ref.url() } };
+export function contextFromS3(name: string, s3Ref: s3.S3Ref): DeployContext {
+  return {name, source:{ kind: 's3', value: s3Ref.url() }};
 }
 
 export function contextFromSecret(
   name: string,
   arn: ArnSecret
-): C.DeployContext {
-  return { name, source: { kind: 'awsSecretArn', value: arn.value } };
+): DeployContext {
+  return {name, source:{ kind: 'awsSecretArn', value: arn.value }};
 }
 
 export function contextFromDb(
   name: string,
   db: rds.DbInstance
-): C.DeployContext {
+): DeployContext {
   switch (db.password_to.kind) {
     case 's3':
-      return {
-        name,
-        source: { kind: 's3', value: db.password_to.s3Ref.url() },
-      };
+      return {name, source: {kind: 's3', value: db.password_to.s3Ref.url() }};
     case 'secret':
-      return {
-        name,
-        source: { kind: 'awsSecretArn', value: db.password_to.arnSecret.value },
-      };
+      return {name, source: {kind: 'awsSecretArn', value: db.password_to.arnSecret.value }};
   }
 }
 
 function remoteDeployMode(proxy: ProxyConfig, nginxConfTemplatePath: Maybe<string>): C.DeployMode {
   if (proxy.kind === 'none' || proxy.kind === 'local') {
-    throw Error('hx-deploy-tool not configured with proxy mode');
+    throw Error('camus2 not configured with proxy mode');
   }
-  const endPoints: { [key: string]: C.EndPoint } = {};
   const remoteStateS3: Maybe<string> = {
     kind: 'just',
     value: proxy.remoteStateS3.url(),
   };
-  proxy.endpoints.forEach(ep => {
-    endPoints[ep.label] = ep;
-  });
   return {
     kind: 'proxy',
-    value: C.makeProxyModeConfig({ endPoints, remoteStateS3, nginxConfTemplatePath: nginxConfTemplatePath}),
+    value: C.makeProxyModeConfig({ endPoints: proxy.endpoints, remoteStateS3, nginxConfTemplatePath: nginxConfTemplatePath}),
   };
 }
 
 /**
- * Construct a bootscript that installs and configures the hx-deploy-tool. This
+ * Construct a bootscript that installs and configures camus2. This
  * bootscript would normally be included into the complete instance bootscript.
  */
 export function install(
   username: string,
   releases: s3.S3Ref,
-  deployContexts: C.DeployContext[],
+  deployContexts: DeployContext[],
   proxy: ProxyConfig,
   healthCheck?: C.HealthCheckConfig,
   frontendproxy_nginx_conf_tpl?: string,
@@ -132,18 +127,19 @@ export function install(
     kind: 'nothing'
   };
   const bs = bootscript.newBootscript();
-  bs.comment('Install and configure hx-deploy-tool');
+  bs.comment('Install and configure camus2');
   bs.mkdir('/opt/etc');
   bs.mkdir('/opt/bin');
   bs.mkdir('/opt/var/log');
-  bs.mkdir('/opt/releases');
+  bs.mkdir('/opt/deploys');
   bs.mkdir('/opt/config');
   bs.sh(`chown -R ${username}:${username} /opt/config`);
-  bs.sh(`chown -R ${username}:${username} /opt/releases`);
+  bs.sh(`chown -R ${username}:${username} /opt/deploys`);
   bs.sh(`chown -R ${username}:${username} /opt/var/log`);
   bs.sh('wget ' + release_url);
-  bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
-  bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
+  bs.gunzip(['/opt/bin/camus2.gz']);
+  bs.sh('chmod 755 /opt/bin/camus2');
+  bs.sh('(cd /opt/bin; ln -s camus2 c2)');
 
   if(frontendproxy_nginx_conf_tpl != undefined) {
     nginxConfTemplatePath = { kind: 'just', value:'/opt/etc/frontendproxy.nginx.conf.tpl' }
@@ -154,18 +150,14 @@ export function install(
 
   switch (proxy.kind) {
     case 'none':
-      deployMode = { kind: 'select' };
+      deployMode = { kind: 'noproxy' };
       break;
     case 'local':
       {
-        const endPoints: { [key: string]: C.EndPoint } = {};
-        proxy.endpoints.forEach(ep => {
-          endPoints[ep.label] = ep;
-        });
         deployMode = {
           kind: 'proxy',
           value: C.makeProxyModeConfig({ 
-            endPoints,
+            endPoints: proxy.endpoints,
             nginxConfTemplatePath}),
         };
       }
@@ -179,10 +171,14 @@ export function install(
     default:
       throw Error(`proxy kind is unrecognised`);
   }
+  const configSources: {[name:string]: C.JsonSource} = {};
+  deployContexts.forEach( dc => {
+    configSources[dc.name] = dc.source;
+  });
 
   const jb = createJsonBinding(RESOLVER, C.texprToolConfig());
   const config = C.makeToolConfig({
-    deployContexts,
+    configSources,
     deployMode,
     healthCheck: healthCheck ? { kind: "just", value: healthCheck} : { kind: "nothing" },
     releases: {
@@ -192,8 +188,8 @@ export function install(
     contextCache: '/opt/config',
     autoCertContactEmail: ssl_cert_email,
   });
-  const deployContextFiles = bs.catToFile(
-    '/opt/etc/hx-deploy-tool.json',
+  bs.catToFile(
+    '/opt/etc/camus2.json',
     JSON.stringify(jb.toJson(config), null, 2)
   );
 
@@ -216,7 +212,8 @@ function letsEncryptSSL(
   const certdnsnames: string[] = [];
 
   if (proxy.kind === 'local') {
-    for (const ep of proxy.endpoints) {
+    for (const epname of Object.keys(proxy.endpoints)) {
+      const ep = proxy.endpoints[epname];
       if (
         ep.etype.kind === 'httpsWithRedirect' &&
         ep.etype.value.kind === 'generated'
@@ -235,7 +232,7 @@ function letsEncryptSSL(
 
   switch (challenge_mode) {
     case 'http-01':
-      const cmd = '/opt/bin/hx-deploy-tool proxy-generate-ssl-certificate';
+      const cmd = '/opt/bin/camus2 generate-ssl-certificate';
       bs.comment('generate an ssl certificate');
       bs.sh('sudo -u app ' + cmd);
       bs.cronJob('ssl-renewal', [
@@ -263,12 +260,12 @@ function bootscriptProxySlaveUpdate(
     `MAILTO=""`,
     `15 0 * * * ${username} docker kill --signal=SIGHUP frontendproxy`,
   ]);
-  bs.systemd('proxy-slave-update', [
+  bs.systemd('slave-update', [
     `[Unit]`,
-    `Description=Periodically refresh local hx-deploy-tool proxy state from S3`,
+    `Description=Periodically refresh local camus2 proxy state from S3`,
     ``,
     `[Service]`,
-    `ExecStart=/opt/bin/hx-deploy-tool proxy-slave-update --repeat 20`,
+    `ExecStart=/opt/bin/camus2 slave-update --repeat 20`,
     `User=${username}`,
     `Restart=on-failure`,
     `WorkingDirectory=~`,

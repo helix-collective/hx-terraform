@@ -1,9 +1,11 @@
 module state {
 
 import sys.types.Map;
-import sys.types.Maybe;
 import types.EndPointLabel;
 import types.DeployLabel;
+import types.StringKeyMap;
+import types.DynamicConfigMode;
+import types.DynamicConfigName;
 
 // The system state stored to manage multiple deploys with
 // a proxy for live switching between them and, where specified, SSL
@@ -11,10 +13,31 @@ import types.DeployLabel;
 
 struct State {
   // Live deployments
-  StringMap<Deploy> deploys;
+  StringKeyMap<DeployLabel, Deploy> deploys;
 
   // Connections between the configured endpoints and deployments
-  StringMap<DeployLabel> connections;
+  StringKeyMap<EndPointLabel, DeployLabel> connections;
+};
+
+
+// The (remotely) reported state of a slave
+struct SlaveState {
+  // The result of the last state change
+  SlaveStatus status;
+  
+  // The IP of the slave on which camus2 is running
+  String ipAddress;
+
+  //Host name of the slave
+  String hostName;
+
+  // The state of the slave after the last succesful state change
+  State state;
+};
+
+union SlaveStatus {
+  Void ok;
+  String error;
 };
 
 // A running deployed system
@@ -22,6 +45,7 @@ struct Deploy {
   DeployLabel label;
   String release;
   Word32 port;
+  StringKeyMap<DynamicConfigName, DynamicConfigMode> dynamicConfigModes;
 };
 
 };

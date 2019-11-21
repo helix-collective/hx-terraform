@@ -35,7 +35,7 @@ interface PasswordStoreSecretManager {
 /**
  * Create an RDS postgres database, with suitable defaults for a uat helix environment.
  * The defaults can be overridden via the customize parameter. A randomly master password
- * will be generated, and stored as json in the password_s3 location.
+ * will be generated, and stored as json in the password_to location.
  */
 export function createPostgresInstance(
   tfgen: TF.Generator,

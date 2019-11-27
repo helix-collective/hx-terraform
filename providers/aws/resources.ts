@@ -2248,6 +2248,7 @@ export interface DbInstanceParams {
   storage_encrypted?: boolean;
   storage_type?: AT.DbInstanceStorageType;
   iops?: number;
+  snapshot_identifier?: string;
   monitoring_interval?: number;
 }
 
@@ -2278,6 +2279,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
   TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
   TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalField(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
   TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
   return fields;
 }

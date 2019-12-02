@@ -26,8 +26,17 @@ def run_dockerized_terraform(terraform_image, args):
     cmd += "-v {0}:{0} ".format(os.environ['HOME'])
     if using_nix:
         cmd += "-v /nix:/nix "
-    cmd += "-e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SHARED_CREDENTIALS_FILE -e AWS_PROFILE "
-    cmd += "-e TF_LOG "
+
+    envs_whitelist = {
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SHARED_CREDENTIALS_FILE",
+        "AWS_PROFILE",
+        "TF_LOG",
+    }
+    cmd += ' '.join(["-e " + e for e in envs_whitelist])
+    cmd += ' '
+
     cmd += "{} ".format(terraform_image)
     cmd += "terraform "
     cmd += ' '.join(args)

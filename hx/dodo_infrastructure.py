@@ -32,6 +32,7 @@ def run_dockerized_terraform(terraform_image, args):
         "AWS_SECRET_ACCESS_KEY",
         "AWS_SHARED_CREDENTIALS_FILE",
         "AWS_PROFILE",
+        "AWS_SESSION_TOKEN",
         "TF_LOG",
     }
     cmd += ' '.join(["-e " + e for e in envs_whitelist])

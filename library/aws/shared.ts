@@ -104,24 +104,6 @@ export function createResources(
     tags: tfgen.tagsContext(),
   });
 
-  // const config_bucket_name = s3_bucket_prefix + "-shared-config";
-  // const config_bucket = AR.createS3Bucket(tfgen, "config", {
-  //   bucket: config_bucket_name,
-  //   versioning: {
-  //     enabled: true
-  //   },
-  //   tags: tfgen.tagsContext()
-  // });
-
-  s3.createObjectFromJson(
-    tfgen,
-    'config',
-    new s3.S3Ref(deploy_bucket_name, 'shared/config/config.json'),
-    {
-      s3_deploy_bucket: deploy_bucket.id,
-    }
-  );
-
   const bastion_security_group = AR.createSecurityGroup(tfgen, 'bastion', {
     vpc_id: network.vpc.id,
     ingress: [ingressOnPort(22)],

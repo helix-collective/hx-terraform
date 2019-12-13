@@ -439,6 +439,7 @@ const cloudwatch_metric_alarm: RecordDecl = {
     ),
     requiredField('threshold', NUMBER),
     optionalField('actions_enabled', BOOLEAN),
+    optionalField('datapoints_to_alarm', NUMBER),
     optionalField('alarm_actions', listType(stringAliasType('AT.Arn'))),
     optionalField('alarm_description', STRING),
     optionalField('dimensions', TAGS_MAP),

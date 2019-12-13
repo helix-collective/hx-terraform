@@ -2772,6 +2772,7 @@ export interface CloudwatchMetricAlarmParams {
   statistic: 'SampleCount' | 'Average' | 'Sum' | 'Minimum' | 'Maximum';
   threshold: number;
   actions_enabled?: boolean;
+  datapoints_to_alarm?: number;
   alarm_actions?: (AT.Arn)[];
   alarm_description?: string;
   dimensions?: TF.TagsMap;
@@ -2791,6 +2792,7 @@ export function fieldsFromCloudwatchMetricAlarmParams(params: CloudwatchMetricAl
   TF.addField(fields, "statistic", params.statistic, TF.stringValue);
   TF.addField(fields, "threshold", params.threshold, TF.numberValue);
   TF.addOptionalField(fields, "actions_enabled", params.actions_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "datapoints_to_alarm", params.datapoints_to_alarm, TF.numberValue);
   TF.addOptionalField(fields, "alarm_actions", params.alarm_actions, TF.listValue(TF.stringAliasValue));
   TF.addOptionalField(fields, "alarm_description", params.alarm_description, TF.stringValue);
   TF.addOptionalField(fields, "dimensions", params.dimensions, TF.tagsValue);

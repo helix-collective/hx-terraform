@@ -347,7 +347,7 @@ export interface EndPointHttpsExternalUrl {
   proxied_from?: string[];
 }
 
-interface Ec2Deployment {
+export interface Ec2Deployment {
   eip: AR.Eip;
   ec2: AR.Instance;
 }

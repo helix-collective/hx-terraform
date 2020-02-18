@@ -40,10 +40,11 @@ export function createScalingAlarms(
 export function createEc2Alarms(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
-  ec2: AR.Instance
+  ec2: AR.Instance,
+  filesystem: AlarmRootFilesystem,
 ) {
   createEc2HighCpuAlarm(tfgen, topic, ec2);
-  createEc2HighDiskAlarm(tfgen, topic, ec2);
+  createEc2HighDiskAlarm(tfgen, topic, ec2, filesystem);
   createEc2HighMemAlarm(tfgen, topic, ec2);
 }
 
@@ -143,10 +144,26 @@ export function createScalingLowHostsAlarm(
   });
 }
 
+type AlarmRootFilesystem = '/dev/xvda1' | '/dev/nvme0n1p1';
+
+/**
+ * Create a cloudwatch alarm for excessive disk usage on an
+ * EC2 instances root disk. This relies on the AWS
+ * CloudWatchMonitoringScripts on the machine to have generated
+ * the metrics.
+ *
+ * The filessystem parameter must be set appropriately for the
+ * instance type. Older types seem to need /dev/xvda1, newer have
+ * needed /dev/nvme0n1p1.
+ *
+ * If in doubt, login to the machine and run df to determin the
+ * correct value
+ */
 export function createEc2HighDiskAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
-  ec2: AR.Instance
+  ec2: AR.Instance,
+  filesystem: AlarmRootFilesystem,
 ) {
   const name = 'highdisk';
   return AR.createCloudwatchMetricAlarm(tfgen, name, {
@@ -160,7 +177,7 @@ export function createEc2HighDiskAlarm(
     threshold: 90,
     dimensions: {
       InstanceId: ec2.id.value,
-      Filesystem: '/dev/xvda1',
+      Filesystem: filesystem,
       MountPath: '/',
     },
     alarm_description: 'Sustained high disk usage for application server',
@@ -191,6 +208,12 @@ export function createEc2HighCpuAlarm(
   });
 }
 
+/**
+ * Create a cloudwatch alarm for excessive memory usage on an
+ * EC2 instance. This relies on the AWS CloudWatchMonitoringScripts
+ * on the machine to have generated the metrics.
+ *
+ */
 export function createEc2HighMemAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,

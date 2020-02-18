@@ -12,8 +12,8 @@ import * as util from '../util';
 import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as docker from '../docker';
-import * as deploytool from '../deploytool/deploytool';
-import * as C from '../../library/deploytool/adl-gen/config';
+import * as camus2 from '../camus2/camus2';
+import * as C from '../../library/camus2/adl-gen/config';
 
 /**
  *  Creates a logical deployment on a single EC2 instance, including:
@@ -37,7 +37,7 @@ export function createEc2Deployment(
   const bs = bootscript.newBootscript();
   const app_user = params.app_user || 'app';
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-  let deploy_contexts: deploytool.DeployContext[];
+  let deploy_contexts: camus2.DeployContext[];
   if (params.deploy_contexts) {
     deploy_contexts = params.deploy_contexts;
   } else {
@@ -56,11 +56,11 @@ export function createEc2Deployment(
   const health_check = undefined;
 
   bs.include(
-    deploytool.install(
+    camus2.install(
       app_user,
       params.releases_s3,
       deploy_contexts,
-      deploytool.localProxy(proxy_endpoints),
+      camus2.localProxy(proxy_endpoints),
       health_check,
       params.frontendproxy_nginx_conf_tpl,
       params.ssl_cert_email,
@@ -170,8 +170,8 @@ export function endpointUrl(
 export function deployToolEndpoints(
   sr: shared.SharedResources,
   endpoints: EndPoint[]
-): deploytool.EndPointMap {
-  const endPointMap: deploytool.EndPointMap = {};
+): camus2.EndPointMap {
+  const endPointMap: camus2.EndPointMap = {};
 
   endpoints.forEach(ep => {
     const http_fqdns: string[] = [];
@@ -192,9 +192,9 @@ export function deployToolEndpoints(
       }
     });
     if (https_fqdns.length > 0) {
-      endPointMap[ep.name] = deploytool.httpsProxyEndpoint(ep.name, https_fqdns);
+      endPointMap[ep.name] = camus2.httpsProxyEndpoint(ep.name, https_fqdns);
     } else {
-      endPointMap[ep.name] = deploytool.httpProxyEndpoint(ep.name, http_fqdns);
+      endPointMap[ep.name] = camus2.httpProxyEndpoint(ep.name, http_fqdns);
     }
   });
 

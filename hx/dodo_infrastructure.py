@@ -41,28 +41,28 @@ def dockerized_adlc(wdir,rcmd):
     cmd += ' '.join(rcmd)
     return cmd
 
-def update_deploytool(basedir):
+def update_camus2(basedir):
     """
-    Returns a doit task to update the version of the deploytool in this repo
+    Returns a doit task to update the version of the camus2 in this repo
     This imports the adl and regenerating the typescript:
 
-       => deploytool/adl/...         the deploy tool adl files
-       => deploytool/adl-gen/...     typescript generated from the adl
-       => deploytool/releaseurl.ts   url of chosen release
+       => camus2/adl/...         the deploy tool adl files
+       => camus2/adl-gen/...     typescript generated from the adl
+       => camus2/releaseurl.ts   url of chosen release
     """
-    def update_deploytool(version):
-        deploytooldir = basedir/'typescript/hx-terraform/library/deploytool'
+    def update_camus2(version):
+        camus2dir = basedir/'typescript/hx-terraform/library/camus2'
         if not version:
             raise RuntimeError("A --version argument is required")
         print( "Fetching src...")
         with urlopen('https://github.com/helix-collective/camus2/archive/{}.zip'.format(version)) as zf:
             zip = zipfile.ZipFile(io.BytesIO(zf.read()))
-            zip.extractall(deploytooldir)
+            zip.extractall(camus2dir)
         print( "Extracting adl...")
-        unpackdir = deploytooldir/'camus2-{}'.format(version)
-        shutil.rmtree(str(deploytooldir/'adl'), ignore_errors=True)
-        shutil.rmtree(str(deploytooldir/'adl-gen'), ignore_errors=True)
-        shutil.move(str(unpackdir/'adl'), str(deploytooldir))
+        unpackdir = camus2dir/'camus2-{}'.format(version)
+        shutil.rmtree(str(camus2dir/'adl'), ignore_errors=True)
+        shutil.rmtree(str(camus2dir/'adl-gen'), ignore_errors=True)
+        shutil.move(str(unpackdir/'adl'), str(camus2dir))
         shutil.rmtree(str(unpackdir))
         print( "Generating typescript...")
         out = subprocess.check_output(dockerized_adlc(basedir, [
@@ -71,20 +71,20 @@ def update_deploytool(basedir):
         adlstdlib = [f.decode('utf-8') for f in out.split()];
         subprocess.check_call(dockerized_adlc(basedir, [
             "adlc", "typescript ",
-            "--searchdir", str(deploytooldir/'adl'),
+            "--searchdir", str(camus2dir/'adl'),
             "--runtime-dir", 'runtime',
-            "--outputdir", str(deploytooldir/'adl-gen'),
+            "--outputdir", str(camus2dir/'adl-gen'),
             "--include-rt",
             "--include-resolver",
-            str(deploytooldir/'adl/*.adl')
+            str(camus2dir/'adl/*.adl')
         ] + adlstdlib), shell=True)
 
-        with open('typescript/hx-terraform/library/deploytool/releaseurl.ts', 'w') as f:
+        with open('typescript/hx-terraform/library/camus2/releaseurl.ts', 'w') as f:
             f.write('export const release_url: string = "https://github.com/helix-collective/camus2/releases/download/{}/camus2.x86_64-linux.gz -O /opt/bin/camus2.gz";\n'.format(version))
 
 
     return {
-        'doc' : 'Update the referenced version of the deploytool, importing adl and regenerating the typescript',
+        'doc' : 'Update the referenced version of the camus2, importing adl and regenerating the typescript',
         'params': [
             {
                 'name' : 'version',
@@ -93,7 +93,7 @@ def update_deploytool(basedir):
                 'default': ''
             },
         ],
-        'actions': [update_deploytool],
+        'actions': [update_camus2],
         'verbosity': 2
     }
 

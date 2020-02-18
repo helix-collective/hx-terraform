@@ -5,7 +5,7 @@ import zipfile
 from datetime import date
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules, fileAge
-from hx.dodo_infrastructure import run_dockerized_terraform, update_deploytool, lambdazip_file_task, lambdazip_pydir_task
+from hx.dodo_infrastructure import run_dockerized_terraform, update_camus2, lambdazip_file_task, lambdazip_pydir_task
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -138,8 +138,8 @@ def task_output():
         'uptodate': [False],
     }
 
-def task_update_deploytool():
-    return update_deploytool(HERE)
+def task_update_camus2():
+    return update_camus2(HERE)
 
 def task_terraform_init():
     # You can only run this target after the infrastructure has been

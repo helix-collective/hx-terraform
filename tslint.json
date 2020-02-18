@@ -39,6 +39,6 @@
   "rulesDirectory": [],
 
   "linterOptions": {
-    "exclude": ["library/deploytool/adl-gen/**/*.ts"]
+    "exclude": ["library/deploytool/adl-gen/**/*.ts","library/camus2/adl-gen/**/*.ts"]
   }
 }

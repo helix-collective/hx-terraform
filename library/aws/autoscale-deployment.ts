@@ -9,8 +9,8 @@ import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as policies from './policies';
 import * as docker from '../docker';
-import * as deploytool from '../deploytool/deploytool';
-import * as C from '../../library/deploytool/adl-gen/config';
+import * as camus2 from '../camus2/camus2';
+import * as C from '../../library/camus2/adl-gen/config';
 
 import {
   EndPoint,
@@ -145,7 +145,7 @@ function createController(
   const controller_label = params.controller_label || name;
   const subnetId = externalSubnetId(sr.network);
 
-  const deploy_contexts: deploytool.DeployContext[] =
+  const deploy_contexts: camus2.DeployContext[] =
     params.controller_deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
@@ -157,11 +157,11 @@ function createController(
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
 
   bs.include(
-    deploytool.install(
+    camus2.install(
       app_user,
       releases_s3,
       deploy_contexts,
-      deploytool.remoteProxyMaster(proxy_endpoints, state_s3),
+      camus2.remoteProxyMaster(proxy_endpoints, state_s3),
       params.health_check,
       params.frontendproxy_nginx_conf_tpl,
     )
@@ -213,7 +213,7 @@ function createProcessorAutoScaleGroup(
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
   const state_s3 = params.state_s3;
-  const deploy_contexts: deploytool.DeployContext[] =
+  const deploy_contexts: camus2.DeployContext[] =
     params.appserver_deploy_contexts || [];
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
@@ -232,11 +232,11 @@ function createProcessorAutoScaleGroup(
   });
 
   bs.include(
-    deploytool.install(
+    camus2.install(
       app_user,
       params.releases_s3,
       deploy_contexts,
-      deploytool.remoteProxySlave(proxy_endpoints, state_s3),
+      camus2.remoteProxySlave(proxy_endpoints, state_s3),
       params.health_check,
       params.frontendproxy_nginx_conf_tpl
     )
@@ -558,8 +558,8 @@ function externalSubnetId(network: shared.NetworkResources): SubnetId {
 function deployToolEndpoints(
   sr: shared.SharedResources,
   endpoints: EndPoint[]
-): deploytool.EndPointMap {
-  const endPointMap: deploytool.EndPointMap = {};
+): camus2.EndPointMap {
+  const endPointMap: camus2.EndPointMap = {};
   endpoints.forEach(ep => {
     const fqdns: string[] = [];
     ep.urls.forEach(url => {
@@ -581,7 +581,7 @@ function deployToolEndpoints(
         fqdns.push(url.fqdnsname);
       }
     });
-    endPointMap[ep.name] = deploytool.httpProxyEndpoint(ep.name, fqdns);
+    endPointMap[ep.name] = camus2.httpProxyEndpoint(ep.name, fqdns);
   });
   return endPointMap;
 }
@@ -632,7 +632,7 @@ interface AutoscaleProcessorParams {
    * The context files are fetched from S3 and made available to the controller instance for
    * interpolation into the deployed application configuration.
    */
-  controller_deploy_contexts?: deploytool.DeployContext[];
+  controller_deploy_contexts?: camus2.DeployContext[];
 
   /**
    * Label the deploy master instance and associated resources for client convenience
@@ -659,7 +659,7 @@ interface AutoscaleProcessorParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  appserver_deploy_contexts?: deploytool.DeployContext[];
+  appserver_deploy_contexts?: camus2.DeployContext[];
 
   /**
    * The EC2 instance created is given an IAM profile with sufficient access policies to

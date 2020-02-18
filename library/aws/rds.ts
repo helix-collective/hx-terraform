@@ -76,7 +76,7 @@ export function createPostgresInstance(
     password: 'REPLACEME',
     identifier: sname.replace(/_/g, '-'),
     name: params.db_name,
-    engine_version: '9.4.20',
+    engine_version: '11.5',
     publicly_accessible: false,
     backup_retention_period: 3,
     vpc_security_group_ids: [security_group.id],

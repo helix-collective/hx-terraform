@@ -860,6 +860,45 @@ const autoscaling_group_tag: RecordDecl = {
   ],
 };
 
+
+const customized_metric_specification = {
+  name: 'customized_metric_specification',
+  fields: [
+    requiredField('namespace', STRING),
+    requiredField('metric_name', stringAliasType('AT.Arn')),
+    requiredField('statistic', STRING),
+    requiredField('unit', STRING),
+    requiredField('dimensions', TAGS_MAP),
+  ],
+};
+
+const target_tracking_scaling_policy_configuration = {
+  name: 'target_tracking_scaling_policy_configuration',
+  fields: [
+    requiredField(
+      'customized_metric_specification',
+      recordType(customized_metric_specification)
+    ),
+    requiredField('target_value', NUMBER),
+    requiredField('scale_in_cooldown', NUMBER),
+    requiredField('scale_out_cooldown', NUMBER),
+  ],
+};
+
+const aws_appautoscaling_policy: RecordDecl = {
+  name: 'aws_appautoscaling_policy',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('policy_type', STRING),
+    requiredField('resource_id', NUMBER),
+    requiredField('scalable_dimension', STRING),
+    requiredField('service_namespace', STRING),
+    requiredField(
+      'target_tracking_scaling_policy_configuration',
+      recordType(target_tracking_scaling_policy_configuration)),
+  ],
+};
+
 const autoscaling_schedule: RecordDecl = {
   name: 'autoscaling_schedule',
   fields: [

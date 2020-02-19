@@ -15,6 +15,9 @@ import * as docker from '../docker';
 import * as camus2 from '../camus2/camus2';
 import * as C from '../../library/camus2/adl-gen/config';
 
+import * as deploytool from '../deploytool_legacy/deploytool';
+import * as DC from '../../library/deploytool_legacy/adl-gen/config';
+
 /**
  *  Creates a logical deployment on a single EC2 instance, including:
  *
@@ -55,18 +58,44 @@ export function createEc2Deployment(
 
   const health_check = undefined;
 
-  bs.include(
-    camus2.install(
-      app_user,
-      params.releases_s3,
-      deploy_contexts,
-      camus2.localProxy(proxy_endpoints),
-      health_check,
-      params.frontendproxy_nginx_conf_tpl,
-      params.ssl_cert_email,
-      params.letsencrypt_challenge_type
-    )
-  );
+  if (params.use_hxdeploytool) {
+    const legacy_proxy_endpoints: DC.EndPoint[] = [];
+    for(const label of Object.keys(proxy_endpoints)) {
+      const pe = proxy_endpoints[label];
+      legacy_proxy_endpoints.push({
+        ...pe,
+        label,
+      });
+    }
+    
+
+    bs.include(
+      // Legacy hx-deploytool support
+      deploytool.install(
+        app_user,
+        params.releases_s3,
+        deploy_contexts,
+        deploytool.localProxy(legacy_proxy_endpoints),
+        health_check,
+        params.frontendproxy_nginx_conf_tpl,
+        params.ssl_cert_email,
+        params.letsencrypt_challenge_type
+      )
+    );
+  } else {
+    bs.include(
+      camus2.install(
+        app_user,
+        params.releases_s3,
+        deploy_contexts,
+        camus2.localProxy(proxy_endpoints),
+        health_check,
+        params.frontendproxy_nginx_conf_tpl,
+        params.ssl_cert_email,
+        params.letsencrypt_challenge_type
+      )
+    );
+  }
 
   if (params.extra_bootscript) {
     bs.include(params.extra_bootscript);
@@ -303,6 +332,12 @@ export interface Ec2DeploymentParams {
    * Substitute the default nginx template used.
    */
   frontendproxy_nginx_conf_tpl?: string;
+
+  /**
+   * Use legacy hx-deploy-tool. If not specified, camus2
+   * will be used
+   */
+   use_hxdeploytool?: boolean;
 }
 
 // An Endpoint consists of a name and one or more connected

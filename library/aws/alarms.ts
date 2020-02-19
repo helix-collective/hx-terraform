@@ -1,5 +1,6 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
+import { Customize } from "../util";
 
 // How to prepare alarms:
 //    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc
@@ -288,10 +289,11 @@ export function createQueueLengthAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   queue: AR.SqsQueue,
-  maxlength: number
+  maxlength: number,
+  customize?: Customize<AR.CloudwatchMetricAlarmParams>
 ) {
   const name = 'queuelength';
-  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+  const params: AR.CloudwatchMetricAlarmParams = {
     alarm_name: tfgen.scopedName(name).join('_'),
     comparison_operator: 'GreaterThanThreshold',
     evaluation_periods: 2,
@@ -305,7 +307,11 @@ export function createQueueLengthAlarm(
     },
     alarm_description: `The sustained length of the message queue is greater than ${maxlength}`,
     alarm_actions: [topic.arn],
-  });
+  };
+  if (customize) {
+    customize(params);
+  }
+  return AR.createCloudwatchMetricAlarm(tfgen, name, params);
 }
 
 export function createLambdaFunctionErrorAlarm(

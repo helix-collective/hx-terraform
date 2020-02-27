@@ -3,6 +3,7 @@ import * as fs from 'fs';
 export interface RecordDecl {
   name: string;
   fields: FieldDecl[];
+  variants?: { [key: string]: RecordDecl };
 }
 
 export interface FieldDecl {
@@ -337,20 +338,61 @@ export function fileGenerator(
 
   function generateParams(record: RecordDecl) {
     const interfaceName = paramsInterfaceName(record.name);
-    lines.push(`export interface ${prefix}${interfaceName} {`);
-    for (const field of record.fields) {
-      const type = genType(field.type);
-      const optional = field.optional ? '?' : '';
-      if (field.docs !== undefined && field.docs.length > 0) {
-        lines.push(`  /**`);
-        for (const doc of field.docs) {
-          lines.push(`  ${doc}`);
+
+    if (record.variants !== undefined) {
+      const variantTypes = [];
+      for (const v in record.variants) {
+        const rec = record.variants[v];
+        const variantType = `${prefix}${interfaceName}${camelFromSnake(v)}`;
+        variantTypes.push(variantType);
+        lines.push(`export type ${variantType} = {`);
+        lines.push(`  kind:"${v}"`);
+        for (const field of rec.fields) {
+          const type = genType(field.type);
+          const optional = field.optional ? '?' : '';
+          if (field.docs !== undefined && field.docs.length > 0) {
+            lines.push(`  /**`);
+            for (const doc of field.docs) {
+              lines.push(`  ${doc}`);
+            }
+            lines.push(`  */`);
+          }
+          lines.push(`  ${field.field}${optional}: ${type};`);
         }
-        lines.push(`  */`);
+        lines.push('};');
+        lines.push('');
       }
-      lines.push(`  ${field.field}${optional}: ${type};`);
+
+      lines.push(`export type ${prefix}${interfaceName} = {`);
+      for (const field of record.fields) {
+        const type = genType(field.type);
+        const optional = field.optional ? '?' : '';
+        if (field.docs !== undefined && field.docs.length > 0) {
+          lines.push(`  /**`);
+          for (const doc of field.docs) {
+            lines.push(`  ${doc}`);
+          }
+          lines.push(`  */`);
+        }
+        lines.push(`  ${field.field}${optional}: ${type};`);
+      }
+      lines.push('} & ' + '(' + variantTypes.join('|') + ')');
+    } else {
+      lines.push(`export interface ${prefix}${interfaceName} {`);
+      for (const field of record.fields) {
+        const type = genType(field.type);
+        const optional = field.optional ? '?' : '';
+        if (field.docs !== undefined && field.docs.length > 0) {
+          lines.push(`  /**`);
+          for (const doc of field.docs) {
+            lines.push(`  ${doc}`);
+          }
+          lines.push(`  */`);
+        }
+        lines.push(`  ${field.field}${optional}: ${type};`);
+      }
+      lines.push('}');
     }
-    lines.push('}');
     lines.push('');
     lines.push(
       `export function fieldsFrom${prefix}${interfaceName}(params: ${prefix}${interfaceName}) : TF.ResourceFieldMap {`
@@ -369,6 +411,33 @@ export function fileGenerator(
         );
       }
     }
+
+    if (record.variants !== undefined) {
+      lines.push(`  switch(params.kind){`);
+      for (const v in record.variants) {
+        const rec = record.variants[v];
+        const variantType = `${prefix}${interfaceName}${camelFromSnake(v)}`;
+
+        lines.push(`    case "${v}": {`);
+        for (const field of rec.fields) {
+          const fname = field.field;
+          const toResourceFn = genResourceFn(field.type);
+          if (field.optional) {
+            lines.push(
+              `      TF.addOptionalField(fields, "${fname}", params.${fname}, ${toResourceFn});`
+            );
+          } else {
+            lines.push(
+              `      TF.addField(fields, "${fname}", params.${fname}, ${toResourceFn});`
+            );
+          }
+        }
+        lines.push(`      break;`);
+        lines.push(`    }`);
+      }
+      lines.push(`  }`);
+    }
+
     lines.push('  return fields;');
     lines.push('}');
     lines.push('');

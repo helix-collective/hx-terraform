@@ -27,18 +27,18 @@ export interface LoggingInfrastructureParams {
   log_cleanup?: LogCleanupMode;
 }
 
-export type LogCleanupMode = { kind: 'older_than_months', months: number };
+export type LogCleanupMode = { kind: 'older_than_months'; months: number };
 
 export interface LoggingCognitoParams {
   // The cognito user pool being given access to kibana
-  user_pool_id: AR.CognitoUserPoolId,
+  user_pool_id: AR.CognitoUserPoolId;
 
   // The cognito identity pool being given access to kibana
-  identity_pool_id: AR.CognitoIdentityPoolId,
+  identity_pool_id: AR.CognitoIdentityPoolId;
 
   // The role that needs to be able to access elasticsearch
-  auth_role_arn: AR.IamRoleArn,
-};
+  auth_role_arn: AR.IamRoleArn;
+}
 
 export interface LoggingInfrastructure {
   aggregator_ipaddresses: AT.IpAddress[];
@@ -164,7 +164,10 @@ export function createLoggingInfrastructure(
     '/opt/etc/secrets/fluentd-sender.crt',
     10
   );
-  bs.catToFile('/opt/etc/fluentd.conf', fluentdConfigFile(ed, sr.network.region));
+  bs.catToFile(
+    '/opt/etc/fluentd.conf',
+    fluentdConfigFile(ed, sr.network.region)
+  );
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
@@ -208,15 +211,21 @@ export function createLoggingInfrastructure(
   AR.createElasticsearchDomainPolicy(tfgen, 'logging_ed_policy', {
     domain_name: params.domain_name,
     access_policies: JSON.stringify(
-      es_access_policy(ed, logging_ip_whitelist.map(i => i.value), iamr, params.cognito && params.cognito.auth_role_arn ),
-      null, 2
+      es_access_policy(
+        ed,
+        logging_ip_whitelist.map(i => i.value),
+        iamr,
+        params.cognito && params.cognito.auth_role_arn
       ),
+      null,
+      2
+    ),
   });
 
   if (params.log_cleanup !== undefined) {
     createLoggingCleanupLambda(tfgen, sr, {
       ed,
-      months: params.log_cleanup.months
+      months: params.log_cleanup.months,
     });
   }
 
@@ -235,7 +244,6 @@ function createLoggingCleanupLambda(
   sr: SharedResources,
   params: LoggingCleanupLambdaParams
 ) {
-
   const name = 'logging_cleanup';
 
   // Construct a lambda function that will be called at each periodic event.
@@ -263,14 +271,18 @@ function createLoggingCleanupLambda(
     environment: {
       variables: {
         ES_ENDPOINT: params.ed.endpoint,
-      }
-    }
+      },
+    },
   });
 
   // Setup cloudwatch to call the lambda function
   const event_rule = AR.createCloudwatchEventRule(tfgen, name, {
     name: tfgen.scopedName(name).join('_'),
-    schedule_expression: scheduleExpression({kind:'rate', period: 1, period_units: 'days'}),
+    schedule_expression: scheduleExpression({
+      kind: 'rate',
+      period: 1,
+      period_units: 'days',
+    }),
   });
 
   AR.createCloudwatchEventTarget(tfgen, name, {
@@ -290,11 +302,11 @@ function createLoggingCleanupLambda(
 }
 
 interface CognitoResourceParams {
-  user_pool_name: string,
-  user_pool_domain: string,
-  identity_pool_name: string,
-  auth_role_name: string,
-};
+  user_pool_name: string;
+  user_pool_domain: string;
+  identity_pool_name: string;
+  auth_role_name: string;
+}
 
 /**
  * Create the AWS cognito resources to support user login for elasticsearch's
@@ -308,106 +320,113 @@ export function createCognitoResources(
   sr: SharedResources,
   params: CognitoResourceParams
 ): LoggingCognitoParams {
-    // Manual imports of a user_pool resource hit this bug, and required the workaround described:
-    //
-    //  https://github.com/terraform-providers/terraform-provider-aws/pull/8845
+  // Manual imports of a user_pool resource hit this bug, and required the workaround described:
+  //
+  //  https://github.com/terraform-providers/terraform-provider-aws/pull/8845
 
-    const user_pool = AR.createCognitoUserPool(tfgen, "kibana_users", {
-      name: params.user_pool_name,
-      admin_create_user_config: {
-        allow_admin_create_user_only: true,
-        invite_message_template: {
-          email_message: `Your username for ${params.user_pool_name} access is {username} and temporary password is {####}. `,
-          email_subject: `Your temporary password for ${params.user_pool_name}`,
-          sms_message: `Your username for ${params.user_pool_name} access is {username} and temporary password is {####}. `,
-        }
+  const user_pool = AR.createCognitoUserPool(tfgen, 'kibana_users', {
+    name: params.user_pool_name,
+    admin_create_user_config: {
+      allow_admin_create_user_only: true,
+      invite_message_template: {
+        email_message: `Your username for ${
+          params.user_pool_name
+        } access is {username} and temporary password is {####}. `,
+        email_subject: `Your temporary password for ${params.user_pool_name}`,
+        sms_message: `Your username for ${
+          params.user_pool_name
+        } access is {username} and temporary password is {####}. `,
       },
-      schema: [
-        {
-          name: 'email',
-          attribute_data_type: 'String',
-          mutable: true,
-          developer_only_attribute: false,
-          required: true,
-          string_attribute_constraints: { min_length: 0, max_length: 2048 },
-        },
-      ],
-      sms_authentication_message: 'Your authentication code is {####}. ',
-      sms_verification_message: 'Your verification code is {####}. ',
-      auto_verified_attributes: ['email'],
-      username_attributes: ['email'],
-    });
+    },
+    schema: [
+      {
+        name: 'email',
+        attribute_data_type: 'String',
+        mutable: true,
+        developer_only_attribute: false,
+        required: true,
+        string_attribute_constraints: { min_length: 0, max_length: 2048 },
+      },
+    ],
+    sms_authentication_message: 'Your authentication code is {####}. ',
+    sms_verification_message: 'Your verification code is {####}. ',
+    auto_verified_attributes: ['email'],
+    username_attributes: ['email'],
+  });
 
-    const client1 = AR.createCognitoUserPoolClient(tfgen, 'client1', {
-      name: 'Kibana',
-      user_pool_id: user_pool.id,
-      read_attributes: [
-        "given_name",
-        "email_verified",
-        "zoneinfo",
-        "website",
-        "preferred_username",
-        "name",
-        "locale",
-        "phone_number",
-        "family_name",
-        "birthdate",
-        "middle_name",
-        "phone_number_verified",
-        "profile",
-        "picture",
-        "address",
-        "gender",
-        "updated_at",
-        "nickname",
-        "email",
-      ],
-      write_attributes: [
-        "given_name",
-        "zoneinfo",
-        "website",
-        "preferred_username",
-        "name",
-        "locale",
-        "phone_number",
-        "family_name",
-        "birthdate",
-        "middle_name",
-        "profile",
-        "picture",
-        "address",
-        "gender",
-        "updated_at",
-        "nickname",
-        "email",
-      ]
-    });
+  const client1 = AR.createCognitoUserPoolClient(tfgen, 'client1', {
+    name: 'Kibana',
+    user_pool_id: user_pool.id,
+    read_attributes: [
+      'given_name',
+      'email_verified',
+      'zoneinfo',
+      'website',
+      'preferred_username',
+      'name',
+      'locale',
+      'phone_number',
+      'family_name',
+      'birthdate',
+      'middle_name',
+      'phone_number_verified',
+      'profile',
+      'picture',
+      'address',
+      'gender',
+      'updated_at',
+      'nickname',
+      'email',
+    ],
+    write_attributes: [
+      'given_name',
+      'zoneinfo',
+      'website',
+      'preferred_username',
+      'name',
+      'locale',
+      'phone_number',
+      'family_name',
+      'birthdate',
+      'middle_name',
+      'profile',
+      'picture',
+      'address',
+      'gender',
+      'updated_at',
+      'nickname',
+      'email',
+    ],
+  });
 
-    AR.createCognitoUserPoolDomain(tfgen, 'domain', {
-      domain: params.user_pool_domain,
-      user_pool_id: user_pool.id,
-    });
+  AR.createCognitoUserPoolDomain(tfgen, 'domain', {
+    domain: params.user_pool_domain,
+    user_pool_id: user_pool.id,
+  });
 
-// *** Automatically created by AWS when Elasticearch is connected to cognito
-//
-// see: https://github.com/terraform-providers/terraform-provider-aws/issues/5557
-//
-// const client2 = AR.createCognitoUserPoolClient(tfgen, 'client2', {
-//       name: 'AWSElasticsearch-es-logging-ap-southeast-2-qkcbwp4nzagr6qieeryenbhvpy',
-//       user_pool_id: user_pool.id,
-//       allowed_oauth_flows: ['code'],
-//       allowed_oauth_flows_user_pool_client: true,
-//       allowed_oauth_scopes: ['openid', 'phone', 'profile', 'email'],
-//       callback_urls: [
-//         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
-//       ],
-//       logout_urls: [
-//         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
-//       ],
-//       supported_identity_providers: ['COGNITO'],
-//     });
+  // *** Automatically created by AWS when Elasticearch is connected to cognito
+  //
+  // see: https://github.com/terraform-providers/terraform-provider-aws/issues/5557
+  //
+  // const client2 = AR.createCognitoUserPoolClient(tfgen, 'client2', {
+  //       name: 'AWSElasticsearch-es-logging-ap-southeast-2-qkcbwp4nzagr6qieeryenbhvpy',
+  //       user_pool_id: user_pool.id,
+  //       allowed_oauth_flows: ['code'],
+  //       allowed_oauth_flows_user_pool_client: true,
+  //       allowed_oauth_scopes: ['openid', 'phone', 'profile', 'email'],
+  //       callback_urls: [
+  //         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
+  //       ],
+  //       logout_urls: [
+  //         "https://search-es-logging-qkcbwp4nzagr6qieeryenbhvpy.ap-southeast-2.es.amazonaws.com/_plugin/kibana/app/kibana"
+  //       ],
+  //       supported_identity_providers: ['COGNITO'],
+  //     });
 
-    const identity_pool = AR.createCognitoIdentityPool(tfgen, "kibana_identities", {
+  const identity_pool = AR.createCognitoIdentityPool(
+    tfgen,
+    'kibana_identities',
+    {
       identity_pool_name: params.identity_pool_name,
       allow_unauthenticated_identities: false,
       cognito_identity_providers: [
@@ -416,69 +435,74 @@ export function createCognitoResources(
           provider_name: user_pool.endpoint,
           server_side_token_check: false,
         },
-//    see *** above
-//
-//        {
-//          client_id: client2.id,
-//          provider_name: user_pool.endpoint,
-//          server_side_token_check: true,
-//        }
-      ]
-    });
+        //    see *** above
+        //
+        //        {
+        //          client_id: client2.id,
+        //          provider_name: user_pool.endpoint,
+        //          server_side_token_check: true,
+        //        }
+      ],
+    }
+  );
 
-    // see *** above
-    tfgen.ignoreChanges(identity_pool, 'cognito_identity_providers');
+  // see *** above
+  tfgen.ignoreChanges(identity_pool, 'cognito_identity_providers');
 
-//    const role1 = AR.createIamRole(tfgen, 'role1', {
-//      name: "CognitoAccessForAmazonES",
-//      path: "/service-role/",
-//      assume_role_policy: JSON.stringify({
-//        "Version": "2012-10-17",
-//        "Statement": [
-//          {
-//            "Effect": "Allow",
-//            "Principal": {
-//              "Service": "es.amazonaws.com"
-//            },
-//            "Action": "sts:AssumeRole"
-//          }
-//        ]
-//      }),
-//      description: "Amazon Elasticsearch role for Kibana authentication."
-//    });
+  //    const role1 = AR.createIamRole(tfgen, 'role1', {
+  //      name: "CognitoAccessForAmazonES",
+  //      path: "/service-role/",
+  //      assume_role_policy: JSON.stringify({
+  //        "Version": "2012-10-17",
+  //        "Statement": [
+  //          {
+  //            "Effect": "Allow",
+  //            "Principal": {
+  //              "Service": "es.amazonaws.com"
+  //            },
+  //            "Action": "sts:AssumeRole"
+  //          }
+  //        ]
+  //      }),
+  //      description: "Amazon Elasticsearch role for Kibana authentication."
+  //    });
 
-    const kibana_auth_role = AR.createIamRole(tfgen, 'kibana_auth', {
-      name: params.auth_role_name,
-      assume_role_policy: JSON.stringify({
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Effect": "Allow",
-            "Principal": {
-              "Federated": "cognito-identity.amazonaws.com"
+  const kibana_auth_role = AR.createIamRole(tfgen, 'kibana_auth', {
+    name: params.auth_role_name,
+    assume_role_policy: JSON.stringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Principal: {
+            Federated: 'cognito-identity.amazonaws.com',
+          },
+          Action: 'sts:AssumeRoleWithWebIdentity',
+          Condition: {
+            StringEquals: {
+              'cognito-identity.amazonaws.com:aud': identity_pool.id.value,
             },
-            "Action": "sts:AssumeRoleWithWebIdentity",
-            "Condition": {
-              "StringEquals": {
-                "cognito-identity.amazonaws.com:aud": identity_pool.id.value,
-              },
-              "ForAnyValue:StringLike": {
-                "cognito-identity.amazonaws.com:amr": "authenticated"
-              }
-            }
-          }
-        ]
-      })
-    });
+            'ForAnyValue:StringLike': {
+              'cognito-identity.amazonaws.com:amr': 'authenticated',
+            },
+          },
+        },
+      ],
+    }),
+  });
 
-    AR.createCognitoIdentityPoolRolesAttachment(tfgen, "kibana_identities", {
-      identity_pool_id: identity_pool.id,
-      roles: {
-        authenticated: kibana_auth_role.arn,
-      }
-    });
+  AR.createCognitoIdentityPoolRolesAttachment(tfgen, 'kibana_identities', {
+    identity_pool_id: identity_pool.id,
+    roles: {
+      authenticated: kibana_auth_role.arn,
+    },
+  });
 
-    return {user_pool_id:user_pool.id, identity_pool_id:identity_pool.id, auth_role_arn:kibana_auth_role.arn};
+  return {
+    user_pool_id: user_pool.id,
+    identity_pool_id: identity_pool.id,
+    auth_role_arn: kibana_auth_role.arn,
+  };
 }
 
 function es_access_policy(
@@ -512,11 +536,11 @@ function es_access_policy(
   ];
   if (cognito_role) {
     Statement.push({
-      Effect: "Allow",
+      Effect: 'Allow',
       Principal: {
-        AWS: cognito_role.value
+        AWS: cognito_role.value,
       },
-      Action: "es:ESHttp*",
+      Action: 'es:ESHttp*',
       Resource: `${domain.arn.value}/*`,
     });
   }

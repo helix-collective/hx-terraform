@@ -60,14 +60,13 @@ export function createEc2Deployment(
 
   if (params.use_hxdeploytool) {
     const legacy_proxy_endpoints: DC.EndPoint[] = [];
-    for(const label of Object.keys(proxy_endpoints)) {
+    for (const label of Object.keys(proxy_endpoints)) {
       const pe = proxy_endpoints[label];
       legacy_proxy_endpoints.push({
         ...pe,
         label,
       });
     }
-    
 
     bs.include(
       // Legacy hx-deploytool support
@@ -287,7 +286,7 @@ export interface Ec2DeploymentParams {
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
    * into the deployed application configuration.
    */
-  deploy_contexts?: {name: string, source: C.JsonSource}[];
+  deploy_contexts?: { name: string; source: C.JsonSource }[];
 
   /**
    * Additional operations for the EC2 instances first boot can be passed vis the operation.
@@ -337,7 +336,7 @@ export interface Ec2DeploymentParams {
    * Use legacy hx-deploy-tool. If not specified, camus2
    * will be used
    */
-   use_hxdeploytool?: boolean;
+  use_hxdeploytool?: boolean;
 }
 
 // An Endpoint consists of a name and one or more connected

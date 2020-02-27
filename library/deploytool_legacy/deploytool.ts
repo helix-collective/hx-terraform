@@ -41,15 +41,30 @@ export function httpsProxyEndpoint(
 export type ProxyConfig =
   | { kind: 'none' }
   | { kind: 'local'; endpoints: C.EndPoint[]; nginxConfTemplatePath?: string }
-  | { kind: 'remoteSlave'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string }
-  | { kind: 'remoteMaster'; endpoints: C.EndPoint[]; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string };
+  | {
+      kind: 'remoteSlave';
+      endpoints: C.EndPoint[];
+      remoteStateS3: s3.S3Ref;
+      nginxConfTemplatePath?: string;
+    }
+  | {
+      kind: 'remoteMaster';
+      endpoints: C.EndPoint[];
+      remoteStateS3: s3.S3Ref;
+      nginxConfTemplatePath?: string;
+    };
 
 export function remoteProxyMaster(
   endpoints: C.EndPoint[],
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
-  return { remoteStateS3, endpoints, kind: 'remoteMaster', nginxConfTemplatePath };
+  return {
+    remoteStateS3,
+    endpoints,
+    kind: 'remoteMaster',
+    nginxConfTemplatePath,
+  };
 }
 
 export function remoteProxySlave(
@@ -57,13 +72,18 @@ export function remoteProxySlave(
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
-  return { remoteStateS3, endpoints, kind: 'remoteSlave', nginxConfTemplatePath };
+  return {
+    remoteStateS3,
+    endpoints,
+    kind: 'remoteSlave',
+    nginxConfTemplatePath,
+  };
 }
 
 export function localProxy(
   endpoints: C.EndPoint[],
   nginxConfTemplatePath?: string
-  ): ProxyConfig {
+): ProxyConfig {
   return { endpoints, kind: 'local', nginxConfTemplatePath };
 }
 
@@ -96,7 +116,10 @@ export function contextFromDb(
   }
 }
 
-function remoteDeployMode(proxy: ProxyConfig, nginxConfTemplatePath: Maybe<string>): C.DeployMode {
+function remoteDeployMode(
+  proxy: ProxyConfig,
+  nginxConfTemplatePath: Maybe<string>
+): C.DeployMode {
   if (proxy.kind === 'none' || proxy.kind === 'local') {
     throw Error('hx-deploy-tool not configured with proxy mode');
   }
@@ -110,7 +133,11 @@ function remoteDeployMode(proxy: ProxyConfig, nginxConfTemplatePath: Maybe<strin
   });
   return {
     kind: 'proxy',
-    value: C.makeProxyModeConfig({ endPoints, remoteStateS3, nginxConfTemplatePath: nginxConfTemplatePath}),
+    value: C.makeProxyModeConfig({
+      endPoints,
+      remoteStateS3,
+      nginxConfTemplatePath: nginxConfTemplatePath,
+    }),
   };
 }
 
@@ -129,7 +156,7 @@ export function install(
   letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
 ): bootscript.BootScript {
   let nginxConfTemplatePath: Maybe<string> = {
-    kind: 'nothing'
+    kind: 'nothing',
   };
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure hx-deploy-tool');
@@ -145,8 +172,11 @@ export function install(
   bs.gunzip(['/opt/bin/hx-deploy-tool.gz']);
   bs.sh('chmod 755 /opt/bin/hx-deploy-tool');
 
-  if(frontendproxy_nginx_conf_tpl != undefined) {
-    nginxConfTemplatePath = { kind: 'just', value:'/opt/etc/frontendproxy.nginx.conf.tpl' }
+  if (frontendproxy_nginx_conf_tpl != undefined) {
+    nginxConfTemplatePath = {
+      kind: 'just',
+      value: '/opt/etc/frontendproxy.nginx.conf.tpl',
+    };
     bs.catToFile(nginxConfTemplatePath.value, frontendproxy_nginx_conf_tpl);
   }
 
@@ -164,9 +194,10 @@ export function install(
         });
         deployMode = {
           kind: 'proxy',
-          value: C.makeProxyModeConfig({ 
+          value: C.makeProxyModeConfig({
             endPoints,
-            nginxConfTemplatePath}),
+            nginxConfTemplatePath,
+          }),
         };
       }
       break;
@@ -184,7 +215,9 @@ export function install(
   const config = C.makeToolConfig({
     deployContexts,
     deployMode,
-    healthCheck: healthCheck ? { kind: "just", value: healthCheck} : { kind: "nothing" },
+    healthCheck: healthCheck
+      ? { kind: 'just', value: healthCheck }
+      : { kind: 'nothing' },
     releases: {
       kind: 's3',
       value: releases.url(),

@@ -23,8 +23,8 @@ export function createScalingAlarms(
   hosts_alarm_threshold: number = 3
 ) {
   createScalingHighCpuAlarm(tfgen, topic, autoscaling_group);
-  createScalingHighMemAlarm(tfgen, topic, "Maximum", 90, autoscaling_group);
-  createScalingHighMemAlarm(tfgen, topic, "Average", 70, autoscaling_group);
+  createScalingHighMemAlarm(tfgen, topic, 'Maximum', 90, autoscaling_group);
+  createScalingHighMemAlarm(tfgen, topic, 'Average', 70, autoscaling_group);
   createScalingLowHostsAlarm(
     tfgen,
     topic,
@@ -41,7 +41,7 @@ export function createEc2Alarms(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   ec2: AR.Instance,
-  filesystem: AlarmRootFilesystem,
+  filesystem: AlarmRootFilesystem
 ) {
   createEc2HighCpuAlarm(tfgen, topic, ec2);
   createEc2HighDiskAlarm(tfgen, topic, ec2, filesystem);
@@ -105,7 +105,8 @@ export function createScalingHighMemAlarm(
     dimensions: {
       AutoScalingGroupName: autoscaling_group.name,
     },
-    alarm_description: 'Sustained high memory ' + statistic + ' across an autoscaling group',
+    alarm_description:
+      'Sustained high memory ' + statistic + ' across an autoscaling group',
     alarm_actions: [topic.arn],
   });
 }
@@ -130,12 +131,12 @@ export function createScalingLowHostsAlarm(
     dimensions: {
       LoadBalancer: TF.rawExpr(
         `"\${replace("${
-        load_balancer.arn.value
+          load_balancer.arn.value
         }", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`
       ),
       TargetGroup: TF.rawExpr(
         `"\${replace("${
-        target_group.arn.value
+          target_group.arn.value
         }", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`
       ),
     },
@@ -163,7 +164,7 @@ export function createEc2HighDiskAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   ec2: AR.Instance,
-  filesystem: AlarmRootFilesystem,
+  filesystem: AlarmRootFilesystem
 ) {
   const name = 'highdisk';
   return AR.createCloudwatchMetricAlarm(tfgen, name, {
@@ -337,9 +338,9 @@ export function createAutoScaleGroupHighDiskAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   autoscaling_group: AR.AutoscalingGroup,
-  Filesystem: string,        // linux filesystem as seen by the instances (todo: how to automate this for different types of instances and storage devices?)
-  threshold: number = 50,    // threshold on DiskSpaceUtilization (%)
-  MountPath: string = "/",
+  Filesystem: string, // linux filesystem as seen by the instances (todo: how to automate this for different types of instances and storage devices?)
+  threshold: number = 50, // threshold on DiskSpaceUtilization (%)
+  MountPath: string = '/',
   evaluation_periods: number = 2,
   period: number = 120
 ) {
@@ -355,7 +356,7 @@ export function createAutoScaleGroupHighDiskAlarm(
     namespace: 'System/Linux',
     statistic: 'Average',
     dimensions: {
-      Filesystem,   // custom to what the processor instances actually have in use depending on instance type/storage type - todo: how to figure it out?
+      Filesystem, // custom to what the processor instances actually have in use depending on instance type/storage type - todo: how to figure it out?
       MountPath,
       AutoScalingGroupName: autoscaling_group.name,
     },

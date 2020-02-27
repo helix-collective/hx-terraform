@@ -332,7 +332,10 @@ export function firehosePutRecordPolicy(
   };
 }
 
-export function autoscalingGroupEnableSetInstanceProtection(name: string, Resource: string) {
+export function autoscalingGroupEnableSetInstanceProtection(
+  name: string,
+  Resource: string
+) {
   return {
     name,
     policy: {
@@ -342,9 +345,9 @@ export function autoscalingGroupEnableSetInstanceProtection(name: string, Resour
           // Customise Resource to restrict access
           Resource,
           Effect: 'Allow',
-          Action: "autoscaling:SetInstanceProtection"
-        }
-      ]
-    }
-  }
+          Action: 'autoscaling:SetInstanceProtection',
+        },
+      ],
+    },
+  };
 }

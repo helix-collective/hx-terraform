@@ -14,9 +14,9 @@ export interface ContextFile {
 }
 
 export interface DeployContext {
-  name: string,
-  source: C.JsonSource
-};
+  name: string;
+  source: C.JsonSource;
+}
 
 export function httpProxyEndpoint(
   label: string,
@@ -41,20 +41,35 @@ export function httpsProxyEndpoint(
   };
 }
 
-export type EndPointMap = {[name:string]: C.EndPoint};
+export type EndPointMap = { [name: string]: C.EndPoint };
 
 export type ProxyConfig =
   | { kind: 'none' }
   | { kind: 'local'; endpoints: EndPointMap; nginxConfTemplatePath?: string }
-  | { kind: 'remoteSlave'; endpoints: EndPointMap; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string }
-  | { kind: 'remoteMaster'; endpoints: EndPointMap; remoteStateS3: s3.S3Ref; nginxConfTemplatePath?: string };
+  | {
+      kind: 'remoteSlave';
+      endpoints: EndPointMap;
+      remoteStateS3: s3.S3Ref;
+      nginxConfTemplatePath?: string;
+    }
+  | {
+      kind: 'remoteMaster';
+      endpoints: EndPointMap;
+      remoteStateS3: s3.S3Ref;
+      nginxConfTemplatePath?: string;
+    };
 
 export function remoteProxyMaster(
   endpoints: EndPointMap,
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
-  return { remoteStateS3, endpoints, kind: 'remoteMaster', nginxConfTemplatePath };
+  return {
+    remoteStateS3,
+    endpoints,
+    kind: 'remoteMaster',
+    nginxConfTemplatePath,
+  };
 }
 
 export function remoteProxySlave(
@@ -62,40 +77,48 @@ export function remoteProxySlave(
   remoteStateS3: s3.S3Ref,
   nginxConfTemplatePath?: string
 ): ProxyConfig {
-  return { remoteStateS3, endpoints, kind: 'remoteSlave', nginxConfTemplatePath };
+  return {
+    remoteStateS3,
+    endpoints,
+    kind: 'remoteSlave',
+    nginxConfTemplatePath,
+  };
 }
 
 export function localProxy(
   endpoints: EndPointMap,
   nginxConfTemplatePath?: string
-  ): ProxyConfig {
+): ProxyConfig {
   return { endpoints, kind: 'local', nginxConfTemplatePath };
 }
 
 export function contextFromS3(name: string, s3Ref: s3.S3Ref): DeployContext {
-  return {name, source:{ kind: 's3', value: s3Ref.url() }};
+  return { name, source: { kind: 's3', value: s3Ref.url() } };
 }
 
-export function contextFromSecret(
-  name: string,
-  arn: ArnSecret
-): DeployContext {
-  return {name, source:{ kind: 'awsSecretArn', value: arn.value }};
+export function contextFromSecret(name: string, arn: ArnSecret): DeployContext {
+  return { name, source: { kind: 'awsSecretArn', value: arn.value } };
 }
 
-export function contextFromDb(
-  name: string,
-  db: rds.DbInstance
-): DeployContext {
+export function contextFromDb(name: string, db: rds.DbInstance): DeployContext {
   switch (db.password_to.kind) {
     case 's3':
-      return {name, source: {kind: 's3', value: db.password_to.s3Ref.url() }};
+      return {
+        name,
+        source: { kind: 's3', value: db.password_to.s3Ref.url() },
+      };
     case 'secret':
-      return {name, source: {kind: 'awsSecretArn', value: db.password_to.arnSecret.value }};
+      return {
+        name,
+        source: { kind: 'awsSecretArn', value: db.password_to.arnSecret.value },
+      };
   }
 }
 
-function remoteDeployMode(proxy: ProxyConfig, nginxConfTemplatePath: Maybe<string>): C.DeployMode {
+function remoteDeployMode(
+  proxy: ProxyConfig,
+  nginxConfTemplatePath: Maybe<string>
+): C.DeployMode {
   if (proxy.kind === 'none' || proxy.kind === 'local') {
     throw Error('camus2 not configured with proxy mode');
   }
@@ -105,7 +128,11 @@ function remoteDeployMode(proxy: ProxyConfig, nginxConfTemplatePath: Maybe<strin
   };
   return {
     kind: 'proxy',
-    value: C.makeProxyModeConfig({ endPoints: proxy.endpoints, remoteStateS3, nginxConfTemplatePath: nginxConfTemplatePath}),
+    value: C.makeProxyModeConfig({
+      endPoints: proxy.endpoints,
+      remoteStateS3,
+      nginxConfTemplatePath: nginxConfTemplatePath,
+    }),
   };
 }
 
@@ -124,7 +151,7 @@ export function install(
   letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
 ): bootscript.BootScript {
   let nginxConfTemplatePath: Maybe<string> = {
-    kind: 'nothing'
+    kind: 'nothing',
   };
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure camus2');
@@ -141,8 +168,11 @@ export function install(
   bs.sh('chmod 755 /opt/bin/camus2');
   bs.sh('(cd /opt/bin; ln -s camus2 c2)');
 
-  if(frontendproxy_nginx_conf_tpl != undefined) {
-    nginxConfTemplatePath = { kind: 'just', value:'/opt/etc/frontendproxy.nginx.conf.tpl' }
+  if (frontendproxy_nginx_conf_tpl != undefined) {
+    nginxConfTemplatePath = {
+      kind: 'just',
+      value: '/opt/etc/frontendproxy.nginx.conf.tpl',
+    };
     bs.catToFile(nginxConfTemplatePath.value, frontendproxy_nginx_conf_tpl);
   }
 
@@ -156,9 +186,10 @@ export function install(
       {
         deployMode = {
           kind: 'proxy',
-          value: C.makeProxyModeConfig({ 
+          value: C.makeProxyModeConfig({
             endPoints: proxy.endpoints,
-            nginxConfTemplatePath}),
+            nginxConfTemplatePath,
+          }),
         };
       }
       break;
@@ -171,8 +202,8 @@ export function install(
     default:
       throw Error(`proxy kind is unrecognised`);
   }
-  const configSources: {[name:string]: C.JsonSource} = {};
-  deployContexts.forEach( dc => {
+  const configSources: { [name: string]: C.JsonSource } = {};
+  deployContexts.forEach(dc => {
     configSources[dc.name] = dc.source;
   });
 
@@ -180,7 +211,9 @@ export function install(
   const config = C.makeToolConfig({
     configSources,
     deployMode,
-    healthCheck: healthCheck ? { kind: "just", value: healthCheck} : { kind: "nothing" },
+    healthCheck: healthCheck
+      ? { kind: 'just', value: healthCheck }
+      : { kind: 'nothing' },
     releases: {
       kind: 's3',
       value: releases.url(),

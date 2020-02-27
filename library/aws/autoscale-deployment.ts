@@ -38,7 +38,13 @@ export function createAutoscaleDeployment(
   sr: shared.SharedResources,
   params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
-  const controller = createController(tfgen, "controller", sr, params, params.endpoints);
+  const controller = createController(
+    tfgen,
+    'controller',
+    sr,
+    params,
+    params.endpoints
+  );
   const autoscale_processor = createProcessorAutoScaleGroup(
     tfgen,
     'appserver',
@@ -77,7 +83,7 @@ export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleFrontendParams,
+  params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(
@@ -163,7 +169,7 @@ function createController(
       deploy_contexts,
       camus2.remoteProxyMaster(proxy_endpoints, state_s3),
       params.health_check,
-      params.frontendproxy_nginx_conf_tpl,
+      params.frontendproxy_nginx_conf_tpl
     )
   );
 
@@ -257,7 +263,8 @@ function createProcessorAutoScaleGroup(
     // due to cyclic dependency we dont know the final asg ARN yet
     // cycle is autoscaling_group -depends-on-> launch_config -depends-on-> appserver_iampolicies -depends-on-> arn of the asg
     // break cycle by using partially wildcarded arn string
-    policies.autoscalingGroupEnableSetInstanceProtection("modifyasginstanceprotection",
+    policies.autoscalingGroupEnableSetInstanceProtection(
+      'modifyasginstanceprotection',
       `arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/${asgName}`
     ),
   ];
@@ -300,19 +307,16 @@ function createProcessorAutoScaleGroup(
 
   tfgen.createBeforeDestroy(launch_config, true);
 
-  const autoscaling_group_params : AR.AutoscalingGroupParams = {
+  const autoscaling_group_params: AR.AutoscalingGroupParams = {
     name: asgName,
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
     vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
     launch_configuration: launch_config.name,
-    enabled_metrics: [
-      'GroupInServiceInstances',
-      'GroupDesiredCapacity',
-    ],
+    enabled_metrics: ['GroupInServiceInstances', 'GroupDesiredCapacity'],
     termination_policies: [
       // flush out old instances when asg size reduces
-      'OldestInstance'
+      'OldestInstance',
     ],
     tags: Object.entries(contextTagsWithName(tfgen, name)).map(
       ([key, value]) => {
@@ -333,12 +337,16 @@ function createProcessorAutoScaleGroup(
   // prevent customization of the name
   autoscaling_group_params.name = asgName;
 
-  const autoscaling_group = AR.createAutoscalingGroup(tfgen, name, autoscaling_group_params);
+  const autoscaling_group = AR.createAutoscalingGroup(
+    tfgen,
+    name,
+    autoscaling_group_params
+  );
 
   return {
     autoscaling_group,
     instance_profile,
-  }
+  };
 }
 
 export type LoadBalancerResources = {
@@ -736,9 +744,9 @@ interface AutoscaleDeployment {
 }
 
 interface AutoscaleProcessor {
-  autoscaling_group: AR.AutoscalingGroup,
-  instance_profile: AR.IamInstanceProfile,
-};
+  autoscaling_group: AR.AutoscalingGroup;
+  instance_profile: AR.IamInstanceProfile;
+}
 
 /**
  * Creates a set of cron based scaling rules for the specified autoscaling group

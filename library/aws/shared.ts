@@ -193,8 +193,8 @@ function createNetworkResources(
   });
 
   // Ignore eks related tags changes
-  tfgen.ignoreChanges(vpc, "tags.%");
-  tfgen.ignoreChanges(vpc, "tags.kubernetes.io/");
+  tfgen.ignoreChanges(vpc, 'tags.%');
+  tfgen.ignoreChanges(vpc, 'tags.kubernetes.io/');
 
   const internet_gateway = AR.createInternetGateway(tfgen, 'gw', {
     vpc_id: vpc.id,
@@ -222,8 +222,8 @@ function createNetworkResources(
       });
 
       // Ignore eks related tags changes
-      tfgen.ignoreChanges(external_subnet, "tags.%");
-      tfgen.ignoreChanges(external_subnet, "tags.kubernetes.io/");
+      tfgen.ignoreChanges(external_subnet, 'tags.%');
+      tfgen.ignoreChanges(external_subnet, 'tags.kubernetes.io/');
 
       const eip = AR.createEip(tfgen, 'ngeip', {
         vpc: true,
@@ -259,8 +259,8 @@ function createNetworkResources(
       });
 
       // Ignore eks related tags changes
-      tfgen.ignoreChanges(internal_subnet, "tags.%");
-      tfgen.ignoreChanges(internal_subnet, "tags.kubernetes.io/");
+      tfgen.ignoreChanges(internal_subnet, 'tags.%');
+      tfgen.ignoreChanges(internal_subnet, 'tags.kubernetes.io/');
 
       AR.createRouteTableAssociation(tfgen, 'rtainternal', {
         subnet_id: internal_subnet.id,
@@ -323,19 +323,19 @@ export function dnsSubdomain(
   tfgen: TF.Generator,
   name: string,
   sr: SharedResources,
-  subzone: AR.Route53Zone,
+  subzone: AR.Route53Zone
 ) {
   AR.createRoute53Record(tfgen, name, {
     zone_id: sr.primary_dns_zone.zone_id,
     name: subzone.name,
-    ttl: "60",
+    ttl: '60',
     type: 'NS',
     records: [
-      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.0}",
-      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.1}",
-      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.2}",
-      "${aws_route53_zone." + subzone.tfname.join("_") + ".name_servers.3}",
-    ]
+      '${aws_route53_zone.' + subzone.tfname.join('_') + '.name_servers.0}',
+      '${aws_route53_zone.' + subzone.tfname.join('_') + '.name_servers.1}',
+      '${aws_route53_zone.' + subzone.tfname.join('_') + '.name_servers.2}',
+      '${aws_route53_zone.' + subzone.tfname.join('_') + '.name_servers.3}',
+    ],
   });
 }
 

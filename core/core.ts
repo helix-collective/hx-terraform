@@ -187,7 +187,7 @@ export function withProviderAlias<T>(
   alias: string,
   createfn: (tfgen: Generator) => T
 ): T {
-  return createfn(tfgen0.providerAlias(providerType,alias));
+  return createfn(tfgen0.providerAlias(providerType, alias));
 }
 
 export function fileGenerator(): FileGenerator {
@@ -221,7 +221,7 @@ export function fileGenerator(): FileGenerator {
   function generator(
     nameContext0: ResourceName,
     tagsContext0: TagsMap,
-    providerAliases0: ProviderAliasMap,
+    providerAliases0: ProviderAliasMap
   ): Generator {
     function createProvider(
       tftype: string,
@@ -245,7 +245,9 @@ export function fileGenerator(): FileGenerator {
     ): Resource {
       const tfname = nameContext0.concat(name);
       const providerType = getProviderType(tftype);
-      const provider = providerAliases0[providerType] ? providerType + "." + providerAliases0[providerType] : "";
+      const provider = providerAliases0[providerType]
+        ? providerType + '.' + providerAliases0[providerType]
+        : '';
       const details = {
         tftype,
         tfname,
@@ -265,7 +267,7 @@ export function fileGenerator(): FileGenerator {
       // The terraform convention is that the provider given by the
       // resource type up to the first underscore
       const match = tftype.match(/[^_]*/);
-      return match && match[0] || "";
+      return (match && match[0]) || '';
     }
 
     function createAdhocFile(path: string, content: string): void {
@@ -332,10 +334,14 @@ export function fileGenerator(): FileGenerator {
     }
 
     function localNameScope(name: string): Generator {
-      return generator(nameContext0.concat(name), tagsContext0, providerAliases0);
+      return generator(
+        nameContext0.concat(name),
+        tagsContext0,
+        providerAliases0
+      );
     }
 
-    function providerAlias(providerType: string, alias:string): Generator {
+    function providerAlias(providerType: string, alias: string): Generator {
       const providerAliases = {
         ...providerAliases0,
       };
@@ -454,7 +460,6 @@ export function fileGenerator(): FileGenerator {
   ): string[] {
     let result = [indent + prefix0 + ' {'];
     for (const field of fields) {
-
       // Quote the field key if required
       const fieldkey = field.key.match(/\//) ? `"${field.key}"` : field.key;
 
@@ -542,10 +547,10 @@ export function fileGenerator(): FileGenerator {
           value: { kind: 'text', text: `[${dependsOn.join(', ')}]` },
         });
       }
-      if (resource.provider != "") {
+      if (resource.provider != '') {
         fields.push({
           key: 'provider',
-          value: { kind: 'text', text: `"${resource.provider}"`},
+          value: { kind: 'text', text: `"${resource.provider}"` },
         });
       }
       if (resource.ignoreChanges.length > 0 || resource.createBeforeDestroy) {

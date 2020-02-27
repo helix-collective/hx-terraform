@@ -12,6 +12,9 @@ import * as docker from '../docker';
 import * as camus2 from '../camus2/camus2';
 import * as C from '../../library/camus2/adl-gen/config';
 
+import * as deploytool from '../deploytool_legacy/deploytool';
+import * as DC from '../../library/deploytool_legacy/adl-gen/config';
+
 import {
   EndPoint,
   getDefaultAmi,
@@ -162,16 +165,39 @@ function createController(
   bs.createUserWithKeypairAccess(app_user);
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
 
-  bs.include(
-    camus2.install(
-      app_user,
-      releases_s3,
-      deploy_contexts,
-      camus2.remoteProxyMaster(proxy_endpoints, state_s3),
-      params.health_check,
-      params.frontendproxy_nginx_conf_tpl
-    )
-  );
+  if (params.use_hxdeploytool) {
+    const legacy_proxy_endpoints: DC.EndPoint[] = [];
+    for (const label of Object.keys(proxy_endpoints)) {
+      const pe = proxy_endpoints[label];
+      legacy_proxy_endpoints.push({
+        ...pe,
+        label,
+      });
+    }
+
+    bs.include(
+      // Legacy hx-deploytool support
+      deploytool.install(
+        app_user,
+        releases_s3,
+        deploy_contexts,
+        deploytool.remoteProxyMaster(legacy_proxy_endpoints, state_s3),
+        params.health_check,
+        params.frontendproxy_nginx_conf_tpl
+      )
+    );
+  } else {
+    bs.include(
+      camus2.install(
+        app_user,
+        releases_s3,
+        deploy_contexts,
+        camus2.remoteProxyMaster(proxy_endpoints, state_s3),
+        params.health_check,
+        params.frontendproxy_nginx_conf_tpl
+      )
+    );
+  }
 
   if (params.controller_extra_bootscript) {
     bs.include(params.controller_extra_bootscript);
@@ -237,16 +263,39 @@ function createProcessorAutoScaleGroup(
       ' --auto-scaling',
   });
 
-  bs.include(
-    camus2.install(
-      app_user,
-      params.releases_s3,
-      deploy_contexts,
-      camus2.remoteProxySlave(proxy_endpoints, state_s3),
-      params.health_check,
-      params.frontendproxy_nginx_conf_tpl
-    )
-  );
+  if (params.use_hxdeploytool) {
+    const legacy_proxy_endpoints: DC.EndPoint[] = [];
+    for (const label of Object.keys(proxy_endpoints)) {
+      const pe = proxy_endpoints[label];
+      legacy_proxy_endpoints.push({
+        ...pe,
+        label,
+      });
+    }
+
+    bs.include(
+      // Legacy hx-deploytool support
+      deploytool.install(
+        app_user,
+        params.releases_s3,
+        deploy_contexts,
+        deploytool.remoteProxySlave(legacy_proxy_endpoints, state_s3),
+        params.health_check,
+        params.frontendproxy_nginx_conf_tpl
+      )
+    );
+  } else {
+    bs.include(
+      camus2.install(
+        app_user,
+        params.releases_s3,
+        deploy_contexts,
+        camus2.remoteProxySlave(proxy_endpoints, state_s3),
+        params.health_check,
+        params.frontendproxy_nginx_conf_tpl
+      )
+    );
+  }
 
   if (params.appserver_extra_bootscript) {
     bs.include(params.appserver_extra_bootscript);
@@ -706,6 +755,12 @@ interface AutoscaleProcessorParams {
    * Health check config
    */
   health_check?: C.HealthCheckConfig;
+
+  /**
+   * Use legacy hx-deploy-tool. If not specified, camus2
+   * will be used
+   */
+  use_hxdeploytool?: boolean;
 }
 
 interface AutoscaleFrontendParams extends AutoscaleProcessorParams {

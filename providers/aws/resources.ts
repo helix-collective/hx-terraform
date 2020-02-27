@@ -4421,3 +4421,266 @@ export function fieldsFromEksClusterVpcConfigParams(params: EksClusterVpcConfigP
   TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
+
+export interface StepAdjustmentParams {
+  /**
+  The number of members by which to scale, when the adjustment bounds are breached.
+  A positive value scales up. A negative value scales down.
+  */
+  scaling_adjustment : number;
+  /**
+  The lower bound for the difference between the alarm threshold and the CloudWatch metric.
+  Without a value, AWS will treat this bound as infinity.
+  */
+  metric_interval_lower_bound?: number;
+  /**
+  The upper bound for the difference between the alarm threshold and the CloudWatch metric.
+  Without a value, AWS will treat this bound as infinity. The upper bound must be greater than the lower bound.
+  */
+  metric_interval_upper_bound?: number;
+}
+
+export function fieldsFromStepAdjustmentParams(params: StepAdjustmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "scaling_adjustment ", params.scaling_adjustment , TF.numberValue);
+  TF.addOptionalField(fields, "metric_interval_lower_bound", params.metric_interval_lower_bound, TF.numberValue);
+  TF.addOptionalField(fields, "metric_interval_upper_bound", params.metric_interval_upper_bound, TF.numberValue);
+  return fields;
+}
+
+export interface PredefinedMetricSpecificationParams {
+  /**
+  ASGAverageCPUUtilization : Average CPU utilization of the Auto Scaling group.
+  ASGAverageNetworkIn : Average number of bytes received on all network interfaces by the Auto Scaling group.
+  ASGAverageNetworkOut : Average number of bytes sent out on all network interfaces by the Auto Scaling group.
+  ALBRequestCountPerTarget : Number of requests completed per target in an Application Load Balancer target group.
+  */
+  predefined_metric_type: 'ASGAverageCPUUtilization' | 'ASGAverageNetworkIn' | 'ASGAverageNetworkOut' | 'ALBRequestCountPerTarget';
+  /**
+  Identifies the resource associated with the metric type.
+  */
+  resource_label?: string;
+}
+
+export function fieldsFromPredefinedMetricSpecificationParams(params: PredefinedMetricSpecificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "predefined_metric_type", params.predefined_metric_type, TF.stringValue);
+  TF.addOptionalField(fields, "resource_label", params.resource_label, TF.stringValue);
+  return fields;
+}
+
+export interface MetricDimensionParams {
+  name: string;
+  value: string;
+}
+
+export function fieldsFromMetricDimensionParams(params: MetricDimensionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "value", params.value, TF.stringValue);
+  return fields;
+}
+
+export interface CustomizedMetricSpecificationParams {
+  metric_name: string;
+  namespace: string;
+  statistic: string;
+  metric_dimension?: (MetricDimensionParams)[];
+  unit?: string;
+}
+
+export function fieldsFromCustomizedMetricSpecificationParams(params: CustomizedMetricSpecificationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addField(fields, "namespace", params.namespace, TF.stringValue);
+  TF.addField(fields, "statistic", params.statistic, TF.stringValue);
+  TF.addOptionalField(fields, "metric_dimension", params.metric_dimension, TF.listValue((v) => TF.mapValue(fieldsFromMetricDimensionParams(v))));
+  TF.addOptionalField(fields, "unit", params.unit, TF.stringValue);
+  return fields;
+}
+
+export interface TargetTrackingConfigurationParams {
+  target_value: number;
+  predefined_metric_specification?: PredefinedMetricSpecificationParams;
+  customized_metric_specification?: CustomizedMetricSpecificationParams;
+  disable_scale_in?: boolean;
+}
+
+export function fieldsFromTargetTrackingConfigurationParams(params: TargetTrackingConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "target_value", params.target_value, TF.numberValue);
+  TF.addOptionalField(fields, "predefined_metric_specification", params.predefined_metric_specification, (v) => TF.mapValue(fieldsFromPredefinedMetricSpecificationParams(v)));
+  TF.addOptionalField(fields, "customized_metric_specification", params.customized_metric_specification, (v) => TF.mapValue(fieldsFromCustomizedMetricSpecificationParams(v)));
+  TF.addOptionalField(fields, "disable_scale_in", params.disable_scale_in, TF.booleanValue);
+  return fields;
+}
+
+export interface SimpleScalingParams {
+  policy_type: 'SimpleScaling';
+  /**
+  The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
+  */
+  cooldown?: number;
+  /**
+  The number of instances by which to scale.
+  adjustment_type determines the interpretation of this number
+  (e.g., as an absolute number or as a percentage of the existing Auto Scaling group size).
+  A positive increment adds to the current capacity and a negative value removes from the current capacity.
+  */
+  scaling_adjustment: number;
+}
+
+export function fieldsFromSimpleScalingParams(params: SimpleScalingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addOptionalField(fields, "cooldown", params.cooldown, TF.numberValue);
+  TF.addField(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
+  return fields;
+}
+
+export interface StepScalingParams {
+  policy_type: 'StepScaling';
+  metric_aggregation_type: 'Minimum' | 'Maximum' | 'Average';
+  step_adjustment: (StepAdjustmentParams)[];
+  /**
+  The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.
+  Without a value, AWS will default to the group's specified cooldown period.
+  */
+  estimated_instance_warmup?: number;
+}
+
+export function fieldsFromStepScalingParams(params: StepScalingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addField(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
+  TF.addField(fields, "step_adjustment", params.step_adjustment, TF.listValue((v) => TF.mapValue(fieldsFromStepAdjustmentParams(v))));
+  TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+  return fields;
+}
+
+export interface TargetTrackingScalingParams {
+  policy_type: 'TargetTrackingScaling';
+  target_tracking_configuration: TargetTrackingConfigurationParams;
+  /**
+  The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.
+  Without a value, AWS will default to the group's specified cooldown period.
+  */
+  estimated_instance_warmup?: number;
+}
+
+export function fieldsFromTargetTrackingScalingParams(params: TargetTrackingScalingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addField(fields, "target_tracking_configuration", params.target_tracking_configuration, (v) => TF.mapValue(fieldsFromTargetTrackingConfigurationParams(v)));
+  TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+  return fields;
+}
+
+/**
+ *  Provides an AutoScaling Scaling Policy resource..
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html
+ */
+export function createAutoscalingPolicy(tfgen: TF.Generator, rname: string, params: AutoscalingPolicyParams): AutoscalingPolicy {
+  const fields = fieldsFromAutoscalingPolicyParams(params);
+  const resource = tfgen.createTypedResource('AutoscalingPolicy', 'aws_autoscaling_policy', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const autoscaling_group_name: string =  '${' + TF.resourceName(resource) + '.autoscaling_group_name}';
+  const adjustment_type: string =  '${' + TF.resourceName(resource) + '.adjustment_type}';
+  const policy_type: string =  '${' + TF.resourceName(resource) + '.policy_type}';
+  const arn: AutoscalingPolicyArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingPolicy');
+
+  return {
+    ...resource,
+    name,
+    autoscaling_group_name,
+    adjustment_type,
+    policy_type,
+    arn,
+  };
+}
+
+export interface AutoscalingPolicy extends TF.ResourceT<'AutoscalingPolicy'> {
+  name: string;
+  autoscaling_group_name: string;
+  adjustment_type: string;
+  policy_type: string;
+  arn: AutoscalingPolicyArn;
+}
+
+export type AutoscalingPolicyId = {type:'AutoscalingPolicyId',value:string};
+export type AutoscalingPolicyArn = AT.ArnT<"AutoscalingPolicy">;
+
+export type AutoscalingPolicyParamsSimpleScaling = {
+  kind:"simple_scaling"
+  policy_type: 'SimpleScaling';
+  /**
+  The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.
+  */
+  cooldown?: number;
+  /**
+  The number of instances by which to scale.
+  adjustment_type determines the interpretation of this number
+  (e.g., as an absolute number or as a percentage of the existing Auto Scaling group size).
+  A positive increment adds to the current capacity and a negative value removes from the current capacity.
+  */
+  scaling_adjustment: number;
+};
+
+export type AutoscalingPolicyParamsStepScaling = {
+  kind:"step_scaling"
+  policy_type: 'StepScaling';
+  metric_aggregation_type: 'Minimum' | 'Maximum' | 'Average';
+  step_adjustment: (StepAdjustmentParams)[];
+  /**
+  The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.
+  Without a value, AWS will default to the group's specified cooldown period.
+  */
+  estimated_instance_warmup?: number;
+};
+
+export type AutoscalingPolicyParamsTargetTrackingScaling = {
+  kind:"target_tracking_scaling"
+  policy_type: 'TargetTrackingScaling';
+  target_tracking_configuration: TargetTrackingConfigurationParams;
+  /**
+  The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.
+  Without a value, AWS will default to the group's specified cooldown period.
+  */
+  estimated_instance_warmup?: number;
+};
+
+export type AutoscalingPolicyParams = {
+  name: string;
+  autoscaling_group_name: AutoscalingGroupId;
+  adjustment_type?: 'ChangeInCapacity' | 'ExactCapacity' | 'PercentChangeInCapacity';
+} & (AutoscalingPolicyParamsSimpleScaling|AutoscalingPolicyParamsStepScaling|AutoscalingPolicyParamsTargetTrackingScaling)
+
+export function fieldsFromAutoscalingPolicyParams(params: AutoscalingPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
+  TF.addOptionalField(fields, "adjustment_type", params.adjustment_type, TF.stringValue);
+  switch(params.kind){
+    case "simple_scaling": {
+      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+      TF.addOptionalField(fields, "cooldown", params.cooldown, TF.numberValue);
+      TF.addField(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
+      break;
+    }
+    case "step_scaling": {
+      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+      TF.addField(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
+      TF.addField(fields, "step_adjustment", params.step_adjustment, TF.listValue((v) => TF.mapValue(fieldsFromStepAdjustmentParams(v))));
+      TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+      break;
+    }
+    case "target_tracking_scaling": {
+      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
+      TF.addField(fields, "target_tracking_configuration", params.target_tracking_configuration, (v) => TF.mapValue(fieldsFromTargetTrackingConfigurationParams(v)));
+      TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+      break;
+    }
+  }
+  return fields;
+}

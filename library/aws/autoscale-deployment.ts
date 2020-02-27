@@ -791,14 +791,14 @@ type AcmCertificateSource =
   | { kind: 'generate' }
   | { kind: 'generate_with_manual_verify' };
 
-interface AutoscaleDeployment {
+export interface AutoscaleDeployment {
   autoscale_processor: AutoscaleProcessor;
   target_group: AR.LbTargetGroup;
   load_balancer: AR.Lb;
   lb_https_listener: AR.LbListener;
 }
 
-interface AutoscaleProcessor {
+export interface AutoscaleProcessor {
   autoscaling_group: AR.AutoscalingGroup;
   instance_profile: AR.IamInstanceProfile;
 }

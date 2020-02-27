@@ -29,6 +29,11 @@ import {
 } from './gen-helpers';
 import { arn } from '../providers/aws/types';
 
+type ResourcesParams = {
+  resources: { [key: string]: RecordDecl };
+  params: { [key: string]: RecordDecl };
+};
+
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',
   fields: [
@@ -1723,6 +1728,206 @@ const eks_cluster: RecordDecl = {
   ],
 };
 
+function autoscaling_policy(gen: Generator): ResourcesParams {
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#step_adjustment
+  const step_adjustment: RecordDecl = {
+    name: 'step_adjustment',
+    fields: [
+      requiredField('scaling_adjustment ', NUMBER, [
+        'The number of members by which to scale, when the adjustment bounds are breached.',
+        'A positive value scales up. A negative value scales down.',
+      ]),
+
+      optionalField('metric_interval_lower_bound', NUMBER, [
+        'The lower bound for the difference between the alarm threshold and the CloudWatch metric.',
+        'Without a value, AWS will treat this bound as infinity.',
+      ]),
+
+      optionalField('metric_interval_upper_bound', NUMBER, [
+        'The upper bound for the difference between the alarm threshold and the CloudWatch metric.',
+        'Without a value, AWS will treat this bound as infinity. The upper bound must be greater than the lower bound.',
+      ]),
+    ],
+  };
+  gen.generateParams(step_adjustment);
+
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#predefined_metric_specification
+  const predefined_metric_specification: RecordDecl = {
+    name: 'predefined_metric_specification',
+    fields: [
+      requiredField(
+        'predefined_metric_type',
+        enumType([
+          'ASGAverageCPUUtilization',
+          'ASGAverageNetworkIn',
+          'ASGAverageNetworkOut',
+          'ALBRequestCountPerTarget',
+        ]),
+        [
+          'ASGAverageCPUUtilization : Average CPU utilization of the Auto Scaling group.',
+          'ASGAverageNetworkIn : Average number of bytes received on all network interfaces by the Auto Scaling group.',
+          'ASGAverageNetworkOut : Average number of bytes sent out on all network interfaces by the Auto Scaling group.',
+          'ALBRequestCountPerTarget : Number of requests completed per target in an Application Load Balancer target group.',
+        ]
+      ),
+      optionalField('resource_label', STRING, [
+        'Identifies the resource associated with the metric type.',
+      ]),
+    ],
+  };
+  gen.generateParams(predefined_metric_specification);
+
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#metric_dimension
+  const metric_dimension: RecordDecl = {
+    name: 'metric_dimension',
+    fields: [requiredField('name', STRING), requiredField('value', STRING)],
+  };
+  gen.generateParams(metric_dimension);
+
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#customized_metric_specification
+  const customized_metric_specification: RecordDecl = {
+    name: 'customized_metric_specification',
+    fields: [
+      requiredField('metric_name', STRING),
+      requiredField('namespace', STRING),
+      requiredField('statistic', STRING),
+      optionalField('metric_dimension', listType(recordType(metric_dimension))),
+      optionalField('unit', STRING),
+    ],
+  };
+  gen.generateParams(customized_metric_specification);
+
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#target_tracking_configuration
+  // https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html
+  const target_tracking_configuration: RecordDecl = {
+    name: 'target_tracking_configuration',
+    fields: [
+      // The target value for the metric
+      requiredField('target_value', NUMBER),
+
+      // One Of:
+      optionalField(
+        'predefined_metric_specification',
+        recordType(predefined_metric_specification)
+      ),
+      optionalField(
+        'customized_metric_specification',
+        recordType(customized_metric_specification)
+      ),
+
+      //  - (Optional, Default: false) Indicates whether scale in by the target tracking policy is disabled.
+      // Disabling scale-in makes sure this target tracking scaling policy will never be used to scale in the Auto Scaling group.
+      optionalField('disable_scale_in', BOOLEAN),
+    ],
+  };
+  gen.generateParams(target_tracking_configuration);
+
+  const simple_scaling: RecordDecl = {
+    name: 'simple_scaling',
+    fields: [
+      requiredField('policy_type', enumType(['SimpleScaling'])),
+      optionalField('cooldown', NUMBER, [
+        'The amount of time, in seconds, after a scaling activity completes and before the next scaling activity can start.',
+      ]),
+      requiredField('scaling_adjustment', NUMBER, [
+        'The number of instances by which to scale.',
+        'adjustment_type determines the interpretation of this number',
+        '(e.g., as an absolute number or as a percentage of the existing Auto Scaling group size).',
+        'A positive increment adds to the current capacity and a negative value removes from the current capacity.',
+      ]),
+    ],
+  };
+  gen.generateParams(simple_scaling);
+
+  const step_scaling: RecordDecl = {
+    name: 'step_scaling',
+    fields: [
+      requiredField('policy_type', enumType(['StepScaling'])),
+      requiredField(
+        'metric_aggregation_type',
+        enumType(['Minimum', 'Maximum', 'Average'])
+      ),
+      requiredField('step_adjustment', listType(recordType(step_adjustment))),
+      optionalField('estimated_instance_warmup', NUMBER, [
+        'The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.',
+        "Without a value, AWS will default to the group's specified cooldown period.",
+      ]),
+    ],
+  };
+  gen.generateParams(step_scaling);
+
+  const target_tracking_scaling: RecordDecl = {
+    name: 'target_tracking_scaling',
+    fields: [
+      requiredField('policy_type', enumType(['TargetTrackingScaling'])),
+      requiredField(
+        'target_tracking_configuration',
+        recordType(target_tracking_configuration)
+      ),
+      optionalField('estimated_instance_warmup', NUMBER, [
+        'The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.',
+        "Without a value, AWS will default to the group's specified cooldown period.",
+      ]),
+    ],
+  };
+  gen.generateParams(target_tracking_scaling);
+
+  // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html
+  const autoscaling_policy: RecordDecl = {
+    name: 'autoscaling_policy',
+    fields: [
+      requiredField('name', STRING),
+      requiredField(
+        'autoscaling_group_name',
+        resourceIdType('AutoscalingGroupId')
+      ),
+
+      optionalField(
+        'adjustment_type',
+        enumType([
+          'ChangeInCapacity',
+          'ExactCapacity',
+          'PercentChangeInCapacity',
+        ])
+      ),
+    ],
+    variants: {
+      simple_scaling,
+      step_scaling,
+      target_tracking_scaling,
+    },
+  };
+  gen.generateResource(
+    'Provides an AutoScaling Scaling Policy resource..',
+    'https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html',
+    autoscaling_policy,
+    [
+      stringAttr('name'),
+      stringAttr('autoscaling_group_name'), // The scaling policy's assigned autoscaling group.
+      stringAttr('adjustment_type'), // The scaling policy's adjustment type.
+      stringAttr('policy_type'), // The scaling policy's type.
+    ],
+    {
+      arn: true,
+    }
+  );
+  gen.generateParams(autoscaling_policy);
+
+  return {
+    resources: {
+      autoscaling_policy,
+    },
+
+    params: {
+      step_adjustment,
+      predefined_metric_specification,
+      metric_dimension,
+      customized_metric_specification,
+      target_tracking_configuration,
+    },
+  };
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -2664,6 +2869,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_identity_pool_roles_attachment_roles);
   gen.generateParams(eks_cluster);
   gen.generateParams(eks_cluster_vpc_config);
+
+  autoscaling_policy(gen);
 }
 
 function generateRandom(gen: Generator) {

@@ -9,14 +9,23 @@ export interface FieldDecl {
   field: string;
   type: Type;
   optional: boolean;
+  docs?: string[];
 }
 
-export function requiredField(field: string, type: Type): FieldDecl {
-  return { field, type, optional: false };
+export function requiredField(
+  field: string,
+  type: Type,
+  docs?: string[]
+): FieldDecl {
+  return { field, type, docs, optional: false };
 }
 
-export function optionalField(field: string, type: Type): FieldDecl {
-  return { field, type, optional: true };
+export function optionalField(
+  field: string,
+  type: Type,
+  docs?: string[]
+): FieldDecl {
+  return { field, type, docs, optional: true };
 }
 
 export type Type =
@@ -332,6 +341,13 @@ export function fileGenerator(
     for (const field of record.fields) {
       const type = genType(field.type);
       const optional = field.optional ? '?' : '';
+      if (field.docs !== undefined && field.docs.length > 0) {
+        lines.push(`  /**`);
+        for (const doc of field.docs) {
+          lines.push(`  ${doc}`);
+        }
+        lines.push(`  */`);
+      }
       lines.push(`  ${field.field}${optional}: ${type};`);
     }
     lines.push('}');

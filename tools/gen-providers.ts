@@ -437,25 +437,28 @@ const cloudwatch_metric_alarm: RecordDecl = {
         'LessThanOrEqualToThreshold',
       ])
     ),
-    requiredField('evaluation_periods', NUMBER),
+    requiredField('evaluation_periods', NUMBER, ["The number of periods over which data is compared to the specified threshold."]),
     requiredField('metric_name', STRING),
     requiredField('namespace', STRING),
-    requiredField('period', NUMBER),
+    requiredField('period', NUMBER, ["The period in seconds over which the specified statistic is applied."]),
     requiredField(
       'statistic',
       enumType(['SampleCount', 'Average', 'Sum', 'Minimum', 'Maximum'])
     ),
-    requiredField('threshold', NUMBER),
-    optionalField('actions_enabled', BOOLEAN),
-    optionalField('alarm_actions', listType(stringAliasType('AT.Arn'))),
+    requiredField('threshold', NUMBER, ["The value against which the specified statistic is compared. This parameter is required for alarms based on static thresholds"]),
+    optionalField('actions_enabled', BOOLEAN, ["Indicates whether or not actions should be executed during any changes to the alarm's state. Defaults to true."]),
+    optionalField('alarm_actions', listType(stringAliasType('AT.Arn')), ["The list of actions to execute when this alarm transitions into an ALARM state from any other state"]),
     optionalField('alarm_description', STRING),
+    optionalField('datapoints_to_alarm', NUMBER, ["The number of datapoints that must be breaching to trigger the alarm."]),
     optionalField('dimensions', TAGS_MAP),
     optionalField(
       'insufficient_data_actions',
-      listType(stringAliasType('AT.Arn'))
+      listType(stringAliasType('AT.Arn')),
+      ["The list of actions to execute when this alarm transitions into an INSUFFICIENT_DATA state from any other state"]
     ),
-    optionalField('ok_actions', listType(stringAliasType('AT.Arn'))),
+    optionalField('ok_actions', listType(stringAliasType('AT.Arn')), ["The list of actions to execute when this alarm transitions into an OK state from any other state"]),
     optionalField('unit', STRING),
+    optionalField('treat_missing_data', enumType(["missing", "ignore", "breaching", "notBreaching"]), ["Sets how this alarm is to handle missing data points"])
   ],
 };
 

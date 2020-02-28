@@ -2765,19 +2765,48 @@ export function fieldsFromDbSubnetGroupParams(params: DbSubnetGroupParams) : TF.
 export interface CloudwatchMetricAlarmParams {
   alarm_name: string;
   comparison_operator: 'GreaterThanOrEqualToThreshold' | 'GreaterThanThreshold' | 'LessThanThreshold' | 'LessThanOrEqualToThreshold';
+  /**
+  The number of periods over which data is compared to the specified threshold.
+  */
   evaluation_periods: number;
   metric_name: string;
   namespace: string;
+  /**
+  The period in seconds over which the specified statistic is applied.
+  */
   period: number;
   statistic: 'SampleCount' | 'Average' | 'Sum' | 'Minimum' | 'Maximum';
+  /**
+  The value against which the specified statistic is compared. This parameter is required for alarms based on static thresholds
+  */
   threshold: number;
+  /**
+  Indicates whether or not actions should be executed during any changes to the alarm's state. Defaults to true.
+  */
   actions_enabled?: boolean;
+  /**
+  The list of actions to execute when this alarm transitions into an ALARM state from any other state
+  */
   alarm_actions?: (AT.Arn)[];
   alarm_description?: string;
+  /**
+  The number of datapoints that must be breaching to trigger the alarm.
+  */
+  datapoints_to_alarm?: number;
   dimensions?: TF.TagsMap;
+  /**
+  The list of actions to execute when this alarm transitions into an INSUFFICIENT_DATA state from any other state
+  */
   insufficient_data_actions?: (AT.Arn)[];
+  /**
+  The list of actions to execute when this alarm transitions into an OK state from any other state
+  */
   ok_actions?: (AT.Arn)[];
   unit?: string;
+  /**
+  Sets how this alarm is to handle missing data points
+  */
+  treat_missing_data?: 'missing' | 'ignore' | 'breaching' | 'notBreaching';
 }
 
 export function fieldsFromCloudwatchMetricAlarmParams(params: CloudwatchMetricAlarmParams) : TF.ResourceFieldMap {
@@ -2793,10 +2822,12 @@ export function fieldsFromCloudwatchMetricAlarmParams(params: CloudwatchMetricAl
   TF.addOptionalField(fields, "actions_enabled", params.actions_enabled, TF.booleanValue);
   TF.addOptionalField(fields, "alarm_actions", params.alarm_actions, TF.listValue(TF.stringAliasValue));
   TF.addOptionalField(fields, "alarm_description", params.alarm_description, TF.stringValue);
+  TF.addOptionalField(fields, "datapoints_to_alarm", params.datapoints_to_alarm, TF.numberValue);
   TF.addOptionalField(fields, "dimensions", params.dimensions, TF.tagsValue);
   TF.addOptionalField(fields, "insufficient_data_actions", params.insufficient_data_actions, TF.listValue(TF.stringAliasValue));
   TF.addOptionalField(fields, "ok_actions", params.ok_actions, TF.listValue(TF.stringAliasValue));
   TF.addOptionalField(fields, "unit", params.unit, TF.stringValue);
+  TF.addOptionalField(fields, "treat_missing_data", params.treat_missing_data, TF.stringValue);
   return fields;
 }
 

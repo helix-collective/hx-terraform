@@ -107,6 +107,10 @@ export function stringValue(value: string): ResourceValue {
   return { kind: 'text', text: quotedText(value) };
 }
 
+export function numberStringValue(value: number): ResourceValue {
+  return { kind: 'text', text: `"${value}"` };
+}
+
 export function stringAliasValue(value: { value: string }): ResourceValue {
   return { kind: 'text', text: JSON.stringify(value.value) };
 }

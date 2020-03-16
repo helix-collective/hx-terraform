@@ -30,6 +30,7 @@ export function optionalField(
 }
 
 export type Type =
+  | ConvertToPrimitive
   | PrimitiveType
   | ListType
   | RecordType
@@ -47,6 +48,16 @@ interface PrimitiveType {
 export const STRING: PrimitiveType = { kind: 'primitive', type: 'string' };
 export const NUMBER: PrimitiveType = { kind: 'primitive', type: 'number' };
 export const BOOLEAN: PrimitiveType = { kind: 'primitive', type: 'boolean' };
+
+export type ConvertNumToStr = { conv: 'num-to-str', typescript: 'number', terraform: 'string' };
+export type ConvertToPrimitive = { kind: 'convert-to-primitive' } & ConvertNumToStr;
+
+export const NUMBERSTR: ConvertToPrimitive = {
+  kind: 'convert-to-primitive',
+  conv: 'num-to-str',
+  typescript: 'number',
+  terraform: 'string'
+};
 
 interface ListType {
   kind: 'list';
@@ -176,6 +187,8 @@ function genType(type: Type): string {
   switch (type.kind) {
     case 'primitive':
       return type.type;
+    case 'convert-to-primitive':
+      return type.typescript;
     case 'list':
       return '(' + genType(type.type) + ')' + '[]';
     case 'record':
@@ -219,6 +232,8 @@ function genResourceFn(type: Type): string {
   switch (type.kind) {
     case 'primitive':
       return `TF.${type.type}Value`;
+    case 'convert-to-primitive':
+      return genResourceFnConvert(type);
     case 'list':
       return `TF.listValue(${genResourceFn(type.type)})`;
     case 'record':
@@ -235,6 +250,13 @@ function genResourceFn(type: Type): string {
       return 'TF.tagsValue';
     case 'enum':
       return 'TF.stringValue';
+  }
+}
+
+function genResourceFnConvert(type: ConvertToPrimitive): string {
+  switch (type.conv) {
+    case 'num-to-str':
+      return 'TF.numberStringValue';
   }
 }
 

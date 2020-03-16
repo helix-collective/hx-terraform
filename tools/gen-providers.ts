@@ -26,6 +26,7 @@ import {
   stringAttr,
   stringAliasAttr,
   resourceIdAttr,
+  NUMBERSTR,
 } from './gen-helpers';
 import { arn } from '../providers/aws/types';
 

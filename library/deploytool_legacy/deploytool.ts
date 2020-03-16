@@ -233,9 +233,11 @@ export function install(
   if (proxy.kind === 'none' || proxy.kind === 'local') {
     // If not in proxy mode, use letsEncrypt SSL
     letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
+    bootscriptProxyNginxReload(bs, username);
   } else if (proxy.kind === 'remoteSlave') {
     // Install tools necessary for the slaves to poll the S3 state file
     bootscriptProxySlaveUpdate(bs, username);
+    bootscriptProxyNginxReload(bs, username);
   }
   return bs;
 }
@@ -292,10 +294,6 @@ function bootscriptProxySlaveUpdate(
   bs: bootscript.BootScript,
   username: string
 ): void {
-  bs.cronJob('proxy-nginx-reload', [
-    `MAILTO=""`,
-    `15 0 * * * ${username} docker kill --signal=SIGHUP frontendproxy`,
-  ]);
   bs.systemd('proxy-slave-update', [
     `[Unit]`,
     `Description=Periodically refresh local hx-deploy-tool proxy state from S3`,
@@ -308,5 +306,15 @@ function bootscriptProxySlaveUpdate(
     ``,
     `[Install]`,
     `WantedBy=multi-user.target`,
+  ]);
+}
+
+function bootscriptProxyNginxReload(
+  bs: bootscript.BootScript,
+  username: string
+): void {
+  bs.cronJob('proxy-nginx-reload', [
+    `MAILTO=""`,
+    `15 0 * * * ${username} docker kill --signal=SIGHUP frontendproxy`,
   ]);
 }

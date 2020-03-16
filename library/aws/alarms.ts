@@ -370,3 +370,33 @@ export function createAutoScaleGroupHighDiskAlarm(
     alarm_actions: [topic.arn],
   });
 }
+
+export function createAutoScaleGroupActiveInstancesAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  autoscaling_group: AR.AutoscalingGroup,
+  threshold: number = 50,
+  period: number = 1,
+  // MountPath: string = "/",
+  evaluation_periods: number = 2,
+  name = 'active_instances',
+) {
+  // Assumes an autoscaling group won't be used with an ec2 instance on the same namespace
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    evaluation_periods,
+    period,
+    threshold,
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanThreshold',
+    metric_name: 'GroupInServiceInstances',
+    namespace: 'AWS/AutoScaling',
+    statistic: 'Average',
+    datapoints_to_alarm: evaluation_periods,
+    dimensions: {
+      AutoScalingGroupName: autoscaling_group.name,
+    },
+
+    alarm_description: 'Maximum sustained number of instances across the autoscaling group',
+    alarm_actions: [topic.arn],
+  });
+}

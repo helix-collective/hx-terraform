@@ -56,6 +56,16 @@ export class BootScript {
     this.sh("echo 'LC_ALL=en_US.UTF-8' >> /etc/environment");
   }
 
+  env(key: string, value: string) {
+    this.comment(`Set ${key} to ${value}`);
+    this.sh(`echo '${key}=${value}' >> /etc/environment`);
+    this.sh(`export ${key}=${value}`);
+  }
+
+  sourceEnv() {
+    this.sh('source /etc/environment');
+  }
+
   dockerWithConfig(cfg: docker.DockerConfig) {
     this.comment('Install docker and docker-compose');
     this.sh('wget -qO- https://get.docker.com/ | sh');

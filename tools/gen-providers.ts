@@ -859,6 +859,9 @@ const launch_configuration: RecordDecl = {
 
     optionalField('ebs_optimized', BOOLEAN),
     optionalField('root_block_device', recordType(instance_root_block_device)),
+    optionalField('spot_price', NUMBERSTR, [
+      "(Number in string). Maximum $ per hour spot price"
+    ]),
   ],
 };
 

@@ -3396,6 +3396,10 @@ export interface LaunchConfigurationParams {
   enable_monitoring?: boolean;
   ebs_optimized?: boolean;
   root_block_device?: InstanceRootBlockDeviceParams;
+  /**
+  (Number in string). Maximum $ per hour spot price
+  */
+  spot_price?: number;
 }
 
 export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationParams) : TF.ResourceFieldMap {
@@ -3412,6 +3416,7 @@ export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationP
   TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
   TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
+  TF.addOptionalField(fields, "spot_price", params.spot_price, TF.numberStringValue);
   return fields;
 }
 

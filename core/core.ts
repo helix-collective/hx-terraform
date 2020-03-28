@@ -2,6 +2,8 @@
  *  Core types and logic for TSTF, Helix's EDSL for terraform generation
  */
 import * as fs from 'fs';
+import * as p from 'path';
+import  crypto from 'crypto';
 
 /**
  * The interface for generating terraform
@@ -524,7 +526,7 @@ export function fileGenerator(): FileGenerator {
     return result;
   }
 
-  function writeGenerated(path: string, generated: Generated) {
+  function generateFile(generated: Generated) {
     const indent = '';
     let lines: string[] = [];
     for (const provider of generated.providers) {
@@ -551,7 +553,7 @@ export function fileGenerator(): FileGenerator {
           value: { kind: 'text', text: `[${dependsOn.join(', ')}]` },
         });
       }
-      if (resource.provider != '') {
+      if (resource.provider !== '') {
         fields.push({
           key: 'provider',
           value: { kind: 'text', text: `"${resource.provider}"` },
@@ -600,21 +602,35 @@ export function fileGenerator(): FileGenerator {
       lines.push('}');
       lines.push('');
     }
-    fs.writeFileSync(path, lines.join('\n'));
+    return lines.join('\n');
   }
 
   function writeFiles(outdir: string) {
+    // write files including manifest & hash
+    // (separately so that providers change can retrigger terraform init)
+    const providers = new Manifest('providers', outdir);
+    const resources = new Manifest('resources', outdir);
+    const adhoc = new Manifest('adhoc', outdir);
+
+    providers.clearFiles();
+    resources.clearFiles();
+    adhoc.clearFiles();
+
     const fileResources = groupResourcesByFile();
     const fileProviders = groupProvidersByFile();
     for (const path in fileProviders) {
-      writeGenerated(outdir + '/' + path, fileProviders[path]);
+      providers.writeFile(path, generateFile(fileProviders[path]));
     }
     for (const path in fileResources) {
-      writeGenerated(outdir + '/' + path, fileResources[path]);
+      resources.writeFile(path, generateFile(fileResources[path]));
     }
     for (const path of Object.keys(generated.adhocFiles)) {
-      fs.writeFileSync(outdir + '/' + path, generated.adhocFiles[path]);
+      adhoc.writeFile(path, generated.adhocFiles[path]);
     }
+
+    providers.save();
+    resources.save();
+    adhoc.save();
   }
 
   return {
@@ -622,6 +638,50 @@ export function fileGenerator(): FileGenerator {
     writeFiles,
   };
 }
+
+class Manifest {
+  private contents : {file:string, hash:string}[] = [];
+  private manifestFile: string;
+
+  constructor(public name: string, public outdir: string) {
+    this.manifestFile = p.join(outdir,`.manifest.${name}`);
+    this.load();
+  }
+
+  load() {
+    if (fs.existsSync(this.manifestFile)) {
+      const data : {file:string, hash:string}[] = JSON.parse(fs.readFileSync(this.manifestFile).toString());
+      this.contents = data;
+    }
+  }
+
+  clearFiles() {
+    for(const c of this.contents) {
+      const path = p.join(this.outdir,c.file);
+      if(fs.existsSync(path)) {
+        fs.unlinkSync(path);
+      }
+    }
+    this.contents = [];
+  }
+
+  writeFile(path: string, content: string) : void {
+    const shasum = crypto.createHash('sha1');
+    shasum.update(content);
+
+    this.contents.push({
+      file:path,
+      hash:shasum.digest('hex')
+    });
+
+    fs.mkdirSync(this.outdir,{recursive:true});
+    fs.writeFileSync(p.join(this.outdir,path),content);
+  }
+
+  save() {
+    fs.writeFileSync(this.manifestFile, JSON.stringify(this.contents, null, 2) + '\n');
+  }
+};
 
 const RAW_EXPR_PREFIX = 'TFRAWEXPR:';
 

@@ -2,10 +2,11 @@ import os
 import uuid
 import sys
 import zipfile
-from datetime import date
+from datetime import date, timedelta
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules, fileAge
 from hx.dodo_infrastructure import run_dockerized_terraform, update_camus2, lambdazip_file_task, lambdazip_pydir_task
+from doit.tools import timeout
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -13,15 +14,12 @@ TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11'
 
 HERE = Path('.')
 
-terraform_initialized = MarkerFile(HERE/'build/.terraform_initialized')
-terraform_image_built = MarkerFile(HERE/'build/.terraform_image_built')
-terraform_image_pushed = MarkerFile(HERE/'build/.terraform_image_pushed')
 es_tool_build_file = (HERE/'typescript/build/hx-terraform/tools/es-tool.js')
 
 provisioning_tools = HERE / 'generate/.stack-work/install/x86_64-linux/lts-10.10/8.2.2/bin/hx-provisioning-tools'
 
-local_lambda_zip_sources = HERE/'lambdas';
-lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas';
+local_lambda_zip_sources = HERE/'lambdas'
+lambda_zip_sources = HERE/'typescript/hx-terraform/aws/lambdas'
 lambda_es_tool = HERE/'typescript/build/hx-terraform/tools/es-tool.js'
 
 lambda_source_files = (list(local_lambda_zip_sources.glob("*")) + list(lambda_zip_sources.glob("*")) + [ lambda_es_tool ])
@@ -90,13 +88,76 @@ def task_lambda_zips():
         elif f.is_dir() and (f/'requirements.txt').is_file():
             yield lambdazip_pydir_task(zipfile, f)
 
+def task_generate_providers():
+    return {
+        'doc' : 'Generate typescript for providers',
+        'actions' : [generate_providers()],
+        'file_dep': [
+            HERE/'typescript/hx-terraform/tools/gen-helpers.ts',
+            HERE/'typescript/hx-terraform/tools/gen-providers.ts',
+        ] +
+        [f for f in rglobfiles(HERE/'typescript/hx-terraform/providers') if not f.name == 'resources.ts'],
+        'targets': [
+            HERE/'typescript/hx-terraform/providers/aws/resources.ts',
+            HERE/'typescript/hx-terraform/providers/random/resources.ts',
+        ]
+    }
+
+def task_generate_terraform():
+    return {
+        'doc' : 'Generate terraform files from the terraform EDSL',
+        'actions' : [
+            generate_tf()
+        ],
+        'task_dep': ['generate_providers'],
+        'file_dep': rglobfiles(HERE/'typescript'),
+        'targets': [
+            HERE/'terraform'/'.manifest.adhoc',
+            HERE/'terraform'/'.manifest.backend',
+            HERE/'terraform'/'.manifest.providers',
+            HERE/'terraform'/'.manifest.resources'
+        ],
+        'verbosity':2
+    }
+def task_generate():
+    return {
+        'doc' : '(alias of generate_terraform)',
+        'task_dep': ['generate_terraform'],
+        'actions': [],
+        'uptodate': [False],
+    }
+
+def task_terraform_init():
+    return {
+        'doc' : '(Re)Initialize terraform on initial setup and/or changes to backend/provider',
+        'actions': [ dockerized_terraform(['init', '--force-copy']) ],
+        'file_dep': [
+            HERE/'terraform'/'.manifest.backend',
+            HERE/'terraform'/'.manifest.providers'
+        ],
+        'verbosity' : 2
+    }
+
 def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes and save the plan',
-        'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan','-out=tfplan']) ],
-        'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep() + lambda_zipfiles(),
+        'actions': [ dockerized_terraform(['plan','-out=tfplan']) ],
+        'task_dep': [ 'terraform_init', ],
+        'file_dep':
+            nodemodules.file_dep() +
+            lambda_zipfiles() +
+            [
+                HERE/'terraform'/'.manifest.adhoc',
+                HERE/'terraform'/'.manifest.backend',
+                HERE/'terraform'/'.manifest.providers',
+                HERE/'terraform'/'.manifest.resources'
+            ] +
+            [ f for f in rglobfiles(HERE/"terraform") if f.name != 'tfplan' ],
+        'targets': [
+            HERE/"terraform/tfplan"
+        ],
         'verbosity' : 2,
-        'uptodate': [ False ],
+        'uptodate': [timeout(timedelta(minutes=2))]
     }
 
 def task_apply():
@@ -113,14 +174,7 @@ def task_apply():
       'uptodate': [False],
   }
 
-def task_generate():
-    return {
-        'doc' : 'Generate terraform files from the terraform EDSL',
-        'actions': [ generate_providers(), generate_tf() ],
-        'file_dep': nodemodules.file_dep(),
-        'verbosity' : 2,
-        'uptodate': [False],
-    }
+
 
 def task_refresh():
     return {
@@ -140,19 +194,6 @@ def task_output():
 
 def task_update_camus2():
     return update_camus2(HERE)
-
-def task_terraform_init():
-    # You can only run this target after the infrastructure has been
-    # deployed, as the bucket used for state storage is part of it.
-    # (See the state-backend.tf file)
-
-    return {
-        'doc' : 'Initialize terraform and connect to the remote AWS stored state',
-        'actions': [ dockerized_terraform(['init', '--force-copy']), terraform_initialized.action() ],
-        'targets': [ terraform_initialized.path ],
-        'verbosity' : 2,
-        'uptodate': [True], # the task is up to date if its ever been run
-    }
 
 def lambda_zipfiles():
     zipfiles = []

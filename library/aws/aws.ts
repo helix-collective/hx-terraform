@@ -298,7 +298,7 @@ export function enableTerraformS3RemoteState(
   bucket: string,
   region: AT.Region
 ) {
-  tfgen.createAdhocFile(
+  tfgen.createBackendFile(
     'state-backend.tf',
     `\
 terraform {

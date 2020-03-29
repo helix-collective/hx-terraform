@@ -26,6 +26,9 @@ export interface Generator {
     fields: ResourceFieldMap
   ): ResourceT<T>;
 
+  /** Create a backend config file */
+  createBackendFile(path: string, content: string): void;
+
   /** Create an ad-hoc output file */
   createAdhocFile(path: string, content: string): void;
 
@@ -217,6 +220,7 @@ export function fileGenerator(): FileGenerator {
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
     adhocFiles: { [path: string]: string };
+    backendFile: {path: string, content: string}|null;
     outputs: OutputDetails[];
   }
 
@@ -258,10 +262,10 @@ export function fileGenerator(): FileGenerator {
         tftype,
         tfname,
         fields,
+        provider,
         ignoreChanges: [],
         dependsOn: [],
         provisioners: [],
-        provider,
         createBeforeDestroy: false,
       };
 
@@ -279,6 +283,12 @@ export function fileGenerator(): FileGenerator {
     function createAdhocFile(path: string, content: string): void {
       generated.adhocFiles[path] = content;
     }
+
+    /// Create the backend config file
+    function createBackendFile(path: string, content: string): void {
+      generated.backendFile = {path, content};
+    }
+
 
     function createTypedResource<T extends string>(
       type: T,
@@ -368,6 +378,7 @@ export function fileGenerator(): FileGenerator {
       createResource,
       createTypedResource,
       createAdhocFile,
+      createBackendFile,
       createOutput,
       ignoreChanges,
       createBeforeDestroy,
@@ -399,6 +410,7 @@ export function fileGenerator(): FileGenerator {
       resources: [],
       resourcesByName: {},
       outputs: [],
+      backendFile: null,
       adhocFiles: {},
     };
   }
@@ -526,7 +538,7 @@ export function fileGenerator(): FileGenerator {
     return result;
   }
 
-  function generateFile(generated: Generated) {
+  function generateFile(generated: Generated) : string {
     const indent = '';
     let lines: string[] = [];
     for (const provider of generated.providers) {
@@ -611,10 +623,12 @@ export function fileGenerator(): FileGenerator {
     const providers = new Manifest('providers', outdir);
     const resources = new Manifest('resources', outdir);
     const adhoc = new Manifest('adhoc', outdir);
+    const backend = new Manifest('backend', outdir);
 
     providers.clearFiles();
     resources.clearFiles();
     adhoc.clearFiles();
+    backend.clearFiles();
 
     const fileResources = groupResourcesByFile();
     const fileProviders = groupProvidersByFile();
@@ -627,10 +641,14 @@ export function fileGenerator(): FileGenerator {
     for (const path of Object.keys(generated.adhocFiles)) {
       adhoc.writeFile(path, generated.adhocFiles[path]);
     }
+    if(generated.backendFile) {
+      backend.writeFile(generated.backendFile.path, generated.backendFile.content);
+    }
 
     providers.save();
     resources.save();
     adhoc.save();
+    backend.save();
   }
 
   return {

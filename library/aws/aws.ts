@@ -310,3 +310,14 @@ terraform {
 }`
   );
 }
+
+export function setTerraformBackend(
+  tfgen: TF.Generator,
+  bucket: string,
+  region: AT.Region,
+  backend: "local"|"s3"
+) {
+  if(backend === "s3") {
+    enableTerraformS3RemoteState(tfgen, bucket, region);
+  }
+}

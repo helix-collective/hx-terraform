@@ -88,6 +88,8 @@ const db_instance: RecordDecl = {
       'vpc_security_group_ids',
       listType(resourceIdType('SecurityGroupId'))
     ),
+    optionalField('deletion_protection', BOOLEAN),
+    optionalField('performance_insights_enabled', BOOLEAN),
     optionalField('parameter_group_name', STRING),
     optionalField('db_subnet_group_name', STRING),
     optionalField('tags', TAGS_MAP),

@@ -2235,6 +2235,8 @@ export interface DbInstanceParams {
   publicly_accessible?: boolean;
   backup_retention_period?: number;
   vpc_security_group_ids?: (SecurityGroupId)[];
+  deletion_protection?: boolean;
+  performance_insights_enabled?: boolean;
   parameter_group_name?: string;
   db_subnet_group_name?: string;
   tags?: TF.TagsMap;
@@ -2266,6 +2268,8 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "publicly_accessible", params.publicly_accessible, TF.booleanValue);
   TF.addOptionalField(fields, "backup_retention_period", params.backup_retention_period, TF.numberValue);
   TF.addOptionalField(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "deletion_protection", params.deletion_protection, TF.booleanValue);
+  TF.addOptionalField(fields, "performance_insights_enabled", params.performance_insights_enabled, TF.booleanValue);
   TF.addOptionalField(fields, "parameter_group_name", params.parameter_group_name, TF.stringValue);
   TF.addOptionalField(fields, "db_subnet_group_name", params.db_subnet_group_name, TF.stringValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);

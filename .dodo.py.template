@@ -147,7 +147,13 @@ def task_terraform_init():
 def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes and save the plan',
-        'actions': [ dockerized_terraform(['plan','-out=tfplan']) ],
+        'actions': [
+            dockerized_terraform(['plan','-out=tfplan']) +
+                "| grep --line-buffered -v 'This plan was saved to'" +
+                "| grep --line-buffered -v 'To perform exactly these actions'" +
+                "| grep --line-buffered -v 'terraform apply'",
+            'echo "Review the above plan and run:\n  doit apply"'
+        ],
         'task_dep': [ 'terraform_init', ],
         'file_dep':
             lambda_zipfiles() +

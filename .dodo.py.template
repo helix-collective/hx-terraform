@@ -157,7 +157,7 @@ def task_plan():
                 HERE/'terraform'/'.manifest.providers',
                 HERE/'terraform'/'.manifest.resources'
             ] +
-            [ f for f in rglobfiles(HERE/"terraform") if f.name != 'tfplan' ],
+            [ f for f in rglobfiles(HERE/"terraform") if f.name != 'tfplan' and '.terraform' not in f.parts ],
         'targets': [
             HERE/"terraform/tfplan"
         ],

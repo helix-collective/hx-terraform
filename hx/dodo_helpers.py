@@ -559,6 +559,7 @@ class YarnNodeModules(object):
         """
         node_modules = self.dir/'node_modules'
         return {
+            'name': self.dir,
             'doc' : 'build/update node dependencies in {}'.format(self.dir),
             'actions': [
                 'cd {} && yarn'.format(self.dir),

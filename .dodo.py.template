@@ -26,13 +26,16 @@ lambda_source_files = (list(local_lambda_zip_sources.glob("*")) + list(lambda_zi
 
 tfplan = HERE / 'terraform/tfplan'
 
+# These are actually symlinked so they share package.json
 nodemodules = YarnNodeModules(HERE / 'typescript')
+hxtnodemodules = YarnNodeModules(HERE / 'typescript'/'hx-terraform')
 
 def dockerized_terraform(cmd):
     return run_dockerized_terraform(TERRAFORM_IMAGE, cmd)
 
 def task_node_modules():
-    return nodemodules.task()
+    yield nodemodules.task()
+    yield hxtnodemodules.task()
 
 def generate_providers():
     return '(cd typescript; ./node_modules/.bin/ts-node hx-terraform/tools/gen-providers.ts)'
@@ -94,9 +97,10 @@ def task_generate_providers():
         'actions' : [generate_providers()],
         'file_dep': [
             HERE/'typescript/hx-terraform/tools/gen-helpers.ts',
-            HERE/'typescript/hx-terraform/tools/gen-providers.ts',
-        ] +
-        [f for f in rglobfiles(HERE/'typescript/hx-terraform/providers') if not f.name == 'resources.ts'],
+            HERE/'typescript/hx-terraform/tools/gen-providers.ts'] +
+            [f for f in rglobfiles(HERE/'typescript/hx-terraform/providers') if not f.name == 'resources.ts'] +
+            nodemodules.file_dep() +
+            hxtnodemodules.file_dep(),
         'targets': [
             HERE/'typescript/hx-terraform/providers/aws/resources.ts',
             HERE/'typescript/hx-terraform/providers/random/resources.ts',
@@ -110,7 +114,9 @@ def task_generate_terraform():
             generate_tf()
         ],
         'task_dep': ['generate_providers'],
-        'file_dep': rglobfiles(HERE/'typescript'),
+        'file_dep': [f for f in rglobfiles(HERE/'typescript') if not 'node_modules' in f.parts] +
+            nodemodules.file_dep() +
+            hxtnodemodules.file_dep(),
         'targets': [
             HERE/'terraform'/'.manifest.adhoc',
             HERE/'terraform'/'.manifest.backend',
@@ -144,7 +150,6 @@ def task_plan():
         'actions': [ dockerized_terraform(['plan','-out=tfplan']) ],
         'task_dep': [ 'terraform_init', ],
         'file_dep':
-            nodemodules.file_dep() +
             lambda_zipfiles() +
             [
                 HERE/'terraform'/'.manifest.adhoc',

@@ -692,7 +692,9 @@ class Manifest {
       hash:shasum.digest('hex')
     });
 
-    fs.mkdirSync(this.outdir,{recursive:true});
+    if (!fs.existsSync(this.outdir)) {
+      fs.mkdirSync(this.outdir,{recursive:true});
+    }
     fs.writeFileSync(p.join(this.outdir,path),content);
   }
 

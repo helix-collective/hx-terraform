@@ -47,20 +47,26 @@ export function createPostgresInstance(
     password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
     use_external_subnets?: boolean;
+    customize_securitygroup?: Customize<AR.SecurityGroupParams>;
   }
 ): DbInstance {
+
   if(!params.db_name.match(/^[A-Za-z][A-Za-z0-9]+$/)) {
     throw new Error('db_name must begin with a letter and contain only alphanumeric characters.');
   }
 
   const sname = tfgen.scopedName(name).join('_');
 
-  const security_group = AR.createSecurityGroup(tfgen, name, {
+  const sg_params : AR.SecurityGroupParams = {
     vpc_id: sr.network.vpc.id,
     ingress: [ingressOnPort(5432)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, name),
-  });
+  };
+  if(params.customize_securitygroup) {
+    params.customize_securitygroup(sg_params);
+  }
+  const security_group = AR.createSecurityGroup(tfgen, name, sg_params);
 
   const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
     name: sname,

@@ -2502,6 +2502,7 @@ export interface IngressRuleParams {
   to_port: number;
   protocol: 'tcp' | 'udp' | 'icmp' | '-1';
   cidr_blocks: (AT.CidrBlock)[];
+  description?: string;
 }
 
 export function fieldsFromIngressRuleParams(params: IngressRuleParams) : TF.ResourceFieldMap {
@@ -2510,6 +2511,7 @@ export function fieldsFromIngressRuleParams(params: IngressRuleParams) : TF.Reso
   TF.addField(fields, "to_port", params.to_port, TF.numberValue);
   TF.addField(fields, "protocol", params.protocol, TF.stringValue);
   TF.addField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -2518,6 +2520,7 @@ export interface EgressRuleParams {
   to_port: number;
   protocol: 'tcp' | 'udp' | 'icmp' | '-1';
   cidr_blocks: (AT.CidrBlock)[];
+  description?: string;
 }
 
 export function fieldsFromEgressRuleParams(params: EgressRuleParams) : TF.ResourceFieldMap {
@@ -2526,6 +2529,7 @@ export function fieldsFromEgressRuleParams(params: EgressRuleParams) : TF.Resour
   TF.addField(fields, "to_port", params.to_port, TF.numberValue);
   TF.addField(fields, "protocol", params.protocol, TF.stringValue);
   TF.addField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 

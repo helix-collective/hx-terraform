@@ -49,6 +49,10 @@ export function createPostgresInstance(
     subnet_ids: AR.SubnetId[];
   }
 ): DbInstance {
+  if(!params.db_name.match(/^[A-Za-z][A-Za-z0-9]+$/)) {
+    throw new Error('db_name must begin with a letter and contain only alphanumeric characters.');
+  }
+
   const sname = tfgen.scopedName(name).join('_');
 
   const security_group = AR.createSecurityGroup(tfgen, name, {

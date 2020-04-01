@@ -1,7 +1,7 @@
 /**
  *  Core types and logic for TSTF, Helix's EDSL for terraform generation
  */
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as p from 'path';
 import  crypto from 'crypto';
 
@@ -692,9 +692,7 @@ class Manifest {
       hash:shasum.digest('hex')
     });
 
-    if (!fs.existsSync(this.outdir)) {
-      fs.mkdirSync(this.outdir,{recursive:true});
-    }
+    fs.mkdirpSync(this.outdir);
     fs.writeFileSync(p.join(this.outdir,path),content);
   }
 

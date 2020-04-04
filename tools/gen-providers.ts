@@ -139,7 +139,17 @@ const vpc: RecordDecl = {
     optionalField('instance_tenancy', STRING),
     optionalField('enable_dns_support', BOOLEAN),
     optionalField('enable_dns_hostnames', BOOLEAN),
-    optionalField('enable_classic_link', BOOLEAN),
+    optionalField('enable_classiclink', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const default_vpc: RecordDecl = {
+  name: 'default_vpc',
+  fields: [
+    optionalField('enable_dns_support', BOOLEAN),
+    optionalField('enable_dns_hostnames', BOOLEAN),
+    optionalField('enable_classiclink', BOOLEAN),
     optionalField('tags', TAGS_MAP),
   ],
 };
@@ -151,6 +161,15 @@ const subnet: RecordDecl = {
     requiredField('cidr_block', stringAliasType('AT.CidrBlock')),
     optionalField('map_public_ip_on_launch', BOOLEAN),
     optionalField('availability_zone', stringAliasType('AT.AvailabilityZone')),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const default_subnet: RecordDecl = {
+  name: 'default_subnet',
+  fields: [
+    requiredField('availability_zone', stringAliasType('AT.AvailabilityZone')),
+    optionalField('map_public_ip_on_launch', BOOLEAN),
     optionalField('tags', TAGS_MAP),
   ],
 };
@@ -2027,10 +2046,29 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a resource to manage the default AWS VPC in the current region.',
+    'https://www.terraform.io/docs/providers/aws/r/default_vpc.html',
+    default_vpc,
+    [resourceIdAttr('id', vpc)]
+  );
+
+  gen.generateResource(
     'Provides a VPC Subnet.',
     'https://www.terraform.io/docs/providers/aws/d/subnet.html',
     subnet,
-    [resourceIdAttr('id', subnet)]
+    [
+      resourceIdAttr('id', subnet),
+    ]
+  );
+
+  gen.generateResource(
+    'Provides a resource to manage a default AWS VPC subnet in the current region.',
+    'https://www.terraform.io/docs/providers/aws/r/default_subnet.html',
+    default_subnet,
+    [
+      resourceIdAttr('id', subnet),
+      stringAliasAttr('availability_zone', 'AvailabilityZone', 'AT.AvailabilityZone'),
+    ]
   );
 
   gen.generateResource(
@@ -2751,7 +2789,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(db_parameter_group_parameter);
   gen.generateParams(eip);
   gen.generateParams(vpc);
+  gen.generateParams(default_vpc);
   gen.generateParams(subnet);
+  gen.generateParams(default_subnet);
   gen.generateParams(security_group);
   gen.generateParams(security_group_rule);
   gen.generateParams(ingress_rule);

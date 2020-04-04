@@ -221,6 +221,28 @@ export interface Vpc extends TF.ResourceT<'Vpc'> {
 export type VpcId = {type:'VpcId',value:string};
 
 /**
+ *  Provides a resource to manage the default AWS VPC in the current region.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/default_vpc.html
+ */
+export function createDefaultVpc(tfgen: TF.Generator, rname: string, params: DefaultVpcParams): DefaultVpc {
+  const fields = fieldsFromDefaultVpcParams(params);
+  const resource = tfgen.createTypedResource('DefaultVpc', 'aws_default_vpc', rname, fields);
+  const id: VpcId =  {type: 'VpcId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface DefaultVpc extends TF.ResourceT<'DefaultVpc'> {
+  id: VpcId;
+}
+
+export type DefaultVpcId = {type:'DefaultVpcId',value:string};
+
+/**
  *  Provides a VPC Subnet.
  *
  *  see https://www.terraform.io/docs/providers/aws/d/subnet.html
@@ -241,6 +263,31 @@ export interface Subnet extends TF.ResourceT<'Subnet'> {
 }
 
 export type SubnetId = {type:'SubnetId',value:string};
+
+/**
+ *  Provides a resource to manage a default AWS VPC subnet in the current region.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/default_subnet.html
+ */
+export function createDefaultSubnet(tfgen: TF.Generator, rname: string, params: DefaultSubnetParams): DefaultSubnet {
+  const fields = fieldsFromDefaultSubnetParams(params);
+  const resource = tfgen.createTypedResource('DefaultSubnet', 'aws_default_subnet', rname, fields);
+  const id: SubnetId =  {type: 'SubnetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: '${' + TF.resourceName(resource) + '.availability_zone}'};
+
+  return {
+    ...resource,
+    id,
+    availability_zone,
+  };
+}
+
+export interface DefaultSubnet extends TF.ResourceT<'DefaultSubnet'> {
+  id: SubnetId;
+  availability_zone: AT.AvailabilityZone;
+}
+
+export type DefaultSubnetId = {type:'DefaultSubnetId',value:string};
 
 /**
  *  Provides a security group resource.
@@ -2341,7 +2388,7 @@ export interface VpcParams {
   instance_tenancy?: string;
   enable_dns_support?: boolean;
   enable_dns_hostnames?: boolean;
-  enable_classic_link?: boolean;
+  enable_classiclink?: boolean;
   tags?: TF.TagsMap;
 }
 
@@ -2351,7 +2398,23 @@ export function fieldsFromVpcParams(params: VpcParams) : TF.ResourceFieldMap {
   TF.addOptionalField(fields, "instance_tenancy", params.instance_tenancy, TF.stringValue);
   TF.addOptionalField(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
   TF.addOptionalField(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_classic_link", params.enable_classic_link, TF.booleanValue);
+  TF.addOptionalField(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface DefaultVpcParams {
+  enable_dns_support?: boolean;
+  enable_dns_hostnames?: boolean;
+  enable_classiclink?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromDefaultVpcParams(params: DefaultVpcParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
+  TF.addOptionalField(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
+  TF.addOptionalField(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
@@ -2370,6 +2433,20 @@ export function fieldsFromSubnetParams(params: SubnetParams) : TF.ResourceFieldM
   TF.addField(fields, "cidr_block", params.cidr_block, TF.stringAliasValue);
   TF.addOptionalField(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
   TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface DefaultSubnetParams {
+  availability_zone: AT.AvailabilityZone;
+  map_public_ip_on_launch?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromDefaultSubnetParams(params: DefaultSubnetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalField(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

@@ -41,8 +41,8 @@ export interface AzConfig {
  *    - common security groups
  *    - SNS topics for alerts and alarms
  */
-export interface SharedResources {
-  network: NetworkResources;
+export interface GenSharedResources<AZ> {
+  network: GenNetworkResources<AZ>;
   primary_dns_zone: AR.Route53Zone;
   domain_name: string;
   deploy_bucket: AR.S3Bucket;
@@ -58,17 +58,34 @@ export interface SharedResources {
   s3_bucket_prefix: string;
 }
 
-export interface NetworkResources {
+export interface GenNetworkResources<AZ> {
   vpc: AR.Vpc;
-  azs: AzResources[];
+  azs: AZ[];
   region: AT.Region;
 }
 
-export interface AzResources {
+
+/**
+ * An availability zone with an externally accessible
+ * subnet
+ */
+export interface PublicAzResources {
+  azname: string;
+  external_subnet: AR.Subnet;
+}
+
+/**
+ * Resources for an availability zone also with a
+ * an internal subnet
+ */
+export interface SplitAzResources {
   azname: string;
   external_subnet: AR.Subnet;
   internal_subnet: AR.Subnet;
 }
+
+export type NetworkResources = GenNetworkResources<SplitAzResources>;
+export type SharedResources = GenSharedResources<SplitAzResources>;
 
 /**
  * Construct the share resources for an AWS account and region
@@ -81,6 +98,19 @@ export function createResources(
   create_buildbot_user?: boolean
 ): SharedResources {
   const network = createNetworkResources(tfgen, network_config);
+  return createOtherResources(tfgen, domain_name, s3_bucket_prefix, network, create_buildbot_user);
+}
+
+/**
+ * Once the network has been setup, create the other standard shared resources
+ */
+export function createOtherResources<AZ>(
+  tfgen: TF.Generator,
+  domain_name: string,
+  s3_bucket_prefix: string,
+  network: GenNetworkResources<AZ>,
+  create_buildbot_user?: boolean
+): GenSharedResources<AZ> {
   const primary_dns_zone = AR.createRoute53Zone(tfgen, 'primary', {
     name: domain_name,
     tags: tfgen.tagsContext(),
@@ -180,6 +210,37 @@ export function createResources(
     alarm_topic,
     s3_bucket_prefix,
   };
+}
+
+/**
+ * Setup networking to use the default vpc and subnets
+ */
+
+export function useDefaultNetworkResources(
+  tfgen: TF.Generator,
+  region: AT.Region,
+  azs0: AT.AvailabilityZone[],
+): GenNetworkResources<PublicAzResources> {
+  const default_vpc = AR.createDefaultVpc(tfgen, "default", {});
+  const vpc: AR.Vpc = {id:default_vpc.id, tftype:default_vpc.tftype, tfname:default_vpc.tfname, type:"Vpc"};
+
+  const azs: PublicAzResources[] = azs0.map( az => {
+    const default_subnet = AR.createDefaultSubnet(tfgen, az.value, {
+      availability_zone: az
+    });
+    const external_subnet: AR.Subnet = {id:default_subnet.id, tftype:default_subnet.tftype, tfname:default_subnet.tfname, type:"Subnet"};
+    return {
+      azname: az.value,
+      external_subnet,
+    };
+  });
+
+  // Cast default_vpc, default_subnet to a vpc, subnet
+  return {
+    region,
+    vpc,
+    azs
+  }
 }
 
 function createNetworkResources(

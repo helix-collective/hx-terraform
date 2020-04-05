@@ -6,7 +6,6 @@ from datetime import date, timedelta
 from pathlib import *
 from hx.dodo_helpers import MarkerFile, DockerContext, DockerImage, rglobfiles, YarnNodeModules, fileAge
 from hx.dodo_infrastructure import run_dockerized_terraform, update_camus2, lambdazip_file_task, lambdazip_pydir_task
-from doit.tools import timeout
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
@@ -168,7 +167,7 @@ def task_plan():
             HERE/"terraform/tfplan"
         ],
         'verbosity' : 2,
-        'uptodate': [timeout(timedelta(minutes=2))]
+        'uptodate': [False]  # always run
     }
 
 def task_apply():

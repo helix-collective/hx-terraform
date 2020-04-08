@@ -511,6 +511,7 @@ export function lambdaRuntime(v: string): LambdaRuntime {
 
 export const python_3_7 = lambdaRuntime('python3.7');
 export const nodejs_8_10 = lambdaRuntime('nodejs8.10');
+export const nodejs_12_x = lambdaRuntime('nodejs12.x');
 
 //----------------------------------------------------------------------
 export type LambdaPermissionAction = {

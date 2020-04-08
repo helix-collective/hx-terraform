@@ -259,13 +259,14 @@ function createLoggingCleanupLambda(
   // The lambda function will have already been packed (by doit) into
   // the zipfile before terraform is run. (The lambda function will be updated
   // whenever the hash of the zipfile changes).
-  const runtime: AT.LambdaRuntime = AT.nodejs_8_10;
+  const runtime: AT.LambdaRuntime = AT.nodejs_12_x;
   const handler: string = 'es-tool.cronDelete';
   const zipfile: string = '../build/lambdas/es-tool.zip';
   const lambda = AR.createLambdaFunction(tfgen, name, {
     runtime,
     handler,
     function_name: tfgen.scopedName(name).join('_'),
+    timeout: 60 * 15,
     role: role.arn,
     filename: zipfile,
     source_code_hash: TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`),

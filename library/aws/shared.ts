@@ -342,10 +342,10 @@ function createNetworkResources(
 /**
  * Create a DNS A record in the primary dns zone
  */
-export function dnsARecord(
+export function dnsARecord<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: GenSharedResources<AZ>,
   dnsname: string,
   ipaddresses: AT.IpAddress[],
   ttl: string
@@ -403,7 +403,7 @@ export function dnsSubdomain(
 /**
  * Return the full qualified domain name for a host in the primary dns zone
  */
-export function fqdn(sr: SharedResources, dnsname: string) {
+export function fqdn<AZS>(sr: GenSharedResources<AZS>, dnsname: string) {
   return dnsname + '.' + sr.domain_name;
 }
 

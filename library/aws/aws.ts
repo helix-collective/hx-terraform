@@ -11,7 +11,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as policies from './policies';
-import { SharedResources } from './shared';
+import { SharedResources, GenSharedResources, PublicAzResources, SplitAzResources } from './shared';
 import {
   contextTagsWithName,
   Customize,
@@ -31,10 +31,11 @@ export interface InstanceWithEipParams {
 /**
  * Construct an EC2 instance with a public elastic IP Address
  */
-export function createInstanceWithEip(
+export function createInstanceWithEip<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: GenSharedResources<AZ>,
+  subnet: AR.Subnet,
   params0: InstanceWithEipParams
 ): { eip: AR.Eip; ec2: AR.Instance } {
   function createInstance() {
@@ -42,7 +43,7 @@ export function createInstanceWithEip(
       ami: params0.ami(sr.network.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
-      subnet_id: firstAzExternalSubnet(sr).id,
+      subnet_id: subnet.id,
       vpc_security_group_ids: [params0.security_group.id],
       root_block_device: {
         volume_size: 20,
@@ -131,7 +132,7 @@ export function externalSubnets(sr: SharedResources): AR.Subnet[] {
 }
 
 /**  Selects the external subnet of the first availability zone */
-export function firstAzExternalSubnet(sr: SharedResources): AR.Subnet {
+export function firstAzExternalSubnet(sr: GenSharedResources<PublicAzResources>): AR.Subnet {
   return sr.network.azs[0].external_subnet;
 }
 
@@ -157,7 +158,7 @@ export function createSqsQueue(
   return AR.createSqsQueue(tfgen, name, params);
 }
 
-export function s3DeployBucketReadOnlyPolicy(sr: SharedResources) {
+export function s3DeployBucketReadOnlyPolicy<AZ>(sr: GenSharedResources<AZ>) {
   return policies.s3ReadonlyPolicy('reads3deploy', sr.deploy_bucket_name);
 }
 

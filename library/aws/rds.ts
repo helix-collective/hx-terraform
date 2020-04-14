@@ -4,7 +4,7 @@ import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
 import * as bootscript from '../bootscript';
-import { SharedResources } from './shared';
+import { SharedResources, GenSharedResources, PublicAzResources, SplitAzResources } from './shared';
 import {
   ingressOnPort,
   egress_all,
@@ -32,6 +32,7 @@ interface PasswordStoreSecretManager {
   arnSecret: ArnSecret;
 }
 
+
 /**
  * Create an RDS postgres database, with suitable defaults for a uat helix environment.
  * The defaults can be overridden via the customize parameter. A randomly master password
@@ -48,6 +49,34 @@ export function createPostgresInstance(
     customize?: Customize<AR.DbInstanceParams>;
     use_external_subnets?: boolean;
   }
+): DbInstance { 
+  const params2 = {
+    ...params,
+    select_subnet: 
+      (az: SplitAzResources) => 
+        params.use_external_subnets
+          ? az.external_subnet
+          : az.internal_subnet
+  }
+  return createPostgresInstanceGeneric(tfgen,name, sr, params2)
+}
+
+/**
+ * Create an RDS postgres database, with suitable defaults for a uat helix environment.
+ * The defaults can be overridden via the customize parameter. A randomly master password
+ * will be generated, and stored as json in the password_to location.
+ */
+export function createPostgresInstanceGeneric<AZ>(
+  tfgen: TF.Generator,
+  name: string,
+  sr: GenSharedResources<AZ>,
+  params: {
+    db_name: string;
+    db_instance_type: AT.DbInstanceType;
+    password_to: PasswordStore;
+    customize?: Customize<AR.DbInstanceParams>;
+    select_subnet(az: AZ): AR.Subnet;
+  }
 ): DbInstance {
   const sname = tfgen.scopedName(name).join('_');
 
@@ -61,10 +90,7 @@ export function createPostgresInstance(
   const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
     name: sname,
     subnet_ids: sr.network.azs.map(
-      az =>
-        params.use_external_subnets
-          ? az.external_subnet.id
-          : az.internal_subnet.id
+      az => params.select_subnet(az).id
     ),
   });
 
@@ -261,9 +287,9 @@ export function createMssqlInstance(
   };
 }
 
-function createPasswordProvisioner(
+function createPasswordProvisioner<AZ>(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  sr: GenSharedResources<AZ>,
   db: AR.DbInstance,
   passwordStore: PasswordStore
 ) {

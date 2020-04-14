@@ -3,7 +3,7 @@ import * as AR from '../../providers/aws/resources';
 import * as AT from '../../providers/aws/types';
 
 import * as secrets from './secrets';
-import { SharedResources } from './shared';
+import * as shared from './shared';
 import * as policies from './policies';
 import * as roles from './roles';
 
@@ -49,10 +49,10 @@ export interface CronWebhooks {
  *
  * Constructs AWS resources required to hit a set of endpoints periodically
  */
-export function createCronWebhooks(
+export function createCronWebhooks<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: shared.GenSharedResources<AZ>,
   params: CronWebhooksParams
 ): CronWebhooks {
   // Construct a shared secret in order that periodic webhook consumers

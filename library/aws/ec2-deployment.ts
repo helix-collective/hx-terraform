@@ -28,10 +28,10 @@ import * as DC from '../../library/deploytool_legacy/adl-gen/config';
  * hx-deploy-tool is configured onto the instance, running in local proxy mode,
  * with a local nginx instance to support green/blue style deploys.
  */
-export function createEc2Deployment(
+export function createEc2Deployment<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.GenSharedResources<AZ>,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
@@ -181,8 +181,8 @@ export function httpsFqdnsFromEndpoints(
   return https_fqdns;
 }
 
-export function endpointUrl(
-  sr: shared.SharedResources,
+export function endpointUrl<AZ>(
+  sr: shared.GenSharedResources<AZ>,
   url: EndPointUrl
 ): string {
   switch (url.kind) {
@@ -195,8 +195,8 @@ export function endpointUrl(
   }
 }
 
-export function deployToolEndpoints(
-  sr: shared.SharedResources,
+export function deployToolEndpoints<AZ>(
+  sr: shared.GenSharedResources<AZ>,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};

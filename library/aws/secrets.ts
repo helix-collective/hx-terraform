@@ -2,7 +2,7 @@ import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
 import * as _ from 'lodash';
 import { ArnT } from '../../providers/aws/types';
-import { SharedResources } from './shared';
+import { SharedResources, GenSharedResources } from './shared';
 import { DESTRUCTION } from 'dns';
 
 export type ArnSecret = ArnT<'SecretsmanagerSecret'>;
@@ -47,10 +47,10 @@ export function createJsonSecret(
  *    { "secret", "XXXXXX" }
  *
  */
-export function createRandomJsonSecret(
+export function createRandomJsonSecret<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: GenSharedResources<AZ>,
   params: JsonSecretParams
 ) {
   const secret = AR.createSecretsmanagerSecret(tfgen, name, {

@@ -31,7 +31,7 @@ import * as DC from '../../library/deploytool_legacy/adl-gen/config';
 export function createEc2Deployment(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.GenSharedResources<shared.PublicAzResources>,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
@@ -115,7 +115,7 @@ export function createEc2Deployment(
     iampolicies
   );
 
-  const appserver = aws.createInstanceWithEip(tfgen, name, sr, {
+  const appserver = aws.createInstanceWithEip(tfgen, name, sr, aws.firstAzExternalSubnet(sr), {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
     security_group: sr.appserver_security_group,
@@ -181,8 +181,8 @@ export function httpsFqdnsFromEndpoints(
   return https_fqdns;
 }
 
-export function endpointUrl(
-  sr: shared.SharedResources,
+export function endpointUrl<AZ>(
+  sr: shared.GenSharedResources<AZ>,
   url: EndPointUrl
 ): string {
   switch (url.kind) {
@@ -195,8 +195,8 @@ export function endpointUrl(
   }
 }
 
-export function deployToolEndpoints(
-  sr: shared.SharedResources,
+export function deployToolEndpoints<AZ>(
+  sr: shared.GenSharedResources<AZ>,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};

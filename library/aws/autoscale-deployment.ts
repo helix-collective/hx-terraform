@@ -211,7 +211,7 @@ function createController(
     controller_iampolicies
   );
 
-  const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, {
+  const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, aws.firstAzExternalSubnet(sr), {
     instance_type: AT.t2_micro,
     ami: params.controller_amis || getDefaultAmi,
     security_group: sr.bastion_security_group,

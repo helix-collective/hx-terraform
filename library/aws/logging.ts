@@ -189,12 +189,14 @@ export function createLoggingInfrastructure(
       tfgen,
       'log_aggregator_one',
       sr,
+       aws.firstAzExternalSubnet(sr),
       laparams(aws.firstAzExternalSubnet(sr))
     ),
     aws.createInstanceWithEip(
       tfgen,
       'log_aggregator_two',
       sr,
+      aws.firstAzExternalSubnet(sr),
       laparams(aws.secondAzExternalSubnet(sr))
     ),
   ];

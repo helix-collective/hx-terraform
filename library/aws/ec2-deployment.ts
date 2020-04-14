@@ -28,10 +28,10 @@ import * as DC from '../../library/deploytool_legacy/adl-gen/config';
  * hx-deploy-tool is configured onto the instance, running in local proxy mode,
  * with a local nginx instance to support green/blue style deploys.
  */
-export function createEc2Deployment<AZ>(
+export function createEc2Deployment(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.GenSharedResources<AZ>,
+  sr: shared.GenSharedResources<shared.PublicAzResources>,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
@@ -115,7 +115,7 @@ export function createEc2Deployment<AZ>(
     iampolicies
   );
 
-  const appserver = aws.createInstanceWithEip(tfgen, name, sr, {
+  const appserver = aws.createInstanceWithEip(tfgen, name, sr, aws.firstAzExternalSubnet(sr), {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
     security_group: sr.appserver_security_group,

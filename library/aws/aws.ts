@@ -28,9 +28,6 @@ export interface InstanceWithEipParams {
   customize_instance?: Customize<AR.InstanceParams>;
 }
 
-/** A type alias for values of an unknown type */
-type unknown = {}|null;
-
 /**
  * Construct an EC2 instance with a public elastic IP Address
  */
@@ -38,6 +35,7 @@ export function createInstanceWithEip<AZ>(
   tfgen: TF.Generator,
   name: string,
   sr: GenSharedResources<AZ>,
+  subnet: AR.Subnet,
   params0: InstanceWithEipParams
 ): { eip: AR.Eip; ec2: AR.Instance } {
   function createInstance() {
@@ -45,7 +43,7 @@ export function createInstanceWithEip<AZ>(
       ami: params0.ami(sr.network.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
-      subnet_id: firstAzExternalSubnet(sr as unknown as GenSharedResources<PublicAzResources | SplitAzResources>).id,
+      subnet_id: subnet.id,
       vpc_security_group_ids: [params0.security_group.id],
       root_block_device: {
         volume_size: 20,
@@ -134,7 +132,7 @@ export function externalSubnets(sr: SharedResources): AR.Subnet[] {
 }
 
 /**  Selects the external subnet of the first availability zone */
-export function firstAzExternalSubnet(sr: GenSharedResources<PublicAzResources | SplitAzResources>): AR.Subnet {
+export function firstAzExternalSubnet(sr: GenSharedResources<PublicAzResources>): AR.Subnet {
   return sr.network.azs[0].external_subnet;
 }
 

@@ -17,7 +17,7 @@ import * as shared from './shared';
 export function createEksCluster(
   tfgen0: TF.Generator,
   tfname: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: EksClusterParams
 ): EksCluster {
   return TF.withLocalNameScope(tfgen0, tfname, tfgen => {

@@ -25,7 +25,7 @@ type InvokePrincipal = 'apigateway.amazonaws.com' | 's3.amazonaws.com';
 export function createLambdaFunctionInVpc(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: VpcLambdaFunctionParams
 ): AR.LambdaFunction {
   const lparams = {

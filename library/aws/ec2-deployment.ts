@@ -31,7 +31,7 @@ import * as DC from '../../library/deploytool_legacy/adl-gen/config';
 export function createEc2Deployment(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.GenSharedResources<shared.PublicAzResources>,
+  sr: shared.SharedResources,
   params: Ec2DeploymentParams
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
@@ -115,7 +115,7 @@ export function createEc2Deployment(
     iampolicies
   );
 
-  const appserver = aws.createInstanceWithEip(tfgen, name, sr, aws.firstAzExternalSubnet(sr), {
+  const appserver = aws.createInstanceWithEip(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
     security_group: sr.appserver_security_group,
@@ -239,6 +239,11 @@ export interface Ec2DeploymentParams {
    * The AWS instance type (ie mem and cores) for the EC2 instance.
    */
   instance_type: AT.InstanceType;
+
+  /**
+   * The subnet to be used
+   */
+  subnet_id: AR.SubnetId,
 
   /**
    * The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name

@@ -13,7 +13,7 @@ import * as aws from './aws';
 import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as util from '../util';
-import { SharedResources } from './shared';
+import * as shared from './shared';
 import * as docker from '../docker';
 import { scheduleExpression } from '../aws/cron-webhooks';
 
@@ -68,7 +68,7 @@ export interface LoggingInfrastructure {
  */
 export function createLoggingInfrastructure(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: LoggingInfrastructureParams
 ): LoggingInfrastructure {
   // An S3 bucket for longer-term storage
@@ -171,7 +171,7 @@ export function createLoggingInfrastructure(
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
-  function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
+  function laparams(): aws.InstanceWithEipParams {
     return {
       ami,
       security_group,
@@ -179,8 +179,7 @@ export function createLoggingInfrastructure(
       key_name: params.aggregator_key_name,
       customize_instance: p => {
         (p.iam_instance_profile = instance_profile.id),
-          (p.subnet_id = subnet.id),
-          (p.user_data = bs.compile());
+        (p.user_data = bs.compile());
       },
     };
   }
@@ -189,15 +188,15 @@ export function createLoggingInfrastructure(
       tfgen,
       'log_aggregator_one',
       sr,
-       aws.firstAzExternalSubnet(sr),
-      laparams(aws.firstAzExternalSubnet(sr))
+      shared.externalSubnetIds(sr)[0],
+      laparams()
     ),
     aws.createInstanceWithEip(
       tfgen,
       'log_aggregator_two',
       sr,
-      aws.firstAzExternalSubnet(sr),
-      laparams(aws.secondAzExternalSubnet(sr))
+      shared.externalSubnetIds(sr)[1],
+      laparams()
     ),
   ];
   const log_aggregator_ips = log_aggregators.map(la => la.eip.public_ip);
@@ -243,7 +242,7 @@ interface LoggingCleanupLambdaParams {
 
 function createLoggingCleanupLambda(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: LoggingCleanupLambdaParams
 ) {
   const name = 'logging_cleanup';
@@ -320,7 +319,7 @@ interface CognitoResourceParams {
  */
 export function createCognitoResources(
   tfgen: TF.Generator,
-  sr: SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: CognitoResourceParams
 ): LoggingCognitoParams {
   // Manual imports of a user_pool resource hit this bug, and required the workaround described:

@@ -11,7 +11,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as policies from './policies';
-import { SharedResources, GenSharedResources, PublicAzResources, SplitAzResources } from './shared';
+import * as shared from "./shared";
 import {
   contextTagsWithName,
   Customize,
@@ -31,11 +31,11 @@ export interface InstanceWithEipParams {
 /**
  * Construct an EC2 instance with a public elastic IP Address
  */
-export function createInstanceWithEip<AZ>(
+export function createInstanceWithEip(
   tfgen: TF.Generator,
   name: string,
-  sr: GenSharedResources<AZ>,
-  subnet: AR.Subnet,
+  sr: shared.SharedResources,
+  subnet_id: AR.SubnetId,
   params0: InstanceWithEipParams
 ): { eip: AR.Eip; ec2: AR.Instance } {
   function createInstance() {
@@ -43,7 +43,7 @@ export function createInstanceWithEip<AZ>(
       ami: params0.ami(sr.network.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
-      subnet_id: subnet.id,
+      subnet_id: subnet_id,
       vpc_security_group_ids: [params0.security_group.id],
       root_block_device: {
         volume_size: 20,
@@ -115,7 +115,7 @@ export function createS3Bucket(
 export function createSecurityGroupInVpc(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: shared.SharedResources,
   params0: AR.SecurityGroupParams
 ): AR.SecurityGroup {
   const params = _.cloneDeep(params0);
@@ -125,20 +125,6 @@ export function createSecurityGroupInVpc(
     ...params.tags,
   };
   return AR.createSecurityGroup(tfgen, name, params);
-}
-
-export function externalSubnets(sr: SharedResources): AR.Subnet[] {
-  return sr.network.azs.map(az => az.external_subnet);
-}
-
-/**  Selects the external subnet of the first availability zone */
-export function firstAzExternalSubnet(sr: GenSharedResources<PublicAzResources>): AR.Subnet {
-  return sr.network.azs[0].external_subnet;
-}
-
-/**  Selects the external subnet of the second availability zone */
-export function secondAzExternalSubnet(sr: SharedResources): AR.Subnet {
-  return sr.network.azs[1].external_subnet;
 }
 
 /**
@@ -158,15 +144,15 @@ export function createSqsQueue(
   return AR.createSqsQueue(tfgen, name, params);
 }
 
-export function s3DeployBucketReadOnlyPolicy<AZ>(sr: GenSharedResources<AZ>) {
+export function s3DeployBucketReadOnlyPolicy<AZ>(sr: shared.SharedResources) {
   return policies.s3ReadonlyPolicy('reads3deploy', sr.deploy_bucket_name);
 }
 
-export function s3DeployBucketModifyPolicy(sr: SharedResources) {
+export function s3DeployBucketModifyPolicy(sr: shared.SharedResources) {
   return policies.s3ModifyPolicy('modifys3deploy', sr.deploy_bucket_name);
 }
 
-export function s3BackupBucketModifyPolicy(sr: SharedResources) {
+export function s3BackupBucketModifyPolicy(sr: shared.SharedResources) {
   return policies.s3ModifyPolicy('modifys3backup', sr.backup_bucket_name);
 }
 
@@ -235,7 +221,7 @@ export function s3BucketNotificationsToLambda(
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
-  sr: SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: {
     node_type: AT.CacheNodeType;
     num_cache_nodes: number;

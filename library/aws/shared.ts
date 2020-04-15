@@ -42,7 +42,7 @@ export interface AzConfig {
  *    - SNS topics for alerts and alarms
  */
 export interface GenSharedResources<AZ> {
-  network: GenNetworkResources<AZ>;
+  network: NetworkResources<AZ>;
   primary_dns_zone: AR.Route53Zone;
   domain_name: string;
   deploy_bucket: AR.S3Bucket;
@@ -58,7 +58,7 @@ export interface GenSharedResources<AZ> {
   s3_bucket_prefix: string;
 }
 
-export interface GenNetworkResources<AZ> {
+export interface NetworkResources<AZ> {
   vpc: AR.Vpc;
   azs: AZ[];
   region: AT.Region;
@@ -84,8 +84,29 @@ export interface SplitAzResources {
   internal_subnet: AR.Subnet;
 }
 
-export type NetworkResources = GenNetworkResources<SplitAzResources>;
-export type SharedResources = GenSharedResources<SplitAzResources>;
+// Shared resources with unspecified network details
+export type SharedResources    = GenSharedResources<{}>;
+
+// Shared resources with external facing subnets
+export type SharedResourcesNE  = GenSharedResources<PublicAzResources>;
+
+// Shared resources with external and internal subnets
+// (Note this is a subtype of SharedResourcesNE)
+export type SharedResourcesNEI = GenSharedResources<SplitAzResources>;
+
+/**
+ *  Return the externally accessible public subnets on the network
+ */
+export function externalSubnetIds(sr: SharedResourcesNE): AR.SubnetId[] {
+  return sr.network.azs.map(az => az.external_subnet.id);
+}
+
+/**
+ *  Return the internal subnets on the network
+ */
+export function internalSubnetIds(sr: SharedResourcesNEI): AR.SubnetId[] {
+  return sr.network.azs.map(az => az.internal_subnet.id);
+}
 
 /**
  * Construct the share resources for an AWS account and region
@@ -96,7 +117,7 @@ export function createResources(
   s3_bucket_prefix: string,
   network_config: NetworkConfig,
   create_buildbot_user?: boolean
-): SharedResources {
+): SharedResourcesNEI {
   const network = createNetworkResources(tfgen, network_config);
   return createOtherResources(tfgen, domain_name, s3_bucket_prefix, network, create_buildbot_user);
 }
@@ -108,7 +129,7 @@ export function createOtherResources<AZ>(
   tfgen: TF.Generator,
   domain_name: string,
   s3_bucket_prefix: string,
-  network: GenNetworkResources<AZ>,
+  network: NetworkResources<AZ>,
   create_buildbot_user?: boolean
 ): GenSharedResources<AZ> {
   const primary_dns_zone = AR.createRoute53Zone(tfgen, 'primary', {
@@ -220,7 +241,7 @@ export function useDefaultNetworkResources(
   tfgen: TF.Generator,
   region: AT.Region,
   azs0: AT.AvailabilityZone[],
-): GenNetworkResources<PublicAzResources> {
+): NetworkResources<PublicAzResources> {
   const default_vpc = AR.createDefaultVpc(tfgen, "default", {});
   const vpc: AR.Vpc = {id:default_vpc.id, tftype:default_vpc.tftype, tfname:default_vpc.tfname, type:"Vpc"};
 
@@ -246,7 +267,7 @@ export function useDefaultNetworkResources(
 function createNetworkResources(
   tfgen: TF.Generator,
   network_config: NetworkConfig
-): NetworkResources {
+): NetworkResources<SplitAzResources> {
   const vpc = AR.createVpc(tfgen, 'vpc', {
     cidr_block: network_config.cidr_block,
     enable_dns_hostnames: true,

@@ -38,7 +38,7 @@ import { contextTagsWithName, Customize, applyCustomize } from '../util';
 export function createAutoscaleDeployment(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
   const controller = createController(
@@ -85,7 +85,7 @@ export function createAutoscaleDeployment(
 export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleFrontendParams
 ): AutoscaleDeployment {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
@@ -132,7 +132,7 @@ export function createAutoscaleFrontend(
 export function createAutoscaleProcessor(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams
 ): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
@@ -144,7 +144,7 @@ export function createAutoscaleProcessor(
 function createController(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams,
   endpoints: EndPoint[]
 ) {
@@ -152,7 +152,7 @@ function createController(
   const releases_s3 = params.releases_s3;
   const state_s3 = params.state_s3;
   const controller_label = params.controller_label || name;
-  const subnetId = externalSubnetId(sr.network);
+  const subnetId = shared.externalSubnetIds(sr)[0];
 
   const deploy_contexts: camus2.DeployContext[] =
     params.controller_deploy_contexts || [];
@@ -211,7 +211,7 @@ function createController(
     controller_iampolicies
   );
 
-  const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, aws.firstAzExternalSubnet(sr), {
+  const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
     instance_type: AT.t2_micro,
     ami: params.controller_amis || getDefaultAmi,
     security_group: sr.bastion_security_group,
@@ -238,7 +238,7 @@ function createController(
 function createProcessorAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams,
   endpoints: EndPoint[]
 ): AutoscaleProcessor {
@@ -407,7 +407,7 @@ export type LoadBalancerResources = {
 function createAppserverLoadBalancer(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   params: AutoscaleFrontendParams,
   autoscaling_group: AR.AutoscalingGroup
 ): LoadBalancerResources {
@@ -505,7 +505,7 @@ function createAppserverLoadBalancer(
 
 function createAcmCertificate(
   tfgen: TF.Generator,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   https_fqdns: string[],
   auto_verify: boolean
 ): AR.AcmCertificateArn {
@@ -608,12 +608,8 @@ function appUserOrDefault(app_user?: string): string {
   return app_user || 'app';
 }
 
-function externalSubnetId(network: shared.NetworkResources): SubnetId {
-  return network.azs.map(az => az.external_subnet.id)[0];
-}
-
 function deployToolEndpoints(
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};

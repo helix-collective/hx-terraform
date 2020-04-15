@@ -12,7 +12,7 @@ import * as shared from './shared';
 export function sslTerminator(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  sr: shared.SharedResourcesNEI,
   ec2: AR.Instance,
   certificate_arns: AR.AcmCertificateArn[]
 ): AR.Lb {

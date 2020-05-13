@@ -1,3 +1,4 @@
+import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults';
 import * as _ from 'lodash';
 import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
@@ -32,7 +33,8 @@ export function createEc2Deployment(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: Ec2DeploymentParams
+  params: Ec2DeploymentParams,
+  nginxDockerVersion?: string,
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
 
@@ -88,6 +90,7 @@ export function createEc2Deployment(
         params.releases_s3,
         deploy_contexts,
         camus2.localProxy(proxy_endpoints),
+        nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
         health_check,
         params.frontendproxy_nginx_conf_tpl,
         params.ssl_cert_email,

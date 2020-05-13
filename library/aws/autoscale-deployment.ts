@@ -1,3 +1,4 @@
+import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults';
 import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
@@ -39,21 +40,24 @@ export function createAutoscaleDeployment(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
-  params: AutoscaleFrontendParams
+  params: AutoscaleFrontendParams,
+  nginxDockerVersion?: string,
 ): AutoscaleDeployment {
   const controller = createController(
     tfgen,
     'controller',
     sr,
     params,
-    params.endpoints
+    params.endpoints,
+    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
   );
   const autoscale_processor = createProcessorAutoScaleGroup(
     tfgen,
     'appserver',
     sr,
     params,
-    params.endpoints
+    params.endpoints,
+    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
   );
   const appserverLoadBalancer = createAppserverLoadBalancer(
     tfgen,
@@ -86,7 +90,8 @@ export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
-  params: AutoscaleFrontendParams
+  params: AutoscaleFrontendParams,
+  nginxDockerVersion?: string,
 ): AutoscaleDeployment {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(
@@ -94,14 +99,16 @@ export function createAutoscaleFrontend(
       'controller',
       sr,
       params,
-      params.endpoints
+      params.endpoints,
+      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
     );
     const autoscale_processor = createProcessorAutoScaleGroup(
       tfgen,
       'asg',
       sr,
       params,
-      params.endpoints
+      params.endpoints,
+      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
     );
     const appserverLoadBalancer = createAppserverLoadBalancer(
       tfgen,
@@ -133,11 +140,26 @@ export function createAutoscaleProcessor(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
-  params: AutoscaleProcessorParams
+  params: AutoscaleProcessorParams,
+  nginxDockerVersion?: string,
 ): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-    const controller = createController(tfgen, 'controller', sr, params, []);
-    return createProcessorAutoScaleGroup(tfgen, 'asg', sr, params, []);
+    const controller = createController(
+      tfgen,
+      'controller',
+      sr,
+      params,
+      [],
+      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+    );
+    return createProcessorAutoScaleGroup(
+      tfgen,
+      'asg',
+      sr,
+      params,
+      [],
+      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+    );
   });
 }
 
@@ -146,7 +168,8 @@ function createController(
   name: string,
   sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams,
-  endpoints: EndPoint[]
+  endpoints: EndPoint[],
+  nginxDockerVersion: string,
 ) {
   const app_user = appUserOrDefault(params.app_user);
   const releases_s3 = params.releases_s3;
@@ -193,6 +216,7 @@ function createController(
         releases_s3,
         deploy_contexts,
         camus2.remoteProxyMaster(proxy_endpoints, state_s3),
+        nginxDockerVersion,
         params.health_check,
         params.frontendproxy_nginx_conf_tpl
       )
@@ -240,7 +264,8 @@ function createProcessorAutoScaleGroup(
   name: string,
   sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams,
-  endpoints: EndPoint[]
+  endpoints: EndPoint[],
+  nginxDockerVersion: string,
 ): AutoscaleProcessor {
   const app_user = appUserOrDefault(params.app_user);
   const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
@@ -291,6 +316,7 @@ function createProcessorAutoScaleGroup(
         params.releases_s3,
         deploy_contexts,
         camus2.remoteProxySlave(proxy_endpoints, state_s3),
+        nginxDockerVersion,
         params.health_check,
         params.frontendproxy_nginx_conf_tpl
       )

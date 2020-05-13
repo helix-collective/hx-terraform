@@ -145,10 +145,11 @@ export function install(
   releases: s3.S3Ref,
   deployContexts: DeployContext[],
   proxy: ProxyConfig,
+  nginxDockerVersion: string,
   healthCheck?: C.HealthCheckConfig,
   frontendproxy_nginx_conf_tpl?: string,
   ssl_cert_email?: string,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
 ): bootscript.BootScript {
   let nginxConfTemplatePath: Maybe<string> = {
     kind: 'nothing',
@@ -220,6 +221,7 @@ export function install(
     },
     contextCache: '/opt/config',
     autoCertContactEmail: ssl_cert_email,
+    nginxDockerVersion,
   });
   bs.catToFile(
     '/opt/etc/camus2.json',

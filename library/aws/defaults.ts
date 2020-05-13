@@ -1,0 +1,1 @@
+export const DEFAULT_NGINX_DOCKER_VERSION: string = "1.18.0"

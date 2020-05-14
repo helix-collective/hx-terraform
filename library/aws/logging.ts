@@ -27,7 +27,7 @@ export interface LoggingInfrastructureParams {
   log_cleanup?: LogCleanupMode;
 }
 
-export type LogCleanupMode = { kind: 'older_than_months'; months: number };
+export type LogCleanupMode = { kind: 'older_than_months'; months: number; lambdaRuntime?: AT.LambdaRuntime; };
 
 export interface LoggingCognitoParams {
   // The cognito user pool being given access to kibana
@@ -224,8 +224,11 @@ export function createLoggingInfrastructure(
   });
 
   if (params.log_cleanup !== undefined) {
+    const lambdaRuntime: AT.LambdaRuntime = params.log_cleanup.lambdaRuntime === undefined
+      ? AT.nodejs_12_x : params.log_cleanup.lambdaRuntime;
     createLoggingCleanupLambda(tfgen, sr, {
       ed,
+      lambdaRuntime,
       months: params.log_cleanup.months,
     });
   }
@@ -238,6 +241,7 @@ export function createLoggingInfrastructure(
 interface LoggingCleanupLambdaParams {
   months: number;
   ed: AR.ElasticsearchDomain;
+  lambdaRuntime: AT.LambdaRuntime;
 }
 
 function createLoggingCleanupLambda(
@@ -258,12 +262,11 @@ function createLoggingCleanupLambda(
   // The lambda function will have already been packed (by doit) into
   // the zipfile before terraform is run. (The lambda function will be updated
   // whenever the hash of the zipfile changes).
-  const runtime: AT.LambdaRuntime = AT.nodejs_12_x;
   const handler: string = 'es-tool.cronDelete';
   const zipfile: string = '../build/lambdas/es-tool.zip';
   const lambda = AR.createLambdaFunction(tfgen, name, {
-    runtime,
     handler,
+    runtime: params.lambdaRuntime,
     function_name: tfgen.scopedName(name).join('_'),
     timeout: 60 * 15,
     role: role.arn,

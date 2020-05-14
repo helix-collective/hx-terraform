@@ -264,11 +264,17 @@ function createLoggingCleanupLambda(
   // whenever the hash of the zipfile changes).
   const handler: string = 'es-tool.cronDelete';
   const zipfile: string = '../build/lambdas/es-tool.zip';
+  // The runtime parameter of nodejs8.10 is no longer supported for creating or updating AWS
+  // Lambda functions. Updating the timeout to 15 minutes causes an error but preserving the old
+  // terraform is allowed. nodejs12.x is recommended but is only available from aws providers
+  // v2.39.0 onwards.
+  const timeout: number | undefined = params.lambdaRuntime === AT.nodejs_8_10
+      ? undefined : (60 * 15);
   const lambda = AR.createLambdaFunction(tfgen, name, {
     handler,
+    timeout,
     runtime: params.lambdaRuntime,
     function_name: tfgen.scopedName(name).join('_'),
-    timeout: 60 * 15,
     role: role.arn,
     filename: zipfile,
     source_code_hash: TF.rawExpr(`"\${base64sha256(file("${zipfile}"))}"`),

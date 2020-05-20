@@ -168,6 +168,8 @@ export function install(
   bs.gunzip(['/opt/bin/camus2.gz']);
   bs.sh('chmod 755 /opt/bin/camus2');
   bs.sh('(cd /opt/bin; ln -s camus2 c2)');
+  bs.sh('/opt/bin/camus2 --bash-completion-script /opt/bin/camus2 >/etc/bash_completion.d/camus2');
+  bs.sh('/opt/bin/c2 --bash-completion-script /opt/bin/c2 >/etc/bash_completion.d/c2');
 
   if (frontendproxy_nginx_conf_tpl != undefined) {
     nginxConfTemplatePath = {

@@ -107,6 +107,7 @@ export function createEc2Deployment(
     policies.publish_metrics_policy,
     aws.s3DeployBucketReadOnlyPolicy(sr),
     policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
+    policies.ecr_readonly_policy,
   ];
   if (params.extra_policies) {
     iampolicies = iampolicies.concat(params.extra_policies);

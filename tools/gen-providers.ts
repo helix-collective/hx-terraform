@@ -683,7 +683,7 @@ const lb_listener_action_fixed_response: RecordDecl = {
       ])
     ),
     optionalField('message_body', STRING),
-    optionalField('statusCode', NUMBER),
+    optionalField('status_code', NUMBER),
   ],
 };
 
@@ -700,13 +700,23 @@ const lb_listener_action: RecordDecl = {
   ],
 };
 
-const lb_listener_rule_condition: RecordDecl = {
-  name: 'lb_listener_rule_condition',
+const lb_listener_rule_values: RecordDecl = {
+  name: 'lb_listener_rule_values',
   fields: [
-    requiredField('field', enumType(['path-pattern', 'host-header'])),
     requiredField('values', listType(STRING)),
   ],
 };
+
+const lb_listener_rule_condition: RecordDecl = {
+  name: 'lb_listener_rule_condition',
+  fields: [
+    optionalField('host_header', recordType(lb_listener_rule_values)),
+    optionalField('http_request_method', recordType(lb_listener_rule_values)),
+    optionalField('path_pattern', recordType(lb_listener_rule_values)),
+    optionalField('source_ip', recordType(lb_listener_rule_values)),
+  ],
+};
+
 
 const lb_listener: RecordDecl = {
   name: 'lb_listener',
@@ -2837,6 +2847,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(lb_target_group_stickiness);
   gen.generateParams(lb_target_group_attachment);
   gen.generateParams(lb_listener_rule);
+  gen.generateParams(lb_listener_rule_values);
   gen.generateParams(lb_listener_rule_condition);
   gen.generateParams(cloudwatch_log_group);
   gen.generateParams(aws_provider);

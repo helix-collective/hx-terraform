@@ -24,58 +24,6 @@ import {
 import { contextTagsWithName, Customize, applyCustomize } from '../util';
 
 /**
- *  Creates a logical deployment on an aws EC2 autoscaling group, including:
- *
- *      - the autoscale group itself
- *      - a controller machine
- *      - AWS generated SSL certificates
- *      - DNS entries for the endpoints
- *      - Load balancer in front of autoscaling group
- *
- * hx-deploy-tool is configured onto the group, running in remote proxy mode.
- *
- * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoscaleFrontend instead
- */
-export function createAutoscaleDeployment(
-  tfgen: TF.Generator,
-  name: string,
-  sr: shared.SharedResourcesNEI,
-  params: AutoscaleFrontendParams,
-  nginxDockerVersion?: string,
-): AutoscaleDeployment {
-  const controller = createController(
-    tfgen,
-    'controller',
-    sr,
-    params,
-    params.endpoints,
-    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-  );
-  const autoscale_processor = createProcessorAutoScaleGroup(
-    tfgen,
-    'appserver',
-    sr,
-    params,
-    params.endpoints,
-    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-  );
-  const appserverLoadBalancer = createAppserverLoadBalancer(
-    tfgen,
-    'appserver',
-    sr,
-    params,
-    autoscale_processor.autoscaling_group
-  );
-
-  return {
-    autoscale_processor,
-    target_group: appserverLoadBalancer.target_group,
-    load_balancer: appserverLoadBalancer.load_balancer,
-    lb_https_listener: appserverLoadBalancer.lb_https_listener,
-  };
-}
-
-/**
  *  Creates a logical application frontend service on an aws EC2 autoscaling group, including:
  *
  *      - the autoscale group itself
@@ -110,19 +58,22 @@ export function createAutoscaleFrontend(
       params.endpoints,
       nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
     );
-    const appserverLoadBalancer = createAppserverLoadBalancer(
+    const lb = createLoadBalancer(tfgen, 'lb', sr, {customize_lb:params.customize_lb});
+
+    const tg = createAutoscaleTargetGroup(
       tfgen,
       'lb',
       sr,
+      lb,
+      autoscale_processor.autoscaling_group,
       params,
-      autoscale_processor.autoscaling_group
     );
 
     return {
       autoscale_processor,
-      target_group: appserverLoadBalancer.target_group,
-      load_balancer: appserverLoadBalancer.load_balancer,
-      lb_https_listener: appserverLoadBalancer.lb_https_listener,
+      target_group: tg.target_group,
+      load_balancer: tg.load_balancer,
+      lb_https_listener: tg.lb_https_listener,
     };
   });
 }
@@ -163,7 +114,7 @@ export function createAutoscaleProcessor(
   });
 }
 
-function createController(
+export function createController(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
@@ -259,7 +210,7 @@ function createController(
   return {};
 }
 
-function createProcessorAutoScaleGroup(
+export function createProcessorAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
@@ -424,21 +375,15 @@ function createProcessorAutoScaleGroup(
   };
 }
 
-export type LoadBalancerResources = {
-  load_balancer: AR.Lb;
-  target_group: AR.LbTargetGroup;
-  lb_https_listener: AR.LbListener;
-};
 
-function createAppserverLoadBalancer(
+export function createLoadBalancer(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
-  params: AutoscaleFrontendParams,
-  autoscaling_group: AR.AutoscalingGroup
-): LoadBalancerResources {
-  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
-
+  params: {
+    customize_lb?: Customize<AR.LbParams>;
+  },
+): AR.Lb {
   const albParams: AR.LbParams = {
     name: tfgen.scopedName(name).join('-'),
     load_balancer_type: 'application',
@@ -451,6 +396,25 @@ function createAppserverLoadBalancer(
     'alb',
     applyCustomize(params.customize_lb, albParams)
   );
+
+  return alb;
+}
+
+export type TargetGroupResources = {
+  load_balancer: AR.Lb;
+  target_group: AR.LbTargetGroup;
+  lb_https_listener: AR.LbListener;
+};
+
+export function createAutoscaleTargetGroup(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResourcesNEI,
+  alb: AR.Lb,
+  autoscaling_group: AR.AutoscalingGroup,
+  params: AutoscaleFrontendParams,
+): TargetGroupResources {
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
     port: 80,
@@ -499,6 +463,23 @@ function createAppserverLoadBalancer(
     protocol: 'HTTPS',
     certificate_arn: acm_certificate_arn,
     default_action: {
+      type: 'fixed-response',
+      fixed_response: {
+        content_type: 'text/plain',
+        message_body: 'Invalid host',
+        status_code: 503,
+      }
+    },
+  });
+
+  AR.createLbListenerRule(tfgen, 'https', {
+    listener_arn: alb_https_listener.arn,
+    condition: {
+      host_header: {
+        values: httpsFqdnsFromEndpoints(sr, params.endpoints),
+      },
+    },
+    action: {
       type: 'forward',
       target_group_arn: alb_target_group.arn,
     },
@@ -667,7 +648,7 @@ function deployToolEndpoints(
 
 type SubnetId = { type: 'SubnetId'; value: string };
 
-interface AutoscaleProcessorParams {
+export interface AutoscaleProcessorParams {
   /**
    * The AWS keyname used for the EC2 instance.
    */
@@ -785,7 +766,7 @@ interface AutoscaleProcessorParams {
   use_hxdeploytool?: boolean;
 }
 
-interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
+export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
   /**
    * The endpoints configured for http/https access.
    */
@@ -860,3 +841,58 @@ interface AutoscalingCronRule {
   max_size?: number;
   desired_capacity?: number;
 }
+
+/**
+ *  Creates a logical deployment on an aws EC2 autoscaling group, including:
+ *
+ *      - the autoscale group itself
+ *      - a controller machine
+ *      - AWS generated SSL certificates
+ *      - DNS entries for the endpoints
+ *      - Load balancer in front of autoscaling group
+ *
+ * hx-deploy-tool is configured onto the group, running in remote proxy mode.
+ *
+ * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoscaleFrontend instead
+ */
+export function createAutoscaleDeployment_DEPRECATED(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResourcesNEI,
+  params: AutoscaleFrontendParams,
+  nginxDockerVersion?: string,
+): AutoscaleDeployment {
+  const controller = createController(
+    tfgen,
+    'controller',
+    sr,
+    params,
+    params.endpoints,
+    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+  );
+  const autoscale_processor = createProcessorAutoScaleGroup(
+    tfgen,
+    'appserver',
+    sr,
+    params,
+    params.endpoints,
+    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+  );
+  const lb = createLoadBalancer(tfgen, 'lb', sr, {customize_lb:params.customize_lb});
+  const tg = createAutoscaleTargetGroup(
+    tfgen,
+    'appserver',
+    sr,
+    lb,
+    autoscale_processor.autoscaling_group,
+    params,
+  );
+
+  return {
+    autoscale_processor,
+    target_group: tg.target_group,
+    load_balancer: lb,
+    lb_https_listener: tg.lb_https_listener,
+  };
+}
+

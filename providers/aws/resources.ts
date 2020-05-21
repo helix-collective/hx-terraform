@@ -3159,14 +3159,14 @@ export function fieldsFromLbListenerActionRedirectParams(params: LbListenerActio
 export interface LbListenerActionFixedResponseParams {
   content_type: 'text/plain' | 'text/css' | 'text/html' | 'application/javascript' | 'application/json';
   message_body?: string;
-  statusCode?: number;
+  status_code?: number;
 }
 
 export function fieldsFromLbListenerActionFixedResponseParams(params: LbListenerActionFixedResponseParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "content_type", params.content_type, TF.stringValue);
   TF.addOptionalField(fields, "message_body", params.message_body, TF.stringValue);
-  TF.addOptionalField(fields, "statusCode", params.statusCode, TF.numberValue);
+  TF.addOptionalField(fields, "status_code", params.status_code, TF.numberValue);
   return fields;
 }
 
@@ -3272,15 +3272,29 @@ export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : T
   return fields;
 }
 
-export interface LbListenerRuleConditionParams {
-  field: 'path-pattern' | 'host-header';
+export interface LbListenerRuleValuesParams {
   values: (string)[];
+}
+
+export function fieldsFromLbListenerRuleValuesParams(params: LbListenerRuleValuesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface LbListenerRuleConditionParams {
+  host_header?: LbListenerRuleValuesParams;
+  http_request_method?: LbListenerRuleValuesParams;
+  path_pattern?: LbListenerRuleValuesParams;
+  source_ip?: LbListenerRuleValuesParams;
 }
 
 export function fieldsFromLbListenerRuleConditionParams(params: LbListenerRuleConditionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "field", params.field, TF.stringValue);
-  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "host_header", params.host_header, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
+  TF.addOptionalField(fields, "http_request_method", params.http_request_method, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
+  TF.addOptionalField(fields, "path_pattern", params.path_pattern, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
+  TF.addOptionalField(fields, "source_ip", params.source_ip, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
   return fields;
 }
 

@@ -92,7 +92,6 @@ export function createAutoscaleProcessor(
   name: string,
   sr: shared.SharedResourcesNEI,
   params: AutoscaleProcessorParams,
-  nginxDockerVersion?: string,
 ): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(
@@ -101,7 +100,8 @@ export function createAutoscaleProcessor(
       sr,
       params,
       [],
-      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+      params.nginxDockerVersion === undefined
+          ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
     );
     return createProcessorAutoScaleGroup(
       tfgen,
@@ -109,7 +109,8 @@ export function createAutoscaleProcessor(
       sr,
       params,
       [],
-      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+      params.nginxDockerVersion === undefined
+          ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
     );
   });
 }
@@ -764,6 +765,11 @@ export interface AutoscaleProcessorParams {
    * will be used
    */
   use_hxdeploytool?: boolean;
+
+  /**
+   * Nginx version to use for camus2
+   */
+  nginxDockerVersion?: string,
 }
 
 export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {

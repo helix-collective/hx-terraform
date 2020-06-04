@@ -57,6 +57,10 @@ export function createInstanceWithEip(
 
     const ec2 = AR.createInstance(tfgen, name, instance_params);
 
+    // Prevent changes to user_data script tainting the instance, (as
+    // a developer convenience)
+    tfgen.ignoreChanges(ec2, 'user_data');
+
     return ec2;
   }
 

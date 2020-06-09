@@ -147,7 +147,7 @@ def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes and save the plan',
         'actions': [
-            dockerized_terraform(['plan','-out=tfplan']) +
+            dockerized_terraform(['plan', '-parallelism=20', '-out=tfplan']) +
                 "| grep --line-buffered -v 'This plan was saved to'" +
                 "| grep --line-buffered -v 'To perform exactly these actions'" +
                 "| grep --line-buffered -v 'terraform apply'",

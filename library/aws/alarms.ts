@@ -146,7 +146,7 @@ export function createScalingLowHostsAlarm(
   });
 }
 
-type AlarmRootFilesystem = '/dev/xvda1' | '/dev/nvme0n1p1';
+export type AlarmRootFilesystem = '/dev/xvda1' | '/dev/nvme0n1p1';
 
 /**
  * Create a cloudwatch alarm for excessive disk usage on an

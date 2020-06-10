@@ -139,6 +139,9 @@ export function createController(
   bs.utf8Locale();
   bs.createUserWithKeypairAccess(app_user);
   bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
+  
+  // Install ec2 instance connect for AWS managed ssh logins
+  bs.addAptPackage("ec2-instance-connect");
 
   if (params.use_hxdeploytool) {
     const legacy_proxy_endpoints: DC.EndPoint[] = [];
@@ -239,6 +242,9 @@ export function createProcessorAutoScaleGroup(
       bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
       ' --auto-scaling',
   });
+
+  // Install ec2 instance connect for AWS managed ssh logins
+  bs.addAptPackage("ec2-instance-connect");
 
   if (params.use_hxdeploytool) {
     const legacy_proxy_endpoints: DC.EndPoint[] = [];

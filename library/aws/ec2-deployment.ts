@@ -55,6 +55,9 @@ export function createEc2Deployment(
   bs.addUserToGroup(app_user, 'docker');
   bs.cloudwatchMetrics(app_user);
 
+  // Install ec2 instance connect for AWS managed ssh logins
+  bs.addAptPackage("ec2-instance-connect");
+
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
   const health_check = undefined;

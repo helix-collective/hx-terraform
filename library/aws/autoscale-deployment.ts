@@ -182,7 +182,11 @@ export function createController(
     bs.include(params.controller_extra_bootscript);
   }
 
-  const controller_iampolicies = [aws.s3DeployBucketModifyPolicy(sr)];
+  let controller_iampolicies: policies.NamedPolicy[] = [aws.s3DeployBucketModifyPolicy(sr)];
+
+  if (params.controller_extra_policies) {
+    controller_iampolicies = controller_iampolicies.concat(params.controller_extra_policies);
+  }
 
   const controller_instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
@@ -698,6 +702,11 @@ export interface AutoscaleProcessorParams {
    * Additional operations for the controller first boot can be passed vis the operation.
    */
   controller_extra_bootscript?: bootscript.BootScript;
+
+  /**
+   * Additional controller IAM policies can be specified here.
+   */
+  controller_extra_policies?: policies.NamedPolicy[];
 
   /**
    * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI

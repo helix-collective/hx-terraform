@@ -66,17 +66,24 @@ export class BootScript {
     this.sh('source /etc/environment');
   }
 
-  dockerWithConfig(cfg: docker.DockerConfig) {
+  installDocker() {
     this.comment('Install docker and docker-compose');
     this.sh('wget -qO- https://get.docker.com/ | sh');
-    this.addUserToGroup('ubuntu', 'docker');
-    this.addAptPackage('curl');
+    this.sh(`usermod -aG docker ubuntu`);
     this.sh(
       'curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
     );
     this.sh('chmod +x /usr/local/bin/docker-compose');
+  }
+
+  configureDocker(cfg: docker.DockerConfig) {
     this.catToFile('/etc/docker/daemon.json', docker.daemonConfig(cfg));
     this.sh('systemctl restart docker');
+  }
+
+  dockerWithConfig(cfg: docker.DockerConfig) {
+    this.installDocker();
+    this.configureDocker(cfg);
   }
 
   createUser(username: string) {

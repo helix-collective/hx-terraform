@@ -133,15 +133,14 @@ export function createController(
     params.controller_deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
+  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
-  bs.utf8Locale();
-  bs.createUserWithKeypairAccess(app_user);
-  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
-  
-  // Install ec2 instance connect for AWS managed ssh logins
-  bs.addAptPackage("ec2-instance-connect");
+  const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
+  if (include_install) {
+    bs.include(asInstallScript(app_user, docker_config, !params.use_hxdeploytool));
+  }
 
   if (params.use_hxdeploytool) {
     const legacy_proxy_endpoints: DC.EndPoint[] = [];
@@ -166,7 +165,7 @@ export function createController(
     );
   } else {
     bs.include(
-      camus2.install(
+      camus2.configureCamus2(
         app_user,
         releases_s3,
         deploy_contexts,
@@ -235,20 +234,10 @@ export function createProcessorAutoScaleGroup(
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
-
-  bs.utf8Locale();
-  bs.dockerWithConfig(docker_config);
-  bs.createUserWithKeypairAccess(app_user);
-  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
-  bs.addUserToGroup(app_user, 'docker');
-  bs.cloudwatchMetrics(app_user, {
-    script_args:
-      bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
-      ' --auto-scaling',
-  });
-
-  // Install ec2 instance connect for AWS managed ssh logins
-  bs.addAptPackage("ec2-instance-connect");
+  const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
+  if (include_install) {
+    bs.include(asInstallScript(app_user, docker_config, !params.use_hxdeploytool));
+  }
 
   if (params.use_hxdeploytool) {
     const legacy_proxy_endpoints: DC.EndPoint[] = [];
@@ -273,7 +262,7 @@ export function createProcessorAutoScaleGroup(
     );
   } else {
     bs.include(
-      camus2.install(
+      camus2.configureCamus2(
         app_user,
         params.releases_s3,
         deploy_contexts,
@@ -704,6 +693,12 @@ export interface AutoscaleProcessorParams {
   controller_extra_bootscript?: bootscript.BootScript;
 
   /**
+   * If true (or not specified), the bootscripts includes asInstallScript().
+   * Otherwise it's assumed this software is baked into the AMI
+   */
+  bootscripts_include_install?: boolean;
+
+  /**
    * Additional controller IAM policies can be specified here.
    */
   controller_extra_policies?: policies.NamedPolicy[];
@@ -926,4 +921,29 @@ export function createAutoscaleDeployment_DEPRECATED(
     lb_https_listener: tg.lb_https_listener,
   };
 }
+
+export function asInstallScript(
+  app_user: string,
+  docker_config: docker.DockerConfig,
+  use_camus2: boolean 
+
+  ): bootscript.BootScript {
+  const install = bootscript.newBootscript();
+  install.utf8Locale();
+  install.dockerWithConfig(docker_config);
+  install.createUserWithKeypairAccess(app_user);
+  install.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
+  install.addUserToGroup(app_user, 'docker');
+  install.cloudwatchMetrics(app_user, {
+    script_args:
+      bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
+      ' --auto-scaling',
+  });
+  install.addAptPackage("ec2-instance-connect");
+  if(use_camus2) {
+   install.include(camus2.installCamus2(app_user));
+  }
+  return install;
+}
+
 

@@ -136,24 +136,7 @@ function remoteDeployMode(
   };
 }
 
-/**
- * Construct a bootscript that installs and configures camus2. This
- * bootscript would normally be included into the complete instance bootscript.
- */
-export function install(
-  username: string,
-  releases: s3.S3Ref,
-  deployContexts: DeployContext[],
-  proxy: ProxyConfig,
-  nginxDockerVersion: string,
-  healthCheck?: C.HealthCheckConfig,
-  frontendproxy_nginx_conf_tpl?: string,
-  ssl_cert_email?: string,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
-): bootscript.BootScript {
-  let nginxConfTemplatePath: Maybe<string> = {
-    kind: 'nothing',
-  };
+export function installCamus2(username: string): bootscript.BootScript {
   const bs = bootscript.newBootscript();
   bs.comment('Install and configure camus2');
   bs.mkdir('/opt/etc');
@@ -170,6 +153,25 @@ export function install(
   bs.sh('(cd /opt/bin; ln -s camus2 c2)');
   bs.sh('/opt/bin/camus2 --bash-completion-script /opt/bin/camus2 >/etc/bash_completion.d/camus2');
   bs.sh('/opt/bin/c2 --bash-completion-script /opt/bin/c2 >/etc/bash_completion.d/c2');
+  return bs;
+}
+
+export function configureCamus2(
+  username: string,
+  releases: s3.S3Ref,
+  deployContexts: DeployContext[],
+  proxy: ProxyConfig,
+  nginxDockerVersion: string,
+  healthCheck?: C.HealthCheckConfig,
+  frontendproxy_nginx_conf_tpl?: string,
+  ssl_cert_email?: string,
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
+): bootscript.BootScript {
+  const bs = bootscript.newBootscript();
+
+  let nginxConfTemplatePath: Maybe<string> = {
+    kind: 'nothing',
+  };
 
   if (frontendproxy_nginx_conf_tpl != undefined) {
     nginxConfTemplatePath = {
@@ -239,6 +241,37 @@ export function install(
     bootscriptProxySlaveUpdate(bs, username);
     bootscriptProxyNginxReload(bs, username);
   }
+  return bs;
+}
+
+/**
+ * Construct a bootscript that installs and configures camus2. This
+ * bootscript would normally be included into the complete instance bootscript.
+ */
+export function install(
+  username: string,
+  releases: s3.S3Ref,
+  deployContexts: DeployContext[],
+  proxy: ProxyConfig,
+  nginxDockerVersion: string,
+  healthCheck?: C.HealthCheckConfig,
+  frontendproxy_nginx_conf_tpl?: string,
+  ssl_cert_email?: string,
+  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
+): bootscript.BootScript {
+  const bs = bootscript.newBootscript();
+  bs.include(installCamus2(username));
+  bs.include(configureCamus2(
+    username,
+    releases,
+    deployContexts,
+    proxy,
+    nginxDockerVersion,
+    healthCheck,
+    frontendproxy_nginx_conf_tpl,
+    ssl_cert_email,
+    letsencrypt_challenge_mode,
+  ));
   return bs;
 }
 

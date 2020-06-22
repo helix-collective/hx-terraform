@@ -20,6 +20,7 @@ import {
   EndPoint,
   getDefaultAmi,
   httpsFqdnsFromEndpoints,
+  ec2InstallScript,
 } from './ec2-deployment';
 import { contextTagsWithName, Customize, applyCustomize } from '../util';
 
@@ -139,7 +140,7 @@ export function createController(
   const bs = bootscript.newBootscript();
   const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
   if (include_install) {
-    bs.include(asInstallScript(app_user, docker_config, !params.use_hxdeploytool));
+    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
   }
 
   if (params.use_hxdeploytool) {
@@ -236,7 +237,7 @@ export function createProcessorAutoScaleGroup(
   const bs = bootscript.newBootscript();
   const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
   if (include_install) {
-    bs.include(asInstallScript(app_user, docker_config, !params.use_hxdeploytool));
+    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
   }
 
   if (params.use_hxdeploytool) {
@@ -693,7 +694,7 @@ export interface AutoscaleProcessorParams {
   controller_extra_bootscript?: bootscript.BootScript;
 
   /**
-   * If true (or not specified), the bootscripts includes asInstallScript().
+   * If true (or not specified), the bootscripts includes ec2InstallScript().
    * Otherwise it's assumed this software is baked into the AMI
    */
   bootscripts_include_install?: boolean;
@@ -922,28 +923,5 @@ export function createAutoscaleDeployment_DEPRECATED(
   };
 }
 
-export function asInstallScript(
-  app_user: string,
-  docker_config: docker.DockerConfig,
-  use_camus2: boolean 
-
-  ): bootscript.BootScript {
-  const install = bootscript.newBootscript();
-  install.utf8Locale();
-  install.dockerWithConfig(docker_config);
-  install.createUserWithKeypairAccess(app_user);
-  install.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
-  install.addUserToGroup(app_user, 'docker');
-  install.cloudwatchMetrics(app_user, {
-    script_args:
-      bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
-      ' --auto-scaling',
-  });
-  install.addAptPackage("ec2-instance-connect");
-  if(use_camus2) {
-   install.include(camus2.installCamus2(app_user));
-  }
-  return install;
-}
 
 

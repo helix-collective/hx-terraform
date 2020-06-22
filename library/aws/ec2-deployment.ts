@@ -36,27 +36,22 @@ export function createEc2Deployment(
   params: Ec2DeploymentParams,
 ): Ec2Deployment {
   const dns_ttl = (params.dns_ttl || 180) + '';
+  const app_user = params.app_user || 'app';
+  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
-  const app_user = params.app_user || 'app';
-  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
+  const include_install = params.bootscript_include_install == undefined ? true : params.bootscript_include_install;
+  if (include_install) {
+    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, false));
+  }
+
   let deploy_contexts: camus2.DeployContext[];
   if (params.deploy_contexts) {
     deploy_contexts = params.deploy_contexts;
   } else {
     deploy_contexts = [];
   }
-
-  bs.utf8Locale();
-  bs.dockerWithConfig(docker_config);
-  bs.createUserWithKeypairAccess(app_user);
-  bs.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
-  bs.addUserToGroup(app_user, 'docker');
-  bs.cloudwatchMetrics(app_user);
-
-  // Install ec2 instance connect for AWS managed ssh logins
-  bs.addAptPackage("ec2-instance-connect");
 
   const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
 
@@ -87,7 +82,7 @@ export function createEc2Deployment(
     );
   } else {
     bs.include(
-      camus2.install(
+      camus2.configureCamus2(
         app_user,
         params.releases_s3,
         deploy_contexts,
@@ -301,6 +296,12 @@ export interface Ec2DeploymentParams {
   deploy_contexts?: { name: string; source: C.JsonSource }[];
 
   /**
+   * If true (or not specified), the bootscript includes ec2InstallScript().
+   * Otherwise it's assumed this software is baked into the AMI
+   */
+  bootscript_include_install?: boolean;
+
+  /**
    * Additional operations for the EC2 instances first boot can be passed vis the operation.
    */
   extra_bootscript?: bootscript.BootScript;
@@ -428,4 +429,28 @@ export function getDefaultAmi(region: AT.Region): AT.Ami {
     return AT.ami('ami-0f2ed58082cb08a4d');
   }
   throw new Error('No AMI specified for region ' + region.value);
+}
+
+export function ec2InstallScript(
+  app_user: string,
+  docker_config: docker.DockerConfig,
+  use_camus2: boolean,
+  autoscaling_metrics: boolean, 
+  ): bootscript.BootScript {
+  const install = bootscript.newBootscript();
+  install.utf8Locale();
+  install.dockerWithConfig(docker_config);
+  install.createUserWithKeypairAccess(app_user);
+  install.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
+  install.addUserToGroup(app_user, 'docker');
+  const script_args = bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args + 
+  (autoscaling_metrics ? ' --auto-scaling' : '');
+  install.cloudwatchMetrics(app_user, {
+    script_args
+  });
+  install.addAptPackage("ec2-instance-connect");
+  if(use_camus2) {
+   install.include(camus2.installCamus2(app_user));
+  }
+  return install;
 }

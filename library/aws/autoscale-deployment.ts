@@ -59,7 +59,24 @@ export function createAutoscaleFrontend(
       params.endpoints,
       nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
     );
-    const lb = createLoadBalancer(tfgen, 'lb', sr, {customize_lb:params.customize_lb});
+
+    const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+    // Create a new certificate if an existing certificate ARN isn't provided.
+    // When new domains are added, the certificate is deleted and re-created, in this situation,
+    // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
+    const acm_certificate_arn =
+      params.acm_certificate === undefined
+        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+        : params.acm_certificate.kind === 'generate'
+          ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+          : params.acm_certificate.kind === 'generate_with_manual_verify'
+            ? createAcmCertificate(tfgen, sr, https_fqdns, false)
+            : params.acm_certificate.arn;
+
+    const lb = createLoadBalancer(tfgen, 'lb', sr, {
+      customize_lb:params.customize_lb,
+      acm_certificate_arn
+    });
 
     const tg = createAutoscaleTargetGroup(
       tfgen,
@@ -376,30 +393,61 @@ export function createProcessorAutoScaleGroup(
   };
 }
 
+export interface LoadBalancerAndListeners {
+  lb :  AR.Lb;
+  http_listener: AR.LbListener; 
+  https_listener: AR.LbListener;
+};
 
-export function createLoadBalancer(
-  tfgen: TF.Generator,
-  name: string,
-  sr: shared.SharedResourcesNEI,
+export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI, 
   params: {
+    acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
-  },
-): AR.Lb {
-  const albParams: AR.LbParams = {
-    name: tfgen.scopedName(name).join('-'),
-    load_balancer_type: 'application',
-    tags: tfgen.tagsContext(),
-    security_groups: [sr.load_balancer_security_group.id],
-    subnets: sr.network.azs.map(az => az.external_subnet.id),
-  };
-  const alb = AR.createLb(
-    tfgen,
-    'alb',
-    applyCustomize(params.customize_lb, albParams)
-  );
+  } ): LoadBalancerAndListeners {
+    const lbParams: AR.LbParams = {
+      name: tfgen.scopedName(tfname).join('-'),
+      load_balancer_type: 'application',
+      tags: tfgen.tagsContext(),
+      security_groups: [sr.load_balancer_security_group.id],
+      subnets: sr.network.azs.map(az => az.external_subnet.id),
+    };
+    const lb = AR.createLb(
+      tfgen,
+      'alb',
+      applyCustomize(params.customize_lb, lbParams)
+    );
+  const lb_http_listener = AR.createLbListener(tfgen, tfname + '_http', {
+    load_balancer_arn: lb.arn,
+    port: 80,
+    protocol: 'HTTP',
+    default_action: {
+      type: 'redirect',
+      redirect: {
+        protocol: 'HTTPS',
+        port: '443',
+        status_code: 'HTTP_301',
+      },
+    },
+  });
 
-  return alb;
+  const lb_https_listener = AR.createLbListener(tfgen, tfname + '_https', {
+    load_balancer_arn: lb.arn,
+    port: 443,
+    protocol: 'HTTPS',
+    certificate_arn: params.acm_certificate_arn,
+    default_action: {
+      type: 'fixed-response',
+      fixed_response: {
+        content_type: 'text/plain',
+        message_body: 'Invalid host',
+        status_code: 503,
+      }
+    },
+  });
+  
+  return {lb, http_listener: lb_http_listener, https_listener: lb_https_listener};
 }
+
 
 export type TargetGroupResources = {
   load_balancer: AR.Lb;
@@ -411,7 +459,7 @@ export function createAutoscaleTargetGroup(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResourcesNEI,
-  alb: AR.Lb,
+  lb: LoadBalancerAndListeners,
   autoscaling_group: AR.AutoscalingGroup,
   params: AutoscaleFrontendParams,
 ): TargetGroupResources {
@@ -444,35 +492,6 @@ export function createAutoscaleTargetGroup(
           ? createAcmCertificate(tfgen, sr, https_fqdns, false)
           : params.acm_certificate.arn;
 
-  const alb_http_listener = AR.createLbListener(tfgen, 'http', {
-    load_balancer_arn: alb.arn,
-    port: 80,
-    protocol: 'HTTP',
-    default_action: {
-      type: 'redirect',
-      redirect: {
-        protocol: 'HTTPS',
-        port: '443',
-        status_code: 'HTTP_301',
-      },
-    },
-  });
-
-  const alb_https_listener = AR.createLbListener(tfgen, 'https', {
-    load_balancer_arn: alb.arn,
-    port: 443,
-    protocol: 'HTTPS',
-    certificate_arn: acm_certificate_arn,
-    default_action: {
-      type: 'fixed-response',
-      fixed_response: {
-        content_type: 'text/plain',
-        message_body: 'Invalid host',
-        status_code: 503,
-      }
-    },
-  });
-
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
   const hosts: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
@@ -483,7 +502,7 @@ export function createAutoscaleTargetGroup(
   for(let i = 0; i < hosts_max5.length; i++) {
     const tfname = 'https' + (i == 0 ? '' : i+1);
     AR.createLbListenerRule(tfgen, tfname, {
-      listener_arn: alb_https_listener.arn,
+      listener_arn: lb.https_listener.arn,
       condition: {
         host_header: {
           values: hosts_max5[i],
@@ -505,8 +524,8 @@ export function createAutoscaleTargetGroup(
           sr,
           url.dnsname,
           {
-            name: alb.dns_name,
-            zone_id: alb.zone_id,
+            name: lb.lb.dns_name,
+            zone_id: lb.lb.zone_id,
             evaluate_target_health: true,
           }
         );
@@ -515,9 +534,9 @@ export function createAutoscaleTargetGroup(
   });
 
   return {
-    load_balancer: alb,
+    load_balancer: lb.lb,
     target_group: alb_target_group,
-    lb_https_listener: alb_https_listener,
+    lb_https_listener: lb.https_listener,
   };
 }
 
@@ -869,6 +888,7 @@ interface AutoscalingCronRule {
   desired_capacity?: number;
 }
 
+
 /**
  *  Creates a logical deployment on an aws EC2 autoscaling group, including:
  *
@@ -905,7 +925,24 @@ export function createAutoscaleDeployment_DEPRECATED(
     params.endpoints,
     nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
   );
-  const lb = createLoadBalancer(tfgen, 'lb', sr, {customize_lb:params.customize_lb});
+
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  // Create a new certificate if an existing certificate ARN isn't provided.
+  // When new domains are added, the certificate is deleted and re-created, in this situation,
+  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
+  const acm_certificate_arn =
+    params.acm_certificate === undefined
+      ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+      : params.acm_certificate.kind === 'generate'
+        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
+        : params.acm_certificate.kind === 'generate_with_manual_verify'
+          ? createAcmCertificate(tfgen, sr, https_fqdns, false)
+          : params.acm_certificate.arn;
+
+  const lb = createLoadBalancer(tfgen, 'lb', sr, {
+    acm_certificate_arn,
+    customize_lb:params.customize_lb
+  });
   const tg = createAutoscaleTargetGroup(
     tfgen,
     'appserver',
@@ -918,7 +955,7 @@ export function createAutoscaleDeployment_DEPRECATED(
   return {
     autoscale_processor,
     target_group: tg.target_group,
-    load_balancer: lb,
+    load_balancer: lb.lb,
     lb_https_listener: tg.lb_https_listener,
   };
 }

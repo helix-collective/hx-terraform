@@ -138,7 +138,7 @@ function remoteDeployMode(
 
 export function installCamus2(username: string): bootscript.BootScript {
   const bs = bootscript.newBootscript();
-  bs.comment('Install and configure camus2');
+  bs.comment('Install camus2');
   bs.mkdir('/opt/etc');
   bs.mkdir('/opt/bin');
   bs.mkdir('/opt/var/log');
@@ -168,6 +168,7 @@ export function configureCamus2(
   letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
 ): bootscript.BootScript {
   const bs = bootscript.newBootscript();
+  bs.comment('Configure camus2');
 
   let nginxConfTemplatePath: Maybe<string> = {
     kind: 'nothing',

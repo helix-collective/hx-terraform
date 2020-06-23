@@ -27,6 +27,7 @@ export const ca_central_1 = region('ca-central-1');
 export const eu_west_2 = region('eu-west-2');
 export const eu_west_1 = region('eu-west-1');
 export const eu_north_1 = region('eu-north-1');
+export const eu_central_1 = region('eu-central-1');
 
 //----------------------------------------------------------------------
 
@@ -89,6 +90,8 @@ export const eu_west_1a = availabilityZone('eu-west-1a');
 export const eu_west_1b = availabilityZone('eu-west-1b');
 export const eu_north_1a = availabilityZone('eu-north-1a');
 export const eu_north_1b = availabilityZone('eu-north-1b');
+export const eu_central_1a = availabilityZone('eu-central-1a');
+export const eu_central_1b = availabilityZone('eu-central-1b');
 
 //----------------------------------------------------------------------
 

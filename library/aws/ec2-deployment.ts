@@ -408,6 +408,7 @@ export interface Ec2Deployment {
  * Standard ubuntu base AMIs.
  *
  * (ubuntu xenial, hvm:ebs-ssd, EBS General purpose SSD, x86)
+ *  https://cloud-images.ubuntu.com/locator/ec2/
  */
 export function getDefaultAmi(region: AT.Region): AT.Ami {
   if (region.value === AT.ap_southeast_2.value) {
@@ -430,6 +431,9 @@ export function getDefaultAmi(region: AT.Region): AT.Ami {
   }
   if (region.value === AT.eu_north_1.value) {
     return AT.ami('ami-04b331702444679c3');
+  }
+  if (region.value === AT.eu_central_1.value) {
+    return AT.ami('ami-05ed2c1359acd8af6');
   }
   throw new Error('No AMI specified for region ' + region.value);
 }

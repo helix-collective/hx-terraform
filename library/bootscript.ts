@@ -198,6 +198,7 @@ export class BootScript {
     this.comment(' Install systemd configuration for ' + name);
     this.catToFile(file, serviceFile.join('\n'));
     this.sh('systemctl start ' + name);
+    this.sh('systemctl enable ' + name)
   }
 
   cronJob(jobname: string, crontext: string[]) {

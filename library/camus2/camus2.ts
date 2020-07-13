@@ -329,7 +329,7 @@ function bootscriptProxySlaveUpdate(
   bs: bootscript.BootScript,
   username: string
 ): void {
-  bs.systemd('slave-update', [
+  bs.systemd('camus2-update', [
     `[Unit]`,
     `Description=Periodically refresh local camus2 proxy state from S3`,
     ``,

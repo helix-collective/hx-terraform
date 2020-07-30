@@ -190,6 +190,7 @@ const ingress_rule: RecordDecl = {
     requiredField('to_port', NUMBER),
     requiredField('protocol', enumType(['tcp', 'udp', 'icmp', '-1'])),
     requiredField('cidr_blocks', listType(stringAliasType('AT.CidrBlock'))),
+    optionalField('description', STRING)
   ],
 };
 
@@ -200,6 +201,7 @@ const egress_rule: RecordDecl = {
     requiredField('to_port', NUMBER),
     requiredField('protocol', enumType(['tcp', 'udp', 'icmp', '-1'])),
     requiredField('cidr_blocks', listType(stringAliasType('AT.CidrBlock'))),
+    optionalField('description', STRING)
   ],
 };
 

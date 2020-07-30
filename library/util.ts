@@ -25,6 +25,20 @@ export function ingressOnPort(port: number): AR.IngressRuleParams {
   };
 }
 
+export function ingressByIpWhitelist(port: number, rules: {ip:string, description: string}[]) : AR.IngressRuleParams[] {
+  return rules.map(r => {
+    const ingressRule : AR.IngressRuleParams = {
+      description: r.description,
+      cidr_blocks: [AT.cidrBlock(r.ip)],
+      from_port: port,
+      to_port: port,
+      protocol: 'tcp',
+    };
+    return ingressRule;
+  });
+}
+
+
 export const egress_all: AR.EgressRuleParams = {
   from_port: 0,
   to_port: 0,

@@ -641,6 +641,54 @@ export interface IamUserPolicyAttachment extends TF.ResourceT<'IamUserPolicyAtta
 export type IamUserPolicyAttachmentId = {type:'IamUserPolicyAttachmentId',value:string};
 
 /**
+ *  Provides an IAM group.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group
+ */
+export function createIamGroup(tfgen: TF.Generator, rname: string, params: IamGroupParams): IamGroup {
+  const fields = fieldsFromIamGroupParams(params);
+  const resource = tfgen.createTypedResource('IamGroup', 'aws_iam_group', rname, fields);
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
+  const arn: IamGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamGroup');
+
+  return {
+    ...resource,
+    name,
+    unique_id,
+    arn,
+  };
+}
+
+export interface IamGroup extends TF.ResourceT<'IamGroup'> {
+  name: string;
+  unique_id: string;
+  arn: IamGroupArn;
+}
+
+export type IamGroupId = {type:'IamGroupId',value:string};
+export type IamGroupArn = AT.ArnT<"IamGroup">;
+
+/**
+ *  Provides an IAM policy attached to a group.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy
+ */
+export function createIamGroupPolicy(tfgen: TF.Generator, rname: string, params: IamGroupPolicyParams): IamGroupPolicy {
+  const fields = fieldsFromIamGroupPolicyParams(params);
+  const resource = tfgen.createTypedResource('IamGroupPolicy', 'aws_iam_group_policy', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface IamGroupPolicy extends TF.ResourceT<'IamGroupPolicy'> {
+}
+
+export type IamGroupPolicyId = {type:'IamGroupPolicyId',value:string};
+
+/**
  *  Provides an EC2 Container Registry Repository
  *
  *  see https://www.terraform.io/docs/providers/aws/r/ecr_repository.html
@@ -2821,6 +2869,32 @@ export function fieldsFromIamUserPolicyAttachmentParams(params: IamUserPolicyAtt
   return fields;
 }
 
+export interface IamGroupParams {
+  name: string;
+  path?: string;
+}
+
+export function fieldsFromIamGroupParams(params: IamGroupParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  return fields;
+}
+
+export interface IamGroupPolicyParams {
+  name: string;
+  policy: string;
+  group: string;
+}
+
+export function fieldsFromIamGroupPolicyParams(params: IamGroupPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "policy", params.policy, TF.stringValue);
+  TF.addField(fields, "group", params.group, TF.stringValue);
+  return fields;
+}
+
 export interface EcrRepositoryParams {
   name: string;
 }
@@ -2938,6 +3012,7 @@ export interface IamRoleParams {
   name?: string;
   name_prefix?: string;
   assume_role_policy: string;
+  max_session_duration?: number;
   path?: string;
   description?: string;
 }
@@ -2947,6 +3022,7 @@ export function fieldsFromIamRoleParams(params: IamRoleParams) : TF.ResourceFiel
   TF.addOptionalField(fields, "name", params.name, TF.stringValue);
   TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addField(fields, "assume_role_policy", params.assume_role_policy, TF.stringValue);
+  TF.addOptionalField(fields, "max_session_duration", params.max_session_duration, TF.numberValue);
   TF.addOptionalField(fields, "path", params.path, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;

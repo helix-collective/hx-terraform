@@ -378,6 +378,23 @@ const iam_user_policy_attachment: RecordDecl = {
   ],
 };
 
+const iam_group: RecordDecl = {
+  name: 'iam_group',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('path', STRING),
+  ],
+};
+
+const iam_group_policy: RecordDecl = {
+  name: 'iam_group_policy',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('policy', STRING),
+    requiredField('group', STRING),
+  ],
+};
+
 const ecr_repository: RecordDecl = {
   name: 'ecr_repository',
   fields: [requiredField('name', STRING)],
@@ -453,6 +470,7 @@ const iam_role: RecordDecl = {
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
     requiredField('assume_role_policy', STRING),
+    optionalField('max_session_duration', NUMBER),
     optionalField('path', STRING),
     optionalField('description', STRING),
   ],
@@ -1800,6 +1818,23 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an IAM group.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group',
+    iam_group,
+    [stringAttr('name'), stringAttr('unique_id')],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides an IAM policy attached to a group.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy',
+    iam_group_policy,
+    []
+  );
+
+  gen.generateResource(
     'Provides an EC2 Container Registry Repository',
     'https://www.terraform.io/docs/providers/aws/r/ecr_repository.html',
     ecr_repository,
@@ -2399,6 +2434,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_user);
   gen.generateParams(iam_user_policy);
   gen.generateParams(iam_user_policy_attachment);
+  gen.generateParams(iam_group);
+  gen.generateParams(iam_group_policy);
   gen.generateParams(ecr_repository);
   gen.generateParams(db_subnet_group);
   gen.generateParams(cloudwatch_metric_alarm);

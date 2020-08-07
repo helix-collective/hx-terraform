@@ -155,6 +155,12 @@ export const c5_4xlarge = instanceType('c5.4xlarge');
 export const c5_9xlarge = instanceType('c5.9xlarge');
 export const c5_18xlarge = instanceType('c5.18xlarge');
 
+export const m5_large = instanceType('m5.large');
+export const m5_xlarge = instanceType('m5.xlarge');
+export const m5_2xlarge = instanceType('m5.2xlarge');
+export const m5_4xlarge = instanceType('m5.4xlarge');
+export const m5_8xlarge = instanceType('m5.8xlarge');
+
 export const p3_2xlarge = instanceType('p3.2xlarge');
 export const p3_8xlarge = instanceType('p3.8xlarge');
 export const p3_16xlarge = instanceType('p3.16xlarge');

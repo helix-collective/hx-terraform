@@ -494,10 +494,16 @@ export function createAutoscaleTargetGroup(
 
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
-  const hosts: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  const explicit_hosts: string[] = []
+  httpsFqdnsFromEndpoints(sr, params.endpoints).forEach(ep => {
+    if( ep.indexOf("*") !== -1 ) {
+      return
+    }
+    explicit_hosts.push(ep)
+  });
   const hosts_max5: string[][] = [];
-  for (let i=0; i<hosts.length; i+=5) {
-    hosts_max5.push(hosts.slice(i,i+5));
+  for (let i=0; i<explicit_hosts.length; i+=5) {
+    hosts_max5.push(explicit_hosts.slice(i,i+5));
   }
   for(let i = 0; i < hosts_max5.length; i++) {
     const tfname = 'https' + (i == 0 ? '' : i+1);

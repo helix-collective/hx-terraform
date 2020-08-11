@@ -42,6 +42,9 @@ export function createAutoscaleFrontend(
   params: AutoscaleFrontendParams,
   nginxDockerVersion?: string,
 ): AutoscaleDeployment {
+  if( params.health_check.outgoingPath.length === 0 || params.health_check.outgoingPath.substr(0,1) !== "/" ) {
+    throw new Error("params.health_check.outgoingPath must start with '/'")
+  }
   return TF.withLocalNameScope(tfgen, name, tfgen => {
     const controller = createController(
       tfgen,

@@ -220,6 +220,9 @@ export function deployToolEndpoints<AZ>(
       } else if (url.kind === 'http') {
         http_fqdns.push(url.fqdnsname);
       }
+      if (https_fqdns.length > 0 && http_fqdns.length > 0) {
+        throw new Error("Endpoints Config Error: both https/https-external and http url specified -  only used one '" + ep.name + "'")
+      }
     });
     if (https_fqdns.length > 0) {
       endPointMap[ep.name] = camus2.httpsProxyEndpoint(ep.name, https_fqdns);

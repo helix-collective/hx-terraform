@@ -43,13 +43,17 @@ s3://DEPLOY_BUCKET/shared/logging/fluentd-sender.crt
 s3://DEPLOY_BUCKET/shared/logging/fluentd-aggregator.key 
 ```
 
-5) Write the typescript code to create the infrastructure. This is typically a small module with
+5) Create a keypair named `logging-keypair` for the logging ec2 instances
+https://ap-southeast-2.console.aws.amazon.com/ec2/v2/home?region=ap-southeast-2#KeyPairs:
+
+6) Write the typescript code to create the infrastructure. This is typically a small module with
 calls to `logging.createCognitoResources()` and `logging.createLoggingInfrastructure()`. See `logging.ts`
 in the [proto-infrastructure] repository.
 
-6) Plan and apply infrastructure changes to deploy the resources
+7) Plan and apply infrastructure changes to deploy the resources
 
-7) Manually connect elasticsearch instance to the cognito resources, using the AWS console.
+8) Manually connect elasticsearch instance to the cognito resources, using the AWS console.
+https://ap-southeast-2.console.aws.amazon.com/es/home?region=ap-southeast-2#domain:resource=es-logging;action=dashboard;tab=TAB_OVERVIEW_ID
 
 Unfortunately terraform can't automate this step (see [this issue] for details). You need
 to modify the elasticsearch cluster as follows:

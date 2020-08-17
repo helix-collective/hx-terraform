@@ -142,6 +142,14 @@ export const t3_large = instanceType('t3.large');
 export const t3_xlarge = instanceType('t3.xlarge');
 export const t3_2xlarge = instanceType('t3.2xlarge');
 
+export const t3a_nano = instanceType('t3a.nano');
+export const t3a_micro = instanceType('t3a.micro');
+export const t3a_small = instanceType('t3a.small');
+export const t3a_medium = instanceType('t3a.medium');
+export const t3a_large = instanceType('t3a.large');
+export const t3a_xlarge = instanceType('t3a.xlarge');
+export const t3a_2xlarge = instanceType('t3a.2xlarge');
+
 export const c4_large = instanceType('c4.large');
 export const c4_xlarge = instanceType('c4.xlarge');
 export const c4_2xlarge = instanceType('c4.2xlarge');

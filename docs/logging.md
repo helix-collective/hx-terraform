@@ -35,13 +35,23 @@ openssl req -x509 -sha256 -nodes -days 3650 -newkey rsa:2048 -keyout fluentd-agg
 
 (substituting appropriate details and your chosen DNS name for LOGGING_AGGREGATOR_DNSNAME).
 
-4) Upload the generated key file and certificate to S3. This is typically to the projects deploy bucket,
+4a) Upload the generated key file and certificate to S3. This is typically to the projects deploy bucket,
 at the following paths:
 
 ```
 s3://DEPLOY_BUCKET/shared/logging/fluentd-sender.crt
 s3://DEPLOY_BUCKET/shared/logging/fluentd-aggregator.key 
 ```
+
+4b) Add a key/value to the secret manager  for the key `fluentd_aggregator_certificate` with the modified contents of the `fluentd-sender.crt`.
+
+Note: Use the PLAINTEXT editor. Don't use the "Secret key/value" editor as it strips the `\n`
+```
+cat fluentd-sender.crt | sed 's!$!\\n!' | tr -d '\n'
+# copy the output
+```
+
+In the [AWS secret manager](https://ap-southeast-2.console.aws.amazon.com/secretsmanager) add or edit the secret, again please remember to use the plaintext editor.
 
 5) Create a keypair named `logging-keypair` for the logging ec2 instances
 https://ap-southeast-2.console.aws.amazon.com/ec2/v2/home?region=ap-southeast-2#KeyPairs:

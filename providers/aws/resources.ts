@@ -3686,6 +3686,7 @@ export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnet
 export interface ElasticacheClusterParams {
   cluster_id: string;
   engine: 'memcached' | 'redis';
+  engine_version?: string;
   node_type: AT.CacheNodeType;
   num_cache_nodes: number;
   parameter_group_name: AT.ElasticacheParameterGroupName;
@@ -3699,6 +3700,7 @@ export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterPar
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "cluster_id", params.cluster_id, TF.stringValue);
   TF.addField(fields, "engine", params.engine, TF.stringValue);
+  TF.addOptionalField(fields, "engine_version", params.engine_version, TF.stringValue);
   TF.addField(fields, "node_type", params.node_type, TF.stringAliasValue);
   TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
   TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);

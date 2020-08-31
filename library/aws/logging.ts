@@ -86,9 +86,9 @@ export function createLoggingInfrastructure(
   // The ES domain itself
   const edparams: AR.ElasticsearchDomainParams = {
     domain_name: params.domain_name,
-    elasticsearch_version: '5.5',
+    elasticsearch_version: '7.7',
     cluster_config: {
-      instance_type: AT.m4_large_elasticsearch,
+      instance_type: AT.r5_large_elasticsearch,
       instance_count: 2,
       dedicated_master_enabled: false,
     },

@@ -482,6 +482,12 @@ export const i3_16xlarge_elasticsearch = esInstanceType(
   'i3.16xlarge.elasticsearch'
 );
 
+export const r5_large_elasticsearch = esInstanceType('r5.large.elasticsearch');
+export const r5_xlarge_elasticsearch = esInstanceType('r5.xlarge.elasticsearch');
+export const r5_2xlarge_elasticsearch = esInstanceType('r5.2xlarge.elasticsearch');
+export const r5_4xlarge_elasticsearch = esInstanceType('r5.4xlarge.elasticsearch');
+export const r5_12xlarge_elasticsearch = esInstanceType('r5.12xlarge.elasticsearch');
+
 //----------------------------------------------------------------------
 export type DbInstanceStorageType = {
   type: 'DbInstanceStorageType';

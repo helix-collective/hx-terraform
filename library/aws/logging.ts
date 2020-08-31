@@ -25,6 +25,7 @@ export interface LoggingInfrastructureParams {
   cognito?: LoggingCognitoParams;
   logging_ip_whitelist?: AT.IpAddress[];
   log_cleanup?: LogCleanupMode;
+  elasticsearch_version?: string;
 }
 
 export type LogCleanupMode = { kind: 'older_than_months'; months: number; lambdaRuntime?: AT.LambdaRuntime; };
@@ -83,10 +84,13 @@ export function createLoggingInfrastructure(
     policies.s3ModifyPolicy('s3modify', logs_bucket_name),
   ]);
 
+  if(!params.elasticsearch_version) {
+    params.elasticsearch_version = "5.5"
+  }
   // The ES domain itself
   const edparams: AR.ElasticsearchDomainParams = {
     domain_name: params.domain_name,
-    elasticsearch_version: '7.7',
+    elasticsearch_version: params.elasticsearch_version,
     cluster_config: {
       instance_type: AT.r5_large_elasticsearch,
       instance_count: 2,

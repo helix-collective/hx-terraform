@@ -1040,12 +1040,22 @@ const elasticache_subnet_group: RecordDecl = {
   ],
 };
 
+const elasticache_parameter_group_parameter: RecordDecl = {
+  name: 'elasticache_parameter_group_parameter',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('value', STRING),
+  ],
+};
+
+
 const elasticache_parameter_group: RecordDecl = {
   name: 'elasticache_parameter_group',
   fields: [
     requiredField('name', STRING),
     requiredField('family', STRING),
     optionalField('description', STRING),
+    optionalField('parameter', listType(recordType(elasticache_parameter_group_parameter)))
   ],
 };
 
@@ -2906,6 +2916,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(extended_s3_configuration);
   gen.generateParams(kinesis_firehose_delivery_stream);
   gen.generateParams(s3_bucket_metric);
+  gen.generateParams(elasticache_parameter_group_parameter);
   gen.generateParams(elasticache_parameter_group);
   gen.generateParams(elasticache_subnet_group);
   gen.generateParams(elasticache_cluster);

@@ -3655,10 +3655,23 @@ export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : T
   return fields;
 }
 
+export interface ElasticacheParameterGroupParameterParams {
+  name: string;
+  value: string;
+}
+
+export function fieldsFromElasticacheParameterGroupParameterParams(params: ElasticacheParameterGroupParameterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "value", params.value, TF.stringValue);
+  return fields;
+}
+
 export interface ElasticacheParameterGroupParams {
   name: string;
   family: string;
   description?: string;
+  parameter?: (ElasticacheParameterGroupParameterParams)[];
 }
 
 export function fieldsFromElasticacheParameterGroupParams(params: ElasticacheParameterGroupParams) : TF.ResourceFieldMap {
@@ -3666,6 +3679,7 @@ export function fieldsFromElasticacheParameterGroupParams(params: ElasticachePar
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "family", params.family, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "parameter", params.parameter, TF.listValue((v) => TF.mapValue(fieldsFromElasticacheParameterGroupParameterParams(v))));
   return fields;
 }
 

@@ -49,14 +49,20 @@ export const STRING: PrimitiveType = { kind: 'primitive', type: 'string' };
 export const NUMBER: PrimitiveType = { kind: 'primitive', type: 'number' };
 export const BOOLEAN: PrimitiveType = { kind: 'primitive', type: 'boolean' };
 
-export type ConvertNumToStr = { conv: 'num-to-str', typescript: 'number', terraform: 'string' };
-export type ConvertToPrimitive = { kind: 'convert-to-primitive' } & ConvertNumToStr;
+export type ConvertNumToStr = {
+  conv: 'num-to-str';
+  typescript: 'number';
+  terraform: 'string';
+};
+export type ConvertToPrimitive = {
+  kind: 'convert-to-primitive';
+} & ConvertNumToStr;
 
 export const NUMBERSTR: ConvertToPrimitive = {
   kind: 'convert-to-primitive',
   conv: 'num-to-str',
   typescript: 'number',
-  terraform: 'string'
+  terraform: 'string',
 };
 
 interface ListType {
@@ -170,6 +176,12 @@ export interface Generator {
     }
   ): void;
   generateParams(params: RecordDecl): void;
+  generateDataSource(
+    title: string,
+    link: string,
+    params: RecordDecl,
+    attributes: AttributeDecl[]
+  ): void;
 }
 
 export interface FileGenerator extends Generator {
@@ -181,6 +193,29 @@ function camelFromSnake(s: string): string {
     .split('_')
     .map(el => el[0].toUpperCase() + el.substr(1))
     .join('');
+}
+
+function escapeVariableName(s: string) : string {
+  if(typescriptKeywords.has(s)) {
+    return s+"_";
+  }
+  return s;
+}
+
+function escapeAsFieldName(s: string) : string {
+  const escapedVarName = escapeVariableName(s);
+  if(escapedVarName === s) {
+    return s;
+  }
+  return `"${s}"`;
+}
+
+function escapeForFieldAndValue(s: string) : string {
+  const escapedVarName = escapeVariableName(s);
+  if(escapedVarName === s) {
+    return s;
+  }
+  return `"${s}": ${escapedVarName}`;
 }
 
 function genType(type: Type): string {
@@ -314,12 +349,12 @@ export function fileGenerator(
       if (attr.type.kind === 'string' && attr.type.type === 'string') {
         lines.push(
           `  const ${
-            attr.name
+            escapeVariableName(attr.name)
           }: string =  '\$\{' + TF.resourceName(resource) + '.${attr.name}}';`
         );
       } else if (attr.type.kind === 'resourcearn') {
         lines.push(
-          `  const ${attr.name}: ${genAttrType(
+          `  const ${escapeVariableName(attr.name)}: ${genAttrType(
             attr.type
           )} = AT.arnT('\$\{' + TF.resourceName(resource) + '.${
             attr.name
@@ -327,7 +362,7 @@ export function fileGenerator(
         );
       } else {
         lines.push(
-          `  const ${attr.name}: ${genAttrType(
+          `  const ${escapeVariableName(attr.name)}: ${genAttrType(
             attr.type
           )} =  {type: '${genAttrTypeLabel(
             attr.type
@@ -339,7 +374,7 @@ export function fileGenerator(
     lines.push('  return {');
     lines.push('    ...resource,');
     for (const attr of attributes) {
-      lines.push(`    ${attr.name},`);
+      lines.push(`    ${escapeForFieldAndValue(attr.name)},`);
     }
     lines.push('  };');
     lines.push('}');
@@ -347,7 +382,7 @@ export function fileGenerator(
     lines.push(`export interface ${name} extends TF.ResourceT<'${name}'> {`);
 
     for (const attr of attributes) {
-      lines.push(`  ${attr.name}: ${genAttrType(attr.type)};`);
+      lines.push(`  ${escapeAsFieldName(attr.name)}: ${genAttrType(attr.type)};`);
     }
     lines.push('}');
     lines.push('');
@@ -355,6 +390,71 @@ export function fileGenerator(
     if (options && options.arn) {
       lines.push(`export type ${name}Arn = AT.ArnT<"${name}">;`);
     }
+    lines.push('');
+  }
+
+  function generateDataSource(
+    comment: string,
+    link: string,
+    params: RecordDecl,
+    attributes: AttributeDecl[]
+  ) {
+    const name = resourceName(params.name);
+    const paramsName = paramsInterfaceName(name);
+    const resourceType = provider + '_' + params.name;
+
+    lines.push(`/**`);
+    lines.push(` *  ${comment}`);
+    lines.push(` *`);
+    lines.push(` *  see ${link}`);
+    lines.push(` */`);
+    lines.push(
+      `export function get${prefix}${name}Data(tfgen: TF.Generator, dname: string, params: ${prefix}${paramsName}): ${name}Data {`
+    );
+    lines.push(`  const fields = fieldsFrom${prefix}${paramsName}(params);`);
+    lines.push(
+      `  const resource = tfgen.createTypedDataSource('${name}', '${resourceType}', dname, fields);`
+    );
+    for (const attr of attributes) {
+      if (attr.type.kind === 'string' && attr.type.type === 'string') {
+        lines.push(
+          `  const ${
+            escapeVariableName(attr.name)
+          }: string = '\$\{' + TF.dataSourceName(resource) + '.${attr.name}}';`
+        );
+      } else if (attr.type.kind === 'resourcearn') {
+        lines.push(
+          `  const ${escapeVariableName(attr.name)}: ${genAttrType(
+            attr.type
+          )} = AT.arnT('\$\{' + TF.dataSourceName(resource) + '.${
+            attr.name
+          }}', '${name}');`
+        );
+      } else {
+        lines.push(
+          `  const ${escapeVariableName(attr.name)}: ${genAttrType(
+            attr.type
+          )} =  {type: '${genAttrTypeLabel(
+            attr.type
+          )}', value: '\$\{' + TF.dataSourceName(resource) + '.${attr.name}}'};`
+        );
+      }
+    }
+    lines.push('');
+    lines.push('  return {');
+    lines.push('    ...resource,');
+    for (const attr of attributes) {
+      lines.push(`    ${escapeForFieldAndValue(attr.name)},`);
+    }
+    lines.push('  };');
+    lines.push('}');
+    lines.push('');
+    lines.push(`export interface ${name}Data extends TF.DataSourceT<'${name}'> {`);
+
+    for (const attr of attributes) {
+      lines.push(`  ${escapeAsFieldName(attr.name)}: ${genAttrType(attr.type)};`);
+    }
+    lines.push('}');
     lines.push('');
   }
 
@@ -472,6 +572,71 @@ export function fileGenerator(
   return {
     generateResource,
     generateParams,
+    generateDataSource,
     writeFile,
   };
 }
+
+// https://github.com/microsoft/TypeScript/issues/2536
+const typescriptKeywords = new Set([
+  "any",
+  "as",
+  "boolean",
+  "break",
+  "case",
+  "catch",
+  "class",
+  "const",
+  "constructor",
+  "continue",
+  "debugger",
+  "declare",
+  "default",
+  "delete",
+  "do",
+  "else",
+  "enum",
+  "export",
+  "extends",
+  "false",
+  "finally",
+  "for",
+  "from",
+  "function",
+  "get",
+  "if",
+  "implements",
+  "import",
+  "in",
+  "instanceof",
+  "interface",
+  "let",
+  "module",
+  "new",
+  "null",
+  "number",
+  "of",
+  "package",
+  "private",
+  "protected",
+  "public",
+  "require",
+  "return",
+  "set",
+  "static",
+  "string",
+  "super",
+  "switch",
+  "symbol",
+  "this",
+  "throw",
+  "true",
+  "try",
+  "type",
+  "typeof",
+  "var",
+  "void",
+  "while",
+  "with",
+  "yield",
+]);

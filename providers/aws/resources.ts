@@ -4942,3 +4942,97 @@ export function fieldsFromAutoscalingPolicyParams(params: AutoscalingPolicyParam
   }
   return fields;
 }
+
+export interface FilterParams {
+  name : string;
+  values : (string)[];
+}
+
+export function fieldsFromFilterParams(params: FilterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name ", params.name , TF.stringValue);
+  TF.addField(fields, "values ", params.values , TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface AmiParams {
+  /**
+  List of AMI owners to limit search.
+  At least 1 value must be specified.
+  Valid values: an AWS account ID, self (the current account),
+  or an AWS owner alias (e.g. amazon, aws-marketplace, microsoft).
+  */
+  owners : (string)[];
+  /**
+  If more than one result is returned, use the most recent AMI.
+  */
+  most_recent?: boolean;
+  /**
+  One or more name/value pairs to filter off of.
+  There are several valid keys, for a full reference, check out describe-images in the AWS CLI reference
+  */
+  filter?: (FilterParams)[];
+  /**
+  A regex string to apply to the AMI list returned by AWS.
+  This allows more advanced filtering not supported from the AWS API.
+  This filtering is done locally on what AWS returns, and could have a performance impact if the result is large.
+  It is recommended to combine this with other options to narrow down the list AWS returns.
+  */
+  name_regex?: string;
+}
+
+export function fieldsFromAmiParams(params: AmiParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "owners ", params.owners , TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "most_recent", params.most_recent, TF.booleanValue);
+  TF.addOptionalField(fields, "filter", params.filter, TF.listValue((v) => TF.mapValue(fieldsFromFilterParams(v))));
+  TF.addOptionalField(fields, "name_regex", params.name_regex, TF.stringValue);
+  return fields;
+}
+
+/**
+ *  Use this data source to get the ID of a registered AMI for use in other resources.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami
+ */
+export function getAmiData(tfgen: TF.Generator, dname: string, params: AmiParams): AmiData {
+  const fields = fieldsFromAmiParams(params);
+  const resource = tfgen.createTypedDataSource('Ami', 'aws_ami', dname, fields);
+  const id: AT.Ami =  {type: 'Ami', value: '${' + TF.dataSourceName(resource) + '.id}'};
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.arn}'};
+  const description: string = '${' + TF.dataSourceName(resource) + '.description}';
+  const image_id: AT.Ami =  {type: 'Ami', value: '${' + TF.dataSourceName(resource) + '.image_id}'};
+  const name: string = '${' + TF.dataSourceName(resource) + '.name}';
+  const owner_id: string = '${' + TF.dataSourceName(resource) + '.owner_id}';
+  const public_: string = '${' + TF.dataSourceName(resource) + '.public}';
+  const root_device_name: string = '${' + TF.dataSourceName(resource) + '.root_device_name}';
+  const root_device_type: string = '${' + TF.dataSourceName(resource) + '.root_device_type}';
+  const virtualization_type: string = '${' + TF.dataSourceName(resource) + '.virtualization_type}';
+
+  return {
+    ...resource,
+    id,
+    arn,
+    description,
+    image_id,
+    name,
+    owner_id,
+    "public": public_,
+    root_device_name,
+    root_device_type,
+    virtualization_type,
+  };
+}
+
+export interface AmiData extends TF.DataSourceT<'Ami'> {
+  id: AT.Ami;
+  arn: AT.Arn;
+  description: string;
+  image_id: AT.Ami;
+  name: string;
+  owner_id: string;
+  "public": string;
+  root_device_name: string;
+  root_device_type: string;
+  virtualization_type: string;
+}

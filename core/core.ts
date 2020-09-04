@@ -29,6 +29,20 @@ export interface Generator {
   /** Create a backend config file */
   createBackendFile(path: string, content: string): void;
 
+  /** Construct a terraform data source */
+  createDataSource(
+    type: string,
+    name: string,
+    fields: ResourceFieldMap
+  ): Resource;
+
+  createTypedDataSource<T extends string>(
+    type: T,
+    tftype: string,
+    tfname: string,
+    fields: ResourceFieldMap
+  ): ResourceT<T>;
+
   /** Create an ad-hoc output file */
   createAdhocFile(path: string, content: string): void;
 
@@ -78,8 +92,10 @@ interface FileGenerator extends Generator {
 export type ResourceType = string;
 export type ResourceName = string[];
 export type Resource = { tftype: ResourceType; tfname: ResourceName };
-
 export type ResourceT<T extends string> = Resource & { type: T };
+
+export type DataSource = Resource;
+export type DataSourceT<T extends string> = DataSource & { type: T };
 
 export type StringAlias<T> = {
   type: T;
@@ -178,6 +194,10 @@ export function resourceName<T>(r: Resource): string {
   return r.tftype + '.' + r.tfname.join('_');
 }
 
+export function dataSourceName<T>(d: DataSource): string {
+  return "data." + d.tftype + '.' + d.tfname.join('_');
+}
+
 export function withLocalNameScope<T>(
   tfgen0: Generator,
   name: string,
@@ -210,6 +230,12 @@ export function fileGenerator(): FileGenerator {
   }
   type Provisioner = { kind: 'local-exec'; script: string };
 
+  /** https://www.terraform.io/docs/configuration-0-11/data-sources.html */
+  interface DataSourceDetails extends DataSource {
+    fields: ResourceFieldMap;
+    provider: string;
+  }
+
   interface OutputDetails {
     tfname: ResourceName;
     value: string;
@@ -222,6 +248,7 @@ export function fileGenerator(): FileGenerator {
     adhocFiles: { [path: string]: string };
     backendFile: {path: string, content: string}|null;
     outputs: OutputDetails[];
+    datasources: DataSourceDetails[];
   }
 
   const generated: Generated = emptyGenerated();
@@ -303,6 +330,44 @@ export function fileGenerator(): FileGenerator {
       return res;
     }
 
+    function createTypedDataSource<T extends string>(
+      type: T,
+      tftype: string,
+      name: string,
+      fields: ResourceFieldMap
+    ): DataSourceT<T> {
+      const res: ResourceT<T> = {
+        type,
+        ...createDataSource(tftype, name, fields),
+      };
+      return res;
+    }
+
+    function createDataSource(
+      tftype: string,
+      name: string,
+      fields: ResourceFieldMap
+    ): DataSource {
+      const tfname = nameContext0.concat(name);
+      const providerType = getProviderType(tftype);
+      const provider = providerAliases0[providerType]
+        ? providerType + '.' + providerAliases0[providerType]
+        : '';
+      const details = {
+        tftype,
+        tfname,
+        fields,
+        ignoreChanges: [],
+        dependsOn: [],
+        provisioners: [],
+        provider,
+        createBeforeDestroy: false,
+      };
+
+      addDataSourceDetails(generated, details);
+      return { tftype, tfname };
+    }
+
     function createOutput(name: string, value: string) {
       const tfname = nameContext0.concat(name);
       addOutput(generated, tfname, value);
@@ -377,6 +442,8 @@ export function fileGenerator(): FileGenerator {
       createProvider,
       createResource,
       createTypedResource,
+      createDataSource,
+      createTypedDataSource,
       createAdhocFile,
       createBackendFile,
       createOutput,
@@ -412,6 +479,7 @@ export function fileGenerator(): FileGenerator {
       outputs: [],
       backendFile: null,
       adhocFiles: {},
+      datasources: [],
     };
   }
 
@@ -422,6 +490,13 @@ export function fileGenerator(): FileGenerator {
   function addResourceDetails(generated: Generated, details: ResourceDetails) {
     generated.resources.push(details);
     generated.resourcesByName[resourceName(details)] = details;
+  }
+
+  function addDataSourceDetails(
+    generated: Generated,
+    details: DataSourceDetails
+  ) {
+    generated.datasources.push(details);
   }
 
   function addOutput(
@@ -448,6 +523,13 @@ export function fileGenerator(): FileGenerator {
         result[file] = emptyGenerated();
       }
       addOutput(result[file], output.tfname, output.value);
+    }
+    for (const datasrc of generated.datasources) {
+      const file = resourceFile(datasrc.tfname);
+      if (result[file] === undefined) {
+        result[file] = emptyGenerated();
+      }
+      addDataSourceDetails(result[file], datasrc);
     }
     return result;
   }
@@ -605,6 +687,21 @@ export function fileGenerator(): FileGenerator {
           lines.push('  }');
         }
       }
+      lines.push('}');
+      lines.push('');
+    }
+    for (const datasrc of generated.datasources) {
+      const prefix =
+        'data "' + datasrc.tftype + '" "' + datasrc.tfname.join('_') + '"';
+      const fields = datasrc.fields.concat([]);
+      // https://www.terraform.io/docs/configuration/data-sources.html#non-default-provider-configurations
+      if (datasrc.provider !== '') {
+        fields.push({
+          key: 'provider',
+          value: { kind: 'text', text: `"${datasrc.provider}"` },
+        });
+      }
+      lines = lines.concat(mapLines(indent, prefix, fields, false));
       lines.push('}');
       lines.push('');
     }

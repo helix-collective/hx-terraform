@@ -28,10 +28,10 @@ import {
   resourceIdAttr,
   NUMBERSTR,
 } from './gen-helpers';
-import { arn } from '../providers/aws/types';
 
 type ResourcesParams = {
   resources: { [key: string]: RecordDecl };
+  datasources?: { [key: string]: RecordDecl };
   params: { [key: string]: RecordDecl };
 };
 
@@ -2015,6 +2015,65 @@ function autoscaling_policy(gen: Generator): ResourcesParams {
   };
 }
 
+function amiDataSource(gen: Generator) : void {
+
+  const amiFilterKeyVal: RecordDecl = {
+    name: 'filter',
+    fields: [
+      requiredField('name ', STRING),
+      requiredField('values ', listType(STRING)),
+    ],
+  };
+  gen.generateParams(amiFilterKeyVal);
+
+  const ami: RecordDecl = {
+    name: 'ami',
+    fields: [
+      requiredField('owners ', listType(STRING), [
+        'List of AMI owners to limit search.',
+        'At least 1 value must be specified.',
+        'Valid values: an AWS account ID, self (the current account),',
+        'or an AWS owner alias (e.g. amazon, aws-marketplace, microsoft).',
+      ]),
+
+      optionalField('most_recent', BOOLEAN, [
+        'If more than one result is returned, use the most recent AMI.',
+      ]),
+
+      optionalField('filter', listType(recordType(amiFilterKeyVal)), [
+        'One or more name/value pairs to filter off of.',
+        'There are several valid keys, for a full reference, check out describe-images in the AWS CLI reference'
+      ]),
+
+      optionalField('name_regex', STRING, [
+        'A regex string to apply to the AMI list returned by AWS.',
+        'This allows more advanced filtering not supported from the AWS API.',
+        'This filtering is done locally on what AWS returns, and could have a performance impact if the result is large.',
+        'It is recommended to combine this with other options to narrow down the list AWS returns.',
+      ]),
+    ],
+  };
+  gen.generateParams(ami);
+
+  gen.generateDataSource(
+    'Use this data source to get the ID of a registered AMI for use in other resources.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami',
+    ami,
+    [
+      stringAliasAttr('id', "Ami", "AT.Ami"),
+      stringAliasAttr('arn', "Arn", "AT.Arn"),
+      stringAttr("description"),
+      stringAliasAttr('image_id', "Ami", "AT.Ami"),
+      stringAttr("name"),
+      stringAttr("owner_id"),
+      stringAttr("public"),
+      stringAttr("root_device_name"),
+      stringAttr("root_device_type"),
+      stringAttr("virtualization_type"),
+    ]
+  )
+}
+
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
@@ -3001,6 +3060,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(eks_cluster_vpc_config);
 
   autoscaling_policy(gen);
+  amiDataSource(gen);
 }
 
 function generateRandom(gen: Generator) {

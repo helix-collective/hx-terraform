@@ -25,6 +25,7 @@ export interface InstanceWithEipParams {
   ami(region: AT.Region): AT.Ami;
   security_group: AR.SecurityGroup;
   key_name: AT.KeyName;
+  ignoreUserDataChanges?: boolean,
   customize_instance?: Customize<AR.InstanceParams>;
 }
 
@@ -59,7 +60,11 @@ export function createInstanceWithEip(
 
     // Prevent changes to user_data script tainting the instance, (as
     // a developer convenience)
-    tfgen.ignoreChanges(ec2, 'user_data');
+
+    const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : true;
+    if(ignoreUserDataChanges) {
+      tfgen.ignoreChanges(ec2, 'user_data');
+    }
 
     return ec2;
   }

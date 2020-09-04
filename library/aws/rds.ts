@@ -13,9 +13,16 @@ import {
 } from '../util';
 import { ArnSecret } from './secrets';
 
+export interface DbConfigJson {
+  name: string;
+  username: string;
+  address: string;
+  port: string;
+};
+
 export interface DbInstance {
   instance: AR.DbInstance;
-  config_json: {};
+  config_json: DbConfigJson;
   password_to: PasswordStore;
 }
 
@@ -97,7 +104,9 @@ export function createPostgresInstance(
   }
   const db = AR.createDbInstance(tfgen, name, dbparams);
 
-  const config_json = {
+
+
+  const config_json : DbConfigJson = {
     name: db.name,
     username: db.username,
     address: db.address,

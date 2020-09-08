@@ -398,11 +398,11 @@ export function createProcessorAutoScaleGroup(
 
 export interface LoadBalancerAndListeners {
   lb :  AR.Lb;
-  http_listener: AR.LbListener; 
+  http_listener: AR.LbListener;
   https_listener: AR.LbListener;
 };
 
-export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI, 
+export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI,
   params: {
     acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
@@ -447,7 +447,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
       }
     },
   });
-  
+
   return {lb, http_listener: lb_http_listener, https_listener: lb_https_listener};
 }
 

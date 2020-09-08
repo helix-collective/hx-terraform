@@ -10,7 +10,6 @@ import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
 import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
-import { RSA_NO_PADDING } from 'constants';
 
 /**
  * A configuration for an entire VPC, with a public
@@ -33,6 +32,35 @@ export interface AzConfig {
   external_cidr_block: AT.CidrBlock;
 }
 
+export interface DomainResources {
+  domain_name: string;
+  primary_dns_zone: AR.Route53Zone;
+};
+
+export interface SharedBucketsResources {
+  deploy_bucket: AR.S3Bucket;
+  deploy_bucket_name: string;
+  backup_bucket: AR.S3Bucket;
+  backup_bucket_name: string;
+};
+
+export interface SharedSecurityGroupResources {
+  bastion_security_group: AR.SecurityGroup;
+  appserver_security_group: AR.SecurityGroup;
+  load_balancer_security_group: AR.SecurityGroup;
+  lambda_security_group: AR.SecurityGroup;
+};
+
+export interface SharedSnsTopicResources {
+  alert_topic: AR.SnsTopic;
+  alarm_topic: AR.SnsTopic;
+};
+
+export interface SharedResourceData {
+  domain_name: string,
+  s3_bucket_prefix: string,
+};
+
 /**
  *  Shared resources created once for a region in a given AWS account. These include:
  *    - a VPC and network resources
@@ -41,29 +69,21 @@ export interface AzConfig {
  *    - common security groups
  *    - SNS topics for alerts and alarms
  */
-export interface GenSharedResources<AZ> {
+export type GenSharedResources<AZ> =
+& {
   network: NetworkResources<AZ>;
-  primary_dns_zone: AR.Route53Zone;
-  domain_name: string;
-  deploy_bucket: AR.S3Bucket;
-  deploy_bucket_name: string;
-  backup_bucket: AR.S3Bucket;
-  backup_bucket_name: string;
-  bastion_security_group: AR.SecurityGroup;
-  appserver_security_group: AR.SecurityGroup;
-  load_balancer_security_group: AR.SecurityGroup;
-  lambda_security_group: AR.SecurityGroup;
-  alert_topic: AR.SnsTopic;
-  alarm_topic: AR.SnsTopic;
-  s3_bucket_prefix: string;
 }
+& DomainResources
+& SharedBucketsResources
+& SharedSecurityGroupResources
+& SharedSnsTopicResources
+& SharedResourceData;
 
 export interface NetworkResources<AZ> {
   vpc: AR.Vpc;
   azs: AZ[];
   region: AT.Region;
 }
-
 
 /**
  * An availability zone with an externally accessible
@@ -122,20 +142,27 @@ export function createResources(
   return createOtherResources(tfgen, domain_name, s3_bucket_prefix, network, create_buildbot_user);
 }
 
-/**
- * Once the network has been setup, create the other standard shared resources
- */
-export function createOtherResources<AZ>(
-  tfgen: TF.Generator,
-  domain_name: string,
-  s3_bucket_prefix: string,
-  network: NetworkResources<AZ>,
-  create_buildbot_user?: boolean
-): GenSharedResources<AZ> {
+export type DomainParams = {domain_name: string};
+export function createDomainResources(
+  tfgen : TF.Generator,
+  params : DomainParams
+) : DomainResources {
+  const {domain_name} = params;
   const primary_dns_zone = AR.createRoute53Zone(tfgen, 'primary', {
     name: domain_name,
     tags: tfgen.tagsContext(),
   });
+  return {
+    domain_name,
+    primary_dns_zone
+  }
+}
+
+export type SharedBucketParams = {
+  s3_bucket_prefix: string
+}
+export function createSharedBucketsResources(tfgen: TF.Generator, params : SharedBucketParams) : SharedBucketsResources {
+  const {s3_bucket_prefix} = params;
 
   const deploy_bucket_name = s3_bucket_prefix + '-shared-deploy';
   const deploy_bucket = AR.createS3Bucket(tfgen, 'deploy', {
@@ -155,6 +182,19 @@ export function createOtherResources<AZ>(
     tags: tfgen.tagsContext(),
   });
 
+  return {
+    deploy_bucket,
+    deploy_bucket_name,
+    backup_bucket,
+    backup_bucket_name
+  };
+}
+
+export type SharedSecurityGroupParams<AZ> = {
+  network : NetworkResources<AZ>
+};
+export function createSharedSecurityGroupResources<AZ>(tfgen: TF.Generator, params : SharedSecurityGroupParams<AZ>) : SharedSecurityGroupResources {
+  const {network} = params;
   const bastion_security_group = AR.createSecurityGroup(tfgen, 'bastion', {
     vpc_id: network.vpc.id,
     ingress: [ingressOnPort(22)],
@@ -181,32 +221,15 @@ export function createOtherResources<AZ>(
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'lambda'),
   });
+  return {
+    bastion_security_group,
+    appserver_security_group,
+    load_balancer_security_group,
+    lambda_security_group
+  };
+}
 
-  if (create_buildbot_user) {
-    const buildbot_user = AR.createIamUser(tfgen, 'buildbot', {
-      name: tfgen.scopedName('buildbot').join('_'),
-    });
-
-    const modifys3deploy = s3ModifyPolicy('modifys3deploy', deploy_bucket_name);
-
-    AR.createIamUserPolicy(tfgen, 'modifys3deploy', {
-      name: tfgen.scopedName('modifys3deploy').join('_'),
-      policy: JSON.stringify(modifys3deploy.policy, null, 2),
-      user: buildbot_user.name,
-    });
-
-    AR.createIamUserPolicy(tfgen, 'ecrmodifyall', {
-      name: tfgen.scopedName('ecrmodifyall').join('_'),
-      policy: JSON.stringify(ecr_modify_all_policy.policy, null, 2),
-      user: buildbot_user.name,
-    });
-
-    AR.createIamUserPolicyAttachment(tfgen, 'readonly', {
-      user: buildbot_user.name,
-      policy_arn: AT.arn('arn:aws:iam::aws:policy/ReadOnlyAccess'),
-    });
-  }
-
+export function createSharedSnsTopicsResources(tfgen: TF.Generator, {}) : SharedSnsTopicResources {
   const alarm_topic = AR.createSnsTopic(tfgen, 'alarms', {
     name: tfgen.scopedName('alarms').join('_'),
   });
@@ -214,22 +237,68 @@ export function createOtherResources<AZ>(
   const alert_topic = AR.createSnsTopic(tfgen, 'alerts', {
     name: tfgen.scopedName('alerts').join('_'),
   });
+  return {
+    alarm_topic,
+    alert_topic
+  };
+}
+
+export type BuildbotUserParams = {
+  buckets: {deploy_bucket_name:string}
+};
+export function createBuildbotUser(tfgen : TF.Generator, {buckets: {deploy_bucket_name}} : BuildbotUserParams) : {} {
+  const buildbot_user = AR.createIamUser(tfgen, 'buildbot', {
+    name: tfgen.scopedName('buildbot').join('_'),
+  });
+
+  const modifys3deploy = s3ModifyPolicy('modifys3deploy', deploy_bucket_name);
+
+  AR.createIamUserPolicy(tfgen, 'modifys3deploy', {
+    name: tfgen.scopedName('modifys3deploy').join('_'),
+    policy: JSON.stringify(modifys3deploy.policy, null, 2),
+    user: buildbot_user.name,
+  });
+
+  AR.createIamUserPolicy(tfgen, 'ecrmodifyall', {
+    name: tfgen.scopedName('ecrmodifyall').join('_'),
+    policy: JSON.stringify(ecr_modify_all_policy.policy, null, 2),
+    user: buildbot_user.name,
+  });
+
+  AR.createIamUserPolicyAttachment(tfgen, 'readonly', {
+    user: buildbot_user.name,
+    policy_arn: AT.arn('arn:aws:iam::aws:policy/ReadOnlyAccess'),
+  });
+  return {};
+}
+
+/**
++ * Deprecated all-in-one function for other shared resources & create_buildbot_user
++ */
+export function createOtherResources<AZ>(
+  tfgen: TF.Generator,
+  domain_name: string,
+  s3_bucket_prefix: string,
+  network: NetworkResources<AZ>,
+  create_buildbot_user?: boolean
+): GenSharedResources<AZ> {
+  const domain = createDomainResources(tfgen, {domain_name});
+  const buckets = createSharedBucketsResources(tfgen, {s3_bucket_prefix});
+  const securityGroups = createSharedSecurityGroupResources(tfgen, {network});
+  const snsTopics = createSharedSnsTopicsResources(tfgen, {});
+
+  if (create_buildbot_user) {
+    createBuildbotUser(tfgen, {buckets});
+  }
 
   return {
     network,
-    primary_dns_zone,
-    domain_name,
-    deploy_bucket,
-    deploy_bucket_name,
-    backup_bucket,
-    backup_bucket_name,
-    bastion_security_group,
-    appserver_security_group,
-    load_balancer_security_group,
-    lambda_security_group,
-    alert_topic,
-    alarm_topic,
+    ...domain,
+    ...buckets,
+    ...securityGroups,
+    ...snsTopics,
     s3_bucket_prefix,
+    domain_name
   };
 }
 
@@ -264,7 +333,7 @@ export function useDefaultNetworkResources(
   }
 }
 
-function createNetworkResources(
+export function createNetworkResources(
   tfgen: TF.Generator,
   network_config: NetworkConfig
 ): NetworkResources<SplitAzResources> {

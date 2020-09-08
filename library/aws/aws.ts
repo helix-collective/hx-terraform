@@ -44,7 +44,7 @@ export function createInstanceWithEip(
       ami: params0.ami(sr.network.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
-      subnet_id: subnet_id,
+      subnet_id,
       vpc_security_group_ids: [params0.security_group.id],
       root_block_device: {
         volume_size: 20,

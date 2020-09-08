@@ -32,6 +32,7 @@
     "restrict-plus-operands": false,
     "strict-boolean-expressions": false,
     "typedef": false,
+    "object-shorthand-properties-first": false,
 
     // Configuration of enabled rules
     "variable-name": [true, "allow-pascal-case", "allow-snake-case"]

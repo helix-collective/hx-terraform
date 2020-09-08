@@ -338,9 +338,26 @@ const bucket_versioning: RecordDecl = {
 const expiration: RecordDecl = {
   name: 'expiration',
   fields: [
-    optionalField('days', NUMBER),
-    optionalField('date', STRING),
+    optionalField('days', NUMBER, ["Specifies the number of days after object creation when the specific rule action takes effect."]),
+    optionalField('date', STRING, ["Specifies the date after which you want the corresponding action to take effect."]),
     optionalField('expired_object_delete_marker', BOOLEAN),
+  ],
+};
+
+const transition: RecordDecl = {
+  name: 'transition',
+  fields: [
+    optionalField('date', STRING, ["Specifies the date after which you want the corresponding action to take effect."]),
+    optionalField('days', NUMBER, ["Specifies the number of days after object creation when the specific rule action takes effect."]),
+    requiredField('storage_class', enumType([
+      "ONEZONE_IA",
+      "STANDARD_IA",
+      "INTELLIGENT_TIERING",
+      "GLACIER",
+      "DEEP_ARCHIVE"
+    ]),[
+      "Specifies the Amazon S3 storage class to which you want the object to transition"
+    ])
   ],
 };
 
@@ -348,9 +365,10 @@ const lifecycle_rule: RecordDecl = {
   name: 'lifecycle_rule',
   fields: [
     optionalField('id', STRING),
-    requiredField('prefix', STRING),
+    optionalField('prefix', STRING),
     requiredField('enabled', BOOLEAN),
     optionalField('expiration', recordType(expiration)),
+    optionalField('transition', recordType(transition)),
   ],
 };
 
@@ -382,7 +400,7 @@ const s3_bucket: RecordDecl = {
     optionalField('acl', stringAliasType('AT.CannedAcl')),
     optionalField('policy', STRING),
     optionalField('versioning', recordType(bucket_versioning)),
-    optionalField('lifecycle_rule', recordType(lifecycle_rule)),
+    optionalField('lifecycle_rule', listType(recordType(lifecycle_rule))),
     optionalField('cors_rule', recordType(cors_rule)),
     optionalField('website', recordType(website)),
     optionalField('tags', TAGS_MAP),
@@ -2864,6 +2882,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(route53_alias);
   gen.generateParams(bucket_versioning);
   gen.generateParams(expiration);
+  gen.generateParams(transition);
   gen.generateParams(lifecycle_rule);
   gen.generateParams(cors_rule);
   gen.generateParams(s3_bucket);
@@ -2970,8 +2989,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_admin_create_users);
   gen.generateParams(cognito_schema_attributes);
   gen.generateParams(cognito_schema_string_attribute_constraints),
-    gen.generateParams(cognito_schema_number_attribute_constraints),
-    gen.generateParams(cognito_user_pool);
+  gen.generateParams(cognito_schema_number_attribute_constraints),
+  gen.generateParams(cognito_user_pool);
   gen.generateParams(cognito_user_pool_client);
   gen.generateParams(cognito_user_pool_domain);
   gen.generateParams(cognito_identity_provider);

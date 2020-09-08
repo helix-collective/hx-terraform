@@ -2714,7 +2714,13 @@ export function fieldsFromBucketVersioningParams(params: BucketVersioningParams)
 }
 
 export interface ExpirationParams {
+  /**
+  Specifies the number of days after object creation when the specific rule action takes effect.
+  */
   days?: number;
+  /**
+  Specifies the date after which you want the corresponding action to take effect.
+  */
   date?: string;
   expired_object_delete_marker?: boolean;
 }
@@ -2727,19 +2733,44 @@ export function fieldsFromExpirationParams(params: ExpirationParams) : TF.Resour
   return fields;
 }
 
+export interface TransitionParams {
+  /**
+  Specifies the date after which you want the corresponding action to take effect.
+  */
+  date?: string;
+  /**
+  Specifies the number of days after object creation when the specific rule action takes effect.
+  */
+  days?: number;
+  /**
+  Specifies the Amazon S3 storage class to which you want the object to transition
+  */
+  storage_class: 'ONEZONE_IA' | 'STANDARD_IA' | 'INTELLIGENT_TIERING' | 'GLACIER' | 'DEEP_ARCHIVE';
+}
+
+export function fieldsFromTransitionParams(params: TransitionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "date", params.date, TF.stringValue);
+  TF.addOptionalField(fields, "days", params.days, TF.numberValue);
+  TF.addField(fields, "storage_class", params.storage_class, TF.stringValue);
+  return fields;
+}
+
 export interface LifecycleRuleParams {
   id?: string;
-  prefix: string;
+  prefix?: string;
   enabled: boolean;
   expiration?: ExpirationParams;
+  transition?: TransitionParams;
 }
 
 export function fieldsFromLifecycleRuleParams(params: LifecycleRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addOptionalField(fields, "prefix", params.prefix, TF.stringValue);
   TF.addField(fields, "enabled", params.enabled, TF.booleanValue);
   TF.addOptionalField(fields, "expiration", params.expiration, (v) => TF.mapValue(fieldsFromExpirationParams(v)));
+  TF.addOptionalField(fields, "transition", params.transition, (v) => TF.mapValue(fieldsFromTransitionParams(v)));
   return fields;
 }
 
@@ -2766,7 +2797,7 @@ export interface S3BucketParams {
   acl?: AT.CannedAcl;
   policy?: string;
   versioning?: BucketVersioningParams;
-  lifecycle_rule?: LifecycleRuleParams;
+  lifecycle_rule?: (LifecycleRuleParams)[];
   cors_rule?: CorsRuleParams;
   website?: WebsiteParams;
   tags?: TF.TagsMap;
@@ -2778,7 +2809,7 @@ export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFi
   TF.addOptionalField(fields, "acl", params.acl, TF.stringAliasValue);
   TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
   TF.addOptionalField(fields, "versioning", params.versioning, (v) => TF.mapValue(fieldsFromBucketVersioningParams(v)));
-  TF.addOptionalField(fields, "lifecycle_rule", params.lifecycle_rule, (v) => TF.mapValue(fieldsFromLifecycleRuleParams(v)));
+  TF.addOptionalField(fields, "lifecycle_rule", params.lifecycle_rule, TF.listValue((v) => TF.mapValue(fieldsFromLifecycleRuleParams(v))));
   TF.addOptionalField(fields, "cors_rule", params.cors_rule, (v) => TF.mapValue(fieldsFromCorsRuleParams(v)));
   TF.addOptionalField(fields, "website", params.website, (v) => TF.mapValue(fieldsFromWebsiteParams(v)));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);

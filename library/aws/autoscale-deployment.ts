@@ -483,18 +483,6 @@ export function createAutoscaleTargetGroup(
     alb_target_group_arn: alb_target_group.arn,
   });
 
-  // Create a new certificate if an existing certificate ARN isn't provided.
-  // When new domains are added, the certificate is deleted and re-created, in this situation,
-  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
-  const acm_certificate_arn =
-    params.acm_certificate === undefined
-      ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-      : params.acm_certificate.kind === 'generate'
-        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-        : params.acm_certificate.kind === 'generate_with_manual_verify'
-          ? createAcmCertificate(tfgen, sr, https_fqdns, false)
-          : params.acm_certificate.arn;
-
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
   const hosts: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);

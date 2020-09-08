@@ -159,7 +159,9 @@ export function createDomainResources(
 }
 
 export type SharedBucketParams = {
-  s3_bucket_prefix: string
+  s3_bucket_prefix: string,
+  deploy?: Partial<AR.S3BucketParams>,
+  backup?: Partial<AR.S3BucketParams>,
 }
 export function createSharedBucketsResources(tfgen: TF.Generator, params : SharedBucketParams) : SharedBucketsResources {
   const {s3_bucket_prefix} = params;
@@ -171,6 +173,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
       enabled: true,
     },
     tags: tfgen.tagsContext(),
+    ...params.deploy,
   });
 
   const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
@@ -180,6 +183,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
       enabled: true,
     },
     tags: tfgen.tagsContext(),
+    ...params.backup,
   });
 
   return {

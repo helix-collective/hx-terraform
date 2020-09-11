@@ -38,10 +38,29 @@ type ResourcesParams = {
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',
   fields: [
-    optionalField('volume_type', enumType(['standard', 'gp2', 'io1'])),
+    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
     optionalField('volume_size', NUMBER),
     optionalField('iops', NUMBER),
     optionalField('delete_on_termination', BOOLEAN),
+  ],
+};
+
+const ebs_block_device: RecordDecl = {
+  name: 'ebs_block_device',
+  fields: [
+    requiredField('device_name', STRING, ["The name of the device to mount."]),
+    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
+    optionalField('volume_size', NUMBER),
+    optionalField('iops', NUMBER),
+    optionalField('delete_on_termination', BOOLEAN),
+  ],
+};
+
+const ephemeral_block_device: RecordDecl = {
+  name: 'ephemeral_block_device',
+  fields: [
+    optionalField('device_name', STRING, ["The name of the block device to mount on the instance."]),
+    optionalField('virtual_name', STRING),
   ],
 };
 
@@ -57,6 +76,8 @@ const instance: RecordDecl = {
     optionalField('subnet_id', resourceIdType('SubnetId')),
     optionalField('associate_public_ip_address', BOOLEAN),
     optionalField('root_block_device', recordType(instance_root_block_device)),
+    optionalField('ebs_block_device', listType(recordType(ebs_block_device))),
+    optionalField('ephemeral_block_device', recordType(ephemeral_block_device)),
     optionalField('user_data', STRING),
     optionalField(
       'iam_instance_profile',
@@ -69,6 +90,26 @@ const instance: RecordDecl = {
     optionalField('tags', TAGS_MAP),
   ],
 };
+
+const ebs_volume: RecordDecl = {
+  name: 'ebs_volume',
+  fields: [
+    requiredField('availability_zone', stringAliasType('AT.AvailabilityZone')),
+    optionalField('iops', NUMBER),
+    optionalField('size', NUMBER),
+    optionalField('type', enumType(["standard", "gp2", "io1", "sc1", "st1"])),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const volume_attachment : RecordDecl = {
+  name: 'volume_attachment',
+  fields: [
+    requiredField('device_name', STRING),
+    requiredField('instance_id', resourceIdType('InstanceId')),
+    requiredField('volume_id', resourceIdType('EbsVolumeId')),
+  ]
+}
 
 const db_instance: RecordDecl = {
   name: 'db_instance',
@@ -2149,6 +2190,33 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Manages a single EBS volume.',
+    'https://registry.terraform.io/providers/hashicorp/aws/2.70.0/docs/resources/ebs_volume',
+    ebs_volume,
+    [
+      resourceIdAttr('id', ebs_volume),
+    ],
+    {
+      arn:true
+    }
+  );
+
+  gen.generateResource(
+    'Provides an AWS EBS Volume Attachment as a top level resource, to attach and detach volumes from AWS Instances.',
+    'https://registry.terraform.io/providers/hashicorp/aws/2.70.0/docs/resources/volume_attachment',
+    volume_attachment,
+    [
+      stringAttr("device_name"),
+      resourceIdAttr('instance_id', instance),
+      resourceIdAttr('volume_id', volume_attachment),
+    ],
+    {
+      arn:true
+    }
+  );
+
+
+  gen.generateResource(
     'Provides an RDS instance resource.',
     'https://www.terraform.io/docs/providers/aws/r/db_instance.html',
     db_instance,
@@ -2940,7 +3008,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(autoscaling_attachment);
 
   gen.generateParams(instance_root_block_device);
+  gen.generateParams(ebs_block_device);
+  gen.generateParams(ephemeral_block_device);
   gen.generateParams(instance);
+  gen.generateParams(ebs_volume);
+  gen.generateParams(volume_attachment);
   gen.generateParams(db_instance);
   gen.generateParams(db_parameter_group);
   gen.generateParams(db_parameter_group_parameter);

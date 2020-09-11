@@ -117,6 +117,64 @@ export type InstanceId = {type:'InstanceId',value:string};
 export type InstanceArn = AT.ArnT<"Instance">;
 
 /**
+ *  Manages a single EBS volume.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/2.70.0/docs/resources/ebs_volume
+ */
+export function createEbsVolume(tfgen: TF.Generator, rname: string, params: EbsVolumeParams): EbsVolume {
+  const fields = fieldsFromEbsVolumeParams(params);
+  const resource = tfgen.createTypedResource('EbsVolume', 'aws_ebs_volume', rname, fields);
+  const id: EbsVolumeId =  {type: 'EbsVolumeId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: EbsVolumeArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EbsVolume');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface EbsVolume extends TF.ResourceT<'EbsVolume'> {
+  id: EbsVolumeId;
+  arn: EbsVolumeArn;
+}
+
+export type EbsVolumeId = {type:'EbsVolumeId',value:string};
+export type EbsVolumeArn = AT.ArnT<"EbsVolume">;
+
+/**
+ *  Provides an AWS EBS Volume Attachment as a top level resource, to attach and detach volumes from AWS Instances.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/2.70.0/docs/resources/volume_attachment
+ */
+export function createVolumeAttachment(tfgen: TF.Generator, rname: string, params: VolumeAttachmentParams): VolumeAttachment {
+  const fields = fieldsFromVolumeAttachmentParams(params);
+  const resource = tfgen.createTypedResource('VolumeAttachment', 'aws_volume_attachment', rname, fields);
+  const device_name: string =  '${' + TF.resourceName(resource) + '.device_name}';
+  const instance_id: InstanceId =  {type: 'InstanceId', value: '${' + TF.resourceName(resource) + '.instance_id}'};
+  const volume_id: VolumeAttachmentId =  {type: 'VolumeAttachmentId', value: '${' + TF.resourceName(resource) + '.volume_id}'};
+  const arn: VolumeAttachmentArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VolumeAttachment');
+
+  return {
+    ...resource,
+    device_name,
+    instance_id,
+    volume_id,
+    arn,
+  };
+}
+
+export interface VolumeAttachment extends TF.ResourceT<'VolumeAttachment'> {
+  device_name: string;
+  instance_id: InstanceId;
+  volume_id: VolumeAttachmentId;
+  arn: VolumeAttachmentArn;
+}
+
+export type VolumeAttachmentId = {type:'VolumeAttachmentId',value:string};
+export type VolumeAttachmentArn = AT.ArnT<"VolumeAttachment">;
+
+/**
  *  Provides an RDS instance resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/db_instance.html
@@ -2256,7 +2314,7 @@ export function fieldsFromAutoscalingAttachmentParams(params: AutoscalingAttachm
 }
 
 export interface InstanceRootBlockDeviceParams {
-  volume_type?: 'standard' | 'gp2' | 'io1';
+  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
   volume_size?: number;
   iops?: number;
   delete_on_termination?: boolean;
@@ -2271,6 +2329,42 @@ export function fieldsFromInstanceRootBlockDeviceParams(params: InstanceRootBloc
   return fields;
 }
 
+export interface EbsBlockDeviceParams {
+  /**
+  The name of the device to mount.
+  */
+  device_name: string;
+  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
+  volume_size?: number;
+  iops?: number;
+  delete_on_termination?: boolean;
+}
+
+export function fieldsFromEbsBlockDeviceParams(params: EbsBlockDeviceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalField(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  return fields;
+}
+
+export interface EphemeralBlockDeviceParams {
+  /**
+  The name of the block device to mount on the instance.
+  */
+  device_name?: string;
+  virtual_name?: string;
+}
+
+export function fieldsFromEphemeralBlockDeviceParams(params: EphemeralBlockDeviceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addOptionalField(fields, "virtual_name", params.virtual_name, TF.stringValue);
+  return fields;
+}
+
 export interface InstanceParams {
   ami: AT.Ami;
   instance_type: AT.InstanceType;
@@ -2281,6 +2375,8 @@ export interface InstanceParams {
   subnet_id?: SubnetId;
   associate_public_ip_address?: boolean;
   root_block_device?: InstanceRootBlockDeviceParams;
+  ebs_block_device?: (EbsBlockDeviceParams)[];
+  ephemeral_block_device?: EphemeralBlockDeviceParams;
   user_data?: string;
   iam_instance_profile?: IamInstanceProfileId;
   vpc_security_group_ids?: (SecurityGroupId)[];
@@ -2298,10 +2394,44 @@ export function fieldsFromInstanceParams(params: InstanceParams) : TF.ResourceFi
   TF.addOptionalField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
   TF.addOptionalField(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
   TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
+  TF.addOptionalField(fields, "ebs_block_device", params.ebs_block_device, TF.listValue((v) => TF.mapValue(fieldsFromEbsBlockDeviceParams(v))));
+  TF.addOptionalField(fields, "ephemeral_block_device", params.ephemeral_block_device, (v) => TF.mapValue(fieldsFromEphemeralBlockDeviceParams(v)));
   TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
   TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
   TF.addOptionalField(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface EbsVolumeParams {
+  availability_zone: AT.AvailabilityZone;
+  iops?: number;
+  size?: number;
+  type?: 'standard' | 'gp2' | 'io1' | 'sc1' | 'st1';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromEbsVolumeParams(params: EbsVolumeParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalField(fields, "size", params.size, TF.numberValue);
+  TF.addOptionalField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface VolumeAttachmentParams {
+  device_name: string;
+  instance_id: InstanceId;
+  volume_id: EbsVolumeId;
+}
+
+export function fieldsFromVolumeAttachmentParams(params: VolumeAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addField(fields, "instance_id", params.instance_id, TF.resourceIdValue);
+  TF.addField(fields, "volume_id", params.volume_id, TF.resourceIdValue);
   return fields;
 }
 

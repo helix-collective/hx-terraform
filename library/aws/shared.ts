@@ -95,17 +95,18 @@ export interface PublicAzResources {
 }
 
 /**
- * Resources for an availability zone also with a
+ * Resources for an availability zone and also with a
  * an internal subnet
  */
-export interface SplitAzResources {
-  azname: string;
-  external_subnet: AR.Subnet;
+export type SplitAzResources = PublicAzResources & {
   internal_subnet: AR.Subnet;
 }
 
+/// Resources for an availability zone - (possibly with an internal subnet)
+export type AzResourcesUndef = PublicAzResources & Partial<SplitAzResources>;
+
 // Shared resources with unspecified network details
-export type SharedResources    = GenSharedResources<{}>;
+export type SharedResources    = GenSharedResources<AzResourcesUndef>;
 
 // Shared resources with external facing subnets
 export type SharedResourcesNE  = GenSharedResources<PublicAzResources>;

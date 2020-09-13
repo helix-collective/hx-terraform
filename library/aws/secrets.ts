@@ -2,8 +2,7 @@ import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
 import * as _ from 'lodash';
 import { ArnT } from '../../providers/aws/types';
-import { SharedResources, GenSharedResources } from './shared';
-import { DESTRUCTION } from 'dns';
+import { SharedResources } from './shared';
 
 export type ArnSecret = ArnT<'SecretsmanagerSecret'>;
 
@@ -50,7 +49,7 @@ export function createJsonSecret(
 export function createRandomJsonSecret<AZ>(
   tfgen: TF.Generator,
   name: string,
-  sr: GenSharedResources<AZ>,
+  sr: SharedResources,
   params: JsonSecretParams
 ) {
   const secret = AR.createSecretsmanagerSecret(tfgen, name, {
@@ -67,7 +66,7 @@ export function createRandomJsonSecret<AZ>(
     secret,
     [
       '# Generate a random password for the secrets initial value',
-      `export AWS_REGION=${sr.network.region.value}`,
+      `export AWS_REGION=${sr.region.value}`,
       `hx-provisioning-tools generate-password --size ${size} --to-secret ${
         secret.arn.value
       }`,

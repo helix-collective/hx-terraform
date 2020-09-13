@@ -68,7 +68,7 @@ export interface LoggingInfrastructure {
  */
 export function createLoggingInfrastructure(
   tfgen: TF.Generator,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: LoggingInfrastructureParams
 ): LoggingInfrastructure {
   // An S3 bucket for longer-term storage
@@ -166,7 +166,7 @@ export function createLoggingInfrastructure(
   );
   bs.catToFile(
     '/opt/etc/fluentd.conf',
-    fluentdConfigFile(ed, sr.network.region)
+    fluentdConfigFile(ed, sr.region)
   );
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
@@ -246,7 +246,7 @@ interface LoggingCleanupLambdaParams {
 
 function createLoggingCleanupLambda(
   tfgen: TF.Generator,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: LoggingCleanupLambdaParams
 ) {
   const name = 'logging_cleanup';
@@ -328,7 +328,7 @@ interface CognitoResourceParams {
  */
 export function createCognitoResources(
   tfgen: TF.Generator,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: CognitoResourceParams
 ): LoggingCognitoParams {
   // Manual imports of a user_pool resource hit this bug, and required the workaround described:

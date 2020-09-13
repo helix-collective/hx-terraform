@@ -17,7 +17,7 @@ import * as shared from './shared';
 export function createEksCluster(
   tfgen0: TF.Generator,
   tfname: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: EksClusterParams
 ): EksCluster {
   return TF.withLocalNameScope(tfgen0, tfname, tfgen => {
@@ -54,17 +54,16 @@ export function createEksCluster(
 
     // Create the master cluster security group
     const master_security_group = AR.createSecurityGroup(tfgen, 'cluster', {
-      vpc_id: sr.network.vpc.id,
+      vpc_id: sr.vpc.id,
       egress: [util.egress_all],
       tags: util.contextTagsWithName(tfgen, 'cluster'),
     });
 
     // Create the cluster itself
-    const subnet_ids: AR.SubnetId[] = [];
-    sr.network.azs.forEach(az => {
-      subnet_ids.push(az.external_subnet.id);
-      subnet_ids.push(az.internal_subnet.id);
-    });
+    const subnet_ids: AR.SubnetId[] = [
+      ... shared.externalSubnetIds(sr),
+      ... shared.internalSubnetIds(sr)
+    ];
 
     const cluster = AR.createEksCluster(tfgen, 'cluster', {
       name: params.cluster_name,
@@ -124,7 +123,7 @@ export function createEksCluster(
     tags[`kubernetes.io/cluster/${params.cluster_name}`] = 'owned';
 
     const worker_security_group = AR.createSecurityGroup(tfgen, 'worker', {
-      vpc_id: sr.network.vpc.id,
+      vpc_id: sr.vpc.id,
       egress: [util.egress_all],
       tags,
     });
@@ -226,7 +225,7 @@ set -o xtrace
       min_size: 1,
       max_size: 4,
       name: asg_name,
-      vpc_zone_identifier: sr.network.azs.map(az => az.external_subnet.id),
+      vpc_zone_identifier: shared.externalSubnetIds(sr),
       tags: asg_tags,
     };
     if (params.asg_customize) {

@@ -49,10 +49,10 @@ export interface CronWebhooks {
  *
  * Constructs AWS resources required to hit a set of endpoints periodically
  */
-export function createCronWebhooks<AZ>(
+export function createCronWebhooks(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.GenSharedResources<AZ>,
+  sr: shared.SharedResources,
   params: CronWebhooksParams
 ): CronWebhooks {
   // Construct a shared secret in order that periodic webhook consumers

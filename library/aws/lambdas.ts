@@ -25,7 +25,7 @@ type InvokePrincipal = 'apigateway.amazonaws.com' | 's3.amazonaws.com';
 export function createLambdaFunctionInVpc(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: VpcLambdaFunctionParams
 ): AR.LambdaFunction {
   const lparams = {
@@ -34,7 +34,7 @@ export function createLambdaFunctionInVpc(
     runtime: params.runtime,
     handler: params.handler,
     vpc_config: {
-      subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
+      subnet_ids: shared.internalSubnetIds(sr),
       security_group_ids: [sr.lambda_security_group.id],
     },
     tags: tfgen.tagsContext(),

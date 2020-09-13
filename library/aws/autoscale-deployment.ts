@@ -23,6 +23,7 @@ import {
   ec2InstallScript,
 } from './ec2-deployment';
 import { contextTagsWithName, Customize, applyCustomize } from '../util';
+import { assertNever } from '../../utils';
 
 /**
  *  Creates a logical application frontend service on an aws EC2 autoscaling group, including:
@@ -38,7 +39,7 @@ import { contextTagsWithName, Customize, applyCustomize } from '../util';
 export function createAutoscaleFrontend(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: AutoscaleFrontendParams,
   nginxDockerVersion?: string,
 ): AutoscaleDeployment {
@@ -63,18 +64,7 @@ export function createAutoscaleFrontend(
       nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
     );
 
-    const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
-    // Create a new certificate if an existing certificate ARN isn't provided.
-    // When new domains are added, the certificate is deleted and re-created, in this situation,
-    // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
-    const acm_certificate_arn =
-      params.acm_certificate === undefined
-        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-        : params.acm_certificate.kind === 'generate'
-          ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-          : params.acm_certificate.kind === 'generate_with_manual_verify'
-            ? createAcmCertificate(tfgen, sr, https_fqdns, false)
-            : params.acm_certificate.arn;
+    const acm_certificate_arn = handleMakeAcmCertificateCases(tfgen, sr, params.endpoints, params.acm_certificate);
 
     const lb = createLoadBalancer(tfgen, 'lb', sr, {
       customize_lb:params.customize_lb,
@@ -111,7 +101,7 @@ export function createAutoscaleFrontend(
 export function createAutoscaleProcessor(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: AutoscaleProcessorParams,
 ): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
@@ -139,7 +129,7 @@ export function createAutoscaleProcessor(
 export function createController(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: AutoscaleProcessorParams,
   endpoints: EndPoint[],
   nginxDockerVersion: string,
@@ -158,7 +148,7 @@ export function createController(
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
-  const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
+  const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
   if (include_install) {
     bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
   }
@@ -241,7 +231,7 @@ export function createController(
 export function createProcessorAutoScaleGroup(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: AutoscaleProcessorParams,
   endpoints: EndPoint[],
   nginxDockerVersion: string,
@@ -255,7 +245,7 @@ export function createProcessorAutoScaleGroup(
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
-  const include_install = params.bootscripts_include_install == undefined ? true : params.bootscripts_include_install;
+  const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
   if (include_install) {
     bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
   }
@@ -331,8 +321,8 @@ export function createProcessorAutoScaleGroup(
     name_prefix: tfgen.scopedName(name).join('-') + '-',
     key_name: params.key_name,
     image_id: params.appserver_amis
-      ? params.appserver_amis(sr.network.region)
-      : getDefaultAmi(sr.network.region),
+      ? params.appserver_amis(sr.region)
+      : getDefaultAmi(sr.region),
     instance_type: params.appserver_instance_type,
     iam_instance_profile: instance_profile.id,
     security_groups: [sr.appserver_security_group.id],
@@ -358,7 +348,7 @@ export function createProcessorAutoScaleGroup(
     name: asgName,
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
-    vpc_zone_identifier: sr.network.azs.map(az => az.internal_subnet.id),
+    vpc_zone_identifier: shared.internalSubnetIds(sr),
     launch_configuration: launch_config.name,
     enabled_metrics: ['GroupInServiceInstances', 'GroupDesiredCapacity'],
     termination_policies: [
@@ -402,7 +392,7 @@ export interface LoadBalancerAndListeners {
   https_listener: AR.LbListener;
 };
 
-export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI,
+export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResources,
   params: {
     acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
@@ -412,7 +402,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
       load_balancer_type: 'application',
       tags: tfgen.tagsContext(),
       security_groups: [sr.load_balancer_security_group.id],
-      subnets: sr.network.azs.map(az => az.external_subnet.id),
+      subnets: shared.externalSubnetIds(sr),
     };
     const lb = AR.createLb(
       tfgen,
@@ -461,7 +451,7 @@ export type TargetGroupResources = {
 export function createAutoscaleTargetGroup(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   lb: LoadBalancerAndListeners,
   autoscaling_group: AR.AutoscalingGroup,
   params: AutoscaleFrontendParams,
@@ -471,7 +461,7 @@ export function createAutoscaleTargetGroup(
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
     port: 80,
     protocol: 'HTTP',
-    vpc_id: sr.network.vpc.id,
+    vpc_id: sr.vpc.id,
     health_check: {
       path: params.health_check.incomingPath,
     },
@@ -490,8 +480,8 @@ export function createAutoscaleTargetGroup(
   for (let i=0; i<hosts.length; i+=5) {
     hosts_max5.push(hosts.slice(i,i+5));
   }
-  for(let i = 0; i < hosts_max5.length; i++) {
-    const tfname = 'https' + (i == 0 ? '' : i+1);
+  for(let i = 0; i < hosts_max5.length; i+=1) {
+    const tfname = 'https' + (i === 0 ? '' : i+1);
     AR.createLbListenerRule(tfgen, tfname, {
       listener_arn: lb.https_listener.arn,
       condition: {
@@ -531,12 +521,38 @@ export function createAutoscaleTargetGroup(
   };
 }
 
-function createAcmCertificate(
-  tfgen: TF.Generator,
-  sr: shared.SharedResourcesNEI,
+function handleMakeAcmCertificateCases(tfgen: TF.Generator, sr: shared.SharedResources, endpoints: EndPoint[], src: AcmCertificateSource ) {
+  if(src.kind === 'existing') {
+    // preferred option: make the ACM certificate somewhere else explicitly
+    // (manual or an explicit terraform call).
+    return src.arn;
+  }
+
+  // Create a new certificate if an existing certificate ARN isn't provided.
+
+  // When new domains are added, the certificate is deleted and re-created, in this situation,
+  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
+
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, endpoints);
+  const auto_verify = (src.kind !== 'generate_with_manual_verify');
+
+  return createAcmCertificate(tfgen, sr, {
+    https_fqdns,
+    auto_verify
+  });
+}
+
+export type AcmCertificateParams = {
   https_fqdns: string[],
   auto_verify: boolean
+};
+export function createAcmCertificate(
+  tfgen: TF.Generator,
+  sr: shared.DomainResources,
+  params: AcmCertificateParams
 ): AR.AcmCertificateArn {
+  const {https_fqdns, auto_verify} = params;
+
   const create_before_destroy = true;
   const acm_certificate = AR.createAcmCertificate(tfgen, 'cert', {
     domain_name: https_fqdns[0],
@@ -637,7 +653,7 @@ function appUserOrDefault(app_user?: string): string {
 }
 
 function deployToolEndpoints(
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};
@@ -666,8 +682,6 @@ function deployToolEndpoints(
   });
   return endPointMap;
 }
-
-type SubnetId = { type: 'SubnetId'; value: string };
 
 export interface AutoscaleProcessorParams {
   /**
@@ -812,7 +826,7 @@ export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
   /**
    * Specify the means by which we obtain/generate the SSL certificate
    */
-  acm_certificate?: AcmCertificateSource;
+  acm_certificate: AcmCertificateSource;
 
   /**
    * Customise underlying load balancer (if required)
@@ -878,78 +892,5 @@ interface AutoscalingCronRule {
   max_size?: number;
   desired_capacity?: number;
 }
-
-
-/**
- *  Creates a logical deployment on an aws EC2 autoscaling group, including:
- *
- *      - the autoscale group itself
- *      - a controller machine
- *      - AWS generated SSL certificates
- *      - DNS entries for the endpoints
- *      - Load balancer in front of autoscaling group
- *
- * hx-deploy-tool is configured onto the group, running in remote proxy mode.
- *
- * DEPRECATED: as it will generated duplicate names if used multiple times. Use createAutoscaleFrontend instead
- */
-export function createAutoscaleDeployment_DEPRECATED(
-  tfgen: TF.Generator,
-  name: string,
-  sr: shared.SharedResourcesNEI,
-  params: AutoscaleFrontendParams,
-  nginxDockerVersion?: string,
-): AutoscaleDeployment {
-  const controller = createController(
-    tfgen,
-    'controller',
-    sr,
-    params,
-    params.endpoints,
-    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-  );
-  const autoscale_processor = createProcessorAutoScaleGroup(
-    tfgen,
-    'appserver',
-    sr,
-    params,
-    params.endpoints,
-    nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-  );
-
-  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
-  // Create a new certificate if an existing certificate ARN isn't provided.
-  // When new domains are added, the certificate is deleted and re-created, in this situation,
-  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
-  const acm_certificate_arn =
-    params.acm_certificate === undefined
-      ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-      : params.acm_certificate.kind === 'generate'
-        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-        : params.acm_certificate.kind === 'generate_with_manual_verify'
-          ? createAcmCertificate(tfgen, sr, https_fqdns, false)
-          : params.acm_certificate.arn;
-
-  const lb = createLoadBalancer(tfgen, 'lb', sr, {
-    acm_certificate_arn,
-    customize_lb:params.customize_lb
-  });
-  const tg = createAutoscaleTargetGroup(
-    tfgen,
-    'appserver',
-    sr,
-    lb,
-    autoscale_processor.autoscaling_group,
-    params,
-  );
-
-  return {
-    autoscale_processor,
-    target_group: tg.target_group,
-    load_balancer: lb.lb,
-    lb_https_listener: tg.lb_https_listener,
-  };
-}
-
 
 

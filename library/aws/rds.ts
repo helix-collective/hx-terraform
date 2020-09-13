@@ -64,7 +64,7 @@ export function createPostgresInstance(
   const sname = tfgen.scopedName(name).join('_');
 
   const sg_params : AR.SecurityGroupParams = {
-    vpc_id: sr.network.vpc.id,
+    vpc_id: sr.vpc.id,
     ingress: [ingressOnPort(5432)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, name),
@@ -130,7 +130,7 @@ export function createPostgresInstance(
 export function createMariaDbInstance(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: {
     db_name: string;
     db_instance_type: AT.DbInstanceType;
@@ -142,7 +142,7 @@ export function createMariaDbInstance(
   const sname = tfgen.scopedName(name).join('_');
 
   const security_group = AR.createSecurityGroup(tfgen, name, {
-    vpc_id: sr.network.vpc.id,
+    vpc_id: sr.vpc.id,
     ingress: [ingressOnPort(3306)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, name),
@@ -202,7 +202,7 @@ export function createMariaDbInstance(
 export function createMssqlInstance(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: {
     db_name: string;
     db_instance_type: AT.DbInstanceType;
@@ -214,7 +214,7 @@ export function createMssqlInstance(
   const sname = tfgen.scopedName(name).join('_');
 
   const security_group = AR.createSecurityGroup(tfgen, name, {
-    vpc_id: sr.network.vpc.id,
+    vpc_id: sr.vpc.id,
     ingress: [ingressOnPort(1433)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, name),
@@ -276,7 +276,7 @@ function createPasswordProvisioner(
         db,
         [
           '# Generate a random password for the instance, and upload it to S3',
-          `export AWS_REGION=${sr.network.region.value}`,
+          `export AWS_REGION=${sr.region.value}`,
           `hx-provisioning-tools generate-rds-password --to-s3 ${db.id.value} ${
             sr.deploy_bucket.id
           } ${passwordStore.s3Ref.key}`,
@@ -288,7 +288,7 @@ function createPasswordProvisioner(
         db,
         [
           '# Generate a random password for the instance, and upload it to AWS Secret Manager',
-          `export AWS_REGION=${sr.network.region.value}`,
+          `export AWS_REGION=${sr.region.value}`,
           `hx-provisioning-tools generate-rds-password --to-secret ${
             db.id.value
           } ${passwordStore.arnSecret.value}`,

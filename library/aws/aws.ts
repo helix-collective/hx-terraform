@@ -41,7 +41,7 @@ export function createInstanceWithEip(
 ): { eip: AR.Eip; ec2: AR.Instance } {
   function createInstance() {
     const instance_params: AR.InstanceParams = {
-      ami: params0.ami(sr.network.region),
+      ami: params0.ami(sr.region),
       instance_type: params0.instance_type,
       key_name: params0.key_name,
       subnet_id,
@@ -124,7 +124,7 @@ export function createSecurityGroupInVpc(
   params0: AR.SecurityGroupParams
 ): AR.SecurityGroup {
   const params = _.cloneDeep(params0);
-  params.vpc_id = sr.network.vpc.id;
+  params.vpc_id = sr.vpc.id;
   params.tags = {
     ...contextTagsWithName(tfgen, name),
     ...params.tags,
@@ -226,7 +226,7 @@ export function s3BucketNotificationsToLambda(
 export function createMemcachedCluster(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   params: {
     node_type: AT.CacheNodeType;
     num_cache_nodes: number;
@@ -259,7 +259,7 @@ export function createMemcachedCluster(
   // limit access to internal subnets
   const subnets = AR.createElasticacheSubnetGroup(tfgen, 'ec', {
     name: scopedName,
-    subnet_ids: sr.network.azs.map(az => az.internal_subnet.id),
+    subnet_ids: shared.internalSubnetIds(sr)
   });
 
   const elasticache_params: AR.ElasticacheClusterParams = {

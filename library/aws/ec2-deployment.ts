@@ -41,7 +41,7 @@ export function createEc2Deployment(
 
   // Build the bootscript for the instance
   const bs = bootscript.newBootscript();
-  const include_install = params.bootscript_include_install == undefined ? true : params.bootscript_include_install;
+  const include_install = params.bootscript_include_install === undefined ? true : params.bootscript_include_install;
   if (include_install) {
     bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, false));
   }
@@ -183,8 +183,8 @@ export function httpsFqdnsFromEndpoints(
   return https_fqdns;
 }
 
-export function endpointUrl<AZ>(
-  sr: shared.GenSharedResources<AZ>,
+export function endpointUrl(
+  sr: shared.DomainResources,
   url: EndPointUrl
 ): string {
   switch (url.kind) {
@@ -197,8 +197,8 @@ export function endpointUrl<AZ>(
   }
 }
 
-export function deployToolEndpoints<AZ>(
-  sr: shared.GenSharedResources<AZ>,
+export function deployToolEndpoints(
+  dr: shared.DomainResources,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};
@@ -208,7 +208,7 @@ export function deployToolEndpoints<AZ>(
     const https_fqdns: string[] = [];
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        https_fqdns.push(shared.fqdn(sr, url.dnsname));
+        https_fqdns.push(shared.fqdn(dr, url.dnsname));
         if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(fqdns => https_fqdns.push(fqdns));
         }
@@ -402,6 +402,29 @@ export interface EndPointHttpsExternalUrl {
   proxied_from?: string[];
 }
 
+export function endPointUrlStr(ep: EndPointUrl) : string {
+  switch(ep.kind) {
+    case 'http':
+      return ep.fqdnsname;
+    case 'https':
+      return ep.dnsname;
+    case 'https-external':
+      return ep.fqdnsname;
+    default:
+      throw new Error(`unknown EndPointUrl.kind ${(ep as any).kind}`);
+  }
+}
+export function endPointsSummary(eps: EndPoint[]) : {[key:string] : string[]} {
+  const res : {[key:string] : string[]} = {};
+  for(const ep of eps) {
+    res[ep.name] = [];
+    for(const url of ep.urls) {
+      res[ep.name].push(endPointUrlStr(url));
+    }
+  }
+  return res;
+}
+
 export interface Ec2Deployment {
   eip: AR.Eip;
   ec2: AR.Instance;
@@ -445,7 +468,7 @@ export function ec2InstallScript(
   app_user: string,
   docker_config: docker.DockerConfig,
   use_camus2: boolean,
-  autoscaling_metrics: boolean, 
+  autoscaling_metrics: boolean,
   ): bootscript.BootScript {
   const install = bootscript.newBootscript();
   install.utf8Locale();
@@ -453,7 +476,7 @@ export function ec2InstallScript(
   install.createUserWithKeypairAccess(app_user);
   install.extendUserShellProfile(app_user, 'PATH="/opt/bin:$PATH"');
   install.addUserToGroup(app_user, 'docker');
-  const script_args = bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args + 
+  const script_args = bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS.script_args +
   (autoscaling_metrics ? ' --auto-scaling' : '');
   install.cloudwatchMetrics(app_user, {
     script_args

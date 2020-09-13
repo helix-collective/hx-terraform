@@ -12,7 +12,7 @@ import * as shared from './shared';
 export function sslTerminator(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResourcesNEI,
+  sr: shared.SharedResources,
   ec2: AR.Instance,
   certificate_arns: AR.AcmCertificateArn[]
 ): AR.Lb {
@@ -20,7 +20,7 @@ export function sslTerminator(
 
   const lb = AR.createLb(tfgen, name, {
     tags,
-    subnets: sr.network.azs.map(az => az.external_subnet.id),
+    subnets: shared.externalSubnetIds(sr),
     security_groups: [sr.appserver_security_group.id],
   });
 
@@ -28,7 +28,7 @@ export function sslTerminator(
     tags,
     port: 80,
     protocol: 'HTTP',
-    vpc_id: sr.network.vpc.id,
+    vpc_id: sr.vpc.id,
     health_check: {
       path: '/health-check',
     },

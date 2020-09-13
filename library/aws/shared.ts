@@ -511,3 +511,36 @@ export function getScopedS3Ref(
 ): s3.S3Ref {
   return new s3.S3Ref(sr.deploy_bucket_name, tfgen.nameContext().join('/'));
 }
+
+
+export type SharedResourcesSummary = {
+  vpc: string;
+  azs: {
+    name: string;
+    external: string;
+    internal: string|null;
+  }[],
+  domain: string;
+  primary_dns_zone: string;
+  deploy_bucket: string;
+  backup_bucket: string;
+  region: string;
+};
+
+export function sharedResourcesSummary<AZ>(sr: GenSharedResources<AzResourcesUndef>) : SharedResourcesSummary {
+  return {
+    vpc: sr.network.vpc.id.value,
+    azs: sr.network.azs.map(az=>{
+      return {
+        name: az.azname,
+        external: az.external_subnet.id.value,
+        internal: az.internal_subnet ? az.internal_subnet.id.value : null,
+      };
+    }),
+    domain: sr.domain_name,
+    primary_dns_zone: sr.primary_dns_zone.name,
+    deploy_bucket: sr.deploy_bucket_name,
+    backup_bucket: sr.backup_bucket_name,
+    region: sr.network.region.value
+  };
+}

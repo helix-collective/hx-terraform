@@ -47,7 +47,7 @@ export interface Generator {
   createAdhocFile(path: string, content: string): void;
 
   /** Construct a terraform output */
-  createOutput(name: string, value: string): void;
+  createOutput(name: string, value: ResourceValue): void;
 
   /** Mark a field of a resource to indicate that changes to that field should not
    cause the resource to be updated */
@@ -238,7 +238,7 @@ export function fileGenerator(): FileGenerator {
 
   interface OutputDetails {
     tfname: ResourceName;
-    value: string;
+    value: ResourceValue;
   }
 
   interface Generated {
@@ -368,7 +368,7 @@ export function fileGenerator(): FileGenerator {
       return { tftype, tfname };
     }
 
-    function createOutput(name: string, value: string) {
+    function createOutput(name: string, value: ResourceValue) {
       const tfname = nameContext0.concat(name);
       addOutput(generated, tfname, value);
     }
@@ -502,7 +502,7 @@ export function fileGenerator(): FileGenerator {
   function addOutput(
     generated: Generated,
     tfname: ResourceName,
-    value: string
+    value: ResourceValue
   ) {
     generated.outputs.push({ tfname, value });
   }
@@ -552,6 +552,62 @@ export function fileGenerator(): FileGenerator {
     return [indent + prefix + text];
   }
 
+  function renderResourceValue(indent: string, prefix: string, value: ResourceValue) {
+    const field = {value};
+
+    let result : string[] = [];
+    switch (field.value.kind) {
+      case 'text':
+        result = result.concat(
+          textLines(indent + INDENT, prefix + ' = ', field.value.text)
+        );
+        break;
+      case 'map':
+        result = result.concat(
+          mapLines(indent + INDENT, prefix, field.value.map)
+        );
+        break;
+      case 'list':
+        // The HCL syntax sucks. If it's a list of maps, we repeat the key section.
+        // whereas for primitive we generate a json style list.
+        if (field.value.values.length > 0) {
+          const value0 = field.value.values[0];
+          switch (value0.kind) {
+            case 'map':
+              for (const value of field.value.values) {
+                if (value.kind === 'map') {
+                  result = result.concat(
+                    mapLines(indent + INDENT, prefix + ' = ', value.map)
+                  );
+                }
+              }
+              break;
+            case 'text':
+              const items: string[] = [];
+              for (const value of field.value.values) {
+                if (value.kind === 'text') {
+                  items.push(value.text);
+                }
+              }
+              result = result.concat(
+                textLines(
+                  indent + INDENT,
+                  prefix + ' = ',
+                  '[' + items.join(', ') + ']'
+                )
+              );
+              break;
+            case 'list':
+              throw new Error('list of lists not implemented');
+          }
+        } else {
+          throw new Error('empty lists not implemented');
+        }
+        break;
+    }
+    return result;
+  }
+
   function mapLines(
     indent: string,
     prefix0: string,
@@ -564,55 +620,7 @@ export function fileGenerator(): FileGenerator {
       const fieldkey = field.key.match(/\//) ? `"${field.key}"` : field.key;
 
       const prefix = indent + fieldkey;
-      switch (field.value.kind) {
-        case 'text':
-          result = result.concat(
-            textLines(indent + INDENT, prefix + ' = ', field.value.text)
-          );
-          break;
-        case 'map':
-          result = result.concat(
-            mapLines(indent + INDENT, prefix, field.value.map)
-          );
-          break;
-        case 'list':
-          // The HCL syntax sucks. If it's a list of maps, we repeat the key section.
-          // whereas for primitive we generate a json style list.
-          if (field.value.values.length > 0) {
-            const value0 = field.value.values[0];
-            switch (value0.kind) {
-              case 'map':
-                for (const value of field.value.values) {
-                  if (value.kind === 'map') {
-                    result = result.concat(
-                      mapLines(indent + INDENT, prefix + ' = ', value.map)
-                    );
-                  }
-                }
-                break;
-              case 'text':
-                const items: string[] = [];
-                for (const value of field.value.values) {
-                  if (value.kind === 'text') {
-                    items.push(value.text);
-                  }
-                }
-                result = result.concat(
-                  textLines(
-                    indent + INDENT,
-                    prefix + ' = ',
-                    '[' + items.join(', ') + ']'
-                  )
-                );
-                break;
-              case 'list':
-                throw new Error('list of lists not implemented');
-            }
-          } else {
-            throw new Error('empty lists not implemented');
-          }
-          break;
-      }
+      result = result.concat(renderResourceValue(indent, prefix, field.value));
     }
     if (closingBrace) {
       result.push(indent + '}');
@@ -706,8 +714,14 @@ export function fileGenerator(): FileGenerator {
       lines.push('');
     }
     for (const output of generated.outputs) {
-      lines.push('output "' + output.tfname.join('_') + '" {');
-      lines.push('  value = "' + output.value + '"');
+      const fields : ResourceFieldMap = [
+        {
+          key: 'value',
+          value: output.value
+        }
+      ];
+      const prefix = `output "${output.tfname.join('_')}"`;
+      lines = lines.concat(mapLines(indent, prefix, fields, false));
       lines.push('}');
       lines.push('');
     }

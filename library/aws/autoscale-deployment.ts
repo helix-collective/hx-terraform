@@ -214,8 +214,11 @@ export function createController(
     controller_iampolicies
   );
 
-  const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
+  const createElasticIp = (params.controller_internal_dns_zone === undefined);
+
+  const controller = aws.createInstanceMaybeWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
     instance_type: AT.t2_micro,
+    createEip: createElasticIp,
     ami: params.controller_amis || getDefaultAmi,
     security_group: sr.bastion_security_group,
     key_name: params.key_name,
@@ -226,14 +229,30 @@ export function createController(
     },
   });
 
-  const controller_route53 = shared.dnsARecord(
-    tfgen,
-    controller_label,
-    sr,
-    params.controller_dns_name,
-    [controller.eip.public_ip],
-    '3600'
-  );
+  let ip : AT.IpAddress;
+  if(controller.eip) {
+    ip = controller.eip.public_ip;
+  } else {
+    ip = controller.ec2.private_ip;
+  }
+
+  if(params.controller_internal_dns_zone) {
+    AR.createRoute53Record(tfgen, controller_label, {
+      ttl: '3600',
+      zone_id: params.controller_internal_dns_zone.zone_id,
+      name: params.controller_dns_name,
+      type: 'A',
+      records: [ip].map(a => a.value),
+    });
+  } else {
+    AR.createRoute53Record(tfgen, controller_label, {
+      ttl: '3600',
+      zone_id: sr.primary_dns_zone.zone_id,
+      name: params.controller_dns_name,
+      type: 'A',
+      records: [ip].map(a => a.value),
+    });
+  }
 
   return {};
 }
@@ -675,10 +694,17 @@ export interface AutoscaleProcessorParams {
    */
   key_name: AT.KeyName;
 
+  /** If specified - register controller's private IP in controller_internal_dns_zone
+   * Skips creating an Elastic Ip for the controller
+  */
+  controller_internal_dns_zone?: AR.Route53Zone
+
   /**
    * The DNS name of the controller machine. This is a prefix to the shared primary DNS zone.
    * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
    * will be aaa.helix.com).
+   *
+   * Unless controller_internal_dns_zone is given, in which case this becomes a prefix on the internal dns zone given.
    */
   controller_dns_name: string;
 

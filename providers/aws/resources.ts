@@ -444,31 +444,6 @@ export interface RouteTableAssociation extends TF.ResourceT<'RouteTableAssociati
 export type RouteTableAssociationId = {type:'RouteTableAssociationId',value:string};
 
 /**
- *  Provides a Route53 Hosted Zone resource.
- *
- *  see https://www.terraform.io/docs/providers/aws/r/route53_zone.html
- */
-export function createRoute53Zone(tfgen: TF.Generator, rname: string, params: Route53ZoneParams): Route53Zone {
-  const fields = fieldsFromRoute53ZoneParams(params);
-  const resource = tfgen.createTypedResource('Route53Zone', 'aws_route53_zone', rname, fields);
-  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-
-  return {
-    ...resource,
-    zone_id,
-    name,
-  };
-}
-
-export interface Route53Zone extends TF.ResourceT<'Route53Zone'> {
-  zone_id: AT.HostedZoneId;
-  name: string;
-}
-
-export type Route53ZoneId = {type:'Route53ZoneId',value:string};
-
-/**
  *  Provides a Route53 record resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/route53_record.htm
@@ -2642,26 +2617,6 @@ export function fieldsFromRouteTableAssociationParams(params: RouteTableAssociat
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
   TF.addField(fields, "route_table_id", params.route_table_id, TF.resourceIdValue);
-  return fields;
-}
-
-export interface Route53ZoneParams {
-  name: string;
-  comment?: string;
-  vpc_id?: VpcId;
-  vpc_region?: AT.Region;
-  force_destroy?: boolean;
-  tags?: TF.TagsMap;
-}
-
-export function fieldsFromRoute53ZoneParams(params: Route53ZoneParams) : TF.ResourceFieldMap {
-  const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "comment", params.comment, TF.stringValue);
-  TF.addOptionalField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "vpc_region", params.vpc_region, TF.stringAliasValue);
-  TF.addOptionalField(fields, "force_destroy", params.force_destroy, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -5036,3 +4991,58 @@ export interface AmiData extends TF.DataSourceT<'Ami'> {
   root_device_type: string;
   virtualization_type: string;
 }
+
+export interface Route53ZoneVpcParams {
+  vpc_id: VpcId;
+  vpc_region?: AT.Region;
+}
+
+export function fieldsFromRoute53ZoneVpcParams(params: Route53ZoneVpcParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "vpc_region", params.vpc_region, TF.stringAliasValue);
+  return fields;
+}
+
+export interface Route53ZoneParams {
+  name: string;
+  comment?: string;
+  vpc?: Route53ZoneVpcParams;
+  force_destroy?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromRoute53ZoneParams(params: Route53ZoneParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "comment", params.comment, TF.stringValue);
+  TF.addOptionalField(fields, "vpc", params.vpc, (v) => TF.mapValue(fieldsFromRoute53ZoneVpcParams(v)));
+  TF.addOptionalField(fields, "force_destroy", params.force_destroy, TF.booleanValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+/**
+ *  Provides a Route53 Hosted Zone resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/route53_zone.html
+ */
+export function createRoute53Zone(tfgen: TF.Generator, rname: string, params: Route53ZoneParams): Route53Zone {
+  const fields = fieldsFromRoute53ZoneParams(params);
+  const resource = tfgen.createTypedResource('Route53Zone', 'aws_route53_zone', rname, fields);
+  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    zone_id,
+    name,
+  };
+}
+
+export interface Route53Zone extends TF.ResourceT<'Route53Zone'> {
+  zone_id: AT.HostedZoneId;
+  name: string;
+}
+
+export type Route53ZoneId = {type:'Route53ZoneId',value:string};

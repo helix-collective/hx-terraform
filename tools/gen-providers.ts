@@ -277,17 +277,41 @@ const route_table_association: RecordDecl = {
   ],
 };
 
-const route53_zone: RecordDecl = {
-  name: 'route53_zone',
-  fields: [
-    requiredField('name', STRING),
-    optionalField('comment', STRING),
-    optionalField('vpc_id', resourceIdType('VpcId')),
-    optionalField('vpc_region', stringAliasType('AT.Region')),
-    optionalField('force_destroy', BOOLEAN),
-    optionalField('tags', TAGS_MAP),
-  ],
-};
+function route53_zone(gen: Generator) {
+  const vpc: RecordDecl = {
+    name: 'route53_zone_vpc',
+    fields: [
+      requiredField('vpc_id', resourceIdType('VpcId')),
+      optionalField('vpc_region', stringAliasType('AT.Region')),
+    ],
+  };
+
+  gen.generateParams(vpc);
+
+  const route53_zone: RecordDecl = {
+    name: 'route53_zone',
+    fields: [
+      requiredField('name', STRING),
+      optionalField('comment', STRING),
+      optionalField('vpc', recordType(vpc)),
+      optionalField('force_destroy', BOOLEAN),
+      optionalField('tags', TAGS_MAP),
+    ],
+  };
+
+  gen.generateParams(route53_zone);
+
+  gen.generateResource(
+    'Provides a Route53 Hosted Zone resource.',
+    'https://www.terraform.io/docs/providers/aws/r/route53_zone.html',
+    route53_zone,
+    [
+      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
+      stringAttr('name'),
+    ]
+  );
+}
+
 
 const route53_alias: RecordDecl = {
   name: 'route53_alias',
@@ -2238,15 +2262,7 @@ function generateAws(gen: Generator) {
     [resourceIdAttr('id', route_table_association)]
   );
 
-  gen.generateResource(
-    'Provides a Route53 Hosted Zone resource.',
-    'https://www.terraform.io/docs/providers/aws/r/route53_zone.html',
-    route53_zone,
-    [
-      stringAliasAttr('zone_id', 'HostedZoneId', 'AT.HostedZoneId'),
-      stringAttr('name'),
-    ]
-  );
+
 
   gen.generateResource(
     'Provides a Route53 record resource.',
@@ -2936,7 +2952,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(route_table);
   gen.generateParams(route);
   gen.generateParams(route_table_association);
-  gen.generateParams(route53_zone);
+
   gen.generateParams(route53_record);
   gen.generateParams(route53_alias);
   gen.generateParams(bucket_versioning);
@@ -3061,6 +3077,7 @@ function generateAws(gen: Generator) {
 
   autoscaling_policy(gen);
   amiDataSource(gen);
+  route53_zone(gen);
 }
 
 function generateRandom(gen: Generator) {

@@ -84,24 +84,37 @@ export function createInstance(tfgen: TF.Generator, rname: string, params: Insta
   const fields = fieldsFromInstanceParams(params);
   const resource = tfgen.createTypedResource('Instance', 'aws_instance', rname, fields);
   const id: InstanceId =  {type: 'InstanceId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
   const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: '${' + TF.resourceName(resource) + '.availability_zone}'};
+  const public_dns: string =  '${' + TF.resourceName(resource) + '.public_dns}';
+  const public_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.public_ip}'};
+  const private_dns: string =  '${' + TF.resourceName(resource) + '.private_dns}';
+  const private_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.private_ip}'};
+  const arn: InstanceArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Instance');
 
   return {
     ...resource,
     id,
-    arn,
     availability_zone,
+    public_dns,
+    public_ip,
+    private_dns,
+    private_ip,
+    arn,
   };
 }
 
 export interface Instance extends TF.ResourceT<'Instance'> {
   id: InstanceId;
-  arn: AT.Arn;
   availability_zone: AT.AvailabilityZone;
+  public_dns: string;
+  public_ip: AT.IpAddress;
+  private_dns: string;
+  private_ip: AT.IpAddress;
+  arn: InstanceArn;
 }
 
 export type InstanceId = {type:'InstanceId',value:string};
+export type InstanceArn = AT.ArnT<"Instance">;
 
 /**
  *  Provides an RDS instance resource.

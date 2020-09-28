@@ -2133,13 +2133,19 @@ function generateAws(gen: Generator) {
     instance,
     [
       resourceIdAttr('id', instance),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAliasAttr(
         'availability_zone',
         'AvailabilityZone',
         'AT.AvailabilityZone'
       ),
-    ]
+      stringAttr('public_dns'),
+      stringAliasAttr('public_ip', 'IpAddress', 'AT.IpAddress'),
+      stringAttr('private_dns'),
+      stringAliasAttr('private_ip', 'IpAddress', 'AT.IpAddress'),
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(

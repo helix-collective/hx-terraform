@@ -47,7 +47,7 @@ export interface Generator {
   createAdhocFile(path: string, content: string): void;
 
   /** Construct a terraform output */
-  createOutput(name: string, value: ResourceValue): void;
+  createOutput(name: string, value: ResourceValue|string): void;
 
   /** Mark a field of a resource to indicate that changes to that field should not
    cause the resource to be updated */
@@ -368,7 +368,10 @@ export function fileGenerator(): FileGenerator {
       return { tftype, tfname };
     }
 
-    function createOutput(name: string, value: ResourceValue) {
+    function createOutput(name: string, value: ResourceValue|string) : void {
+      if(typeof value === 'string') {
+        return createOutput(name, stringValue(value));
+      }
       const tfname = nameContext0.concat(name);
       addOutput(generated, tfname, value);
     }

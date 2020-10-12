@@ -157,27 +157,7 @@ export type SharedResources =
   & SharedBucketsResources
   & SharedSecurityGroupResources
   & SharedSnsTopicResources
-  & SharedResourcesBackwardsCompatHelpers
 ;
-
-// DEPRECATED: backwards compatibility helper (extra level of nesting on "network" params)
-// TODO: Remove
-export type SharedResourcesBackwardsCompatHelpers = {
-  network: NetworkResources
-};
-
-// DEPRECATED: former type name SharedResourcesNE for shared resources with external subnets only
-// instead: use SharedResources type and shared.externalSubnetIds function.
-// TODO: Remove
-export type SharedResourcesNE = SharedResources & {
-  network: {
-    azs: PublicAzResources[];
-  }
-};
-
-// DEPRECATED: former type name SharedResourcesNEI for shared resources with external and internal subnets
-// instead: Use function shared.externalSubnetIds and shared.internalSubnetIds to extract relevant subnet types where particularly relevant.
-export type SharedResourcesNEI = SharedResources;
 
 /**
  * Construct the share resources for an AWS account and region
@@ -195,19 +175,12 @@ export function createResources(
   const securityGroups = createSharedSecurityGroupResources(tfgen, network);
   const snsTopics = createSharedSnsTopicsResources(tfgen, {});
 
-  // DEPRECATED: backwards compatibility helper
-  // TODO: Remove
-  const backcompat = {
-    network
-  };
-
   return {
     ...network,
     ...domain,
     ...buckets,
     ...securityGroups,
     ...snsTopics,
-    ...backcompat,
   };
 }
 

@@ -26,10 +26,12 @@ export interface InstanceWithEipParams {
   security_group: AR.SecurityGroup;
   key_name: AT.KeyName;
   ignoreUserDataChanges?: boolean,
-  createEip?: boolean,
   customize_instance?: Customize<AR.InstanceParams>;
 }
 
+/**
+ * Construct an EC2 instance with a public elastic IP Address
+ */
 export function createInstanceWithEip(
   tfgen: TF.Generator,
   name: string,
@@ -37,31 +39,6 @@ export function createInstanceWithEip(
   subnet_id: AR.SubnetId,
   params0: InstanceWithEipParams
 ): { eip: AR.Eip; ec2: AR.Instance } {
-  const params : InstanceWithEipParams = {
-    ...params0,
-    createEip: true,
-  };
-  const instanceWip = createInstanceMaybeWithEip(tfgen, name, sr, subnet_id, params);
-  if(instanceWip.eip === undefined) {
-    throw new Error("Unexpected undefined eip");
-  }
-  return {
-    eip: instanceWip.eip,
-    ec2: instanceWip.ec2
-  };
-}
-
-/**
- * Construct an EC2 instance with a public elastic IP Address
- * TODO: Refactor to separately createInstance and createElasticIp
- */
-export function createInstanceMaybeWithEip(
-  tfgen: TF.Generator,
-  name: string,
-  sr: shared.SharedResources,
-  subnet_id: AR.SubnetId,
-  params0: InstanceWithEipParams
-): { eip?: AR.Eip; ec2: AR.Instance } {
   function createInstance() {
     const instance_params: AR.InstanceParams = {
       ami: params0.ami(sr.network.region),
@@ -106,14 +83,9 @@ export function createInstanceMaybeWithEip(
   }
 
   const ec2 = createInstance();
+  const eip = createElasticIp(ec2);
 
-  if(params0.createEip) {
-    const eip = createElasticIp(ec2);
-    return eip;
-  }
-  return {
-    ec2
-  };
+  return eip;
 }
 
 /**

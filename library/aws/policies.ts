@@ -351,3 +351,31 @@ export function autoscalingGroupEnableSetInstanceProtection(
     },
   };
 }
+
+/**
+ * Allow sending of SMS, but not sns messages to topics, etc.
+ * 
+ * https://stackoverflow.com/questions/38871201/authorization-when-sending-a-text-message-using-amazonsnsclient
+ */
+export const snsPostSmsPolicy: NamedPolicy = {
+  name: 'snspostsms',
+  policy: {
+    Version: "2012-10-17",
+    Statement: [
+        {
+            Effect: "Deny",
+            Action: [
+                "sns:Publish"
+            ],
+            Resource: "arn:aws:sns:*:*:*"
+        },
+        {
+            Effect: "Allow",
+            Action: [
+                "sns:Publish"
+            ],
+            Resource: "*"
+        }
+    ]
+},
+};

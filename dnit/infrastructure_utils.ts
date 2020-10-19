@@ -359,6 +359,17 @@ export async function makeInfraTasks(): Promise<InfraTasks> {
     uptodate: runAlways,
   });
 
+  const generate = task({
+    name: 'generate',
+    description: 'Alias of generateTerraform',
+    action: async () => {
+    },
+    deps: [
+      generateTerraform
+    ],
+    uptodate: runAlways,
+  });
+
   const terraformInit = task({
     name: 'terraform_init',
     description:
@@ -536,6 +547,7 @@ export async function makeInfraTasks(): Promise<InfraTasks> {
       yarnHxTerraform,
       generateProviders,
       generateTerraform,
+      generate,
       terraformInit,
       terraformPlan,
       terraformApply,

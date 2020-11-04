@@ -1,4 +1,4 @@
-# hx-deploy-tool
+# camus2
 
 This repository is commonly used with camus2, a deployment automation tool
 

@@ -36,5 +36,7 @@ codify helix patterns for:
 
 etc
 
+See the [documentation directory](./docs) for more information
+
 [typescript]:https://www.typescriptlang.org/
 [terraform]:https://www.terraform.io/

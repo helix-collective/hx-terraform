@@ -54,6 +54,7 @@ export function createPostgresInstance(
     password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
     customize_securitygroup?: Customize<AR.SecurityGroupParams>;
+    force_ssl?: boolean,
     subnet_ids: AR.SubnetId[];
   }
 ): DbInstance {
@@ -79,6 +80,13 @@ export function createPostgresInstance(
     subnet_ids: params.subnet_ids,
   });
 
+  const db_parameter_group = params.force_ssl == undefined ? undefined : AR.createDbParameterGroup(tfgen, name, {
+    family: 'postgres11',
+    parameter: [
+      {name: 'force_ssl', value: params.force_ssl ? '1' : '0'}
+    ],
+  });
+
   const dbparams: AR.DbInstanceParams = {
     allocated_storage: 5, // The allocated storage size in gibibytes
     engine: AT.postgres,
@@ -97,6 +105,7 @@ export function createPostgresInstance(
     skip_final_snapshot: false,
     apply_immediately: false,
     storage_type: AT.gp2,
+    parameter_group_name: db_parameter_group && db_parameter_group.id.value
   };
 
   if (params.customize) {

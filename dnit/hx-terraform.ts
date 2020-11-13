@@ -62,8 +62,7 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
         skip: [/.*resources.ts/],
       })).map(trackFile),
     ],
-    targets: generatedProviderSrcs,
-    uptodate: runAlways,
+    targets: generatedProviderSrcs
   });
 
   const manifests : Manifests = {
@@ -92,7 +91,6 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
       })).map(trackFile),
     ],
     targets: Object.values(manifests),
-    uptodate: runAlways,
   });
 
   const generate = task({
@@ -102,8 +100,7 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
     },
     deps: [
       generateTerraform
-    ],
-    uptodate: runAlways,
+    ]
   });
 
   return {

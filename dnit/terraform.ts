@@ -68,7 +68,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     description:
       'Execute terraform apply to make any pending infrastructure changes according to the plan',
     action: async ctx => {
-      if (!(await generatedTerraformPlan.exists(ctx))) {
+      if (!(await generatedTerraformPlan.exists())) {
         throw new Error("No plan file found - Run 'dnit plan' first.");
       }
 

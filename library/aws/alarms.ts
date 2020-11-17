@@ -1,6 +1,7 @@
 import * as TF from '../../core/core';
 import * as AR from '../../providers/aws/resources';
 import { Customize } from "../util";
+import { CloudwatchMetricAlarmParams } from "../../providers/aws/resources";
 
 // How to prepare alarms:
 //    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc
@@ -55,10 +56,11 @@ export function createEc2Alarms(
 export function createDbAlarms(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
-  db: AR.DbInstance
+  db: AR.DbInstance,
+  customizeDbSpaceAlarm?: Customize<CloudwatchMetricAlarmParams>
 ) {
   createHighDbCpuAlarm(tfgen, topic, db);
-  createLowDbSpaceAlarm(tfgen, topic, db);
+  createLowDbSpaceAlarm(tfgen, topic, db, customizeDbSpaceAlarm);
 }
 
 export function createScalingHighCpuAlarm(
@@ -242,10 +244,11 @@ export function createEc2HighMemAlarm(
 export function createLowDbSpaceAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
-  db: AR.DbInstance
+  db: AR.DbInstance,
+  customize?: Customize<CloudwatchMetricAlarmParams>
 ) {
   const name = 'lowdbspace';
-  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+  const params: CloudwatchMetricAlarmParams = {
     alarm_name: tfgen.scopedName(name).join('_'),
     comparison_operator: 'LessThanThreshold',
     evaluation_periods: 1,
@@ -259,7 +262,11 @@ export function createLowDbSpaceAlarm(
     },
     alarm_description: 'Low free space in RDS db',
     alarm_actions: [topic.arn],
-  });
+  };
+  if (customize) {
+    customize(params);
+  }
+  return AR.createCloudwatchMetricAlarm(tfgen, name, params);
 }
 
 export function createHighDbCpuAlarm(

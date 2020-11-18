@@ -5,6 +5,7 @@ export {
   trackFile,
   asyncFiles,
   runAlways,
+  getLogger,
   path,
   fs,
   Task,
@@ -13,7 +14,9 @@ export {
 
 // hx dnit-utils:
 export {
+  run,
   runConsole,
+  runProcess,
   dockerRunConsole,
   dockerRun,
   currentUserOpts,

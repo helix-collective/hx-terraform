@@ -44,3 +44,15 @@ export async function fileAgeMs(
   return ageMs;
 }
 
+/// Check that a path exists and is a directory
+export async function directoryExists(path: string) : Promise<boolean> {
+  try {
+    const fileinfo = await Deno.lstat(path);
+    return fileinfo.isDirectory;
+  } catch (err) {
+    if (err instanceof Deno.errors.NotFound) {
+      return false;
+    }
+    throw err;
+  }
+}

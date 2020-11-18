@@ -10,8 +10,10 @@ export type JavaPackage = string;
 const JavaPackage_AST : ADL.ScopedDecl =
   {"moduleName":"adlc.config.java","decl":{"annotations":[],"type_":{"kind":"type_","value":{"typeParams":[],"typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}}},"name":"JavaPackage","version":{"kind":"nothing"}}};
 
+export const snJavaPackage: ADL.ScopedName = {moduleName:"adlc.config.java", name:"JavaPackage"};
+
 export function texprJavaPackage(): ADL.ATypeExpr<JavaPackage> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "adlc.config.java",name : "JavaPackage"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snJavaPackage}, parameters : []}};
 }
 
 /**
@@ -23,8 +25,10 @@ export type JavaGenerate = boolean;
 const JavaGenerate_AST : ADL.ScopedDecl =
   {"moduleName":"adlc.config.java","decl":{"annotations":[],"type_":{"kind":"type_","value":{"typeParams":[],"typeExpr":{"typeRef":{"kind":"primitive","value":"Bool"},"parameters":[]}}},"name":"JavaGenerate","version":{"kind":"nothing"}}};
 
+export const snJavaGenerate: ADL.ScopedName = {moduleName:"adlc.config.java", name:"JavaGenerate"};
+
 export function texprJavaGenerate(): ADL.ATypeExpr<JavaGenerate> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "adlc.config.java",name : "JavaGenerate"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snJavaGenerate}, parameters : []}};
 }
 
 /**
@@ -54,8 +58,10 @@ export function makeJavaCustomType(
 const JavaCustomType_AST : ADL.ScopedDecl =
   {"moduleName":"adlc.config.java","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"javaname","default":{"kind":"nothing"},"name":"javaname","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"helpers","default":{"kind":"nothing"},"name":"helpers","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"generateType","default":{"kind":"just","value":false},"name":"generateType","typeExpr":{"typeRef":{"kind":"primitive","value":"Bool"},"parameters":[]}}]}},"name":"JavaCustomType","version":{"kind":"nothing"}}};
 
+export const snJavaCustomType: ADL.ScopedName = {moduleName:"adlc.config.java", name:"JavaCustomType"};
+
 export function texprJavaCustomType(): ADL.ATypeExpr<JavaCustomType> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "adlc.config.java",name : "JavaCustomType"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snJavaCustomType}, parameters : []}};
 }
 
 export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {

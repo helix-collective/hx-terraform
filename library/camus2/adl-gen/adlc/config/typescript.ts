@@ -11,8 +11,10 @@ export type TypescriptGenerate = boolean;
 const TypescriptGenerate_AST : ADL.ScopedDecl =
   {"moduleName":"adlc.config.typescript","decl":{"annotations":[],"type_":{"kind":"type_","value":{"typeParams":[],"typeExpr":{"typeRef":{"kind":"primitive","value":"Bool"},"parameters":[]}}},"name":"TypescriptGenerate","version":{"kind":"nothing"}}};
 
+export const snTypescriptGenerate: ADL.ScopedName = {moduleName:"adlc.config.typescript", name:"TypescriptGenerate"};
+
 export function texprTypescriptGenerate(): ADL.ATypeExpr<TypescriptGenerate> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "adlc.config.typescript",name : "TypescriptGenerate"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snTypescriptGenerate}, parameters : []}};
 }
 
 export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {

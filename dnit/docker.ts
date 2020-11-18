@@ -38,28 +38,3 @@ export async function runDockerizedTerraform(cmds: string[]): Promise<void> {
     ],
   });
 }
-
-/** Run dockerized ADL tools image */
-export async function runDockerizedAdlc(
-  mountDir: string,
-  cmds: string[]
-): Promise<string> {
-  const IMAGE = 'helixta/hxadl:0.11';
-
-  const asUser = await currentUserOpts();
-
-  return dockerRun(IMAGE, {
-    cmds,
-    user: asUser.user,
-    mounts: [
-      ...asUser.mounts,
-      {
-        type: 'bind',
-        source: mountDir,
-        target: '/src',
-      },
-    ],
-    workdir: '/src',
-    interactive: false,
-  });
-}

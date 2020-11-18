@@ -25,8 +25,10 @@ export function makeNginxConfContext(
 const NginxConfContext_AST : ADL.ScopedDecl =
   {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"healthCheck","default":{"kind":"nothing"},"name":"healthCheck","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"nginx","name":"NginxHealthCheck"}},"parameters":[]}]}},{"annotations":[],"serializedName":"endPoints","default":{"kind":"nothing"},"name":"endPoints","typeExpr":{"typeRef":{"kind":"primitive","value":"Vector"},"parameters":[{"typeRef":{"kind":"reference","value":{"moduleName":"nginx","name":"NginxEndPoint"}},"parameters":[]}]}}]}},"name":"NginxConfContext","version":{"kind":"nothing"}}};
 
+export const snNginxConfContext: ADL.ScopedName = {moduleName:"nginx", name:"NginxConfContext"};
+
 export function texprNginxConfContext(): ADL.ATypeExpr<NginxConfContext> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxConfContext"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snNginxConfContext}, parameters : []}};
 }
 
 export interface NginxEndPoint_Http {
@@ -40,11 +42,20 @@ export interface NginxEndPoint_Https {
 
 export type NginxEndPoint = NginxEndPoint_Http | NginxEndPoint_Https;
 
+export interface NginxEndPointOpts {
+  http: NginxHttpEndPoint;
+  https: NginxHttpsEndPoint;
+}
+
+export function makeNginxEndPoint<K extends keyof NginxEndPointOpts>(kind: K, value: NginxEndPointOpts[K]) { return {kind, value}; }
+
 const NginxEndPoint_AST : ADL.ScopedDecl =
   {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"union_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"http","default":{"kind":"nothing"},"name":"http","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"nginx","name":"NginxHttpEndPoint"}},"parameters":[]}},{"annotations":[],"serializedName":"https","default":{"kind":"nothing"},"name":"https","typeExpr":{"typeRef":{"kind":"reference","value":{"moduleName":"nginx","name":"NginxHttpsEndPoint"}},"parameters":[]}}]}},"name":"NginxEndPoint","version":{"kind":"nothing"}}};
 
+export const snNginxEndPoint: ADL.ScopedName = {moduleName:"nginx", name:"NginxEndPoint"};
+
 export function texprNginxEndPoint(): ADL.ATypeExpr<NginxEndPoint> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxEndPoint"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snNginxEndPoint}, parameters : []}};
 }
 
 export interface NginxHttpEndPoint {
@@ -67,8 +78,10 @@ export function makeNginxHttpEndPoint(
 const NginxHttpEndPoint_AST : ADL.ScopedDecl =
   {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"port","default":{"kind":"nothing"},"name":"port","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}}]}},"name":"NginxHttpEndPoint","version":{"kind":"nothing"}}};
 
+export const snNginxHttpEndPoint: ADL.ScopedName = {moduleName:"nginx", name:"NginxHttpEndPoint"};
+
 export function texprNginxHttpEndPoint(): ADL.ATypeExpr<NginxHttpEndPoint> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxHttpEndPoint"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snNginxHttpEndPoint}, parameters : []}};
 }
 
 export interface NginxHttpsEndPoint {
@@ -100,8 +113,10 @@ export function makeNginxHttpsEndPoint(
 const NginxHttpsEndPoint_AST : ADL.ScopedDecl =
   {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"serverNames","default":{"kind":"nothing"},"name":"serverNames","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"sslCertPath","default":{"kind":"nothing"},"name":"sslCertPath","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"sslCertKeyPath","default":{"kind":"nothing"},"name":"sslCertKeyPath","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}]}},{"annotations":[],"serializedName":"letsencryptWwwDir","default":{"kind":"nothing"},"name":"letsencryptWwwDir","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"port","default":{"kind":"nothing"},"name":"port","typeExpr":{"typeRef":{"kind":"primitive","value":"Nullable"},"parameters":[{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}]}}]}},"name":"NginxHttpsEndPoint","version":{"kind":"nothing"}}};
 
+export const snNginxHttpsEndPoint: ADL.ScopedName = {moduleName:"nginx", name:"NginxHttpsEndPoint"};
+
 export function texprNginxHttpsEndPoint(): ADL.ATypeExpr<NginxHttpsEndPoint> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxHttpsEndPoint"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snNginxHttpsEndPoint}, parameters : []}};
 }
 
 export interface NginxHealthCheck {
@@ -127,8 +142,10 @@ export function makeNginxHealthCheck(
 const NginxHealthCheck_AST : ADL.ScopedDecl =
   {"moduleName":"nginx","decl":{"annotations":[],"type_":{"kind":"struct_","value":{"typeParams":[],"fields":[{"annotations":[],"serializedName":"incomingPath","default":{"kind":"nothing"},"name":"incomingPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"outgoingPath","default":{"kind":"nothing"},"name":"outgoingPath","typeExpr":{"typeRef":{"kind":"primitive","value":"String"},"parameters":[]}},{"annotations":[],"serializedName":"outgoingPort","default":{"kind":"nothing"},"name":"outgoingPort","typeExpr":{"typeRef":{"kind":"primitive","value":"Word32"},"parameters":[]}}]}},"name":"NginxHealthCheck","version":{"kind":"nothing"}}};
 
+export const snNginxHealthCheck: ADL.ScopedName = {moduleName:"nginx", name:"NginxHealthCheck"};
+
 export function texprNginxHealthCheck(): ADL.ATypeExpr<NginxHealthCheck> {
-  return {value : {typeRef : {kind: "reference", value : {moduleName : "nginx",name : "NginxHealthCheck"}}, parameters : []}};
+  return {value : {typeRef : {kind: "reference", value : snNginxHealthCheck}, parameters : []}};
 }
 
 export const _AST_MAP: { [key: string]: ADL.ScopedDecl } = {

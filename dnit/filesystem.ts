@@ -56,3 +56,14 @@ export async function directoryExists(path: string) : Promise<boolean> {
     throw err;
   }
 }
+
+/// Remove a path - ignore error notfound
+export async function removeIfExists(path:string, options?: Deno.RemoveOptions) : Promise<void> {
+  try {
+    await Deno.remove(path, options);
+  } catch (err) {
+    if (!(err instanceof Deno.errors.NotFound)) {
+      throw err;
+    }
+  }
+}

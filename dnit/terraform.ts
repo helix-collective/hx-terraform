@@ -1,7 +1,7 @@
 // Tasks for running terraform itself:
 
 import { confirmation, asyncFiles, runAlways, Task, TrackedFile, trackFile, path, task } from './deps.ts'
-import { fileAgeMs, rglobfiles } from './filesystem.ts';
+import { fileAgeMs, removeIfExists, rglobfiles } from './filesystem.ts';
 import { runDockerizedTerraform } from './docker.ts';
 import { HxTerraformTasks } from './hx-terraform.ts';
 import { LambdaTasks } from './lamdas.ts';
@@ -70,35 +70,38 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     description:
       'Execute terraform apply to make any pending infrastructure changes according to the plan',
     action: async ctx => {
-      if (!(await generatedTerraformPlan.exists())) {
-        throw new Error("No plan file found - Run 'dnit plan' first.");
+      try {
+        if (!(await generatedTerraformPlan.exists())) {
+          throw new Error("No plan file found - Run 'dnit plan' first.");
+        }
+
+        // Ensure the plan is not too old - couple of minutes
+        const ageThresholdMs = 5 * 60 * 1000;
+
+        const planAgeMs = await fileAgeMs(generatedTerraformPlan.path);
+        if (planAgeMs > ageThresholdMs) {
+          await Deno.remove(generatedTerraformPlan.path);
+          throw new Error("Plan expired. Run 'dnit plan' again.");
+        }
+
+        // get confirmation:
+        const ok = await confirmation(
+          'You are about to apply changes to live infrastructure\n' +
+            'Please confirm you have checked the plan and wish to proceed\n' +
+            'by entering y',
+          false
+        );
+
+        if (!ok) {
+          throw new Error('Apply aborted');
+        }
+
+        await runDockerizedTerraform(['apply', 'tfplan']);
       }
-
-      // Ensure the plan is not too old - couple of minutes
-      const ageThresholdMs = 5 * 60 * 1000;
-
-      const planAgeMs = await fileAgeMs(generatedTerraformPlan.path);
-      if (planAgeMs > ageThresholdMs) {
-        await Deno.remove(generatedTerraformPlan.path);
-        throw new Error("Plan expired. Run 'dnit plan' again.");
+      finally {
+        // remove the former plan after use or error
+        await removeIfExists(generatedTerraformPlan.path);
       }
-
-      // get confirmation:
-      const ok = await confirmation(
-        'You are about to apply changes to live infrastructure\n' +
-          'Please confirm you have checked the plan and wish to proceed\n' +
-          'by entering y',
-        false
-      );
-
-      if (!ok) {
-        throw new Error('Apply aborted');
-      }
-
-      await runDockerizedTerraform(['apply', 'tfplan']);
-
-      // remove the plan after using it
-      await Deno.remove(generatedTerraformPlan.path);
     },
     uptodate: runAlways,
   });

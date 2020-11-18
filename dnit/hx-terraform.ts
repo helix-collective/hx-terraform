@@ -1,6 +1,6 @@
 // Tasks from 'hx-terraform' ie generating providers and generating terraform
 
-import { runAlways, runConsole, Task, TrackedFile, trackFile, path, task } from './deps.ts'
+import { runAlways, asyncFiles, runConsole, Task, TrackedFile, trackFile, path, task } from './deps.ts'
 import type { TasksObject } from "./types.ts";
 import { rglobfiles } from './filesystem.ts';
 
@@ -57,10 +57,13 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
       trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-helpers.ts')),
       trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-providers.ts')),
 
-      ...// all provider sources other than (the generated) resources.ts
-      (await rglobfiles(path.join(ROOT, 'typescript/hx-terraform/providers'), {
-        skip: [/.*resources.ts/],
-      })).map(trackFile),
+      asyncFiles(async ()=>{
+        // all provider sources other than (the generated) resources.ts
+        const providers = await rglobfiles(path.join(ROOT, 'typescript/hx-terraform/providers'), {
+          skip: [/.*resources.ts/],
+        });
+        return providers.map(trackFile)
+      })
     ],
     targets: generatedProviderSrcs
   });
@@ -85,10 +88,13 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
       yarn.tasks.hxTerraform,
       generateProviders,
       ...generatedProviderSrcs,
-      ...// all typescript sources excl node_modules
-      (await rglobfiles(path.join(ROOT, 'typescript'), {
-        skip: [/node_modules/, /typescript\/build/],
-      })).map(trackFile),
+      asyncFiles(async ()=>{
+        // all typescript sources excl node_modules
+        const sources = await rglobfiles(path.join(ROOT, 'typescript'), {
+          skip: [/node_modules/, /typescript\/build/],
+        });
+        return sources.map(trackFile)
+      })
     ],
     targets: Object.values(manifests),
   });

@@ -1,6 +1,6 @@
 // Tasks for running terraform itself:
 
-import { confirmation, runAlways, Task, TrackedFile, trackFile, path, task } from './deps.ts'
+import { confirmation, asyncFiles, runAlways, Task, TrackedFile, trackFile, path, task } from './deps.ts'
 import { fileAgeMs, rglobfiles } from './filesystem.ts';
 import { runDockerizedTerraform } from './docker.ts';
 import { HxTerraformTasks } from './hx-terraform.ts';
@@ -42,10 +42,6 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
 
   const generatedTerraformPlan = trackFile(path.join(ROOT, 'terraform', 'tfplan'));
 
-  const sourceTerraformFiles = (await rglobfiles(path.join(ROOT, 'terraform'), {
-    exts: ['.tf'],
-  })).map(trackFile);
-
   const terraformPlan = task({
     name: 'plan',
     description:
@@ -57,7 +53,13 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
       terraformInit,
       ...Object.values(deps.lambda.tasks),
       ...Object.values(deps.hxTerraform.manifests),
-      ...sourceTerraformFiles,
+
+      asyncFiles(async ()=>{
+        const terraformFiles = await rglobfiles(path.join(ROOT, 'terraform'), {
+          exts: ['.tf'],
+        });
+        return terraformFiles.map(trackFile);
+      })
     ],
     targets: [generatedTerraformPlan],
     uptodate: runAlways,

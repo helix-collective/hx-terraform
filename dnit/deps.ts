@@ -1,14 +1,15 @@
 // task execution tool - dnit:
 export {
   task,
-  exec as dnitExec,
-  file as trackFile,
+  execCli as dnitExecCli,
+  trackFile,
+  asyncFiles,
   runAlways,
   path,
   fs,
   Task,
   TrackedFile,
-} from 'https://deno.land/x/dnit@dnit-v1.10.0/mod.ts';
+} from 'https://deno.land/x/dnit@dnit-v1.11.0/mod.ts';
 
 // hx dnit-utils:
 export {

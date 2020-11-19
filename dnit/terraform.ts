@@ -80,7 +80,6 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
 
         const planAgeMs = await fileAgeMs(generatedTerraformPlan.path);
         if (planAgeMs > ageThresholdMs) {
-          await Deno.remove(generatedTerraformPlan.path);
           throw new Error("Plan expired. Run 'dnit plan' again.");
         }
 
@@ -137,4 +136,3 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     generatedTerraformPlan
   };
 }
-

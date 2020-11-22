@@ -53,6 +53,8 @@ hx-terraform.
 2. Perform a `doit plan` and ensure that terraform reports no changes to be
 applied.
 
+Note: Use `dnit plan` if calling from a repository that has migrated to `dnit`.
+
 This ensures that the current state of the repo reflects the state of the
 infrastructure. If it isn't, there's a chance that other developers have
 forgotten to perform step 6, or someone has incorrectly made a manual change
@@ -71,6 +73,8 @@ to infrastructure via the AWS console.
 4. Run `doit plan` to see the changes Terraform is prepared to make to the
 infrastructure.
 
+Note: Use `dnit plan` if calling from a repository that has migrated to `dnit`.
+
 5. When your code is ready to go, submit your code change and `doit plan`
 output through your favourite code review process:
 
@@ -84,7 +88,11 @@ output through your favourite code review process:
     * When you're ready to stand up the changes, do another `doit plan` to ensure
     the output is identical to what you expected, then push to master.
 
+Note: Use `dnit plan` if calling from a repository that has migrated to `dnit`.
+
 6. Immediately after, run `doit apply`.
+
+Note: Use `dnit apply` if calling from a repository that has migrated to `dnit`.
 
 ## Additional Resources
 

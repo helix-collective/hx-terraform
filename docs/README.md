@@ -5,3 +5,4 @@
 * [Configuring EKS](./eks.md) - how to setup with hx-terraform library functions.
 * [SSL for RDS](./ssl-for-rds.md) - how to encrypt application server to database communications
 * [Workflow](./workflow.md) - describes the workflow used in making changes to infrastructure via terraform
+* [`dnit` tasks](./dnit-tasks.md) - introduction to `dnit` used for tasks in new infrastructure repositories

@@ -38,5 +38,7 @@ etc
 
 See the [documentation directory](./docs) for more information
 
+If you are upgrading and are encountering breaking changes, you can find useful information in the [Breaking Changelog](./BREAKINGCL.md) - Please update if you are creating a breaking change
+
 [typescript]:https://www.typescriptlang.org/
 [terraform]:https://www.terraform.io/

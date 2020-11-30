@@ -38,7 +38,13 @@ etc
 
 See the [documentation directory](./docs) for more information
 
-If you are upgrading and are encountering breaking changes, you can find useful information in the [Breaking Changelog](./BREAKINGCL.md) - Please update if you are creating a breaking change
+If you are upgrading and are encountering breaking changes, you can find useful information in the commit messages by running:
+
+$ git log --grep breaking adf4b3636d..HEAD
+
+Ie if my previous version before upgrading was adf4b3636d then this should show all the necessary information.
+
+To ensure this works, please note the standard of including "breaking" in your commit title/summary.
 
 [typescript]:https://www.typescriptlang.org/
 [terraform]:https://www.terraform.io/

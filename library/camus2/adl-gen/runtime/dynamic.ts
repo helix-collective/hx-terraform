@@ -1,3 +1,4 @@
+import * as AST from './sys/adlast';
 import {typeExprsEqual} from './utils';
 import {JsonBinding} from './json';
 import {Dynamic} from './sys/dynamic';

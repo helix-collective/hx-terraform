@@ -40,14 +40,6 @@ export interface TypeRef_Reference {
 
 export type TypeRef = TypeRef_Primitive | TypeRef_TypeParam | TypeRef_Reference;
 
-export interface TypeRefOpts {
-  primitive: Ident;
-  typeParam: Ident;
-  reference: ScopedName;
-}
-
-export function makeTypeRef<K extends keyof TypeRefOpts>(kind: K, value: TypeRefOpts[K]) { return {kind, value}; }
-
 export interface TypeExpr {
   typeRef: TypeRef;
   parameters: TypeExpr[];
@@ -181,15 +173,6 @@ export interface DeclType_Newtype_ {
 
 export type DeclType = DeclType_Struct_ | DeclType_Union_ | DeclType_Type_ | DeclType_Newtype_;
 
-export interface DeclTypeOpts {
-  struct_: Struct;
-  union_: Union;
-  type_: TypeDef;
-  newtype_: NewType;
-}
-
-export function makeDeclType<K extends keyof DeclTypeOpts>(kind: K, value: DeclTypeOpts[K]) { return {kind, value}; }
-
 export interface Decl {
   name: Ident;
   version: sys_types.Maybe<number>;
@@ -243,17 +226,10 @@ export interface Import_ScopedName {
 
 export type Import = Import_ModuleName | Import_ScopedName;
 
-export interface ImportOpts {
-  moduleName: ModuleName;
-  scopedName: ScopedName;
-}
-
-export function makeImport<K extends keyof ImportOpts>(kind: K, value: ImportOpts[K]) { return {kind, value}; }
-
 export interface Module {
   name: ModuleName;
   imports: Import[];
-  decls: {[key: string]: Decl};
+  decls: sys_types.Map<Ident, Decl>;
   annotations: Annotations;
 }
 
@@ -261,7 +237,7 @@ export function makeModule(
   input: {
     name: ModuleName,
     imports: Import[],
-    decls: {[key: string]: Decl},
+    decls: sys_types.Map<Ident, Decl>,
     annotations: Annotations,
   }
 ): Module {

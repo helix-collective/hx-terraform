@@ -1429,6 +1429,7 @@ const cloudfront_cache_behavior: RecordDecl = {
     requiredField('allowed_methods', listType(STRING)),
     requiredField('cached_methods', listType(STRING)),
     requiredField('forwarded_values', recordType(cloudfront_forwarded_values)),
+    // path_pattern cannot be set for default cache behaviour, defaults to *
     optionalField('path_pattern', STRING),
     optionalField('compress', BOOLEAN),
     optionalField('default_ttl', NUMBER),
@@ -1471,6 +1472,7 @@ const cloudfront_origin: RecordDecl = {
     requiredField('domain_name', STRING),
     requiredField('origin_id', STRING),
     optionalField('s3_origin_config', recordType(cloudfront_s3_origin_config)),
+    // if placing CF infront of a web server, custom_origin_config is madatory as S3 is assumed.
     optionalField(
       'custom_origin_config',
       recordType(cloudfront_custom_origin_config)

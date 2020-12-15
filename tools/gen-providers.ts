@@ -1430,7 +1430,7 @@ const cloudfront_cache_behavior: RecordDecl = {
     requiredField('cached_methods', listType(STRING)),
     requiredField('forwarded_values', recordType(cloudfront_forwarded_values)),
     // path_pattern cannot be set for default cache behaviour, defaults to *
-    optionalField('path_pattern', STRING),
+    optionalField('path_pattern', STRING, ["path_pattern cannot be set for default cache behaviour, defaults to *"]),
     optionalField('compress', BOOLEAN),
     optionalField('default_ttl', NUMBER),
     optionalField('min_ttl', NUMBER),

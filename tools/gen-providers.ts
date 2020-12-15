@@ -1503,7 +1503,7 @@ const cloudfront_viewer_certificate: RecordDecl = {
     optionalField('acm_certificate_arn', arnType(acm_certificate)),
     optionalField(
       'minimum_protocol_version',
-      enumType(['SSLv3', 'TLSv1', 'TLSv1_2016', 'TLSv1.1_2016', 'TLSv1.2_2018', '	TLSv1.2_2019'])
+      enumType(['SSLv3', 'TLSv1', 'TLSv1_2016', 'TLSv1.1_2016', 'TLSv1.2_2018', 'TLSv1.2_2019'])
     ),
     optionalField('ssl_support_method', enumType(['vip', 'sni-only'])),
   ],

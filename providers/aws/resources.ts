@@ -4345,7 +4345,7 @@ export function fieldsFromCloudfrontS3OriginConfigParams(params: CloudfrontS3Ori
 export interface CloudfrontViewerCertificateParams {
   cloudfront_default_certificate?: boolean;
   acm_certificate_arn?: AT.ArnT<"AcmCertificate">;
-  minimum_protocol_version?: 'SSLv3' | 'TLSv1' | 'TLSv1_2016' | 'TLSv1.1_2016' | 'TLSv1.2_2018';
+  minimum_protocol_version?: 'SSLv3' | 'TLSv1' | 'TLSv1_2016' | 'TLSv1.1_2016' | 'TLSv1.2_2018' | 'TLSv1.2_2019';
   ssl_support_method?: 'vip' | 'sni-only';
 }
 

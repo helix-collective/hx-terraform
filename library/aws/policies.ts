@@ -379,3 +379,22 @@ export const snsPostSmsPolicy: NamedPolicy = {
     ]
 },
 };
+
+/**
+ * Full access to SNS
+ */
+export const snsFullAccessPolicy: NamedPolicy = {
+  name: 'snsfullaccess',
+  policy: {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "sns:*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ]
+  },
+};

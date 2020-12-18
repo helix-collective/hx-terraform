@@ -50,6 +50,7 @@ export function createPostgresInstance(
   sr: shared.SharedResources,
   params: {
     db_name: string;
+    db_identifier?: string;
     db_instance_type: AT.DbInstanceType;
     password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
@@ -93,7 +94,7 @@ export function createPostgresInstance(
     instance_class: params.db_instance_type,
     username: 'postgres',
     password: 'REPLACEME',
-    identifier: sname.replace(/_/g, '-'),
+    identifier: params.db_identifier || sname.replace(/_/g, '-'),
     name: params.db_name,
     engine_version: '11.5',
     publicly_accessible: false,

@@ -149,7 +149,7 @@ export function createSqsQueue(
   return AR.createSqsQueue(tfgen, name, params);
 }
 
-export function s3DeployBucketReadOnlyPolicy<AZ>(sr: shared.SharedResources) {
+export function s3DeployBucketReadOnlyPolicy(sr: shared.SharedResources) {
   return policies.s3ReadonlyPolicy('reads3deploy', sr.deploy_bucket_name);
 }
 

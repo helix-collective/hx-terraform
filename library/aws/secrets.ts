@@ -46,7 +46,7 @@ export function createJsonSecret(
  *    { "secret", "XXXXXX" }
  *
  */
-export function createRandomJsonSecret<AZ>(
+export function createRandomJsonSecret(
   tfgen: TF.Generator,
   name: string,
   sr: SharedResources,

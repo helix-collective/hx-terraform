@@ -353,6 +353,22 @@ function route53_zone(gen: Generator) {
   );
 }
 
+const Route53GeolocationRoutingPolicyParams: RecordDecl = {
+  name: 'Route53GeolocationRoutingPolicyParams',
+  fields: [
+    optionalField('continent', enumType([
+      'AF',
+      'AN',
+      'AS',
+      'EU',
+      'OC',
+      'NA',
+      'SA'
+    ])),
+    optionalField('country', STRING),
+    optionalField('subdivision', STRING),
+  ],
+};
 
 const route53_alias: RecordDecl = {
   name: 'route53_alias',
@@ -389,6 +405,8 @@ const route53_record: RecordDecl = {
     optionalField('records', listType(STRING)),
     optionalField('alias', recordType(route53_alias)),
     optionalField('allow_overwrite', BOOLEAN),
+    optionalField('set_identifier', STRING,["Optional Unique identifier to differentiate records with routing policies from one another. Required if using failover, geolocation, latency, or weighted"]),
+    optionalField('geolocation_routing_policy',recordType(Route53GeolocationRoutingPolicyParams)),
   ],
 };
 
@@ -3034,6 +3052,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(route_table_association);
 
   gen.generateParams(route53_record);
+  gen.generateParams(Route53GeolocationRoutingPolicyParams);
   gen.generateParams(route53_alias);
   gen.generateParams(bucket_versioning);
   gen.generateParams(expiration);

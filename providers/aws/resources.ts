@@ -2771,6 +2771,11 @@ export interface Route53RecordParams {
   records?: (string)[];
   alias?: Route53AliasParams;
   allow_overwrite?: boolean;
+  /**
+  Optional Unique identifier to differentiate records with routing policies from one another. Required if using failover, geolocation, latency, or weighted
+  */
+  set_identifier?: string;
+  geolocation_routing_policy?: Route53GeolocationRoutingPolicyParamsParams;
 }
 
 export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.ResourceFieldMap {
@@ -2782,6 +2787,22 @@ export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.
   TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.stringValue));
   TF.addOptionalField(fields, "alias", params.alias, (v) => TF.mapValue(fieldsFromRoute53AliasParams(v)));
   TF.addOptionalField(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
+  TF.addOptionalField(fields, "set_identifier", params.set_identifier, TF.stringValue);
+  TF.addOptionalField(fields, "geolocation_routing_policy", params.geolocation_routing_policy, (v) => TF.mapValue(fieldsFromRoute53GeolocationRoutingPolicyParamsParams(v)));
+  return fields;
+}
+
+export interface Route53GeolocationRoutingPolicyParamsParams {
+  continent?: 'AF' | 'AN' | 'AS' | 'EU' | 'OC' | 'NA' | 'SA';
+  country?: string;
+  subdivision?: string;
+}
+
+export function fieldsFromRoute53GeolocationRoutingPolicyParamsParams(params: Route53GeolocationRoutingPolicyParamsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "continent", params.continent, TF.stringValue);
+  TF.addOptionalField(fields, "country", params.country, TF.stringValue);
+  TF.addOptionalField(fields, "subdivision", params.subdivision, TF.stringValue);
   return fields;
 }
 
@@ -4234,6 +4255,9 @@ export interface CloudfrontCacheBehaviourParams {
   allowed_methods: (string)[];
   cached_methods: (string)[];
   forwarded_values: CloudfrontForwardedValuesParams;
+  /**
+  path_pattern cannot be set for default cache behaviour, defaults to *
+  */
   path_pattern?: string;
   compress?: boolean;
   default_ttl?: number;

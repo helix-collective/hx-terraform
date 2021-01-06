@@ -48,14 +48,14 @@ export async function getCachedAdlDir(version: string) {
   const versiondir=`${cachedir}/hxadl/${version}`;
 
   if (! await directoryExists(versiondir)) {
-    log.info('Fetching ADL version ' + version);
+    log.info('Fetching ' + release);
     const downloadPath=path.join(downloads,name);
 
     await Deno.mkdir(downloads,{recursive:true});
     await downloadFile(release, downloadPath);
     await Deno.mkdir(versiondir,{recursive:true});
 
-    run(["unzip","-q",downloadPath],{cwd:versiondir});
+    await run(["unzip","-q",downloadPath],{cwd:versiondir});
   }
 
   return versiondir;

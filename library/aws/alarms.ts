@@ -184,7 +184,7 @@ export function createEc2HighDiskAlarm(
       Filesystem: filesystem,
       MountPath: '/',
     },
-    alarm_description: 'Sustained high disk usage for application server',
+    alarm_description: `Sustained high disk usage for ${tfgen.nameContext().join('_')}`,
     alarm_actions: [topic.arn],
   });
 }
@@ -207,7 +207,7 @@ export function createEc2HighCpuAlarm(
     dimensions: {
       InstanceId: ec2.id.value,
     },
-    alarm_description: 'Sustained high cpu usage for application server',
+    alarm_description: `Sustained high cpu usage for ${tfgen.nameContext().join('_')}`,
     alarm_actions: [topic.arn],
   });
 }
@@ -236,7 +236,7 @@ export function createEc2HighMemAlarm(
     dimensions: {
       InstanceId: ec2.id.value,
     },
-    alarm_description: 'Sustained high memory for application server',
+    alarm_description: `Sustained high memory for ${tfgen.nameContext().join('_')}`,
     alarm_actions: [topic.arn],
   });
 }

@@ -71,6 +71,7 @@ const instance: RecordDecl = {
     requiredField('instance_type', stringAliasType('AT.InstanceType')),
     optionalField('availability_zone', stringAliasType('AT.AvailabilityZone')),
     optionalField('ebs_optimized', BOOLEAN),
+    optionalField('disable_api_termination', BOOLEAN),
     optionalField('key_name', stringAliasType('AT.KeyName')),
     optionalField('monitoring', BOOLEAN),
     optionalField('subnet_id', resourceIdType('SubnetId')),

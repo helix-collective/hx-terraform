@@ -2,8 +2,14 @@
  * Configuration for a docker installation
  */
 export interface DockerConfig {
-  // Flesh out as required
-}
+  install: DockerInstallConfig;
+
+  // todo: flesh out types for daemonConfig
+};
+
+export interface DockerInstallConfig {
+  dockerComposeVersion: string
+};
 
 export function daemonConfig(cfg: DockerConfig): string {
   return JSON.stringify(
@@ -18,4 +24,8 @@ export function daemonConfig(cfg: DockerConfig): string {
   );
 }
 
-export const DEFAULT_CONFIG: DockerConfig = {};
+export const DEFAULT_CONFIG: DockerConfig = {
+  install: {
+    dockerComposeVersion: "1.14.0",
+  }
+};

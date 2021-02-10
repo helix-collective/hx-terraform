@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import { listeners } from 'cluster';
 import { listType } from '../tools/gen-helpers';
+import { DockerInstallConfig } from './docker';
 
 /**
  * Generator for boot scripts which are intended to be passed to an ubuntu AMI
@@ -66,12 +67,14 @@ export class BootScript {
     this.sh('source /etc/environment');
   }
 
-  installDocker() {
+  installDocker(params:DockerInstallConfig) {
+    const {dockerComposeVersion} = params;
+
     this.comment('Install docker and docker-compose');
     this.sh('wget -qO- https://get.docker.com/ | sh');
     this.sh(`usermod -aG docker ubuntu`);
     this.sh(
-      'curl -L https://github.com/docker/compose/releases/download/1.14.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose'
+      `curl -L https://github.com/docker/compose/releases/download/${dockerComposeVersion}/docker-compose-\`uname -s\`-\`uname -m\` > /usr/local/bin/docker-compose`
     );
     this.sh('chmod +x /usr/local/bin/docker-compose');
   }
@@ -82,7 +85,7 @@ export class BootScript {
   }
 
   dockerWithConfig(cfg: docker.DockerConfig) {
-    this.installDocker();
+    this.installDocker(cfg.install);
     this.configureDocker(cfg);
   }
 

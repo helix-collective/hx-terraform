@@ -168,7 +168,6 @@ export function createResources(
     s3_bucket_prefix: string,
     network_config: NetworkConfig,
   ): SharedResources {
-
   const network = createNetworkResources(tfgen, network_config);
   const domain = createDomainResources(tfgen, {domain_name});
   const buckets = createSharedBucketsResources(tfgen, {s3_bucket_prefix});
@@ -270,7 +269,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
 export type SharedSecurityGroupParams = {
   vpc: AR.Vpc;
 };
-export function createSharedSecurityGroupResources<AZ>(tfgen: TF.Generator, params : SharedSecurityGroupParams) : SharedSecurityGroupResources {
+export function createSharedSecurityGroupResources(tfgen: TF.Generator, params : SharedSecurityGroupParams) : SharedSecurityGroupResources {
   const {vpc} = params;
   const bastion_security_group = AR.createSecurityGroup(tfgen, 'bastion', {
     vpc_id: vpc.id,
@@ -478,7 +477,7 @@ export function createNetworkResources(
 /**
  * Create a DNS A record in the primary dns zone
  */
-export function dnsARecord<AZ>(
+export function dnsARecord(
   tfgen: TF.Generator,
   name: string,
   dr: DomainResources,
@@ -568,7 +567,7 @@ export type SharedResourcesSummary = {
   region: string;
 };
 
-export function sharedResourcesSummary<AZ>(sr: SharedResources) : SharedResourcesSummary {
+export function sharedResourcesSummary(sr: SharedResources) : SharedResourcesSummary {
   return {
     vpc: sr.vpc.id.value,
     azs: sr.azs.map(az=>{

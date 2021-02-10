@@ -4234,6 +4234,9 @@ export interface CloudfrontCacheBehaviourParams {
   allowed_methods: (string)[];
   cached_methods: (string)[];
   forwarded_values: CloudfrontForwardedValuesParams;
+  /**
+  path_pattern cannot be set for default cache behaviour, defaults to *
+  */
   path_pattern?: string;
   compress?: boolean;
   default_ttl?: number;

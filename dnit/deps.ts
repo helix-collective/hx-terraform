@@ -21,7 +21,7 @@ export {
   dockerRun,
   currentUserOpts,
   confirmation,
-} from 'https://denopkg.com/helix-collective/dnit-utils@v1.2.0/mod.ts';
+} from 'https://denopkg.com/helix-collective/dnit-utils@v1.2.1/mod.ts';
 
 // other deno typescript libs:
 export * as jszip from 'https://denopkg.com/hayd/deno-zip@0.8.0/mod.ts';

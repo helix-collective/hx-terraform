@@ -10,7 +10,7 @@ export {
   fs,
   Task,
   TrackedFile,
-} from 'https://deno.land/x/dnit@dnit-v1.11.0/mod.ts';
+} from 'https://deno.land/x/dnit@dnit-v1.12.1/mod.ts';
 
 // hx dnit-utils:
 export {

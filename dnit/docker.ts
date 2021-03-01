@@ -12,7 +12,7 @@ export async function runDockerizedTerraform(cmds: string[]): Promise<void> {
   const asUser = await currentUserOpts();
 
   await dockerRunConsole(TERRAFORM_IMAGE, {
-    interactive: false,
+    interactive: true,
     user: asUser.user,
     cmds: ['terraform', ...cmds],
     mounts: [

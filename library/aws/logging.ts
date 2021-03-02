@@ -25,6 +25,17 @@ export interface LoggingInfrastructureParams {
   cognito?: LoggingCognitoParams;
   logging_ip_whitelist?: AT.IpAddress[];
   log_cleanup?: LogCleanupMode;
+  /**
+   * Additional operations for the EC2 log aggregator instances first boot can be passed here.
+   */
+  log_aggregator_extra_bootscript?: bootscript.BootScript;
+
+  /**
+   * Specifies the AMI for the EC2 log aggregator instances. Defaults to an ubuntu 16.04 AMI
+   * for the appropriate region.
+   */
+  log_aggregator_amis?(region: AT.Region): AT.Ami;
+
 }
 
 export type LogCleanupMode = { kind: 'older_than_months', months: number };
@@ -168,9 +179,13 @@ export function createLoggingInfrastructure(
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
+  if (params.log_aggregator_extra_bootscript) {
+    bs.include(params.log_aggregator_extra_bootscript);
+  }
+
   function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
     return {
-      ami,
+      ami: params.log_aggregator_amis || ami,
       security_group,
       instance_type: AT.t2_small,
       key_name: params.aggregator_key_name,

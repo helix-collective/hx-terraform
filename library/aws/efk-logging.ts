@@ -176,38 +176,34 @@ export function createLoggingInfrastructure(
   bs.catToFile('/opt/etc/docker-compose.yml', DOCKER_COMPOSE_FILE);
   bs.sh('sudo -H -u app docker-compose -f /opt/etc/docker-compose.yml up -d');
 
-  function laparams(): aws.InstanceWithEipParams {
-    return {
-      ami,
-      security_group,
-      instance_type: AT.t2_small,
-      key_name: params.aggregator_key_name,
-      customize_instance: p => {
-        (p.iam_instance_profile = instance_profile.id),
-        (p.user_data = bs.compile());
-      },
-    };
-  }
-  const log_aggregators = [
-    aws.createInstanceWithEip(
+  const names = ["one","two"];
+  const log_aggregators : { eip: AR.Eip; ec2: AR.Instance }[] = [];
+  for(let i=0; i<names.length; ++i) {
+    const name = `log_aggregator_${names[i]}`;
+    const instance = aws.createInstanceWithEip(
       tfgen,
-      'log_aggregator_one',
+      name, // preserve existing name
       sr,
-      shared.externalSubnetIds(sr)[0],
-      laparams()
-    ),
-    aws.createInstanceWithEip(
-      tfgen,
-      'log_aggregator_two',
-      sr,
-      shared.externalSubnetIds(sr)[1],
-      laparams()
-    ),
-  ];
+      shared.externalSubnetIds(sr)[i],
+      {
+        ami,
+        security_group,
+        instance_type: AT.t2_small,
+        key_name: params.aggregator_key_name,
+        customize_instance: p => {
+          (p.iam_instance_profile = instance_profile.id),
+          (p.user_data = bs.compile());
+        },
+      }
+    );
 
-  log_aggregators.forEach(la=>{
-    alarms.createEc2Alarms(tfgen, sr.alarm_topic, la.ec2, '/dev/xvda1');
-  });
+    TF.withLocalNameScope(tfgen, name, tfgen=>{
+      // scope alarms to log aggregator name
+      alarms.createEc2Alarms(tfgen, sr.alarm_topic, instance.ec2, '/dev/xvda1');
+    });
+
+    log_aggregators.push(instance);
+  }
 
   const log_aggregator_ips = log_aggregators.map(la => la.eip.public_ip);
 

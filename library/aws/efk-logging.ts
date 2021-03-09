@@ -127,6 +127,7 @@ export function createLoggingInfrastructure(
     [
       policies.s3ReadonlyPolicy('s3readonly', params.secrets_s3_ref.bucket),
       policies.edModifyPolicy('elastic_search_modify_policy', ed),
+      policies.publish_metrics_policy
     ]
   );
 

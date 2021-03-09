@@ -154,6 +154,9 @@ export function createLoggingInfrastructure(
   bs.addUserToGroup('app', 'docker');
   bs.addAptPackage('jq');
   bs.mkdir('/opt/etc/secrets');
+  bs.cloudwatchMetrics('app',
+    bootscript.DEFAULT_CLOUDWATCH_METRICS_PARAMS
+  );
   bs.s3Fetch(
     params.secrets_s3_ref.extendKey('/fluentd-aggregator.key'),
     '/opt/etc/secrets/fluentd-aggregator.key',

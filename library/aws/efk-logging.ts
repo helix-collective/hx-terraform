@@ -10,6 +10,7 @@ import * as AR from '../../providers/aws/resources';
 import * as policies from './policies';
 import * as roles from './roles';
 import * as aws from './aws';
+import * as alarms from './alarms';
 import * as s3 from './s3';
 import * as bootscript from '../bootscript';
 import * as util from '../util';
@@ -203,6 +204,11 @@ export function createLoggingInfrastructure(
       laparams()
     ),
   ];
+
+  log_aggregators.forEach(la=>{
+    alarms.createEc2Alarms(tfgen, sr.alarm_topic, la.ec2, '/dev/xvda1');
+  });
+
   const log_aggregator_ips = log_aggregators.map(la => la.eip.public_ip);
 
   // The whitelist of static ip addresses allowed to write to the ES domain

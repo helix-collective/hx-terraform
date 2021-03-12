@@ -183,7 +183,7 @@ export function createLoggingInfrastructure(
     bs.include(params.log_aggregator_extra_bootscript);
   }
 
-  function laparams(subnet: AR.Subnet): aws.InstanceWithEipParams {
+  function laparams(subnet: AR.Subnet, name: string): aws.InstanceWithEipParams {
     return {
       ami: params.log_aggregator_amis || ami,
       security_group,
@@ -191,8 +191,18 @@ export function createLoggingInfrastructure(
       key_name: params.aggregator_key_name,
       customize_instance: p => {
         (p.iam_instance_profile = instance_profile.id),
-          (p.subnet_id = subnet.id),
-          (p.user_data = bs.compile());
+        (p.subnet_id = subnet.id),
+        (p.user_data = bs.compile());
+
+        // workaround canva's addition of tag: "canva.inspector.enable-scan": "false"
+        p.tags = {
+          // match what would-have-been the tags
+          ...tfgen.tagsContext(),
+          "Name": [...tfgen.nameContext(),name].join("_"),
+
+          // add the currently-existing tag
+          "canva.inspector.enable-scan": "false"
+        }
       },
     };
   }
@@ -201,13 +211,13 @@ export function createLoggingInfrastructure(
       tfgen,
       'log_aggregator_one',
       sr,
-      laparams(aws.firstAzExternalSubnet(sr))
+      laparams(aws.firstAzExternalSubnet(sr), 'log_aggregator_one'),
     ),
     aws.createInstanceWithEip(
       tfgen,
       'log_aggregator_two',
       sr,
-      laparams(aws.secondAzExternalSubnet(sr))
+      laparams(aws.secondAzExternalSubnet(sr), 'log_aggregator_two')
     ),
   ];
   const log_aggregator_ips = log_aggregators.map(la => la.eip.public_ip);

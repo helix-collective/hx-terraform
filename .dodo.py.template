@@ -93,7 +93,9 @@ def task_lambda_zips():
 def task_plan():
     return {
         'doc' : 'Execute terraform plan to show pending infrastructure changes and save the plan',
-        'actions': [ generate_providers(), generate_tf(), dockerized_terraform(['plan','-out=tfplan']) ],
+        'actions': [ generate_providers(),
+            #generate_tf(),
+        dockerized_terraform(['plan','-out=tfplan']) ],
         'file_dep': [ terraform_initialized.path ] + nodemodules.file_dep() + lambda_zipfiles(),
         'verbosity' : 2,
         'uptodate': [ False ],

@@ -2651,6 +2651,34 @@ export function fieldsFromDefaultSubnetParams(params: DefaultSubnetParams) : TF.
   return fields;
 }
 
+export interface VpcEndpointParams {
+  service_name: string;
+  vpc_id: VpcId;
+  auto_accept?: boolean;
+  policy?: string;
+  private_dns_enabled?: boolean;
+  route_table_ids?: (RouteTableId)[];
+  subnet_ids?: (SubnetId)[];
+  security_group_ids?: (SecurityGroupId)[];
+  tags?: TF.TagsMap;
+  vpc_endpoint_type?: 'Gateway' | 'GatewayLoadBalancer' | 'Interface';
+}
+
+export function fieldsFromVpcEndpointParams(params: VpcEndpointParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "service_name", params.service_name, TF.stringValue);
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "auto_accept", params.auto_accept, TF.booleanValue);
+  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalField(fields, "private_dns_enabled", params.private_dns_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "route_table_ids", params.route_table_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalField(fields, "vpc_endpoint_type", params.vpc_endpoint_type, TF.stringValue);
+  return fields;
+}
+
 export interface SecurityGroupParams {
   name?: string;
   name_prefix?: string;

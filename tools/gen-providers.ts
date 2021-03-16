@@ -3059,6 +3059,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(default_vpc);
   gen.generateParams(subnet);
   gen.generateParams(default_subnet);
+  gen.generateParams(vpc_endpoint);
   gen.generateParams(security_group);
   gen.generateParams(security_group_rule);
   gen.generateParams(ingress_rule);

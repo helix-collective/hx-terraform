@@ -378,6 +378,26 @@ export function useDefaultNetworkResources(
   }
 }
 
+// Generate VPC Endpoint for list of services.
+// For example ['s3'] will generate endpoint for com.amazonaws.<region>.s3
+export function createVpcEndpointsForServices(
+  tfgen: TF.Generator,
+  vpc: AR.Vpc,
+  region: AT.Region,
+  services: string[],
+) {
+  // Don't go through GW for predefined services.
+  for (const service of services) {
+    AR.createVpcEndpoint(tfgen, service, {
+      vpc_id: vpc.id,
+      tags: contextTagsWithName(tfgen, 'vpce_' + service),
+      service_name: 'com.amazonaws.' + region.value + '.' + service,
+      vpc_endpoint_type: 'Gateway',
+    });
+  }
+
+}
+
 export function createNetworkResources(
   tfgen: TF.Generator,
   network_config: NetworkConfig

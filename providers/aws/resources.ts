@@ -361,6 +361,38 @@ export interface DefaultSubnet extends TF.ResourceT<'DefaultSubnet'> {
 export type DefaultSubnetId = {type:'DefaultSubnetId',value:string};
 
 /**
+ *  Provides a resource to manage a AWS endpoint.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+ */
+export function createVpcEndpoint(tfgen: TF.Generator, rname: string, params: VpcEndpointParams): VpcEndpoint {
+  const fields = fieldsFromVpcEndpointParams(params);
+  const resource = tfgen.createTypedResource('VpcEndpoint', 'aws_vpc_endpoint', rname, fields);
+  const id: VpcEndpointId =  {type: 'VpcEndpointId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const owner_id: string =  '${' + TF.resourceName(resource) + '.owner_id}';
+  const prefix_list_id: string =  '${' + TF.resourceName(resource) + '.prefix_list_id}';
+  const arn: VpcEndpointArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VpcEndpoint');
+
+  return {
+    ...resource,
+    id,
+    owner_id,
+    prefix_list_id,
+    arn,
+  };
+}
+
+export interface VpcEndpoint extends TF.ResourceT<'VpcEndpoint'> {
+  id: VpcEndpointId;
+  owner_id: string;
+  prefix_list_id: string;
+  arn: VpcEndpointArn;
+}
+
+export type VpcEndpointId = {type:'VpcEndpointId',value:string};
+export type VpcEndpointArn = AT.ArnT<"VpcEndpoint">;
+
+/**
  *  Provides a security group resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/security_group.html
@@ -2616,6 +2648,34 @@ export function fieldsFromDefaultSubnetParams(params: DefaultSubnetParams) : TF.
   TF.addField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
   TF.addOptionalField(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface VpcEndpointParams {
+  service_name: string;
+  vpc_id: VpcId;
+  auto_accept?: boolean;
+  policy?: string;
+  private_dns_enabled?: boolean;
+  route_table_ids?: (RouteTableId)[];
+  subnet_ids?: (SubnetId)[];
+  security_group_ids?: (SecurityGroupId)[];
+  tags?: TF.TagsMap;
+  vpc_endpoint_type?: 'Gateway' | 'GatewayLoadBalancer' | 'Interface';
+}
+
+export function fieldsFromVpcEndpointParams(params: VpcEndpointParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "service_name", params.service_name, TF.stringValue);
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "auto_accept", params.auto_accept, TF.booleanValue);
+  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalField(fields, "private_dns_enabled", params.private_dns_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "route_table_ids", params.route_table_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalField(fields, "vpc_endpoint_type", params.vpc_endpoint_type, TF.stringValue);
   return fields;
 }
 

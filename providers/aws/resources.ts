@@ -361,6 +361,38 @@ export interface DefaultSubnet extends TF.ResourceT<'DefaultSubnet'> {
 export type DefaultSubnetId = {type:'DefaultSubnetId',value:string};
 
 /**
+ *  Provides a resource to manage a AWS endpoint.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+ */
+export function createVpcEndpoint(tfgen: TF.Generator, rname: string, params: VpcEndpointParams): VpcEndpoint {
+  const fields = fieldsFromVpcEndpointParams(params);
+  const resource = tfgen.createTypedResource('VpcEndpoint', 'aws_vpc_endpoint', rname, fields);
+  const id: VpcEndpointId =  {type: 'VpcEndpointId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const owner_id: string =  '${' + TF.resourceName(resource) + '.owner_id}';
+  const prefix_list_id: string =  '${' + TF.resourceName(resource) + '.prefix_list_id}';
+  const arn: VpcEndpointArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VpcEndpoint');
+
+  return {
+    ...resource,
+    id,
+    owner_id,
+    prefix_list_id,
+    arn,
+  };
+}
+
+export interface VpcEndpoint extends TF.ResourceT<'VpcEndpoint'> {
+  id: VpcEndpointId;
+  owner_id: string;
+  prefix_list_id: string;
+  arn: VpcEndpointArn;
+}
+
+export type VpcEndpointId = {type:'VpcEndpointId',value:string};
+export type VpcEndpointArn = AT.ArnT<"VpcEndpoint">;
+
+/**
  *  Provides a security group resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/security_group.html

@@ -216,6 +216,22 @@ const default_subnet: RecordDecl = {
   ],
 };
 
+const vpc_endpoint: RecordDecl = {
+  name: 'vpc_endpoint',
+  fields: [
+    requiredField('service_name', STRING),
+    requiredField('vpc_id', resourceIdType('VpcId')),
+    optionalField('auto_accept', BOOLEAN),
+    optionalField('policy', STRING),
+    optionalField('private_dns_enabled', BOOLEAN),
+    optionalField('route_table_ids', listType(resourceIdType('RouteTableId'))),
+    optionalField('subnet_ids', listType(resourceIdType('SubnetId'))),
+    optionalField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    optionalField('tags', TAGS_MAP),
+    optionalField('vpc_endpoint_type', enumType(['Gateway', 'GatewayLoadBalancer', 'Interface'])),
+  ],
+};
+
 const eip: RecordDecl = {
   name: 'eip',
   fields: [
@@ -2288,6 +2304,25 @@ function generateAws(gen: Generator) {
       resourceIdAttr('id', subnet),
       stringAliasAttr('availability_zone', 'AvailabilityZone', 'AT.AvailabilityZone'),
     ]
+  );
+
+  gen.generateResource(
+    'Provides a resource to manage a AWS endpoint.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint',
+    vpc_endpoint,
+    [
+      resourceIdAttr('id', vpc_endpoint),
+      // cidr_blocks
+      // dns_entry
+      // network_interface_ids
+      stringAttr('owner_id'),
+      stringAttr('prefix_list_id'),
+      // requester_managed
+      // state
+    ],
+    {
+      arn: true,
+    }
   );
 
   gen.generateResource(

@@ -2277,14 +2277,20 @@ function generateAws(gen: Generator) {
     'Provides a VPC.',
     'https://www.terraform.io/docs/providers/aws/d/vpc.html',
     vpc,
-    [resourceIdAttr('id', vpc)]
+    [
+      resourceIdAttr('id', vpc),
+      resourceIdAttr('default_route_table_id', route_table),
+    ]
   );
 
   gen.generateResource(
     'Provides a resource to manage the default AWS VPC in the current region.',
     'https://www.terraform.io/docs/providers/aws/r/default_vpc.html',
     default_vpc,
-    [resourceIdAttr('id', vpc)]
+    [
+      resourceIdAttr('id', vpc),
+      resourceIdAttr('default_route_table_id', route_table),
+    ]
   );
 
   gen.generateResource(

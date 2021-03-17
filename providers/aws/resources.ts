@@ -278,15 +278,18 @@ export function createVpc(tfgen: TF.Generator, rname: string, params: VpcParams)
   const fields = fieldsFromVpcParams(params);
   const resource = tfgen.createTypedResource('Vpc', 'aws_vpc', rname, fields);
   const id: VpcId =  {type: 'VpcId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: '${' + TF.resourceName(resource) + '.default_route_table_id}'};
 
   return {
     ...resource,
     id,
+    default_route_table_id,
   };
 }
 
 export interface Vpc extends TF.ResourceT<'Vpc'> {
   id: VpcId;
+  default_route_table_id: RouteTableId;
 }
 
 export type VpcId = {type:'VpcId',value:string};
@@ -300,15 +303,18 @@ export function createDefaultVpc(tfgen: TF.Generator, rname: string, params: Def
   const fields = fieldsFromDefaultVpcParams(params);
   const resource = tfgen.createTypedResource('DefaultVpc', 'aws_default_vpc', rname, fields);
   const id: VpcId =  {type: 'VpcId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: '${' + TF.resourceName(resource) + '.default_route_table_id}'};
 
   return {
     ...resource,
     id,
+    default_route_table_id,
   };
 }
 
 export interface DefaultVpc extends TF.ResourceT<'DefaultVpc'> {
   id: VpcId;
+  default_route_table_id: RouteTableId;
 }
 
 export type DefaultVpcId = {type:'DefaultVpcId',value:string};

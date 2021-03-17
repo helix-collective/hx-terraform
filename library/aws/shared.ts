@@ -389,6 +389,7 @@ export function createVpcEndpointsForServices(
   vpc: AR.Vpc,
   region: AT.Region,
   services: string[],
+  endpointParams: Partial<AR.VpcEndpointParams>,
 ) {
   // Don't go through GW for predefined services.
   for (const service of services) {
@@ -396,7 +397,7 @@ export function createVpcEndpointsForServices(
       vpc_id: vpc.id,
       tags: contextTagsWithName(tfgen, 'vpce_' + service),
       service_name: 'com.amazonaws.' + region.value + '.' + service,
-      vpc_endpoint_type: 'Gateway',
+      ...endpointParams,
     });
   }
 

@@ -45,6 +45,7 @@ export interface AvailabilityZone {
  */
 export interface AzResourcesExternalSubnet {
   external_subnet: AR.Subnet;
+  external_route_table_id: AR.RouteTableId;
 }
 
 /**
@@ -53,7 +54,9 @@ export interface AzResourcesExternalSubnet {
  */
 export interface AzResourcesInternalSubnet {
   internal_subnet: AR.Subnet;
+  internal_route_table_id: AR.RouteTableId;
 }
+
 
 /**
  * SharedResources: Resources for an availability zone -
@@ -367,6 +370,7 @@ export function useDefaultNetworkResources(
     return {
       azname: az.value,
       external_subnet,
+      external_route_table_id: vpc.default_route_table_id,
     };
   });
 
@@ -485,7 +489,9 @@ export function createNetworkResources(
 
       return {
         external_subnet,
+        external_route_table_id: rtexternal.id,
         internal_subnet,
+        internal_route_table_id: rtinternal.id,
         azname: az.azname,
       };
     });

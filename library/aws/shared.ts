@@ -357,7 +357,7 @@ export function useDefaultNetworkResources(
   azs0: AT.AvailabilityZone[],
 ): NetworkResources {
   const default_vpc = AR.createDefaultVpc(tfgen, "default", {});
-  const vpc: AR.Vpc = {id:default_vpc.id, tftype:default_vpc.tftype, tfname:default_vpc.tfname, type:"Vpc"};
+  const vpc: AR.Vpc = {id:default_vpc.id, tftype:default_vpc.tftype, tfname:default_vpc.tfname, type:"Vpc", default_route_table_id: default_vpc.default_route_table_id};
 
   const azs: PublicAzResources[] = azs0.map( az => {
     const default_subnet = AR.createDefaultSubnet(tfgen, az.value, {

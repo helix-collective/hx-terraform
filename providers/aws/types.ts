@@ -163,6 +163,8 @@ export const c5_4xlarge = instanceType('c5.4xlarge');
 export const c5_9xlarge = instanceType('c5.9xlarge');
 export const c5_18xlarge = instanceType('c5.18xlarge');
 
+export const c5d_24xlarge = instanceType('c5d.24xlarge');
+
 export const m5_large = instanceType('m5.large');
 export const m5_xlarge = instanceType('m5.xlarge');
 export const m5_2xlarge = instanceType('m5.2xlarge');
@@ -296,6 +298,7 @@ export const db_m4_2xlarge: DbInstanceType = dbInstanceType('db.m4.2xlarge');
 export const db_m4_4xlarge: DbInstanceType = dbInstanceType('db.m4.4xlarge');
 export const db_m4_large: DbInstanceType = dbInstanceType('db.m4.large');
 export const db_m4_xlarge: DbInstanceType = dbInstanceType('db.m4.xlarge');
+export const db_m5_2xlarge: DbInstanceType = dbInstanceType('db.m5.2xlarge');
 export const db_r3_2xlarge: DbInstanceType = dbInstanceType('db.r3.2xlarge');
 export const db_r3_4xlarge: DbInstanceType = dbInstanceType('db.r3.4xlarge');
 export const db_r3_8xlarge: DbInstanceType = dbInstanceType('db.r3.8xlarge');

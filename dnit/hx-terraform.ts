@@ -27,7 +27,7 @@ export interface HxTerraformTasks extends TasksObject {
   manifests: Manifests;
 };
 
-export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<HxTerraformTasks> {
+export function makeHxTerraformTasks(params: {yarn: YarnTasks}) : HxTerraformTasks {
   const {yarn} = params;
 
   // typescript terraform providers generated:

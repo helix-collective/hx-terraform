@@ -90,7 +90,7 @@ export function createLoggingInfrastructure(
     elasticsearch_version: '5.5',
     cluster_config: {
       instance_type: AT.m4_large_elasticsearch,
-      instance_count: 2,
+      instance_count: 6,
       dedicated_master_enabled: false,
     },
     advanced_options: {
@@ -188,7 +188,7 @@ export function createLoggingInfrastructure(
       {
         ami,
         security_group,
-        instance_type: AT.t2_small,
+        instance_type: AT.t3_large,
         key_name: params.aggregator_key_name,
         customize_instance: p => {
           (p.iam_instance_profile = instance_profile.id),

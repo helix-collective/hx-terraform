@@ -44,7 +44,7 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
     description: 'Generate typescript for providers',
     action: async () => {
       await runConsole(
-        ['./node_modules/.bin/ts-node', 'hx-terraform/tools/gen-providers.ts'],
+        ['npx', 'ts-node', 'hx-terraform/tools/gen-providers.ts'],
         {
           cwd: path.join(ROOT, 'typescript'),
         }
@@ -79,7 +79,7 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
     name: 'generateTerraform',
     description: 'Generate terraform files from the terraform EDSL',
     action: async () => {
-      await runConsole(['./node_modules/.bin/ts-node', 'main.ts'], {
+      await runConsole(['npx','ts-node', 'main.ts'], {
         cwd: path.join(ROOT, 'typescript'),
       });
     },

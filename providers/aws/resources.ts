@@ -2271,6 +2271,93 @@ export interface EksCluster extends TF.ResourceT<'EksCluster'> {
 export type EksClusterId = {type:'EksClusterId',value:string};
 export type EksClusterArn = AT.ArnT<"EksCluster">;
 
+/**
+ *  Creates a AWS Batch compute environment. Compute environments contain the Amazon ECS container instances that are used to run containerized batch jobs
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_compute_environment
+ */
+export function createBatchComputeEnvironment(tfgen: TF.Generator, rname: string, params: BatchComputeEnvironmentParams): BatchComputeEnvironment {
+  const fields = fieldsFromBatchComputeEnvironmentParams(params);
+  const resource = tfgen.createTypedResource('BatchComputeEnvironment', 'aws_batch_compute_environment', rname, fields);
+  const id: BatchComputeEnvironmentId =  {type: 'BatchComputeEnvironmentId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const status: string =  '${' + TF.resourceName(resource) + '.status}';
+  const status_reason: string =  '${' + TF.resourceName(resource) + '.status_reason}';
+  const arn: BatchComputeEnvironmentArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchComputeEnvironment');
+
+  return {
+    ...resource,
+    id,
+    status,
+    status_reason,
+    arn,
+  };
+}
+
+export interface BatchComputeEnvironment extends TF.ResourceT<'BatchComputeEnvironment'> {
+  id: BatchComputeEnvironmentId;
+  status: string;
+  status_reason: string;
+  arn: BatchComputeEnvironmentArn;
+}
+
+export type BatchComputeEnvironmentId = {type:'BatchComputeEnvironmentId',value:string};
+export type BatchComputeEnvironmentArn = AT.ArnT<"BatchComputeEnvironment">;
+
+/**
+ *  Provides a Batch Job Definition resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_job_definition
+ */
+export function createBatchJobDefinition(tfgen: TF.Generator, rname: string, params: BatchJobDefinitionParams): BatchJobDefinition {
+  const fields = fieldsFromBatchJobDefinitionParams(params);
+  const resource = tfgen.createTypedResource('BatchJobDefinition', 'aws_batch_job_definition', rname, fields);
+  const id: BatchJobDefinitionId =  {type: 'BatchJobDefinitionId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const revision: string =  '${' + TF.resourceName(resource) + '.revision}';
+  const arn: BatchJobDefinitionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchJobDefinition');
+
+  return {
+    ...resource,
+    id,
+    revision,
+    arn,
+  };
+}
+
+export interface BatchJobDefinition extends TF.ResourceT<'BatchJobDefinition'> {
+  id: BatchJobDefinitionId;
+  revision: string;
+  arn: BatchJobDefinitionArn;
+}
+
+export type BatchJobDefinitionId = {type:'BatchJobDefinitionId',value:string};
+export type BatchJobDefinitionArn = AT.ArnT<"BatchJobDefinition">;
+
+/**
+ *  Provides a Batch Job Queue resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_job_queue
+ */
+export function createBatchJobQueue(tfgen: TF.Generator, rname: string, params: BatchJobQueueParams): BatchJobQueue {
+  const fields = fieldsFromBatchJobQueueParams(params);
+  const resource = tfgen.createTypedResource('BatchJobQueue', 'aws_batch_job_queue', rname, fields);
+  const id: BatchJobQueueId =  {type: 'BatchJobQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: BatchJobQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchJobQueue');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface BatchJobQueue extends TF.ResourceT<'BatchJobQueue'> {
+  id: BatchJobQueueId;
+  arn: BatchJobQueueArn;
+}
+
+export type BatchJobQueueId = {type:'BatchJobQueueId',value:string};
+export type BatchJobQueueArn = AT.ArnT<"BatchJobQueue">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -4846,6 +4933,116 @@ export function fieldsFromEksClusterVpcConfigParams(params: EksClusterVpcConfigP
   TF.addOptionalField(fields, "endpoint_public_access", params.endpoint_public_access, TF.booleanValue);
   TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
   TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  return fields;
+}
+
+export interface BatchComputeEnvironmentParams {
+  compute_environment_name?: string;
+  compute_environment_name_prefix?: string;
+  compute_resource?: BatchComputeEnvironmentComputeResourceParams;
+  service_role: AT.ArnT<"IamRole">;
+  state?: 'ENABLED' | 'DISABLED';
+  tags?: TF.TagsMap;
+  type: 'MANAGED' | 'UNMANAGED';
+}
+
+export function fieldsFromBatchComputeEnvironmentParams(params: BatchComputeEnvironmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "compute_environment_name", params.compute_environment_name, TF.stringValue);
+  TF.addOptionalField(fields, "compute_environment_name_prefix", params.compute_environment_name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "compute_resource", params.compute_resource, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceParams(v)));
+  TF.addField(fields, "service_role", params.service_role, TF.resourceArnValue);
+  TF.addOptionalField(fields, "state", params.state, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface BatchComputeEnvironmentComputeResourceParams {
+  allocation_strategy?: 'BEST_FIT_PROGRESSIVE' | 'SPOT_CAPACITY_OPTIMIZED' | 'BEST_FIT';
+  bid_percentage?: number;
+  desired_vcpus?: number;
+  ec2_key_pair?: AT.KeyName;
+  image_id?: AT.Ami;
+  instance_role: AT.ArnT<"IamRole">;
+  instance_type: (string)[];
+  max_vcpus: number;
+  min_vcpus: number;
+  security_group_ids: (SecurityGroupId)[];
+  spot_iam_fleet_role?: AT.ArnT<"IamRole">;
+  subnets: (SubnetId)[];
+  tags?: TF.TagsMap;
+  type: 'EC2' | 'SPOT';
+}
+
+export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: BatchComputeEnvironmentComputeResourceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "allocation_strategy", params.allocation_strategy, TF.stringValue);
+  TF.addOptionalField(fields, "bid_percentage", params.bid_percentage, TF.numberValue);
+  TF.addOptionalField(fields, "desired_vcpus", params.desired_vcpus, TF.numberValue);
+  TF.addOptionalField(fields, "ec2_key_pair", params.ec2_key_pair, TF.stringAliasValue);
+  TF.addOptionalField(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addField(fields, "instance_role", params.instance_role, TF.resourceArnValue);
+  TF.addField(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
+  TF.addField(fields, "max_vcpus", params.max_vcpus, TF.numberValue);
+  TF.addField(fields, "min_vcpus", params.min_vcpus, TF.numberValue);
+  TF.addField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "spot_iam_fleet_role", params.spot_iam_fleet_role, TF.resourceArnValue);
+  TF.addField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface BatchJobDefinitionParams {
+  name: string;
+  /**
+  A valid container properties provided as a single valid JSON document.
+  */
+  container_properties?: string;
+  parameters?: (string)[];
+  retry_strategy?: BatchJobDefinitionRetryStrategyParams;
+  tags?: TF.TagsMap;
+  timeout?: BatchJobDefinitionTimeoutParams;
+  type: 'container';
+}
+
+export function fieldsFromBatchJobDefinitionParams(params: BatchJobDefinitionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "container_properties", params.container_properties, TF.stringValue);
+  TF.addOptionalField(fields, "parameters", params.parameters, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "retry_strategy", params.retry_strategy, (v) => TF.mapValue(fieldsFromBatchJobDefinitionRetryStrategyParams(v)));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalField(fields, "timeout", params.timeout, (v) => TF.mapValue(fieldsFromBatchJobDefinitionTimeoutParams(v)));
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface BatchJobQueueParams {
+  name: string;
+  /**
+  Specifies the set of compute environments mapped to a job queue and their order.
+  The position of the compute environments in the list will dictate the order.
+  You can associate up to 3 compute environments with a job queue.
+  */
+  compute_environments: (AT.ArnT<"BatchComputeEnvironment">)[];
+  /**
+  The priority of the job queue.
+  Job queues with a higher priority are evaluated first when associated with the same compute environment.
+  */
+  priority: number;
+  state: 'ENABLED' | 'DISABLED';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromBatchJobQueueParams(params: BatchJobQueueParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "compute_environments", params.compute_environments, TF.listValue(TF.resourceArnValue));
+  TF.addField(fields, "priority", params.priority, TF.numberValue);
+  TF.addField(fields, "state", params.state, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

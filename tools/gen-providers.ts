@@ -1899,6 +1899,94 @@ const eks_cluster: RecordDecl = {
   ],
 };
 
+const batch_compute_environment_compute_resource: RecordDecl = {
+  name: 'batch_compute_environment_compute_resource',
+  fields: [
+    optionalField('allocation_strategy', enumType([
+      'BEST_FIT_PROGRESSIVE',
+      'SPOT_CAPACITY_OPTIMIZED',
+      'BEST_FIT',
+    ])),
+    optionalField('bid_percentage', NUMBER),
+    optionalField('desired_vcpus', NUMBER),
+    optionalField('ec2_key_pair', stringAliasType('AT.KeyName')),
+    optionalField('image_id', stringAliasType('AT.Ami')),
+    requiredField('instance_role', arnType(iam_role)),
+    requiredField('instance_type', listType(STRING)),
+    // launch template
+    requiredField('max_vcpus', NUMBER),
+    requiredField('min_vcpus', NUMBER),
+    requiredField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
+    optionalField('spot_iam_fleet_role', arnType(iam_role)),
+    requiredField('subnets', listType(resourceIdType('SubnetId'))),
+    optionalField('tags', TAGS_MAP),
+    requiredField('type', enumType(['EC2', 'SPOT'])),
+  ],
+};
+
+const batch_compute_environment: RecordDecl = {
+  name: 'batch_compute_environment',
+  fields: [
+    optionalField('compute_environment_name', STRING),
+    optionalField('compute_environment_name_prefix', STRING),
+    optionalField('compute_resource', recordType(batch_compute_environment_compute_resource)),
+    requiredField('service_role', arnType(iam_role)),
+    optionalField('state', enumType(['ENABLED', 'DISABLED'])),
+    optionalField('tags', TAGS_MAP),
+    requiredField('type', enumType(['MANAGED', 'UNMANAGED'])),
+  ],
+};
+
+const batch_job_definition_retry_strategy: RecordDecl = {
+  name: 'batch_job_definition_retry_strategy',
+  fields: [
+    optionalField('attempts', NUMBER),
+  ],
+};
+
+const batch_job_definition_timeout: RecordDecl = {
+  name: 'batch_job_definition_timeout',
+  fields: [
+    optionalField('attempt_duration_seconds ', NUMBER, [
+      'The time duration in seconds after which AWS Batch terminates your jobs if they have not finished.',
+      'The minimum value for the timeout is 60 seconds.',
+    ]),
+  ],
+};
+
+const batch_job_definition: RecordDecl = {
+  name: 'batch_job_definition',
+  fields: [
+    requiredField('name', STRING),
+    optionalField('container_properties', STRING, [
+      'A valid container properties provided as a single valid JSON document.',
+    ]),
+    optionalField('parameters', listType(STRING)),
+    optionalField('retry_strategy', recordType(batch_job_definition_retry_strategy)),
+    optionalField('tags', TAGS_MAP),
+    optionalField('timeout', recordType(batch_job_definition_timeout)),
+    requiredField('type', enumType(['container'])),
+  ],
+};
+
+const batch_job_queue: RecordDecl = {
+  name: 'batch_job_queue',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('compute_environments', listType(arnType(batch_compute_environment)), [
+      'Specifies the set of compute environments mapped to a job queue and their order.',
+      'The position of the compute environments in the list will dictate the order.',
+      'You can associate up to 3 compute environments with a job queue.'
+    ]),
+    requiredField('priority', NUMBER, [
+      'The priority of the job queue.',
+      'Job queues with a higher priority are evaluated first when associated with the same compute environment.'
+    ]),
+    requiredField('state', enumType(['ENABLED', 'DISABLED'])),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
 function autoscaling_policy(gen: Generator): ResourcesParams {
   // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#step_adjustment
   const step_adjustment: RecordDecl = {
@@ -3045,6 +3133,46 @@ function generateAws(gen: Generator) {
     }
   );
 
+  gen.generateResource(
+    'Creates a AWS Batch compute environment. Compute environments contain the Amazon ECS container instances that are used to run containerized batch jobs',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_compute_environment',
+    batch_compute_environment,
+    [
+      resourceIdAttr('id', batch_compute_environment),
+      // resourceArnAttr('ecs_cluster_arn', elastic_compute_service),
+      stringAttr('status'),
+      stringAttr('status_reason'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a Batch Job Definition resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_job_definition',
+    batch_job_definition,
+    [
+      resourceIdAttr('id', batch_job_definition),
+      stringAttr('revision'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a Batch Job Queue resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_job_queue',
+    batch_job_queue,
+    [
+      resourceIdAttr('id', batch_job_queue),
+    ],
+    {
+      arn: true,
+    }
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -3197,6 +3325,10 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_identity_pool_roles_attachment_roles);
   gen.generateParams(eks_cluster);
   gen.generateParams(eks_cluster_vpc_config);
+  gen.generateParams(batch_compute_environment);
+  gen.generateParams(batch_compute_environment_compute_resource);
+  gen.generateParams(batch_job_definition);
+  gen.generateParams(batch_job_queue);
 
   autoscaling_policy(gen);
   amiDataSource(gen);

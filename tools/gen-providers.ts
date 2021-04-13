@@ -1929,7 +1929,7 @@ const batch_compute_environment: RecordDecl = {
   fields: [
     optionalField('compute_environment_name', STRING),
     optionalField('compute_environment_name_prefix', STRING),
-    optionalField('compute_resource', recordType(batch_compute_environment_compute_resource)),
+    optionalField('compute_resources', recordType(batch_compute_environment_compute_resource)),
     requiredField('service_role', arnType(iam_role)),
     optionalField('state', enumType(['ENABLED', 'DISABLED'])),
     optionalField('tags', TAGS_MAP),

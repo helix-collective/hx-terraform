@@ -4939,7 +4939,7 @@ export function fieldsFromEksClusterVpcConfigParams(params: EksClusterVpcConfigP
 export interface BatchComputeEnvironmentParams {
   compute_environment_name?: string;
   compute_environment_name_prefix?: string;
-  compute_resource?: BatchComputeEnvironmentComputeResourceParams;
+  compute_resources?: BatchComputeEnvironmentComputeResourceParams;
   service_role: AT.ArnT<"IamRole">;
   state?: 'ENABLED' | 'DISABLED';
   tags?: TF.TagsMap;
@@ -4950,7 +4950,7 @@ export function fieldsFromBatchComputeEnvironmentParams(params: BatchComputeEnvi
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "compute_environment_name", params.compute_environment_name, TF.stringValue);
   TF.addOptionalField(fields, "compute_environment_name_prefix", params.compute_environment_name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "compute_resource", params.compute_resource, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceParams(v)));
+  TF.addOptionalField(fields, "compute_resources", params.compute_resources, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceParams(v)));
   TF.addField(fields, "service_role", params.service_role, TF.resourceArnValue);
   TF.addOptionalField(fields, "state", params.state, TF.stringValue);
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
@@ -4991,6 +4991,30 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
   TF.addField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface BatchJobDefinitionRetryStrategyParams {
+  attempts?: number;
+}
+
+export function fieldsFromBatchJobDefinitionRetryStrategyParams(params: BatchJobDefinitionRetryStrategyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "attempts", params.attempts, TF.numberValue);
+  return fields;
+}
+
+export interface BatchJobDefinitionTimeoutParams {
+  /**
+  The time duration in seconds after which AWS Batch terminates your jobs if they have not finished.
+  The minimum value for the timeout is 60 seconds.
+  */
+  attempt_duration_seconds ?: number;
+}
+
+export function fieldsFromBatchJobDefinitionTimeoutParams(params: BatchJobDefinitionTimeoutParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "attempt_duration_seconds ", params.attempt_duration_seconds , TF.numberValue);
   return fields;
 }
 

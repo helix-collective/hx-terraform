@@ -1911,7 +1911,7 @@ const batch_compute_environment_compute_resource: RecordDecl = {
     optionalField('desired_vcpus', NUMBER),
     optionalField('ec2_key_pair', stringAliasType('AT.KeyName')),
     optionalField('image_id', stringAliasType('AT.Ami')),
-    requiredField('instance_role', arnType(iam_role)),
+    requiredField('instance_role', arnType(iam_instance_profile)),
     requiredField('instance_type', listType(STRING)),
     // launch template
     requiredField('max_vcpus', NUMBER),

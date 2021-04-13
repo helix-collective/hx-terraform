@@ -4964,7 +4964,7 @@ export interface BatchComputeEnvironmentComputeResourceParams {
   desired_vcpus?: number;
   ec2_key_pair?: AT.KeyName;
   image_id?: AT.Ami;
-  instance_role: AT.ArnT<"IamRole">;
+  instance_role: AT.ArnT<"IamInstanceProfile">;
   instance_type: (string)[];
   max_vcpus: number;
   min_vcpus: number;

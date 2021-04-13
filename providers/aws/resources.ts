@@ -4994,6 +4994,30 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
   return fields;
 }
 
+export interface BatchJobDefinitionRetryStrategyParams {
+  attempts?: number;
+}
+
+export function fieldsFromBatchJobDefinitionRetryStrategyParams(params: BatchJobDefinitionRetryStrategyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "attempts", params.attempts, TF.numberValue);
+  return fields;
+}
+
+export interface BatchJobDefinitionTimeoutParams {
+  /**
+  The time duration in seconds after which AWS Batch terminates your jobs if they have not finished.
+  The minimum value for the timeout is 60 seconds.
+  */
+  attempt_duration_seconds ?: number;
+}
+
+export function fieldsFromBatchJobDefinitionTimeoutParams(params: BatchJobDefinitionTimeoutParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "attempt_duration_seconds ", params.attempt_duration_seconds , TF.numberValue);
+  return fields;
+}
+
 export interface BatchJobDefinitionParams {
   name: string;
   /**

@@ -3327,6 +3327,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(eks_cluster_vpc_config);
   gen.generateParams(batch_compute_environment);
   gen.generateParams(batch_compute_environment_compute_resource);
+  gen.generateParams(batch_job_definition_retry_strategy);
+  gen.generateParams(batch_job_definition_timeout);
   gen.generateParams(batch_job_definition);
   gen.generateParams(batch_job_queue);
 

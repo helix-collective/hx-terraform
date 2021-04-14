@@ -137,7 +137,7 @@ function createController(
   name: string,
   sr: shared.SharedResources,
   params: AutoscaleProcessorParams,
-  endpoints: EndPoint[]
+  endpoints: EndPoint[],
 ) {
   const app_user = appUserOrDefault(params.app_user);
   const releases_s3 = params.releases_s3;
@@ -188,6 +188,9 @@ function createController(
       i.user_data = bs.compile();
       i.iam_instance_profile = controller_instance_profile.id;
       i.subnet_id = subnetId;
+      if (params.customize_controller) {
+        params.customize_controller(i);
+      }
     },
   });
 
@@ -686,6 +689,11 @@ interface AutoscaleProcessorParams {
    * Customize the autoscaling group
    */
   customize_autoscaling_group?: Customize<AR.AutoscalingGroupParams>;
+
+  /**
+   * Customize the controller instance
+   */
+  customize_controller?: Customize<AR.InstanceParams>;
 
   /**
    * Substitute the default nginx template used.

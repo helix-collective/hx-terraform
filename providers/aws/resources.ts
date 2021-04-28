@@ -2934,7 +2934,7 @@ export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
   TF.addOptionalField(fields, "ttl", params.ttl, TF.stringValue);
-  TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.quotedStringValue));
   TF.addOptionalField(fields, "alias", params.alias, (v) => TF.mapValue(fieldsFromRoute53AliasParams(v)));
   TF.addOptionalField(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
   return fields;

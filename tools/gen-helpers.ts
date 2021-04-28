@@ -54,14 +54,26 @@ export type ConvertNumToStr = {
   typescript: 'number';
   terraform: 'string';
 };
+export type ConvertStrToStr = {
+  conv: 'str-to-str';
+  typescript: 'string';
+  terraform: 'string';
+};
 export type ConvertToPrimitive = {
   kind: 'convert-to-primitive';
-} & ConvertNumToStr;
+} & ( ConvertNumToStr | ConvertStrToStr);
 
 export const NUMBERSTR: ConvertToPrimitive = {
   kind: 'convert-to-primitive',
   conv: 'num-to-str',
   typescript: 'number',
+  terraform: 'string',
+};
+
+export const QUOTED_STRING: ConvertToPrimitive = {
+  kind: 'convert-to-primitive',
+  conv: 'str-to-str',
+  typescript: 'string',
   terraform: 'string',
 };
 
@@ -292,6 +304,8 @@ function genResourceFnConvert(type: ConvertToPrimitive): string {
   switch (type.conv) {
     case 'num-to-str':
       return 'TF.numberStringValue';
+    case 'str-to-str':
+      return 'TF.quotedStringValue';
   }
 }
 

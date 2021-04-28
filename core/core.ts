@@ -128,6 +128,12 @@ export function stringValue(value: string): ResourceValue {
   return { kind: 'text', text: quotedText(value) };
 }
 
+// We use that function and QUOTED_STRING type when we need to preserve
+// quoting semantics instead of heredocs for strings need quoting.
+export function quotedStringValue(value: string): ResourceValue {
+  return { kind: 'text', text: quotedTextNoEof(value) };
+}
+
 export function numberStringValue(value: number): ResourceValue {
   return { kind: 'text', text: `"${value}"` };
 }
@@ -837,6 +843,19 @@ function quotedText(s: string) {
     const eof = getUniqueEof(s);
     const trailing = s.endsWith('\n') ? '' : '\n';
     return `<<${eof}\n${s}${trailing}${eof}\n`;
+  }
+  return JSON.stringify(s);
+}
+
+function quotedTextNoEof(s: string) {
+  if (s.startsWith(RAW_EXPR_PREFIX)) {
+    return s.slice(RAW_EXPR_PREFIX.length);
+  }
+
+  const needsQuoting = s.includes('"');
+
+  if (needsQuoting) {
+    s = s.replace(/"/g, "\"");
   }
   return JSON.stringify(s);
 }

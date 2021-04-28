@@ -14,6 +14,7 @@ import {
   NUMBER,
   BOOLEAN,
   STRING,
+  QUOTED_STRING,
   TAGS_MAP,
   stringAliasType,
   arnType,
@@ -403,7 +404,7 @@ const route53_record: RecordDecl = {
       ])
     ),
     optionalField('ttl', STRING),
-    optionalField('records', listType(STRING)),
+    optionalField('records', listType(QUOTED_STRING)),
     optionalField('alias', recordType(route53_alias)),
     optionalField('allow_overwrite', BOOLEAN),
   ],

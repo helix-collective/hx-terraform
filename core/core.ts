@@ -836,7 +836,7 @@ function quotedText(s: string) {
   if (needsQuoting) {
     const eof = getUniqueEof(s);
     const trailing = s.endsWith('\n') ? '' : '\n';
-    return `<<${eof}\n${s}${trailing}${eof}`;
+    return `<<${eof}\n${s}${trailing}${eof}\n`;
   }
   return JSON.stringify(s);
 }

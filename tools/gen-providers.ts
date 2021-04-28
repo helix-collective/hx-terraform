@@ -324,7 +324,14 @@ const route: RecordDecl = {
     requiredField('route_table_id', resourceIdType('RouteTableId')),
     requiredField('destination_cidr_block', stringAliasType('AT.CidrBlock')),
     optionalField('nat_gateway_id', resourceIdType('NatGatewayId')),
-    optionalField('gateway_id', resourceIdType('InternetGatewayId')),
+    optionalField('gateway_id', resourceIdType('InternetGatewayId'),[
+      "Note according to the terraform docs",
+      "'gateway_id - (Optional) Identifier of a VPC internet gateway or a virtual private gateway'",
+      "Currently this 'or' is difficult to capture, so it has been left up to the client code",
+      "",
+      "When using a vpn use the following in the client",
+      "'gateway_id: { type: 'InternetGatewayId', value: vpn_gw.id.value }'",
+    ]),
   ],
 };
 
@@ -887,6 +894,52 @@ const autoscaling_attachment: RecordDecl = {
       resourceIdType('AutoscalingGroupId')
     ),
     requiredField('alb_target_group_arn', arnType(lb_target_group)),
+  ],
+};
+
+const customer_gateway: RecordDecl = {
+  name: 'customer_gateway',
+  fields: [
+    requiredField('bgp_asn', NUMBER, ["use 65000 unless you know better"]),
+    requiredField('ip_address', stringAliasType("AT.IpAddress")),
+    requiredField('type', enumType(["ipsec.1"])),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const vpn_gateway: RecordDecl = {
+  name: 'vpn_gateway',
+  fields: [
+    requiredField('vpc_id', resourceIdType('VpcId')),
+    optionalField('tags', TAGS_MAP),
+    //availability_zone
+    //amazon_side_asn
+  ],
+};
+
+const vpn_gateway_attachment: RecordDecl = {
+  name: 'vpn_gateway_attachment',
+  fields: [
+    requiredField('vpc_id', resourceIdType('VpcId')),
+    requiredField('vpn_gateway_id', resourceIdType('VpnGatewayId')),
+  ],
+};
+
+const vpn_connection: RecordDecl = {
+  name: 'vpn_connection',
+  fields: [
+    requiredField('vpn_gateway_id', resourceIdType('VpnGatewayId')),
+    requiredField('customer_gateway_id', resourceIdType('CustomerGatewayId')),
+    requiredField('type', enumType(["ipsec.1"])),
+    requiredField('static_routes_only', BOOLEAN),
+  ],
+};
+
+const vpn_connection_route: RecordDecl = {
+  name: 'vpn_connection_route',
+  fields: [
+    requiredField('destination_cidr_block', stringAliasType('AT.CidrBlock')),
+    requiredField('vpn_connection_id', resourceIdType('VpnConnectionId')),
   ],
 };
 
@@ -2250,10 +2303,48 @@ function amiDataSource(gen: Generator) : void {
 function generateAws(gen: Generator) {
   // Generate the resources
   gen.generateResource(
+    'Provides a resource to create a VPC Custom Gateway',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/customer_gateway',
+    customer_gateway,
+    [resourceIdAttr('id', customer_gateway)],
+  );
+
+  gen.generateResource(
+    'Provides a resource to create a VPN Gateway',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_gateway',
+    vpn_gateway,
+    [resourceIdAttr('id', vpn_gateway)],
+  );
+
+  gen.generateResource(
+    'Provides a VPN Gateway attachment',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_gateway',
+    vpn_gateway_attachment,
+    [resourceIdAttr('id', vpn_gateway_attachment)],
+  );
+
+  gen.generateResource(
+    'Provides a VPN Connection',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_connection',
+    vpn_connection,
+    [resourceIdAttr('id', vpn_connection)],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Provides a VPN Connection Route',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_connection_route',
+    vpn_connection_route,
+    [],
+  );
+
+  gen.generateResource(
     'Provides attachment of a autoscaling group to a ALB load balancer',
     'https://www.terraform.io/docs/providers/aws/r/autoscaling_attachment.html',
     autoscaling_attachment,
-    []
+    [],
   );
 
   gen.generateResource(
@@ -3179,6 +3270,13 @@ function generateAws(gen: Generator) {
   gen.generateParams(autoscaling_group);
   gen.generateParams(autoscaling_schedule);
   gen.generateParams(autoscaling_attachment);
+
+  gen.generateParams(customer_gateway);
+  gen.generateParams(vpn_gateway);
+  gen.generateParams(vpn_gateway_attachment);
+  gen.generateParams(vpn_connection);
+  gen.generateParams(vpn_connection_route);
+
 
   gen.generateParams(instance_root_block_device);
   gen.generateParams(ebs_block_device);

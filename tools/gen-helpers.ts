@@ -113,6 +113,14 @@ export function resourceIdType(name: string): ResourceIdType {
   return { name, kind: 'resourceid' };
 }
 
+interface IpAddress {
+  kind: 'ipaddress';
+  name: string;
+}
+export function ipAddressType(name: string): IpAddress {
+  return { name, kind: 'ipaddress' };
+}
+
 interface ArnType {
   kind: 'arntype';
   name: string;

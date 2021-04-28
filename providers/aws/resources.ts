@@ -5,6 +5,117 @@ import * as AT from "./types";
 import * as TF from "../../core/core";
 
 /**
+ *  Provides a resource to create a VPC Custom Gateway
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/customer_gateway
+ */
+export function createCustomerGateway(tfgen: TF.Generator, rname: string, params: CustomerGatewayParams): CustomerGateway {
+  const fields = fieldsFromCustomerGatewayParams(params);
+  const resource = tfgen.createTypedResource('CustomerGateway', 'aws_customer_gateway', rname, fields);
+  const id: CustomerGatewayId =  {type: 'CustomerGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface CustomerGateway extends TF.ResourceT<'CustomerGateway'> {
+  id: CustomerGatewayId;
+}
+
+export type CustomerGatewayId = {type:'CustomerGatewayId',value:string};
+
+/**
+ *  Provides a resource to create a VPN Gateway
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_gateway
+ */
+export function createVpnGateway(tfgen: TF.Generator, rname: string, params: VpnGatewayParams): VpnGateway {
+  const fields = fieldsFromVpnGatewayParams(params);
+  const resource = tfgen.createTypedResource('VpnGateway', 'aws_vpn_gateway', rname, fields);
+  const id: VpnGatewayId =  {type: 'VpnGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface VpnGateway extends TF.ResourceT<'VpnGateway'> {
+  id: VpnGatewayId;
+}
+
+export type VpnGatewayId = {type:'VpnGatewayId',value:string};
+
+/**
+ *  Provides a VPN Gateway attachment
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_gateway
+ */
+export function createVpnGatewayAttachment(tfgen: TF.Generator, rname: string, params: VpnGatewayAttachmentParams): VpnGatewayAttachment {
+  const fields = fieldsFromVpnGatewayAttachmentParams(params);
+  const resource = tfgen.createTypedResource('VpnGatewayAttachment', 'aws_vpn_gateway_attachment', rname, fields);
+  const id: VpnGatewayAttachmentId =  {type: 'VpnGatewayAttachmentId', value: '${' + TF.resourceName(resource) + '.id}'};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface VpnGatewayAttachment extends TF.ResourceT<'VpnGatewayAttachment'> {
+  id: VpnGatewayAttachmentId;
+}
+
+export type VpnGatewayAttachmentId = {type:'VpnGatewayAttachmentId',value:string};
+
+/**
+ *  Provides a VPN Connection
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_connection
+ */
+export function createVpnConnection(tfgen: TF.Generator, rname: string, params: VpnConnectionParams): VpnConnection {
+  const fields = fieldsFromVpnConnectionParams(params);
+  const resource = tfgen.createTypedResource('VpnConnection', 'aws_vpn_connection', rname, fields);
+  const id: VpnConnectionId =  {type: 'VpnConnectionId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: VpnConnectionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VpnConnection');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface VpnConnection extends TF.ResourceT<'VpnConnection'> {
+  id: VpnConnectionId;
+  arn: VpnConnectionArn;
+}
+
+export type VpnConnectionId = {type:'VpnConnectionId',value:string};
+export type VpnConnectionArn = AT.ArnT<"VpnConnection">;
+
+/**
+ *  Provides a VPN Connection Route
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_connection_route
+ */
+export function createVpnConnectionRoute(tfgen: TF.Generator, rname: string, params: VpnConnectionRouteParams): VpnConnectionRoute {
+  const fields = fieldsFromVpnConnectionRouteParams(params);
+  const resource = tfgen.createTypedResource('VpnConnectionRoute', 'aws_vpn_connection_route', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface VpnConnectionRoute extends TF.ResourceT<'VpnConnectionRoute'> {
+}
+
+export type VpnConnectionRouteId = {type:'VpnConnectionRouteId',value:string};
+
+/**
  *  Provides attachment of a autoscaling group to a ALB load balancer
  *
  *  see https://www.terraform.io/docs/providers/aws/r/autoscaling_attachment.html
@@ -2438,6 +2549,77 @@ export function fieldsFromAutoscalingAttachmentParams(params: AutoscalingAttachm
   return fields;
 }
 
+export interface CustomerGatewayParams {
+  /**
+  use 65000 unless you know better
+  */
+  bgp_asn: number;
+  ip_address: AT.IpAddress;
+  type: 'ipsec.1';
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromCustomerGatewayParams(params: CustomerGatewayParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bgp_asn", params.bgp_asn, TF.numberValue);
+  TF.addField(fields, "ip_address", params.ip_address, TF.stringAliasValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface VpnGatewayParams {
+  vpc_id: VpcId;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromVpnGatewayParams(params: VpnGatewayParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface VpnGatewayAttachmentParams {
+  vpc_id: VpcId;
+  vpn_gateway_id: VpnGatewayId;
+}
+
+export function fieldsFromVpnGatewayAttachmentParams(params: VpnGatewayAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addField(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
+  return fields;
+}
+
+export interface VpnConnectionParams {
+  vpn_gateway_id: VpnGatewayId;
+  customer_gateway_id: CustomerGatewayId;
+  type: 'ipsec.1';
+  static_routes_only: boolean;
+}
+
+export function fieldsFromVpnConnectionParams(params: VpnConnectionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
+  TF.addField(fields, "customer_gateway_id", params.customer_gateway_id, TF.resourceIdValue);
+  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addField(fields, "static_routes_only", params.static_routes_only, TF.booleanValue);
+  return fields;
+}
+
+export interface VpnConnectionRouteParams {
+  destination_cidr_block: AT.CidrBlock;
+  vpn_connection_id: VpnConnectionId;
+}
+
+export function fieldsFromVpnConnectionRouteParams(params: VpnConnectionRouteParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "destination_cidr_block", params.destination_cidr_block, TF.stringAliasValue);
+  TF.addField(fields, "vpn_connection_id", params.vpn_connection_id, TF.resourceIdValue);
+  return fields;
+}
+
 export interface InstanceRootBlockDeviceParams {
   volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
   volume_size?: number;
@@ -2894,6 +3076,14 @@ export interface RouteParams {
   route_table_id: RouteTableId;
   destination_cidr_block: AT.CidrBlock;
   nat_gateway_id?: NatGatewayId;
+  /**
+  Note according to the terraform docs
+  'gateway_id - (Optional) Identifier of a VPC internet gateway or a virtual private gateway'
+  Currently this 'or' is difficult to capture, so it has been left up to the client code
+  
+  When using a vpn use the following in the client
+  'gateway_id: { type: 'InternetGatewayId', value: vpn_gw.id.value }'
+  */
   gateway_id?: InternetGatewayId;
 }
 

@@ -8,7 +8,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
-import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { ingressIcmpAll, ingressIcmpPing, ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 
 /**
@@ -31,6 +31,39 @@ export interface AzConfig {
   internal_cidr_block: AT.CidrBlock;
   external_cidr_block: AT.CidrBlock;
 };
+
+
+/**
+ * A configuration for an entire VPN within a VPC.
+ * Only has a private subnet potentially in multiple availability zone.
+ * NOTE: Multiple subnets with multiple vpn (tunnels) is reported to cause issues.
+ */
+ export interface VpnConfig {
+  azs: VpnAzConfig[];
+  vpns: VpnNetworkConfig[];
+};
+
+export interface VpnNetworkConfig {
+  name: string;
+  ip_address: AT.IpAddress;
+  destinations: VpnRouteConfig[];
+};
+
+export interface VpnRouteConfig {
+  cidr_block: AT.CidrBlock;
+  rname: string;
+};
+
+/**
+ * The configuration for a network availability zone, containing a
+ * a public (external) and a private (internal) subnet.
+ */
+export interface VpnAzConfig {
+  azname: string;
+  availability_zone: AT.AvailabilityZone;
+  internal_cidr_block: AT.CidrBlock;
+};
+
 
 /**
  * An availability zone
@@ -86,6 +119,7 @@ export type SplitAzResources = AvailabilityZone & AzResourcesExternalSubnet & Az
 export type RegionResources = {
   vpc: AR.Vpc;
   region: AT.Region;
+  // internet_gateway: AR.InternetGateway;
 };
 
 /**
@@ -131,6 +165,7 @@ export type SharedBucketsResources = {
 export type SharedSecurityGroupResources = {
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
+  internal_security_group: AR.SecurityGroup;
   load_balancer_security_group: AR.SecurityGroup;
   lambda_security_group: AR.SecurityGroup;
 };
@@ -161,6 +196,22 @@ export type SharedResources =
   & SharedSecurityGroupResources
   & SharedSnsTopicResources
 ;
+
+export interface VpnAz {
+  internal_subnet: AR.Subnet;
+  rtinternal: AR.RouteTable;
+  azname: string;
+};
+
+export interface VpnConn {
+  customer_gw: AR.CustomerGateway;
+  vpn_connection: AR.VpnConnection;
+};
+
+export interface Vpn {
+  azs: VpnAz[];
+  vpns: VpnConn[];
+}
 
 /**
  * Construct the share resources for an AWS account and region
@@ -288,6 +339,13 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
     tags: contextTagsWithName(tfgen, 'appserver'),
   });
 
+  const internal_security_group = AR.createSecurityGroup(tfgen, 'internal_server', {
+    vpc_id: vpc.id,
+    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressIcmpAll()],
+    egress: [egress_all],
+    tags: contextTagsWithName(tfgen, 'internal_server'),
+  });
+
   const load_balancer_security_group = AR.createSecurityGroup(tfgen, 'lb', {
     vpc_id: vpc.id,
     ingress: [ingressOnPort(80), ingressOnPort(443)],
@@ -303,6 +361,7 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
   return {
     bastion_security_group,
     appserver_security_group,
+    internal_security_group,
     load_balancer_security_group,
     lambda_security_group
   };

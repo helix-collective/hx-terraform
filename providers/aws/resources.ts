@@ -482,6 +482,22 @@ function fieldsFromCustomerGatewayParams(params: CustomerGatewayParams) : TF.Res
 }
 
 
+export interface VpnAz {
+  internal_subnet: Subnet;
+  rtinternal: RouteTable;
+  azname: string;
+};
+
+export interface VpnConn {
+  customer_gw: CustomerGateway;
+  vpn_connection: VpnConnection;
+};
+
+export interface Vpn {
+  azs: VpnAz[];
+  vpns: VpnConn[];
+}
+
 /**
  *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpn_gateway
  */

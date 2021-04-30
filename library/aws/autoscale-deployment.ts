@@ -348,7 +348,7 @@ export function createProcessorAutoScaleGroup(
     name: asgName,
     min_size: params.min_size === undefined ? 1 : params.min_size,
     max_size: params.max_size === undefined ? 1 : params.max_size,
-    vpc_zone_identifier: shared.internalSubnetIds(sr),
+    vpc_zone_identifier: params.appserver_subnet_ids ? params.appserver_subnet_ids : shared.internalSubnetIds(sr),
     launch_configuration: launch_config.name,
     enabled_metrics: ['GroupInServiceInstances', 'GroupDesiredCapacity'],
     termination_policies: [
@@ -773,6 +773,12 @@ export interface AutoscaleProcessorParams {
    * can be specified here.
    */
   appserver_extra_policies?: policies.NamedPolicy[];
+
+  /**
+   * The subnets the appserver should start in.
+   * If not specified internal is used.
+   */
+  appserver_subnet_ids: AR.SubnetId[];
 
   /** Lower bound of EC2 instances for the Autoscaling group */
   min_size?: number;

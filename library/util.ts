@@ -25,6 +25,15 @@ export function ingressOnPort(port: number): AR.IngressRuleParams {
   };
 }
 
+export function ingressAllICMP(): AR.IngressRuleParams {
+  return {
+    from_port: 0,
+    to_port: 254,
+    protocol: 'icmp',
+    cidr_blocks: [AT.cidrBlock('0.0.0.0/0')],
+  };
+}
+
 export function ingressByIpWhitelist(port: number, rules: {ip:string, description: string}[]) : AR.IngressRuleParams[] {
   return rules.map(r => {
     const ingressRule : AR.IngressRuleParams = {

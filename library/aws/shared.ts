@@ -8,7 +8,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
-import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { ingressAllICMP, ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 
 /**
@@ -119,6 +119,7 @@ export type SplitAzResources = AvailabilityZone & AzResourcesExternalSubnet & Az
 export type RegionResources = {
   vpc: AR.Vpc;
   region: AT.Region;
+  // internet_gateway: AR.InternetGateway;
 };
 
 /**
@@ -164,6 +165,7 @@ export type SharedBucketsResources = {
 export type SharedSecurityGroupResources = {
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
+  internal_security_group: AR.SecurityGroup;
   load_balancer_security_group: AR.SecurityGroup;
   lambda_security_group: AR.SecurityGroup;
 };
@@ -321,6 +323,13 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
     tags: contextTagsWithName(tfgen, 'appserver'),
   });
 
+  const internal_security_group = AR.createSecurityGroup(tfgen, 'internal_server', {
+    vpc_id: vpc.id,
+    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressAllICMP()],
+    egress: [egress_all],
+    tags: contextTagsWithName(tfgen, 'internal_server'),
+  });
+
   const load_balancer_security_group = AR.createSecurityGroup(tfgen, 'lb', {
     vpc_id: vpc.id,
     ingress: [ingressOnPort(80), ingressOnPort(443)],
@@ -336,6 +345,7 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
   return {
     bastion_security_group,
     appserver_security_group,
+    internal_security_group,
     load_balancer_security_group,
     lambda_security_group
   };

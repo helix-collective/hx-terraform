@@ -8,7 +8,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
-import { ingressIcmpPing, ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { ingressIcmpAll, ingressIcmpPing, ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 
 /**
@@ -325,7 +325,7 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
 
   const internal_security_group = AR.createSecurityGroup(tfgen, 'internal_server', {
     vpc_id: vpc.id,
-    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressIcmpPing()],
+    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressIcmpAll()],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'internal_server'),
   });

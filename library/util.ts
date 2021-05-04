@@ -25,10 +25,10 @@ export function ingressOnPort(port: number): AR.IngressRuleParams {
   };
 }
 
-export function ingressAllICMP(): AR.IngressRuleParams {
+export function ingressIcmpPing(): AR.IngressRuleParams {
   return {
-    from_port: 0,
-    to_port: 254,
+    from_port: 8,
+    to_port: 0,
     protocol: 'icmp',
     cidr_blocks: [AT.cidrBlock('0.0.0.0/0')],
   };

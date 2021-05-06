@@ -64,7 +64,7 @@ export function createInternalEc2Deployment(
   const appserver = aws.createInstance(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
-    security_group: sr.internal_security_group,
+    security_group: sr.appserver_security_group,
     key_name: params.key_name,
     customize_instance: (i: AR.InstanceParams) => {
       i.user_data = bs.compile();

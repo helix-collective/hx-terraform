@@ -3254,6 +3254,40 @@ export function fieldsFromCorsRuleParams(params: CorsRuleParams) : TF.ResourceFi
   return fields;
 }
 
+export interface ApplyServerSideEncryptionByDefaultParams {
+  sse_algorithm: 'aws:kms' | 'AES256';
+  kms_master_key_id?: string;
+}
+
+export function fieldsFromApplyServerSideEncryptionByDefaultParams(params: ApplyServerSideEncryptionByDefaultParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "sse_algorithm", params.sse_algorithm, TF.stringValue);
+  TF.addOptionalField(fields, "kms_master_key_id", params.kms_master_key_id, TF.stringValue);
+  return fields;
+}
+
+export interface SseRuleParams {
+  apply_server_side_encryption_by_default: ApplyServerSideEncryptionByDefaultParams;
+  bucket_key_enabled?: boolean;
+}
+
+export function fieldsFromSseRuleParams(params: SseRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "apply_server_side_encryption_by_default", params.apply_server_side_encryption_by_default, (v) => TF.mapValue(fieldsFromApplyServerSideEncryptionByDefaultParams(v)));
+  TF.addOptionalField(fields, "bucket_key_enabled", params.bucket_key_enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface ServerSideEncryptionConfigurationParams {
+  rule: SseRuleParams;
+}
+
+export function fieldsFromServerSideEncryptionConfigurationParams(params: ServerSideEncryptionConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromSseRuleParams(v)));
+  return fields;
+}
+
 export interface S3BucketParams {
   bucket: string;
   acl?: AT.CannedAcl;
@@ -3261,6 +3295,7 @@ export interface S3BucketParams {
   versioning?: BucketVersioningParams;
   lifecycle_rule?: (LifecycleRuleParams)[];
   cors_rule?: CorsRuleParams;
+  server_side_encryption_configuration?: ServerSideEncryptionConfigurationParams;
   website?: WebsiteParams;
   tags?: TF.TagsMap;
 }
@@ -3273,6 +3308,7 @@ export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFi
   TF.addOptionalField(fields, "versioning", params.versioning, (v) => TF.mapValue(fieldsFromBucketVersioningParams(v)));
   TF.addOptionalField(fields, "lifecycle_rule", params.lifecycle_rule, TF.listValue((v) => TF.mapValue(fieldsFromLifecycleRuleParams(v))));
   TF.addOptionalField(fields, "cors_rule", params.cors_rule, (v) => TF.mapValue(fieldsFromCorsRuleParams(v)));
+  TF.addOptionalField(fields, "server_side_encryption_configuration", params.server_side_encryption_configuration, (v) => TF.mapValue(fieldsFromServerSideEncryptionConfigurationParams(v)));
   TF.addOptionalField(fields, "website", params.website, (v) => TF.mapValue(fieldsFromWebsiteParams(v)));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;

@@ -604,6 +604,25 @@ export type S3BucketId = {type:'S3BucketId',value:string};
 export type S3BucketArn = AT.ArnT<"S3Bucket">;
 
 /**
+ *  Provides a S3 bucket policy resource.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
+ */
+export function createS3BucketPolicy(tfgen: TF.Generator, rname: string, params: S3BucketPolicyParams): S3BucketPolicy {
+  const fields = fieldsFromS3BucketPolicyParams(params);
+  const resource = tfgen.createTypedResource('S3BucketPolicy', 'aws_s3_bucket_policy', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface S3BucketPolicy extends TF.ResourceT<'S3BucketPolicy'> {
+}
+
+export type S3BucketPolicyId = {type:'S3BucketPolicyId',value:string};
+
+/**
  *  Provides a S3 bucket object resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/d/s3_bucket_object.html
@@ -3066,6 +3085,18 @@ export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFi
   TF.addOptionalField(fields, "cors_rule", params.cors_rule, (v) => TF.mapValue(fieldsFromCorsRuleParams(v)));
   TF.addOptionalField(fields, "website", params.website, (v) => TF.mapValue(fieldsFromWebsiteParams(v)));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface S3BucketPolicyParams {
+  bucket: string;
+  policy?: string;
+}
+
+export function fieldsFromS3BucketPolicyParams(params: S3BucketPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }
 

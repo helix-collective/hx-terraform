@@ -490,6 +490,14 @@ const s3_bucket: RecordDecl = {
   ],
 };
 
+const s3_bucket_policy: RecordDecl = {
+  name: 's3_bucket_policy',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('policy', STRING),
+  ],
+};
+
 const s3_bucket_object: RecordDecl = {
   name: 's3_bucket_object',
   fields: [
@@ -2489,6 +2497,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a S3 bucket policy resource.',
+    'https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html',
+    s3_bucket_policy,
+    [],
+  );
+
+  gen.generateResource(
     'Provides a S3 bucket object resource.',
     'https://www.terraform.io/docs/providers/aws/d/s3_bucket_object.html',
     s3_bucket_object,
@@ -3213,6 +3228,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(lifecycle_rule);
   gen.generateParams(cors_rule);
   gen.generateParams(s3_bucket);
+  gen.generateParams(s3_bucket_policy);
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);
   gen.generateParams(sns_topic);

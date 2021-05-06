@@ -20,7 +20,7 @@ import {
   applyCustomize,
 } from '../util';
 
-export interface InstanceWithEipParams {
+export interface InstanceParams {
   instance_type: AT.InstanceType;
   ami(region: AT.Region): AT.Ami;
   security_group: AR.SecurityGroup;
@@ -37,37 +37,8 @@ export function createInstanceWithEip(
   name: string,
   sr: shared.SharedResources,
   subnet_id: AR.SubnetId,
-  params0: InstanceWithEipParams
+  params0: InstanceParams
 ): { eip: AR.Eip; ec2: AR.Instance } {
-  function createInstance() {
-    const instance_params: AR.InstanceParams = {
-      ami: params0.ami(sr.region),
-      instance_type: params0.instance_type,
-      key_name: params0.key_name,
-      subnet_id,
-      vpc_security_group_ids: [params0.security_group.id],
-      root_block_device: {
-        volume_size: 20,
-      },
-      tags: contextTagsWithName(tfgen, name),
-    };
-
-    if (params0.customize_instance) {
-      params0.customize_instance(instance_params);
-    }
-
-    const ec2 = AR.createInstance(tfgen, name, instance_params);
-
-    // Prevent changes to user_data script tainting the instance, (as
-    // a developer convenience)
-
-    const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : true;
-    if(ignoreUserDataChanges) {
-      tfgen.ignoreChanges(ec2, 'user_data');
-    }
-
-    return ec2;
-  }
 
   function createElasticIp(ec2: AR.Instance) {
     const params: AR.EipParams = {
@@ -82,10 +53,46 @@ export function createInstanceWithEip(
     return { eip, ec2 };
   }
 
-  const ec2 = createInstance();
+  const ec2 = createInstance(tfgen, name, sr, subnet_id, params0);
   const eip = createElasticIp(ec2);
 
   return eip;
+}
+
+export function createInstance(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  subnet_id: AR.SubnetId,
+  params0: InstanceParams
+): AR.Instance {
+  const instance_params: AR.InstanceParams = {
+    ami: params0.ami(sr.region),
+    instance_type: params0.instance_type,
+    key_name: params0.key_name,
+    subnet_id,
+    vpc_security_group_ids: [params0.security_group.id],
+    root_block_device: {
+      volume_size: 20,
+    },
+    tags: contextTagsWithName(tfgen, name),
+  };
+
+  if (params0.customize_instance) {
+    params0.customize_instance(instance_params);
+  }
+
+  const ec2 = AR.createInstance(tfgen, name, instance_params);
+
+  // Prevent changes to user_data script tainting the instance, (as
+  // a developer convenience)
+
+  const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : true;
+  if(ignoreUserDataChanges) {
+    tfgen.ignoreChanges(ec2, 'user_data');
+  }
+
+  return ec2;
 }
 
 /**

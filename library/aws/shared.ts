@@ -8,7 +8,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
-import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { ingressIcmpPing, ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 
 /**
@@ -86,6 +86,7 @@ export type SplitAzResources = AvailabilityZone & AzResourcesExternalSubnet & Az
 export type RegionResources = {
   vpc: AR.Vpc;
   region: AT.Region;
+  // internet_gateway: AR.InternetGateway;
 };
 
 /**
@@ -283,7 +284,7 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
 
   const appserver_security_group = AR.createSecurityGroup(tfgen, 'appserver', {
     vpc_id: vpc.id,
-    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
+    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressIcmpPing()],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'appserver'),
   });

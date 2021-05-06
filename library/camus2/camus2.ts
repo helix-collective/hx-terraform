@@ -8,6 +8,16 @@ import { RESOLVER } from './adl-gen/resolver';
 import { Maybe } from './adl-gen/runtime/sys/types';
 import { ArnSecret } from '../aws/secrets';
 
+export type Camus2Params = {
+  username: string;
+  releases: s3.S3Ref;
+  deployContexts: DeployContext[];
+  proxy: ProxyConfig;
+  nginxDockerVersion: string;
+  healthCheck?: C.HealthCheckConfig;
+  frontendproxy_nginx_conf_tpl?: string;
+  ssl_cert_email?: string;
+}
 export interface ContextFile {
   name: string;
   source_name: string;
@@ -44,8 +54,16 @@ export function httpsProxyEndpoint(
 export type EndPointMap = { [name: string]: C.EndPoint };
 
 export type ProxyConfig =
-  | { kind: 'none' }
-  | { kind: 'local'; endpoints: EndPointMap; nginxConfTemplatePath?: string }
+  | {
+    kind: 'none';
+    challenge_mode: 'http-01' | 'dns-01';
+  }
+  | {
+    kind: 'local';
+    endpoints: EndPointMap;
+    nginxConfTemplatePath?: string;
+    challenge_mode: 'http-01' | 'dns-01';
+  }
   | {
       kind: 'remoteSlave';
       endpoints: EndPointMap;
@@ -87,9 +105,10 @@ export function remoteProxySlave(
 
 export function localProxy(
   endpoints: EndPointMap,
+  challenge_mode: 'http-01' | 'dns-01',
   nginxConfTemplatePath?: string
 ): ProxyConfig {
-  return { endpoints, kind: 'local', nginxConfTemplatePath };
+  return { endpoints, challenge_mode, kind: 'local', nginxConfTemplatePath };
 }
 
 export function contextFromS3(name: string, s3Ref: s3.S3Ref): DeployContext {
@@ -156,17 +175,7 @@ export function installCamus2(username: string): bootscript.BootScript {
   return bs;
 }
 
-export function configureCamus2(
-  username: string,
-  releases: s3.S3Ref,
-  deployContexts: DeployContext[],
-  proxy: ProxyConfig,
-  nginxDockerVersion: string,
-  healthCheck?: C.HealthCheckConfig,
-  frontendproxy_nginx_conf_tpl?: string,
-  ssl_cert_email?: string,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
-): bootscript.BootScript {
+export function configureCamus2(params: Camus2Params): bootscript.BootScript {
   const bs = bootscript.newBootscript();
   bs.comment('Configure camus2');
 
@@ -174,17 +183,17 @@ export function configureCamus2(
     kind: 'nothing',
   };
 
-  if (frontendproxy_nginx_conf_tpl != undefined) {
+  if (params.frontendproxy_nginx_conf_tpl != undefined) {
     nginxConfTemplatePath = {
       kind: 'just',
       value: '/opt/etc/frontendproxy.nginx.conf.tpl',
     };
-    bs.catToFile(nginxConfTemplatePath.value, frontendproxy_nginx_conf_tpl);
+    bs.catToFile(nginxConfTemplatePath.value, params.frontendproxy_nginx_conf_tpl);
   }
 
   let deployMode: C.DeployMode;
 
-  switch (proxy.kind) {
+  switch (params.proxy.kind) {
     case 'none':
       deployMode = { kind: 'noproxy' };
       break;
@@ -193,23 +202,23 @@ export function configureCamus2(
         deployMode = {
           kind: 'proxy',
           value: C.makeProxyModeConfig({
-            endPoints: proxy.endpoints,
+            endPoints: params.proxy.endpoints,
             nginxConfTemplatePath,
           }),
         };
       }
       break;
     case 'remoteSlave':
-      deployMode = remoteDeployMode(proxy, nginxConfTemplatePath);
+      deployMode = remoteDeployMode(params.proxy, nginxConfTemplatePath);
       break;
     case 'remoteMaster':
-      deployMode = remoteDeployMode(proxy, nginxConfTemplatePath);
+      deployMode = remoteDeployMode(params.proxy, nginxConfTemplatePath);
       break;
     default:
       throw Error(`proxy kind is unrecognised`);
   }
   const configSources: { [name: string]: C.JsonSource } = {};
-  deployContexts.forEach(dc => {
+  params.deployContexts.forEach(dc => {
     configSources[dc.name] = dc.source;
   });
 
@@ -217,30 +226,30 @@ export function configureCamus2(
   const config = C.makeToolConfig({
     configSources,
     deployMode,
-    healthCheck: healthCheck
-      ? { kind: 'just', value: healthCheck }
+    healthCheck: params.healthCheck
+      ? { kind: 'just', value: params.healthCheck }
       : { kind: 'nothing' },
     releases: {
       kind: 's3',
-      value: releases.url(),
+      value: params.releases.url(),
     },
     contextCache: '/opt/config',
-    autoCertContactEmail: ssl_cert_email,
-    nginxDockerVersion,
+    autoCertContactEmail: params.ssl_cert_email,
+    nginxDockerVersion: params.nginxDockerVersion,
   });
   bs.catToFile(
     '/opt/etc/camus2.json',
     JSON.stringify(jb.toJson(config), null, 2)
   );
 
-  if (proxy.kind === 'none' || proxy.kind === 'local') {
-    // If not in proxy mode, use letsEncrypt SSL
-    letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
-    bootscriptProxyNginxReload(bs, username);
-  } else if (proxy.kind === 'remoteSlave') {
+  if (params.proxy.kind === 'none' || params.proxy.kind === 'local') {
+      // If not in proxy mode, use letsEncrypt SSL
+      letsEncryptSSL(config, params.proxy, bs, params.proxy.challenge_mode);
+      bootscriptProxyNginxReload(bs, params.username);
+  } else if (params.proxy.kind === 'remoteSlave') {
     // Install tools necessary for the slaves to poll the S3 state file
-    bootscriptProxySlaveUpdate(bs, username);
-    bootscriptProxyNginxReload(bs, username);
+    bootscriptProxySlaveUpdate(bs, params.username);
+    bootscriptProxyNginxReload(bs, params.username);
   }
   return bs;
 }
@@ -249,30 +258,10 @@ export function configureCamus2(
  * Construct a bootscript that installs and configures camus2. This
  * bootscript would normally be included into the complete instance bootscript.
  */
-export function install(
-  username: string,
-  releases: s3.S3Ref,
-  deployContexts: DeployContext[],
-  proxy: ProxyConfig,
-  nginxDockerVersion: string,
-  healthCheck?: C.HealthCheckConfig,
-  frontendproxy_nginx_conf_tpl?: string,
-  ssl_cert_email?: string,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01',
-): bootscript.BootScript {
+export function install(params: Camus2Params): bootscript.BootScript {
   const bs = bootscript.newBootscript();
-  bs.include(installCamus2(username));
-  bs.include(configureCamus2(
-    username,
-    releases,
-    deployContexts,
-    proxy,
-    nginxDockerVersion,
-    healthCheck,
-    frontendproxy_nginx_conf_tpl,
-    ssl_cert_email,
-    letsencrypt_challenge_mode,
-  ));
+  bs.include(installCamus2(params.username));
+  bs.include(configureCamus2(params));
   return bs;
 }
 
@@ -280,7 +269,7 @@ function letsEncryptSSL(
   config: C.ToolConfig,
   proxy: ProxyConfig,
   bs: bootscript.BootScript,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
+  challenge_mode: 'http-01' | 'dns-01'
 ) {
   const certdnsnames: string[] = [];
 
@@ -297,7 +286,6 @@ function letsEncryptSSL(
       }
     }
   }
-  const challenge_mode = letsencrypt_challenge_mode || 'http-01';
 
   if (certdnsnames.length === 0) {
     return;

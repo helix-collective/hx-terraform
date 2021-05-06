@@ -6,7 +6,6 @@ import * as AR from '../../providers/aws/resources';
 
 import * as aws from './aws';
 import * as roles from './roles';
-import * as alarms from './alarms';
 import * as policies from './policies';
 import * as shared from './shared';
 import * as util from '../util';
@@ -16,107 +15,27 @@ import * as docker from '../docker';
 import * as camus2 from '../camus2/camus2';
 import * as C from '../../library/camus2/adl-gen/config';
 
-import * as deploytool from '../deploytool_legacy/deploytool';
-import * as DC from '../../library/deploytool_legacy/adl-gen/config';
-
 /**
- *  Creates a logical deployment on a single EC2 instance, including:
+ *  Creates a logical deployment on a single publicly addressable EC2 instance, including:
  *
  *      - the EC2 instance itself
  *      - a letsencrypt SSL certificate for configured endpoints
  *      - DNS entries for the endpoints
  *
- * hx-deploy-tool is configured onto the instance, running in local proxy mode,
+ * camus2 is configured onto the instance, running in local proxy mode,
  * with a local nginx instance to support green/blue style deploys.
  */
 export function createEc2Deployment(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: Ec2DeploymentParams,
+  params: Ec2ExternalDeploymentParams,
 ): Ec2Deployment {
-  const dns_ttl = (params.dns_ttl || 180) + '';
-  const app_user = params.app_user || 'app';
-  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-
-  // Build the bootscript for the instance
-  const bs = bootscript.newBootscript();
-  const include_install = params.bootscript_include_install === undefined ? true : params.bootscript_include_install;
-  if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, false));
-  }
-
-  let deploy_contexts: camus2.DeployContext[];
-  if (params.deploy_contexts) {
-    deploy_contexts = params.deploy_contexts;
-  } else {
-    deploy_contexts = [];
-  }
-
-  const proxy_endpoints = deployToolEndpoints(sr, params.endpoints);
-
-  const health_check = undefined;
-
-  if (params.use_hxdeploytool) {
-    const legacy_proxy_endpoints: DC.EndPoint[] = [];
-    for (const label of Object.keys(proxy_endpoints)) {
-      const pe = proxy_endpoints[label];
-      legacy_proxy_endpoints.push({
-        ...pe,
-        label,
-      });
-    }
-
-    bs.include(
-      // Legacy hx-deploytool support
-      deploytool.install(
-        app_user,
-        params.releases_s3,
-        deploy_contexts,
-        deploytool.localProxy(legacy_proxy_endpoints),
-        health_check,
-        params.frontendproxy_nginx_conf_tpl,
-        params.ssl_cert_email,
-        params.letsencrypt_challenge_type
-      )
-    );
-  } else {
-    bs.include(
-      camus2.configureCamus2(
-        app_user,
-        params.releases_s3,
-        deploy_contexts,
-        camus2.localProxy(proxy_endpoints),
-        params.nginxDockerVersion === undefined
-            ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
-        health_check,
-        params.frontendproxy_nginx_conf_tpl,
-        params.ssl_cert_email,
-        params.letsencrypt_challenge_type
-      )
-    );
-  }
-
-  if (params.extra_bootscript) {
-    bs.include(params.extra_bootscript);
-  }
-
-  let iampolicies = [
-    policies.publish_metrics_policy,
-    aws.s3DeployBucketReadOnlyPolicy(sr),
-    policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
-    policies.ecr_readonly_policy,
-  ];
-  if (params.extra_policies) {
-    iampolicies = iampolicies.concat(params.extra_policies);
-  }
-
-  const instance_profile = roles.createInstanceProfileWithPolicies(
-    tfgen,
-    name,
-    iampolicies
-  );
-
+  const letsencrypt_challenge_type = params.letsencrypt_challenge_type
+    ? params.letsencrypt_challenge_type
+    : "http-01";
+  const bs = createBuildScript(sr, params, letsencrypt_challenge_type);
+  const instance_profile = createIamInstanceProfile(tfgen, name, sr, params);
   const appserver = aws.createInstanceWithEip(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
     ami: params.ami || getDefaultAmi,
@@ -130,7 +49,45 @@ export function createEc2Deployment(
       }
     },
   });
+  addDNS(tfgen, name, sr, params, appserver.eip.public_ip, params.public_dns_name);
+  return appserver;
+}
 
+export function createInternalEc2Deployment(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  params: Ec2InternalDeploymentParams,
+): AR.Instance {
+  const bs = createBuildScript(sr, params, "dns-01");
+  const instance_profile = createIamInstanceProfile(tfgen, name, sr, params);
+  const appserver = aws.createInstance(tfgen, name, sr, params.subnet_id, {
+    instance_type: params.instance_type,
+    ami: params.ami || getDefaultAmi,
+    security_group: sr.internal_security_group,
+    key_name: params.key_name,
+    customize_instance: (i: AR.InstanceParams) => {
+      i.user_data = bs.compile();
+      i.iam_instance_profile = instance_profile.id;
+      if (params.customize) {
+        params.customize(i);
+      }
+    },
+  });
+  addDNS(tfgen, name, sr, params, appserver.private_ip, params.dns_name);
+  return appserver;
+}
+
+
+function addDNS(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  params: Ec2InstanceDeploymentParams,
+  ip_address: AT.IpAddress,
+  dns_name?: string,
+) {
+  const dns_ttl = (params.dns_ttl || 180) + '';
   params.endpoints.forEach(ep => {
     ep.urls.forEach((url, i) => {
       if (url.kind === 'https') {
@@ -139,26 +96,87 @@ export function createEc2Deployment(
           name + '_' + ep.name + '_' + i,
           sr,
           url.dnsname,
-          [appserver.eip.public_ip],
+          [ip_address],
           dns_ttl
         );
       }
     });
   });
-
   // Create a canonical DNS record for the ec2 box (independent of switchable endpoints)
-  if (params.public_dns_name !== undefined) {
+  if (dns_name !== undefined) {
     shared.dnsARecord(
       tfgen,
       name,
       sr,
-      params.public_dns_name,
-      [appserver.eip.public_ip],
+      dns_name,
+      [ip_address],
       dns_ttl
     );
   }
+}
 
-  return appserver;
+// Build the bootscript for the instance
+function createBuildScript(
+  dr: shared.DomainResources,
+  params: Ec2InstanceDeploymentParams,
+  letsencrypt_challenge_type: 'http-01' | 'dns-01',
+): bootscript.BootScript {
+  const app_user = params.app_user || 'app';
+  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
+  const bs = bootscript.newBootscript();
+  const include_install = params.bootscript_include_install === undefined ? true : params.bootscript_include_install;
+  if (include_install) {
+    bs.include(ec2InstallScript(app_user, docker_config, false));
+  }
+  let deploy_contexts: camus2.DeployContext[];
+  if (params.deploy_contexts) {
+    deploy_contexts = params.deploy_contexts;
+  } else {
+    deploy_contexts = [];
+  }
+  const proxy_endpoints = deployToolEndpoints(dr, params.endpoints);
+  const health_check = undefined;
+  bs.include(
+    camus2.configureCamus2(
+      app_user,
+      params.releases_s3,
+      deploy_contexts,
+      camus2.localProxy(proxy_endpoints),
+      params.nginxDockerVersion === undefined
+          ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
+      health_check,
+      params.frontendproxy_nginx_conf_tpl,
+      params.ssl_cert_email,
+      letsencrypt_challenge_type,
+    )
+  );
+  if (params.extra_bootscript) {
+    bs.include(params.extra_bootscript);
+  }
+  return bs;
+}
+
+function createIamInstanceProfile(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  params: Ec2InstanceDeploymentParams,
+): AR.IamInstanceProfile {
+  let iampolicies = [
+    policies.publish_metrics_policy,
+    aws.s3DeployBucketReadOnlyPolicy(sr),
+    policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
+    policies.ecr_readonly_policy,
+  ];
+  if (params.extra_policies) {
+    iampolicies = iampolicies.concat(params.extra_policies);
+  }
+  const instance_profile = roles.createInstanceProfileWithPolicies(
+    tfgen,
+    name,
+    iampolicies
+  );
+  return instance_profile;
 }
 
 /**
@@ -234,129 +252,75 @@ export function deployToolEndpoints(
   return endPointMap;
 }
 
-export interface Ec2DeploymentParams {
-  /**
-   * The AWS keyname used for the EC2 instance.
-   */
-  key_name: AT.KeyName;
-
-  /**
-   * The AWS instance type (ie mem and cores) for the EC2 instance.
-   */
-  instance_type: AT.InstanceType;
-
-  /**
-   * The subnet to be used
-   */
-  subnet_id: AR.SubnetId,
-
-  /**
-   * The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name
-   * they can cname to (that is, one of the endpoints is https-external)
-   */
+export interface Ec2ExternalDeploymentParams extends Ec2InstanceDeploymentParams {
+  // The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name
+  // they can cname to (that is, one of the endpoints is https-external)
   public_dns_name?: string;
-
-  /**
-   * The email address for SSL certificate admin and notification.
-   */
-  ssl_cert_email: string;
-
-  /**
-   * The S3 location where hx-deploy-tool releases are stored.
-   */
-  releases_s3: s3.S3Ref;
-
-  /**
-   * The name of the unprivileged user used to run application code.
-   * Defaults to "app".
-   */
-  app_user?: string;
-
-  /**
-   * The endpoints configured for http/https access. Defaults to
-   *    main:   ${dns_name}.${primary_dns_zone}
-   *    test:   ${dns_name}-test.${primary_dns_zone}
-   */
-  endpoints: EndPoint[];
-
-  /**
-   * Specifies the AMI for the EC2 instance. Defaults to an ubuntu 16.04 AMI
-   * for the appropriate region.
-   */
-  ami?(region: AT.Region): AT.Ami;
-
-  /**
-   * The EC2 instance created is given an IAM profile with sufficient access policies to
-   * log metrics, run the deploy tool and create SSL certificates. Additional policies
-   * can be specified here.
-   */
-  extra_policies?: policies.NamedPolicy[];
-
-  /**
-   * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
-   * into the deployed application configuration.
-   */
-  deploy_contexts?: { name: string; source: C.JsonSource }[];
-
-  /**
-   * If true (or not specified), the bootscript includes ec2InstallScript().
-   * Otherwise it's assumed this software is baked into the AMI
-   */
-  bootscript_include_install?: boolean;
-
-  /**
-   * Additional operations for the EC2 instances first boot can be passed vis the operation.
-   */
-  extra_bootscript?: bootscript.BootScript;
-
-  /**
-   * Override the default docker config.
-   */
-  docker_config?: docker.DockerConfig;
-
-  /**
-   * Set the letsencrypt DNS challenge mode
-   *
-   * If the endpoints require an SSL certificate to be created via letsencrypt,
-   * this controls the challenge mechanism. http-01 challenges have the
-   * benefit that they can be used to generate certificates for domains without
-   * dns control. dns-01 challenges have the benefit that they can be generated
-   * off-line, ie the system doesn't need to be connected via dns before certs
-   * can be generated.
-   */
-
+  // Set the letsencrypt DNS challenge mode
+  //
+  // If the endpoints require an SSL certificate to be created via letsencrypt,
+  // this controls the challenge mechanism. http-01 challenges have the
+  // benefit that they can be used to generate certificates for domains without
+  // dns control. dns-01 challenges have the benefit that they can be generated
+  // off-line, ie the system doesn't need to be connected via dns before certs
+  // can be generated.
   letsencrypt_challenge_type?: 'http-01' | 'dns-01';
+}
 
-  /**
-   * Specify the DNS ttl value.
-   *
-   * This defaults to 3 minutes, on the assumption that when initially being setup
-   * a short TTL is useful to ensure the fast propagation of changes. Once a system
-   * has stabilised this should be increased to a much larger value.
-   *
-   * (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
-   */
+export interface Ec2InternalDeploymentParams extends Ec2InstanceDeploymentParams {
+  // The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name
+  // they can cname to (that is, one of the endpoints is https-external)
+  dns_name: string;
+}
+
+export interface Ec2InstanceDeploymentParams {
+  // The AWS keyname used for the EC2 instance.
+  key_name: AT.KeyName;
+  // The AWS instance type (ie mem and cores) for the EC2 instance.
+  instance_type: AT.InstanceType;
+  // The subnet to be used
+  subnet_id: AR.SubnetId,
+  // The email address for SSL certificate admin and notification.
+  ssl_cert_email: string;
+  // The S3 location where hx-deploy-tool releases are stored.
+  releases_s3: s3.S3Ref;
+  // The name of the unprivileged user used to run application code.
+  // Defaults to "app".
+  app_user?: string;
+  // The endpoints configured for http/https access. Defaults to
+  //    main:   ${dns_name}.${primary_dns_zone}
+  //    test:   ${dns_name}-test.${primary_dns_zone}
+  endpoints: EndPoint[];
+  // Specifies the AMI for the EC2 instance. Defaults to an ubuntu 16.04 AMI
+  // for the appropriate region.
+  ami?(region: AT.Region): AT.Ami;
+  // The EC2 instance created is given an IAM profile with sufficient access policies to
+  // log metrics, run the deploy tool and create SSL certificates. Additional policies
+  // can be specified here.
+  extra_policies?: policies.NamedPolicy[];
+  // The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
+  // into the deployed application configuration.
+  deploy_contexts?: { name: string; source: C.JsonSource }[];
+  // If true (or not specified), the bootscript includes ec2InstallScript().
+  // Otherwise it's assumed this software is baked into the AMI
+  bootscript_include_install?: boolean;
+  // Additional operations for the EC2 instances first boot can be passed vis the operation.
+  extra_bootscript?: bootscript.BootScript;
+  // Override the default docker config.
+  docker_config?: docker.DockerConfig;
+  // Specify the DNS ttl value.
+  //
+  // This defaults to 3 minutes, on the assumption that when initially being setup
+  // a short TTL is useful to ensure the fast propagation of changes. Once a system
+  // has stabilised this should be increased to a much larger value.
+  //
+  // (eg see http://social.dnsmadeeasy.com/blog/long-short-ttls)
   dns_ttl?: number;
-
-  /**
-   *  Customize the ec2 instance, overriding defaults as required
-   */
+  //  Customize the ec2 instance, overriding defaults as required
   customize?: util.Customize<AR.InstanceParams>;
-
-  /**
-   * Substitute the default nginx template used.
-   */
+  // Substitute the default nginx template used.
   frontendproxy_nginx_conf_tpl?: string;
-
-  /**
-   * Use legacy hx-deploy-tool. If not specified, camus2
-   * will be used
-   */
-  use_hxdeploytool?: boolean;
-
-  /**
-   * Nginx version to use for camus2
-   */
+  // Nginx version to use for camus2
   nginxDockerVersion?: string,
 }
 
@@ -467,7 +431,6 @@ export function getDefaultAmi(region: AT.Region): AT.Ami {
 export function ec2InstallScript(
   app_user: string,
   docker_config: docker.DockerConfig,
-  use_camus2: boolean,
   autoscaling_metrics: boolean,
   ): bootscript.BootScript {
   const install = bootscript.newBootscript();
@@ -482,8 +445,6 @@ export function ec2InstallScript(
     script_args
   });
   install.addAptPackage("ec2-instance-connect");
-  if(use_camus2) {
-   install.include(camus2.installCamus2(app_user));
-  }
+  install.include(camus2.installCamus2(app_user));
   return install;
 }

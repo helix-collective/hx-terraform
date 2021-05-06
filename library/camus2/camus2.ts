@@ -234,9 +234,13 @@ export function configureCamus2(
   );
 
   if (proxy.kind === 'none' || proxy.kind === 'local') {
-    // If not in proxy mode, use letsEncrypt SSL
-    letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
-    bootscriptProxyNginxReload(bs, username);
+    if (letsencrypt_challenge_mode) {
+      // If not in proxy mode, use letsEncrypt SSL
+      letsEncryptSSL(config, proxy, bs, letsencrypt_challenge_mode);
+      bootscriptProxyNginxReload(bs, username);
+    } else {
+      throw new Error("api change: letsencrypt_challenge_mode must be specified, not longer optional")
+    }
   } else if (proxy.kind === 'remoteSlave') {
     // Install tools necessary for the slaves to poll the S3 state file
     bootscriptProxySlaveUpdate(bs, username);
@@ -280,7 +284,7 @@ function letsEncryptSSL(
   config: C.ToolConfig,
   proxy: ProxyConfig,
   bs: bootscript.BootScript,
-  letsencrypt_challenge_mode?: 'http-01' | 'dns-01'
+  challenge_mode: 'http-01' | 'dns-01'
 ) {
   const certdnsnames: string[] = [];
 
@@ -297,7 +301,6 @@ function letsEncryptSSL(
       }
     }
   }
-  const challenge_mode = letsencrypt_challenge_mode || 'http-01';
 
   if (certdnsnames.length === 0) {
     return;

@@ -137,18 +137,17 @@ function createBuildScript(
   const proxy_endpoints = deployToolEndpoints(dr, params.endpoints);
   const health_check = undefined;
   bs.include(
-    camus2.configureCamus2(
-      app_user,
-      params.releases_s3,
-      deploy_contexts,
-      camus2.localProxy(proxy_endpoints),
-      params.nginxDockerVersion === undefined
+    camus2.configureCamus2({
+      username: app_user,
+      releases: params.releases_s3,
+      deployContexts: deploy_contexts,
+      proxy: camus2.localProxy(proxy_endpoints, letsencrypt_challenge_type),
+      nginxDockerVersion: params.nginxDockerVersion === undefined
           ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
-      health_check,
-      params.frontendproxy_nginx_conf_tpl,
-      params.ssl_cert_email,
-      letsencrypt_challenge_type,
-    )
+      healthCheck: health_check,
+      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
+      ssl_cert_email: params.ssl_cert_email,
+    })
   );
   if (params.extra_bootscript) {
     bs.include(params.extra_bootscript);

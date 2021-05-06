@@ -150,43 +150,20 @@ export function createController(
   const bs = bootscript.newBootscript();
   const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
   if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
+    bs.include(ec2InstallScript(app_user, docker_config, true));
   }
 
-  if (params.use_hxdeploytool) {
-    const legacy_proxy_endpoints: DC.EndPoint[] = [];
-    for (const label of Object.keys(proxy_endpoints)) {
-      const pe = proxy_endpoints[label];
-      legacy_proxy_endpoints.push({
-        ...pe,
-        label,
-      });
-    }
-
-    bs.include(
-      // Legacy hx-deploytool support
-      deploytool.install(
-        app_user,
-        releases_s3,
-        deploy_contexts,
-        deploytool.remoteProxyMaster(legacy_proxy_endpoints, state_s3),
-        params.health_check,
-        params.frontendproxy_nginx_conf_tpl
-      )
-    );
-  } else {
-    bs.include(
-      camus2.configureCamus2(
-        app_user,
-        releases_s3,
-        deploy_contexts,
-        camus2.remoteProxyMaster(proxy_endpoints, state_s3),
-        nginxDockerVersion,
-        params.health_check,
-        params.frontendproxy_nginx_conf_tpl
-      )
-    );
-  }
+  bs.include(
+    camus2.configureCamus2({
+      username: app_user,
+      releases: releases_s3,
+      deployContexts: deploy_contexts,
+      proxy: camus2.remoteProxyMaster(proxy_endpoints, state_s3),
+      nginxDockerVersion,
+      healthCheck: params.health_check,
+      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
+    })
+  );
 
   if (params.controller_extra_bootscript) {
     bs.include(params.controller_extra_bootscript);
@@ -247,43 +224,20 @@ export function createProcessorAutoScaleGroup(
   const bs = bootscript.newBootscript();
   const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
   if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, !params.use_hxdeploytool, true));
+    bs.include(ec2InstallScript(app_user, docker_config, true));
   }
 
-  if (params.use_hxdeploytool) {
-    const legacy_proxy_endpoints: DC.EndPoint[] = [];
-    for (const label of Object.keys(proxy_endpoints)) {
-      const pe = proxy_endpoints[label];
-      legacy_proxy_endpoints.push({
-        ...pe,
-        label,
-      });
-    }
-
-    bs.include(
-      // Legacy hx-deploytool support
-      deploytool.install(
-        app_user,
-        params.releases_s3,
-        deploy_contexts,
-        deploytool.remoteProxySlave(legacy_proxy_endpoints, state_s3),
-        params.health_check,
-        params.frontendproxy_nginx_conf_tpl
-      )
-    );
-  } else {
-    bs.include(
-      camus2.configureCamus2(
-        app_user,
-        params.releases_s3,
-        deploy_contexts,
-        camus2.remoteProxySlave(proxy_endpoints, state_s3),
-        nginxDockerVersion,
-        params.health_check,
-        params.frontendproxy_nginx_conf_tpl
-      )
-    );
-  }
+  bs.include(
+    camus2.configureCamus2({
+      username: app_user,
+      releases: params.releases_s3,
+      deployContexts: deploy_contexts,
+      proxy: camus2.remoteProxySlave(proxy_endpoints, state_s3),
+      nginxDockerVersion,
+      healthCheck: params.health_check,
+      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
+    })
+  );
 
   if (params.appserver_extra_bootscript) {
     bs.include(params.appserver_extra_bootscript);
@@ -804,12 +758,6 @@ export interface AutoscaleProcessorParams {
    * Health check config
    */
   health_check?: C.HealthCheckConfig;
-
-  /**
-   * Use legacy hx-deploy-tool. If not specified, camus2
-   * will be used
-   */
-  use_hxdeploytool?: boolean;
 
   /**
    * Nginx version to use for camus2

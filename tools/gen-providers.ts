@@ -329,6 +329,29 @@ const website: RecordDecl = {
   ],
 };
 
+const apply_server_side_encryption_by_default: RecordDecl = {
+  name: 'apply_server_side_encryption_by_default',
+  fields: [
+    requiredField('sse_algorithm', enumType(['aws:kms', 'AES256'])),
+    optionalField('kms_master_key_id', STRING),
+  ],
+};
+
+const sse_rule: RecordDecl = {
+  name: 'sse_rule',
+  fields: [
+    requiredField('apply_server_side_encryption_by_default', recordType(apply_server_side_encryption_by_default)),
+    optionalField('bucket_key_enabled', BOOLEAN),
+  ],
+};
+
+const server_side_encryption_configuration: RecordDecl = {
+  name: 'server_side_encryption_configuration',
+  fields: [
+    requiredField('rule', recordType(sse_rule)),
+  ],
+};
+
 const s3_bucket: RecordDecl = {
   name: 's3_bucket',
   fields: [
@@ -338,6 +361,7 @@ const s3_bucket: RecordDecl = {
     optionalField('versioning', recordType(bucket_versioning)),
     optionalField('lifecycle_rule', recordType(lifecycle_rule)),
     optionalField('cors_rule', recordType(cors_rule)),
+    optionalField('server_side_encryption_configuration', recordType(server_side_encryption_configuration)),
     optionalField('website', recordType(website)),
     optionalField('tags', TAGS_MAP),
   ],
@@ -2393,6 +2417,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(expiration);
   gen.generateParams(lifecycle_rule);
   gen.generateParams(cors_rule);
+  gen.generateParams(apply_server_side_encryption_by_default);
+  gen.generateParams(sse_rule);
+  gen.generateParams(server_side_encryption_configuration);
   gen.generateParams(s3_bucket);
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);

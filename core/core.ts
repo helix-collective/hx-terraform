@@ -572,7 +572,7 @@ export function fileGenerator(): FileGenerator {
       case 'map':
         // result.push("# core.ts:573 renderResourceValue ")
         result = result.concat(
-          mapLines(indent + INDENT, prefix, field.value.map)
+          mapLines(indent + INDENT, prefix, field.value.map, true, true)
         );
         break;
       case 'list':
@@ -586,7 +586,7 @@ export function fileGenerator(): FileGenerator {
                 if (value.kind === 'map') {
                   // result.push("# core.ts:587 renderResourceValue ")
                   result = result.concat(
-                    mapLines(indent + INDENT, prefix + ' = ', value.map)
+                    mapLines(indent + INDENT, prefix, value.map, true, true)
                   );
                 }
               }
@@ -599,6 +599,7 @@ export function fileGenerator(): FileGenerator {
                   items.push(value.text);
                 }
               }
+              
               result = result.concat(
                 textLines(
                   indent + INDENT,
@@ -622,9 +623,13 @@ export function fileGenerator(): FileGenerator {
     indent: string,
     prefix0: string,
     fields: ResourceFieldMap,
-    closingBrace: boolean = true
+    equalsOpen: boolean,
+    closingBrace: boolean,
   ): string[] {
     let result = [indent + prefix0 + ' {'];
+    if (equalsOpen) {
+      result = [indent + prefix0 + ' = {'];
+    }
     // result.push("# core.ts:624 mapLines")
     for (const field of fields) {
       // Quote the field key if required
@@ -647,7 +652,7 @@ export function fileGenerator(): FileGenerator {
     for (const provider of generated.providers) {
       const prefix = `provider "${provider.tftype}"`;
       const fields = provider.fields.concat([]);
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
+      lines = lines.concat(mapLines(indent, prefix, fields, false, false));
       lines.push('}');
       lines.push('');
     }
@@ -700,7 +705,7 @@ export function fileGenerator(): FileGenerator {
         };
         fields.push(lifecycleField);
       }
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
+      lines = lines.concat(mapLines(indent, prefix, fields, false, false));
       for (const provisioner of resource.provisioners) {
         if (provisioner.kind === 'local-exec') {
           lines.push('  provisioner "local-exec" {');
@@ -725,7 +730,7 @@ export function fileGenerator(): FileGenerator {
           value: { kind: 'text', text: `"${datasrc.provider}"` },
         });
       }
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
+      lines = lines.concat(mapLines(indent, prefix, fields, false, false));
       lines.push('}');
       lines.push('');
     }
@@ -738,7 +743,7 @@ export function fileGenerator(): FileGenerator {
         }
       ];
       const prefix = `output "${output.tfname.join('_')}"`;
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
+      lines = lines.concat(mapLines(indent, prefix, fields, false, false));
       lines.push('}');
       lines.push('');
     }

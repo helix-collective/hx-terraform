@@ -6,7 +6,8 @@ import {currentUserOpts, dockerRun, dockerRunConsole} from './deps.ts'
 export async function runDockerizedTerraform(cmds: string[]): Promise<void> {
   // Use helix's packaged terraform and associated tools
   // from the image helixta/terraform at this version:
-  const TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11';
+  // const TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11';
+  const TERRAFORM_IMAGE = 'hashicorp/terraform:0.15.3';
 
   // run as user for writing out the plan:
   const asUser = await currentUserOpts();
@@ -14,7 +15,7 @@ export async function runDockerizedTerraform(cmds: string[]): Promise<void> {
   await dockerRunConsole(TERRAFORM_IMAGE, {
     interactive: true,
     user: asUser.user,
-    cmds: ['terraform', ...cmds],
+    cmds: [...cmds],
     mounts: [
       ...asUser.mounts,
       {

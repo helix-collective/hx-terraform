@@ -9,7 +9,8 @@ from hx.dodo_infrastructure import run_dockerized_terraform, update_camus2, lamb
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
-TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11'
+# TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11'
+TERRAFORM_IMAGE = 'hashicorp/terraform:0.15.3'
 
 HERE = Path('.')
 

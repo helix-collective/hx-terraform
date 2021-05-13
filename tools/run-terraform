@@ -1,3 +1,5 @@
 #!/bin/bash
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}")"/.. >/dev/null && pwd )"
-docker run -it --rm -v $ROOT:/src -w /src/terraform -v$HOME:$HOME -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SHARED_CREDENTIALS_FILE -e AWS_PROFILE -e AWS_SESSION_TOKEN helixta/terraform:2019-03-11 terraform "$@"
+docker run -it --rm -v $ROOT:/src -w /src/terraform -v$HOME:$HOME -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SHARED_CREDENTIALS_FILE -e AWS_PROFILE -e AWS_SESSION_TOKEN hashicorp/terraform:0.15.3 terraform "$@"
+# docker run -it --rm -v $ROOT:/src -w /src/terraform -v$HOME:$HOME -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SHARED_CREDENTIALS_FILE -e AWS_PROFILE -e AWS_SESSION_TOKEN helixta/terraform:2019-03-11 terraform "$@"
+

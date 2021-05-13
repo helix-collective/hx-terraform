@@ -721,7 +721,8 @@ const lb_subnet_mapping = {
   name: 'lb_subnet_mapping',
   fields: [
     requiredField('subnet_id', resourceIdType('SubnetId')),
-    requiredField('allocation_id', resourceIdType('EipId')),
+    optionalField('allocation_id', resourceIdType('EipId')),
+    optionalField('private_ipv4_address', stringAliasType("AT.IpAddress")),
   ],
 };
 

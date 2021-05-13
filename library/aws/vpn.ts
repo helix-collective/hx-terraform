@@ -31,12 +31,14 @@ export interface VpnAzConfig {
   availability_zone: AT.AvailabilityZone;
   internal_cidr_block: AT.CidrBlock;
   external_az_by_name: string;
+  lb_ipaddress: AT.IpAddress;
 };
 
 export interface VpnAz {
   internal_subnet: AR.Subnet;
   rtinternal: AR.RouteTable;
   azname: string;
+  lb_ipaddress: AT.IpAddress;
 };
 
 export interface VpnConn {

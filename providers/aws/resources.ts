@@ -3711,13 +3711,15 @@ export function fieldsFromLbAccessLogsParams(params: LbAccessLogsParams) : TF.Re
 
 export interface LbSubnetMappingParams {
   subnet_id: SubnetId;
-  allocation_id: EipId;
+  allocation_id?: EipId;
+  private_ipv4_address?: AT.IpAddress;
 }
 
 export function fieldsFromLbSubnetMappingParams(params: LbSubnetMappingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
-  TF.addField(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "private_ipv4_address", params.private_ipv4_address, TF.stringAliasValue);
   return fields;
 }
 

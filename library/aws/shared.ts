@@ -291,7 +291,7 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
 
   const load_balancer_security_group = AR.createSecurityGroup(tfgen, 'lb', {
     vpc_id: vpc.id,
-    ingress: [ingressOnPort(80), ingressOnPort(443)],
+    ingress: [ingressOnPort(80), ingressOnPort(443), ingressIcmpPing()],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'lb'),
   });

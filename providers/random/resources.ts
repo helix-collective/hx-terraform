@@ -11,7 +11,7 @@ import * as TF from "../../core/core";
 export function createRandomString(tfgen: TF.Generator, rname: string, params: RandomStringParams): String {
   const fields = fieldsFromRandomStringParams(params);
   const resource = tfgen.createTypedResource('String', 'random_string', rname, fields);
-  const result: string =  '${' + TF.resourceName(resource) + '.result}';
+  const result: string =  TF.resourceName(resource) + '.result';
 
   return {
     ...resource,

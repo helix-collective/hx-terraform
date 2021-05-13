@@ -564,11 +564,13 @@ export function fileGenerator(): FileGenerator {
     let result : string[] = [];
     switch (field.value.kind) {
       case 'text':
+        // result.push("# core.ts:567 renderResourceValue ")
         result = result.concat(
           textLines(indent + INDENT, prefix + ' = ', field.value.text)
         );
         break;
       case 'map':
+        // result.push("# core.ts:573 renderResourceValue ")
         result = result.concat(
           mapLines(indent + INDENT, prefix, field.value.map)
         );
@@ -582,6 +584,7 @@ export function fileGenerator(): FileGenerator {
             case 'map':
               for (const value of field.value.values) {
                 if (value.kind === 'map') {
+                  // result.push("# core.ts:587 renderResourceValue ")
                   result = result.concat(
                     mapLines(indent + INDENT, prefix + ' = ', value.map)
                   );
@@ -589,6 +592,7 @@ export function fileGenerator(): FileGenerator {
               }
               break;
             case 'text':
+              // result.push("# core.ts:595 renderResourceValue ")
               const items: string[] = [];
               for (const value of field.value.values) {
                 if (value.kind === 'text') {
@@ -621,11 +625,13 @@ export function fileGenerator(): FileGenerator {
     closingBrace: boolean = true
   ): string[] {
     let result = [indent + prefix0 + ' {'];
+    // result.push("# core.ts:624 mapLines")
     for (const field of fields) {
       // Quote the field key if required
       const fieldkey = field.key.match(/\//) ? `"${field.key}"` : field.key;
 
       const prefix = indent + fieldkey;
+      // result.push("# core.ts:630 mapLines")
       result = result.concat(renderResourceValue(indent, prefix, field.value));
     }
     if (closingBrace) {
@@ -637,6 +643,7 @@ export function fileGenerator(): FileGenerator {
   function generateFile(generated: Generated) : string {
     const indent = '';
     let lines: string[] = [];
+    // lines.push("# core.ts:640 generateFile")
     for (const provider of generated.providers) {
       const prefix = `provider "${provider.tftype}"`;
       const fields = provider.fields.concat([]);
@@ -644,7 +651,9 @@ export function fileGenerator(): FileGenerator {
       lines.push('}');
       lines.push('');
     }
+    // lines.push("# core.ts:648 generateFile")
     for (const resource of generated.resources) {
+      // lines.push("# core.ts:650 generateFile")
       const prefix =
         'resource "' +
         resource.tftype +
@@ -704,6 +713,7 @@ export function fileGenerator(): FileGenerator {
       lines.push('}');
       lines.push('');
     }
+    // lines.push("# core.ts:709 generateFile")
     for (const datasrc of generated.datasources) {
       const prefix =
         'data "' + datasrc.tftype + '" "' + datasrc.tfname.join('_') + '"';
@@ -719,6 +729,7 @@ export function fileGenerator(): FileGenerator {
       lines.push('}');
       lines.push('');
     }
+    // lines.push("# core.ts:725 generateFile")
     for (const output of generated.outputs) {
       const fields : ResourceFieldMap = [
         {
@@ -731,6 +742,7 @@ export function fileGenerator(): FileGenerator {
       lines.push('}');
       lines.push('');
     }
+    // lines.push("# core.ts:738 generateFile")
     return lines.join('\n');
   }
 

@@ -372,15 +372,15 @@ export function fileGenerator(
         lines.push(
           `  const ${
             escapeVariableName(attr.name)
-          }: string =  '\$\{' + TF.resourceName(resource) + '.${attr.name}}';`
+          }: string =  TF.resourceName(resource) + '.${attr.name}';`
         );
       } else if (attr.type.kind === 'resourcearn') {
         lines.push(
           `  const ${escapeVariableName(attr.name)}: ${genAttrType(
             attr.type
-          )} = AT.arnT('\$\{' + TF.resourceName(resource) + '.${
+          )} = AT.arnT(TF.resourceName(resource) + '.${
             attr.name
-          }}', '${name}');`
+          }', '${name}');`
         );
       } else {
         lines.push(
@@ -388,7 +388,7 @@ export function fileGenerator(
             attr.type
           )} =  {type: '${genAttrTypeLabel(
             attr.type
-          )}', value: '\$\{' + TF.resourceName(resource) + '.${attr.name}}'};`
+          )}', value: TF.resourceName(resource) + '.${attr.name}'};`
         );
       }
     }
@@ -442,7 +442,7 @@ export function fileGenerator(
         lines.push(
           `  const ${
             escapeVariableName(attr.name)
-          }: string = '\$\{' + TF.dataSourceName(resource) + '.${attr.name}}';`
+          }: string = TF.dataSourceName(resource) + '.${attr.name}';`
         );
       } else if (attr.type.kind === 'resourcearn') {
         lines.push(

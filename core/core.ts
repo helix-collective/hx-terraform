@@ -572,7 +572,7 @@ export function fileGenerator(): FileGenerator {
       case 'map':
         // result.push("# core.ts:573 renderResourceValue ")
         result = result.concat(
-          mapLines(indent + INDENT, prefix, field.value.map, true, true)
+          mapLines(indent + INDENT, prefix, field.value.map, false, true)
         );
         break;
       case 'list':

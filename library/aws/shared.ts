@@ -415,8 +415,7 @@ export function createNetworkResources(
   });
 
   // Ignore eks related tags changes
-  tfgen.ignoreChanges(vpc, 'tags.%');
-  tfgen.ignoreChanges(vpc, 'tags.kubernetes.io/');
+  tfgen.ignoreChanges(vpc, 'tags');
 
   const internet_gateway = AR.createInternetGateway(tfgen, 'gw', {
     vpc_id: vpc.id,
@@ -444,8 +443,7 @@ export function createNetworkResources(
       });
 
       // Ignore eks related tags changes
-      tfgen.ignoreChanges(external_subnet, 'tags.%');
-      tfgen.ignoreChanges(external_subnet, 'tags.kubernetes.io/');
+      tfgen.ignoreChanges(external_subnet, 'tags');
 
       const eip = AR.createEip(tfgen, 'ngeip', {
         vpc: true,
@@ -481,8 +479,7 @@ export function createNetworkResources(
       });
 
       // Ignore eks related tags changes
-      tfgen.ignoreChanges(internal_subnet, 'tags.%');
-      tfgen.ignoreChanges(internal_subnet, 'tags.kubernetes.io/');
+      tfgen.ignoreChanges(internal_subnet, 'tags');
 
       AR.createRouteTableAssociation(tfgen, 'rtainternal', {
         subnet_id: internal_subnet.id,

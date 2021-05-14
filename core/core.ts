@@ -125,34 +125,35 @@ export function booleanValue(value: boolean): ResourceValue {
 }
 
 export function stringValue(value: string): ResourceValue {
-  return { kind: 'text', text: quotedText(value) };
+  return { kind: 'text', text: quotedText(value) + " /*A*/"};
 }
 
 // We use that function and QUOTED_STRING type when we need to preserve
 // quoting semantics instead of heredocs for strings need quoting.
 export function quotedStringValue(value: string): ResourceValue {
-  return { kind: 'text', text: quotedTextNoEof(value) };
+  return { kind: 'text', text: quotedTextNoEof(value) + " /*B*/" };
 }
 
 export function numberStringValue(value: number): ResourceValue {
-  return { kind: 'text', text: `"${value}"` };
+  return { kind: 'text', text: `"${value}"` + " /*C*/" };
 }
 
 export function stringAliasValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
+  return { kind: 'text', text: JSON.stringify(value.value) + " /*D*/" };
 }
 
 export function numberValue(value: number): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value) };
+  return { kind: 'text', text: JSON.stringify(value) + " /*E*/" };
 }
 
 export function resourceIdValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
+  return { kind: 'text', text: JSON.stringify(value.value) + " /*F*/" };
 }
 
 export function resourceArnValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
+  return { kind: 'text', text: JSON.stringify(value.value) + " /*G*/" };
 }
+
 
 export function listValue<T>(
   conv: (t: T) => ResourceValue
@@ -572,7 +573,7 @@ export function fileGenerator(): FileGenerator {
       case 'map':
         // result.push("# core.ts:573 renderResourceValue ")
         result = result.concat(
-          mapLines(indent + INDENT, prefix, field.value.map, false, true)
+          mapLines(indent + INDENT, prefix, field.value.map, true, true)
         );
         break;
       case 'list':

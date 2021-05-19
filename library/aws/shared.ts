@@ -19,6 +19,7 @@ export interface NetworkConfig {
   region: AT.Region;
   cidr_block: AT.CidrBlock;
   azs: AzConfig[];
+  named_security_groups?: {[key: string]: Omit<AR.SecurityGroupParams, "vpc_id"> };
 };
 
 /**
@@ -134,6 +135,7 @@ export type SharedSecurityGroupResources = {
   appserver_security_group: AR.SecurityGroup;
   load_balancer_security_group: AR.SecurityGroup;
   lambda_security_group: AR.SecurityGroup;
+  named_security_groups: {[key: string] : AR.SecurityGroup};
 };
 
 /**
@@ -175,7 +177,7 @@ export function createResources(
   const network = createNetworkResources(tfgen, network_config);
   const domain = createDomainResources(tfgen, {domain_name});
   const buckets = createSharedBucketsResources(tfgen, {s3_bucket_prefix});
-  const securityGroups = createSharedSecurityGroupResources(tfgen, network);
+  const securityGroups = createSharedSecurityGroupResources(tfgen, {...network, named_security_groups: network_config.named_security_groups || {}});
   const snsTopics = createSharedSnsTopicsResources(tfgen, {});
 
   return {
@@ -272,6 +274,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
 
 export type SharedSecurityGroupParams = {
   vpc: AR.Vpc;
+  named_security_groups: {[key: string]: Omit<AR.SecurityGroupParams, "vpc_id"> };
 };
 export function createSharedSecurityGroupResources(tfgen: TF.Generator, params : SharedSecurityGroupParams) : SharedSecurityGroupResources {
   const {vpc} = params;
@@ -301,11 +304,24 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'lambda'),
   });
+  const named_security_groups: {[key: string] : AR.SecurityGroup} = {}
+  for (const key of Object.keys(params.named_security_groups)) {
+    if( ['bastion', 'appserver', 'lb', 'lambda'].includes(key) ) {
+      throw new Error("named_security_groups must not be one of the reserved names ('bastion', 'appserver', 'lb', 'lambda')")
+    }
+    const sg = AR.createSecurityGroup(tfgen, key, {
+      ...params.named_security_groups[key],
+      tags: contextTagsWithName(tfgen, key),
+      vpc_id: vpc.id,
+    })
+    named_security_groups[key] = sg;
+  }
   return {
     bastion_security_group,
     appserver_security_group,
     load_balancer_security_group,
-    lambda_security_group
+    lambda_security_group,
+    named_security_groups,
   };
 }
 

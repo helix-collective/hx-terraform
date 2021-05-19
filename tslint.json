@@ -1,6 +1,10 @@
 {
   "defaultSeverity": "error",
-  "extends": ["tslint-config-airbnb", "tslint-config-prettier"],
+  "extends": [
+    // Default to all rules - add exclusions in `rules` stanza
+    "tslint:all",
+    "tslint-config-prettier"
+  ],
   "jsRules": {},
   "rules": {
     // Decided to not have

@@ -4701,12 +4701,14 @@ export function fieldsFromCloudfrontDistributionParams(params: CloudfrontDistrib
 
 export interface CloudfrontForwardedValuesParams {
   cookies: CloudfrontCookiesParams;
+  headers?: (string)[];
   query_string: boolean;
 }
 
 export function fieldsFromCloudfrontForwardedValuesParams(params: CloudfrontForwardedValuesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "cookies", params.cookies, (v) => TF.mapValue(fieldsFromCloudfrontCookiesParams(v)));
+  TF.addOptionalField(fields, "headers", params.headers, TF.listValue(TF.stringValue));
   TF.addField(fields, "query_string", params.query_string, TF.booleanValue);
   return fields;
 }

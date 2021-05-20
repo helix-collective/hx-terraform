@@ -1522,6 +1522,7 @@ const cloudfront_forwarded_values: RecordDecl = {
   name: 'cloudfront_forwarded_values',
   fields: [
     requiredField('cookies', recordType(cloudfront_cookies)),
+    optionalField('headers', listType(STRING)),
     requiredField('query_string', BOOLEAN),
   ],
 };

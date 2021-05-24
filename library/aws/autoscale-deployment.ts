@@ -13,9 +13,6 @@ import * as docker from '../docker';
 import * as camus2 from '../camus2/camus2';
 import * as C from '../../library/camus2/adl-gen/config';
 
-import * as deploytool from '../deploytool_legacy/deploytool';
-import * as DC from '../../library/deploytool_legacy/adl-gen/config';
-
 import {
   EndPoint,
   getDefaultAmi,

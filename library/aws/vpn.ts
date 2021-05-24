@@ -30,6 +30,7 @@ export interface VpnAzConfig {
   azname: string;
   availability_zone: AT.AvailabilityZone;
   internal_cidr_block: AT.CidrBlock;
+  external_az_by_name: string;
 };
 
 export interface VpnAz {

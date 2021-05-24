@@ -8,7 +8,7 @@ import * as TF from '../../core/core';
 import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
-import { ingressIcmpPing, ingressOnPort, egress_all, contextTagsWithName } from '../util';
+import { Customize, ingressOnPort, egress_all, contextTagsWithName } from '../util';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
 
 /**
@@ -19,6 +19,7 @@ export interface NetworkConfig {
   region: AT.Region;
   cidr_block: AT.CidrBlock;
   azs: AzConfig[];
+  customize_security_groups?: Customize<SecurityGroupsConfig>;
 };
 
 /**
@@ -175,7 +176,7 @@ export function createResources(
   const network = createNetworkResources(tfgen, network_config);
   const domain = createDomainResources(tfgen, {domain_name});
   const buckets = createSharedBucketsResources(tfgen, {s3_bucket_prefix});
-  const securityGroups = createSharedSecurityGroupResources(tfgen, network);
+  const securityGroups = createSharedSecurityGroupResources(tfgen, network, network_config.customize_security_groups);
   const snsTopics = createSharedSnsTopicsResources(tfgen, {});
 
   return {
@@ -273,40 +274,60 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
 export type SharedSecurityGroupParams = {
   vpc: AR.Vpc;
 };
-export function createSharedSecurityGroupResources(tfgen: TF.Generator, params : SharedSecurityGroupParams) : SharedSecurityGroupResources {
-  const {vpc} = params;
-  const bastion_security_group = AR.createSecurityGroup(tfgen, 'bastion', {
-    vpc_id: vpc.id,
-    ingress: [ingressOnPort(22)],
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, 'bastion'),
-  });
+export type SecurityGroupsConfig = {
+  bastion: AccessParams;
+  appserver: AccessParams;
+  lb: AccessParams;
+  lambda: AccessParams;
+};
+export type AccessParams = {
+  key: string;
+  ingress?: AR.IngressRuleParams[];
+  egress: AR.EgressRuleParams[];
+}
 
-  const appserver_security_group = AR.createSecurityGroup(tfgen, 'appserver', {
-    vpc_id: vpc.id,
-    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443), ingressIcmpPing()],
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, 'appserver'),
-  });
-
-  const load_balancer_security_group = AR.createSecurityGroup(tfgen, 'lb', {
-    vpc_id: vpc.id,
-    ingress: [ingressOnPort(80), ingressOnPort(443)],
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, 'lb'),
-  });
-
-  const lambda_security_group = AR.createSecurityGroup(tfgen, 'lambda', {
-    vpc_id: vpc.id,
-    egress: [egress_all],
-    tags: contextTagsWithName(tfgen, 'lambda'),
-  });
+export function createSharedSecurityGroupResources(tfgen: TF.Generator, params : SharedSecurityGroupParams, customize_security_groups?: Customize<SecurityGroupsConfig>) : SharedSecurityGroupResources {
+  const sgConfig: SecurityGroupsConfig = {
+    bastion: {
+      key: "bastion",
+      ingress: [ingressOnPort(22)],
+      egress: [egress_all],
+    },
+    appserver: {
+      key: "appserver",
+      ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
+      egress: [egress_all],
+    },
+    lb: {
+      key: "lb",
+      ingress: [ingressOnPort(80), ingressOnPort(443)],
+      egress: [egress_all],
+    },
+    lambda: {
+      key: "lambda",
+      ingress: undefined,
+      egress: [egress_all],
+    },
+  }
+  if (customize_security_groups) {
+    customize_security_groups(sgConfig);
+  }
   return {
-    bastion_security_group,
-    appserver_security_group,
-    load_balancer_security_group,
-    lambda_security_group
-  };
+    bastion_security_group: createSG(tfgen, params, sgConfig.bastion),
+    appserver_security_group: createSG(tfgen, params, sgConfig.appserver),
+    load_balancer_security_group: createSG(tfgen, params, sgConfig.lb),
+    lambda_security_group: createSG(tfgen, params, sgConfig.lambda),
+  }
+}
+
+function createSG(tfgen: TF.Generator, params : SharedSecurityGroupParams, config: AccessParams) {
+  const {vpc} = params;
+  return AR.createSecurityGroup(tfgen, config.key, {
+    ingress: config.ingress,
+    egress: config.egress,
+    tags: contextTagsWithName(tfgen, config.key),
+    vpc_id: vpc.id,
+  })
 }
 
 export function createSharedSnsTopicsResources(tfgen: TF.Generator, {}) : SharedSnsTopicResources {

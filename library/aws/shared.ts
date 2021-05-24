@@ -130,7 +130,6 @@ export type SharedBucketsResources = {
 /**
  * SharedResources: shared security groups
  */
-// note the fields much match the name fields in `const sgConfig: SecurityGroupsConfig = { ...`
 export type SharedSecurityGroupResources = {
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
@@ -282,31 +281,30 @@ export type SecurityGroupsConfig = {
   lambda: AccessParams;
 };
 export type AccessParams = {
-  name: string;
+  key: string;
   ingress?: AR.IngressRuleParams[];
   egress: AR.EgressRuleParams[];
 }
 
 export function createSharedSecurityGroupResources(tfgen: TF.Generator, params : SharedSecurityGroupParams, customize_security_groups?: Customize<SecurityGroupsConfig>) : SharedSecurityGroupResources {
-  // note the name fields much match the field names in SharedSecurityGroupResources
   const sgConfig: SecurityGroupsConfig = {
     bastion: {
-      name: "bastion_security_group",
+      key: "bastion",
       ingress: [ingressOnPort(22)],
       egress: [egress_all],
     },
     appserver: {
-      name: "appserver_security_group",
+      key: "appserver",
       ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
       egress: [egress_all],
     },
     lb: {
-      name: "load_balancer_security_group",
+      key: "lb",
       ingress: [ingressOnPort(80), ingressOnPort(443)],
       egress: [egress_all],
     },
     lambda: {
-      name: "lambda_security_group",
+      key: "lambda",
       ingress: undefined,
       egress: [egress_all],
     },
@@ -314,21 +312,22 @@ export function createSharedSecurityGroupResources(tfgen: TF.Generator, params :
   if (customize_security_groups) {
     customize_security_groups(sgConfig);
   }
-  const {vpc} = params;
-  // Note this is reflection based code
-  // it only work as the name fields in sgConfig and the fields of SharedSecurityGroupResources are consistent
-  const result = {} as SharedSecurityGroupResources
-  for (const key of Object.keys(sgConfig)) {
-    const config: AccessParams = sgConfig[key]
-    const sg = AR.createSecurityGroup(tfgen, key, {
-      ingress: config.ingress,
-      egress: config.egress,
-      tags: contextTagsWithName(tfgen, key),
-      vpc_id: vpc.id,
-    })
-    result[config.name] = sg;
+  return {
+    bastion_security_group: createSG(tfgen, params, sgConfig.bastion),
+    appserver_security_group: createSG(tfgen, params, sgConfig.appserver),
+    load_balancer_security_group: createSG(tfgen, params, sgConfig.lb),
+    lambda_security_group: createSG(tfgen, params, sgConfig.lambda),
   }
-  return result
+}
+
+function createSG(tfgen: TF.Generator, params : SharedSecurityGroupParams, config: AccessParams) {
+  const {vpc} = params;
+  return AR.createSecurityGroup(tfgen, config.key, {
+    ingress: config.ingress,
+    egress: config.egress,
+    tags: contextTagsWithName(tfgen, config.key),
+    vpc_id: vpc.id,
+  })
 }
 
 export function createSharedSnsTopicsResources(tfgen: TF.Generator, {}) : SharedSnsTopicResources {

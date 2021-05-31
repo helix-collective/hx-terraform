@@ -199,7 +199,7 @@ export function createLoggingInfrastructure(
 
     TF.withLocalNameScope(tfgen, name, tfgen=>{
       // scope alarms to log aggregator name
-      alarms.createEc2Alarms(tfgen, sr.alarm_topic, instance.ec2, '/dev/xvda1');
+      alarms.createEc2Alarms(tfgen, sr.alarm_topic, instance.ec2, '/dev/nvme0n1p1');
     });
 
     log_aggregators.push(instance);

@@ -4340,15 +4340,25 @@ export function fieldsFromLambdaPermissionParams(params: LambdaPermissionParams)
 
 export interface CloudwatchEventRuleParams {
   name?: string;
+  name_prefix?: string;
   schedule_expression?: string;
+  event_pattern?: string;
   description?: string;
+  role_arn?: AT.ArnT<"IamRole">;
+  is_enabled?: boolean;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addOptionalField(fields, "schedule_expression", params.schedule_expression, TF.stringValue);
+  TF.addOptionalField(fields, "event_pattern", params.event_pattern, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "is_enabled", params.is_enabled, TF.booleanValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

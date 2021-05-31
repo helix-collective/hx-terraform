@@ -1306,8 +1306,13 @@ const cloudwatch_event_rule = {
   name: 'cloudwatch_event_rule',
   fields: [
     optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
     optionalField('schedule_expression', STRING),
+    optionalField('event_pattern', STRING),
     optionalField('description', STRING),
+    optionalField('role_arn', arnType(iam_role)),
+    optionalField('is_enabled', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
   ],
 };
 

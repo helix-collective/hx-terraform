@@ -4365,14 +4365,158 @@ export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleP
 export interface CloudwatchEventTargetParams {
   rule: string;
   arn: AT.Arn;
-  input: string;
+  input?: string;
+  input_path?: string;
+  role_arn?: AT.ArnT<"IamRole">;
+  run_command_target?: RunCommandTargetsParams;
+  kinesis_target?: KinesisTargetParams;
+  sqs_target?: SqsTargetParams;
+  http_target?: HttpTargetParams;
+  input_transformer?: InputTransformerParams;
+  retry_policy?: RetryPolicyParams;
+  dead_letter_config?: DeadLetterConfigParams;
 }
 
 export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "rule", params.rule, TF.stringValue);
   TF.addField(fields, "arn", params.arn, TF.stringAliasValue);
-  TF.addField(fields, "input", params.input, TF.stringValue);
+  TF.addOptionalField(fields, "input", params.input, TF.stringValue);
+  TF.addOptionalField(fields, "input_path", params.input_path, TF.stringValue);
+  TF.addOptionalField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalField(fields, "run_command_target", params.run_command_target, (v) => TF.mapValue(fieldsFromRunCommandTargetsParams(v)));
+  TF.addOptionalField(fields, "kinesis_target", params.kinesis_target, (v) => TF.mapValue(fieldsFromKinesisTargetParams(v)));
+  TF.addOptionalField(fields, "sqs_target", params.sqs_target, (v) => TF.mapValue(fieldsFromSqsTargetParams(v)));
+  TF.addOptionalField(fields, "http_target", params.http_target, (v) => TF.mapValue(fieldsFromHttpTargetParams(v)));
+  TF.addOptionalField(fields, "input_transformer", params.input_transformer, (v) => TF.mapValue(fieldsFromInputTransformerParams(v)));
+  TF.addOptionalField(fields, "retry_policy", params.retry_policy, (v) => TF.mapValue(fieldsFromRetryPolicyParams(v)));
+  TF.addOptionalField(fields, "dead_letter_config", params.dead_letter_config, (v) => TF.mapValue(fieldsFromDeadLetterConfigParams(v)));
+  return fields;
+}
+
+export interface RunCommandTargetsParams {
+  /**
+  Can be either tag:tag-key or InstanceIds
+  */
+  key: string;
+  /**
+  If Key is tag:tag-key, Values is a list of tag values.
+  If Key is InstanceIds, Values is a list of Amazon EC2 instance IDs.
+  */
+  values: (string)[];
+}
+
+export function fieldsFromRunCommandTargetsParams(params: RunCommandTargetsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "key", params.key, TF.stringValue);
+  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface KinesisTargetParams {
+  /**
+  The JSON path to be extracted from the event and used as the partition key.
+  */
+  partition_key_path?: string;
+}
+
+export function fieldsFromKinesisTargetParams(params: KinesisTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "partition_key_path", params.partition_key_path, TF.stringValue);
+  return fields;
+}
+
+export interface SqsTargetParams {
+  /**
+  The FIFO message group ID to use as the target.
+  */
+  message_group_id?: string;
+}
+
+export function fieldsFromSqsTargetParams(params: SqsTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "message_group_id", params.message_group_id, TF.stringValue);
+  return fields;
+}
+
+export interface HttpTargetParams {
+  /**
+  The list of values that correspond sequentially to any path variables in your endpoint ARN
+  (for example "arn:aws:execute-api:us-east-1:123456:myapi/ * /POST/pets/ *".)
+  (spaces in URI around " * " are for clarity)
+  */
+  path_parameter_values?: (string)[];
+  /**
+  Represents keys/values of query string parameters that are appended to the invoked endpoint.
+  */
+  query_string_parameters?: TF.TagsMap;
+  /**
+  Enables you to specify HTTP headers to add to the request.
+  */
+  header_parameters?: TF.TagsMap;
+}
+
+export function fieldsFromHttpTargetParams(params: HttpTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "path_parameter_values", params.path_parameter_values, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "query_string_parameters", params.query_string_parameters, TF.tagsValue);
+  TF.addOptionalField(fields, "header_parameters", params.header_parameters, TF.tagsValue);
+  return fields;
+}
+
+export interface InputTransformerParams {
+  /**
+   Key value pairs specified in the form of JSONPath (for example, time = $.time)
+   * You can have as many as 10 key-value pairs.
+   * You must use JSON dot notation, not bracket notation.
+   * The keys can't start with "AWS".
+  */
+  input_paths?: TF.TagsMap;
+  /**
+  Template to customize data sent to the target.
+  Must be valid JSON.
+  To send a string value, the string value must include double quotes.
+  Values must be escaped for both JSON and Terraform, e.g.
+  "\"Your string goes here.\\nA new line.\""
+  */
+  input_template: string;
+}
+
+export function fieldsFromInputTransformerParams(params: InputTransformerParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "input_paths", params.input_paths, TF.tagsValue);
+  TF.addField(fields, "input_template", params.input_template, TF.stringValue);
+  return fields;
+}
+
+export interface RetryPolicyParams {
+  /**
+  The age in seconds to continue to make retry attempts.
+  */
+  maximum_event_age_in_seconds?: number;
+  /**
+  Maximum number of retry attempts to make before the request fails
+  */
+  maximum_retry_attempts?: number;
+}
+
+export function fieldsFromRetryPolicyParams(params: RetryPolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "maximum_event_age_in_seconds", params.maximum_event_age_in_seconds, TF.numberValue);
+  TF.addOptionalField(fields, "maximum_retry_attempts", params.maximum_retry_attempts, TF.numberValue);
+  return fields;
+}
+
+export interface DeadLetterConfigParams {
+  /**
+  ARN of the SQS queue specified as the target for the dead-letter queue.
+  */
+  arn?: AT.ArnT<"SqsQueue">;
+}
+
+export function fieldsFromDeadLetterConfigParams(params: DeadLetterConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "arn", params.arn, TF.resourceArnValue);
   return fields;
 }
 

@@ -1316,12 +1316,112 @@ const cloudwatch_event_rule = {
   ],
 };
 
+
+const cloudwatch_event_target_run_command_targets: RecordDecl = {
+  name: 'run_command_targets',
+  fields: [
+    requiredField('key', STRING, [
+      'Can be either tag:tag-key or InstanceIds',
+    ]),
+    requiredField('values', listType(STRING), [
+      'If Key is tag:tag-key, Values is a list of tag values.',
+      'If Key is InstanceIds, Values is a list of Amazon EC2 instance IDs.'
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_kinesis_target: RecordDecl = {
+  name: 'kinesis_target',
+  fields: [
+    optionalField('partition_key_path', STRING, [
+      'The JSON path to be extracted from the event and used as the partition key.',
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_sqs_target: RecordDecl = {
+  name: 'sqs_target',
+  fields: [
+    optionalField('message_group_id', STRING, [
+      'The FIFO message group ID to use as the target.'
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_http_target: RecordDecl = {
+  name: 'http_target',
+  fields: [
+    optionalField('path_parameter_values', listType(STRING), [
+      'The list of values that correspond sequentially to any path variables in your endpoint ARN',
+      '(for example "arn:aws:execute-api:us-east-1:123456:myapi/ * /POST/pets/ *".)',
+      '(spaces in URI around " * " are for clarity)'
+    ]),
+    optionalField('query_string_parameters', TAGS_MAP, [
+      'Represents keys/values of query string parameters that are appended to the invoked endpoint.',
+    ]),
+    optionalField('header_parameters', TAGS_MAP, [
+      'Enables you to specify HTTP headers to add to the request.'
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_input_transformer: RecordDecl = {
+  name: 'input_transformer',
+  fields: [
+    optionalField('input_paths', TAGS_MAP, [
+      ' Key value pairs specified in the form of JSONPath (for example, time = $.time)',
+      ' * You can have as many as 10 key-value pairs.',
+      ' * You must use JSON dot notation, not bracket notation.',
+      ' * The keys can\'t start with "AWS".',
+    ]),
+    requiredField('input_template', STRING, [
+      'Template to customize data sent to the target.',
+      'Must be valid JSON.',
+      'To send a string value, the string value must include double quotes.',
+      'Values must be escaped for both JSON and Terraform, e.g.',
+      '"\\"Your string goes here.\\\\nA new line.\\""',
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_retry_policy: RecordDecl = {
+  name: 'retry_policy',
+  fields: [
+    optionalField('maximum_event_age_in_seconds', NUMBER, [
+      'The age in seconds to continue to make retry attempts.',
+    ]),
+    optionalField('maximum_retry_attempts', NUMBER, [
+      'Maximum number of retry attempts to make before the request fails',
+    ]),
+  ],
+};
+
+const cloudwatch_event_target_dead_letter_config: RecordDecl = {
+  name: 'dead_letter_config',
+  fields: [
+    optionalField('arn', arnType(sqs_queue), [
+      'ARN of the SQS queue specified as the target for the dead-letter queue.'
+    ]),
+  ],
+};
+
 const cloudwatch_event_target = {
   name: 'cloudwatch_event_target',
   fields: [
     requiredField('rule', STRING),
     requiredField('arn', stringAliasType('AT.Arn')),
-    requiredField('input', STRING),
+    optionalField('input', STRING),
+    optionalField('input_path', STRING),
+    optionalField('role_arn', arnType(iam_role)),
+    optionalField('run_command_target', recordType(cloudwatch_event_target_run_command_targets)),
+    // optionalField('ecs_target', recordType()),
+    // optionalField('batch_target', recordType()),
+    optionalField('kinesis_target', recordType(cloudwatch_event_target_kinesis_target)),
+    optionalField('sqs_target', recordType(cloudwatch_event_target_sqs_target)),
+    optionalField('http_target', recordType(cloudwatch_event_target_http_target)),
+    optionalField('input_transformer', recordType(cloudwatch_event_target_input_transformer)),
+    optionalField('retry_policy', recordType(cloudwatch_event_target_retry_policy)),
+    optionalField('dead_letter_config', recordType(cloudwatch_event_target_dead_letter_config)),
   ],
 };
 
@@ -3418,6 +3518,13 @@ function generateAws(gen: Generator) {
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);
+  gen.generateParams(cloudwatch_event_target_run_command_targets);
+  gen.generateParams(cloudwatch_event_target_kinesis_target);
+  gen.generateParams(cloudwatch_event_target_sqs_target);
+  gen.generateParams(cloudwatch_event_target_http_target);
+  gen.generateParams(cloudwatch_event_target_input_transformer);
+  gen.generateParams(cloudwatch_event_target_retry_policy);
+  gen.generateParams(cloudwatch_event_target_dead_letter_config);
   gen.generateParams(field_to_match);
   gen.generateParams(byte_match_tuples);
   gen.generateParams(waf_byte_match_set);

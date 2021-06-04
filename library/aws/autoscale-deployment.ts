@@ -410,6 +410,7 @@ export function createAutoscaleTargetGroup(
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
+    name: tfgen.scopedName(name).join('-'),
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.vpc.id,

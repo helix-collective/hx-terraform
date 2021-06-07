@@ -247,6 +247,9 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     tags: tfgen.tagsContext(),
     ...params.deploy,
   });
+  s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
+
+  
 
   const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
   const backup_bucket = AR.createS3Bucket(tfgen, 'backup', {
@@ -257,6 +260,8 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     tags: tfgen.tagsContext(),
     ...params.backup,
   });
+  s3.blockPublicAccess(tfgen, 'backup', backup_bucket.id);
+
 
   return {
     s3_bucket_prefix,

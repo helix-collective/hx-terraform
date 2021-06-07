@@ -594,6 +594,28 @@ export interface S3BucketObject extends TF.ResourceT<'S3BucketObject'> {
 export type S3BucketObjectId = {type:'S3BucketObjectId',value:string};
 
 /**
+ *  Manages S3 bucket-level Public Access Block configuration.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block
+ */
+export function createS3BucketPublicAccessBlock(tfgen: TF.Generator, rname: string, params: S3BucketPublicAccessBlockParams): S3BucketPublicAccessBlock {
+  const fields = fieldsFromS3BucketPublicAccessBlockParams(params);
+  const resource = tfgen.createTypedResource('S3BucketPublicAccessBlock', 'aws_s3_bucket_public_access_block', rname, fields);
+  const id: string =  '${' + TF.resourceName(resource) + '.id}';
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketPublicAccessBlock extends TF.ResourceT<'S3BucketPublicAccessBlock'> {
+  id: string;
+}
+
+export type S3BucketPublicAccessBlockId = {type:'S3BucketPublicAccessBlockId',value:string};
+
+/**
  *  Provides an SNS topic resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/sns_topic.html
@@ -2943,6 +2965,24 @@ export function fieldsFromS3BucketObjectParams(params: S3BucketObjectParams) : T
   TF.addField(fields, "key", params.key, TF.stringValue);
   TF.addOptionalField(fields, "source", params.source, TF.stringValue);
   TF.addOptionalField(fields, "content", params.content, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketPublicAccessBlockParams {
+  bucket: string;
+  block_public_acls?: boolean;
+  block_public_policy?: boolean;
+  ignore_public_acls?: boolean;
+  restrict_public_buckets?: boolean;
+}
+
+export function fieldsFromS3BucketPublicAccessBlockParams(params: S3BucketPublicAccessBlockParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalField(fields, "block_public_acls", params.block_public_acls, TF.booleanValue);
+  TF.addOptionalField(fields, "block_public_policy", params.block_public_policy, TF.booleanValue);
+  TF.addOptionalField(fields, "ignore_public_acls", params.ignore_public_acls, TF.booleanValue);
+  TF.addOptionalField(fields, "restrict_public_buckets", params.restrict_public_buckets, TF.booleanValue);
   return fields;
 }
 

@@ -67,3 +67,20 @@ export function createObjectFromFile(
     source: sourcePath,
   });
 }
+
+/**
+ * Block all public access for a bucket
+ */
+export function blockPublicAccess(
+  tfgen: TF.Generator,
+  tfname: string,
+  bucket: string
+) {
+  AR.createS3BucketPublicAccessBlock(tfgen, tfname, {
+    bucket,
+    block_public_acls: true,
+    block_public_policy: true,
+    restrict_public_buckets: true,
+    ignore_public_acls: true,
+  });
+}

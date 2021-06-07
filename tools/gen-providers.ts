@@ -539,6 +539,17 @@ const s3_bucket_object: RecordDecl = {
   ],
 };
 
+const s3_bucket_public_access_block: RecordDecl = {
+  name: 's3_bucket_public_access_block',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('block_public_acls', BOOLEAN),
+    optionalField('block_public_policy', BOOLEAN),
+    optionalField('ignore_public_acls', BOOLEAN),
+    optionalField('restrict_public_buckets', BOOLEAN),
+  ],
+};
+
 const iam_user: RecordDecl = {
   name: 'iam_user',
   fields: [
@@ -2731,6 +2742,14 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Manages S3 bucket-level Public Access Block configuration.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block',
+    s3_bucket_public_access_block,
+    [stringAttr('id')]
+  );
+
+
+  gen.generateResource(
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
@@ -3461,6 +3480,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_policy);
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);
+  gen.generateParams(s3_bucket_public_access_block);
   gen.generateParams(sns_topic);
   gen.generateParams(iam_user);
   gen.generateParams(iam_user_policy);

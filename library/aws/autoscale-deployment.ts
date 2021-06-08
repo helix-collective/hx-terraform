@@ -64,7 +64,7 @@ export function createAutoscaleFrontend(
     const acm_certificate_arn = handleMakeAcmCertificateCases(tfgen, sr, params.endpoints, params.acm_certificate);
 
     const lb = createLoadBalancer(tfgen, 'lb', sr, {
-      customize_lb:params.customize_lb,
+      customize_lb: params.customize_lb,
       acm_certificate_arn
     });
 
@@ -410,7 +410,7 @@ export function createAutoscaleTargetGroup(
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
-    name: tfgen.scopedName(name).join('-'),
+    name: params.target_group_generate_name ? tfgen.scopedName(name).join('-') : undefined,
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.vpc.id,
@@ -779,6 +779,20 @@ export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
    * https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html
    */
   customize_lb?: Customize<AR.LbParams>;
+
+  /**
+   * If true `tfgen.scopedName(name).join('-')` is used as the name.
+   * Else name is undefined and Terraform will assign a random, unique name.
+   *
+   * Note changing this for existing infra will forces new resource.
+   * see
+   * https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group#name
+   *
+   * This caused a PLP prod outage.
+   *
+   * Recommend using false for existing infra and true for new.
+   */
+  target_group_generate_name: boolean;
 
   /**
    * Health check config

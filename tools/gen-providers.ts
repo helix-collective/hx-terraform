@@ -616,6 +616,16 @@ const sns_topic: RecordDecl = {
   ],
 };
 
+const sns_sms_preferences: RecordDecl = {
+  name: 'sns_sms_preferences',
+  fields: [
+    optionalField('monthly_spend_limit', NUMBER),
+    optionalField('default_sender_id', STRING),
+    optionalField('default_sms_type', enumType(['Transactional','Promotional'])),
+  ],
+};
+
+
 const cloudwatch_metric_alarm: RecordDecl = {
   name: 'cloudwatch_metric_alarm',
   fields: [
@@ -2761,6 +2771,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a way to set SNS SMS preferences.',
+    'https://www.terraform.io/docs/providers/aws/r/sns_sms_preferences.html',
+    sns_sms_preferences,
+    []
+  );
+
+  gen.generateResource(
     'Provides an IAM user.',
     'https://www.terraform.io/docs/providers/aws/r/iam_user.html',
     iam_user,
@@ -3483,6 +3500,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_object);
   gen.generateParams(s3_bucket_public_access_block);
   gen.generateParams(sns_topic);
+  gen.generateParams(sns_sms_preferences);
   gen.generateParams(iam_user);
   gen.generateParams(iam_user_policy);
   gen.generateParams(iam_user_policy_attachment);

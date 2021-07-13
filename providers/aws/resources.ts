@@ -810,6 +810,25 @@ export type SnsTopicId = {type:'SnsTopicId',value:string};
 export type SnsTopicArn = AT.ArnT<"SnsTopic">;
 
 /**
+ *  Provides a way to set SNS SMS preferences.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/sns_sms_preferences.html
+ */
+export function createSnsSmsPreferences(tfgen: TF.Generator, rname: string, params: SnsSmsPreferencesParams): SnsSmsPreferences {
+  const fields = fieldsFromSnsSmsPreferencesParams(params);
+  const resource = tfgen.createTypedResource('SnsSmsPreferences', 'aws_sns_sms_preferences', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface SnsSmsPreferences extends TF.ResourceT<'SnsSmsPreferences'> {
+}
+
+export type SnsSmsPreferencesId = {type:'SnsSmsPreferencesId',value:string};
+
+/**
  *  Provides an IAM user.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/iam_user.html
@@ -3407,6 +3426,20 @@ export function fieldsFromSnsTopicParams(params: SnsTopicParams) : TF.ResourceFi
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
   TF.addOptionalField(fields, "display_name", params.display_name, TF.stringValue);
+  return fields;
+}
+
+export interface SnsSmsPreferencesParams {
+  monthly_spend_limit?: number;
+  default_sender_id?: string;
+  default_sms_type?: 'Transactional' | 'Promotional';
+}
+
+export function fieldsFromSnsSmsPreferencesParams(params: SnsSmsPreferencesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "monthly_spend_limit", params.monthly_spend_limit, TF.numberValue);
+  TF.addOptionalField(fields, "default_sender_id", params.default_sender_id, TF.stringValue);
+  TF.addOptionalField(fields, "default_sms_type", params.default_sms_type, TF.stringValue);
   return fields;
 }
 

@@ -6,7 +6,7 @@
  * avoid confusing them by giving them different types.
  */
 
-import * as TF from '../../core/core';
+import * as TF from '../../core/core.ts';
 
 export type Region = {
   type: 'Region';

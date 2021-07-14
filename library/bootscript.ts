@@ -1,10 +1,9 @@
-import * as docker from './docker';
-import * as s3 from './aws/s3';
-import * as path from 'path';
+import * as docker from './docker.ts';
+import * as s3 from './aws/s3.ts';
+import { path } from '../deps.ts';
 
-import { listeners } from 'cluster';
-import { listType } from '../tools/gen-helpers';
-import { DockerInstallConfig } from './docker';
+
+import { DockerInstallConfig } from './docker.ts';
 
 /**
  * Generator for boot scripts which are intended to be passed to an ubuntu AMI

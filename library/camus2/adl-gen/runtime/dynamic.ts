@@ -1,6 +1,6 @@
-import {typeExprsEqual} from './utils';
-import {JsonBinding} from './json';
-import {Dynamic} from './sys/dynamic';
+import {typeExprsEqual} from './utils.ts';
+import {JsonBinding} from './json.ts';
+import {Dynamic} from './sys/dynamic.ts';
 
 /**
  * Convert an ADL value to a dynamically typed value

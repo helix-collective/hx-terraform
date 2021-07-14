@@ -1,6 +1,6 @@
 /* @generated from adl module nginx */
 
-import * as ADL from './runtime/adl';
+import * as ADL from './runtime/adl.ts';
 
 /**
  * The struct available to the nginx config mustache template

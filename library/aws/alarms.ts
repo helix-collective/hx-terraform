@@ -1,7 +1,7 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
-import { Customize } from "../util";
-import { CloudwatchMetricAlarmParams } from "../../providers/aws/resources";
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import { Customize } from "../util.ts";
+import { CloudwatchMetricAlarmParams } from "../../providers/aws/resources.ts";
 
 // How to prepare alarms:
 //    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc

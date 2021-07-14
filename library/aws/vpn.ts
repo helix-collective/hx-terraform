@@ -1,5 +1,5 @@
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
 
 /**
  * A configuration for an entire VPN within a VPC.

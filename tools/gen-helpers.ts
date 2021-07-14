@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 
 export interface RecordDecl {
   name: string;
@@ -588,7 +587,7 @@ export function fileGenerator(
   }
 
   function writeFile(path: string) {
-    fs.writeFileSync(path, lines.join('\n'));
+    Deno.writeFileSync(path, new TextEncoder().encode(lines.join('\n')));
   }
 
   return {

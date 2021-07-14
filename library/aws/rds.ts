@@ -1,17 +1,16 @@
-import * as _ from 'lodash';
-import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
-import * as s3 from './s3';
-import * as bootscript from '../bootscript';
-import * as shared from './shared';
+import * as TF from '../../core/core.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import * as s3 from './s3.ts';
+import * as bootscript from '../bootscript.ts';
+import * as shared from './shared.ts';
 import {
   ingressOnPort,
   egress_all,
   contextTagsWithName,
   Customize,
-} from '../util';
-import { ArnSecret } from './secrets';
+} from '../util.ts';
+import { ArnSecret } from './secrets.ts';
 
 export interface DbConfigJson {
   name: string;

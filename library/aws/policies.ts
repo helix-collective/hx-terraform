@@ -1,6 +1,6 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
-import { ArnSecret } from './secrets';
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import { ArnSecret } from './secrets.ts';
 
 export interface NamedPolicy {
   name: string;

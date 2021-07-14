@@ -1,7 +1,7 @@
-import {DeclResolver,ATypeExpr} from './adl';
-import * as AST from './sys/adlast';
-import * as b64 from 'base64-js';
-import {isVoid, isEnum, scopedNamesEqual} from './utils';
+import {DeclResolver,ATypeExpr} from './adl.ts';
+import * as AST from './sys/adlast.ts';
+import {encode as b64Encode, decode as b64Decode} from 'https://deno.land/std@0.97.0/encoding/base64.ts';
+import {isVoid, isEnum, scopedNamesEqual} from './utils.ts';
 
 /** A type for json serialised values */
 
@@ -193,14 +193,14 @@ function identityJsonBinding<T>(expected : string, predicate : (json : Json) => 
 
 function bytesJsonBinding() : JsonBinding0<Uint8Array> {
   function toJson(v : Uint8Array) : Json {
-    return b64.fromByteArray(v);
+    return b64Encode(v);
   }
 
   function fromJson(json : Json) : Uint8Array {
     if (typeof(json) != 'string') {
       throw jsonParseException('expected a string');
     }
-    return b64.toByteArray(json);
+    return b64Decode(json);
   }
 
   return {toJson, fromJson};
@@ -261,6 +261,7 @@ function stringMapJsonBinding(dresolver : DeclResolver, texpr : AST.TypeExpr, bo
         if (isJsonParseException(e)) {
           e.pushField(k);
         }
+        throw e;
       }
     }
     return result;
@@ -357,22 +358,22 @@ function structJsonBinding(dresolver : DeclResolver, struct : AST.Struct, params
 }
 
 function enumJsonBinding(_dresolver : DeclResolver, union : AST.Union, _params : AST.TypeExpr[], _boundTypeParams : BoundTypeParams ) : JsonBinding0<Unknown> {
-  const fieldSerializedNames : string[] = [];
-  const fieldNumbers : {[key:string]:number} = {};
-  union.fields.forEach( (field,i) => {
-    fieldSerializedNames.push(field.serializedName);
-    fieldNumbers[field.serializedName] = i;
+  const toSerialized: {[key:string]:string} = {};
+  const fromSerialized: {[key:string]:string} = {};
+  union.fields.forEach( field => {
+    toSerialized[field.name] = field.serializedName;
+    fromSerialized[field.serializedName] = field.name;
   });
 
   function toJson(v :Unknown) : Json {
-    return fieldSerializedNames[v as number];
+    return toSerialized[v as string];
   }
 
   function fromJson(json : Json) : Unknown {
     if (typeof(json) !== 'string') {
       throw jsonParseException("expected a string for enum");
     }
-    const result = fieldNumbers[json as string];
+    const result = fromSerialized[json as string];
     if (result === undefined) {
       throw jsonParseException("invalid string for enum: " + json);
     }
@@ -498,9 +499,9 @@ export function getAnnotation<T>(jb: JsonBinding<T>, annotations: AST.Annotation
     return undefined;
   }
   const annScopedName :AST.ScopedName = jb.typeExpr.typeRef.value;
-  const ann = annotations.find(el => scopedNamesEqual(el.v1, annScopedName));
+  const ann = annotations.find(el => scopedNamesEqual(el.key, annScopedName));
   if (ann === undefined) {
     return undefined;
   }
-  return jb.fromJsonE(ann.v2);
+  return jb.fromJsonE(ann.value);
 }

@@ -1,26 +1,25 @@
-import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults';
-import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
+import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults.ts';
+import * as TF from '../../core/core.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
 
-import * as aws from './aws';
-import * as roles from './roles';
-import * as shared from './shared';
-import * as s3 from './s3';
-import * as bootscript from '../bootscript';
-import * as policies from './policies';
-import * as docker from '../docker';
-import * as camus2 from '../camus2/camus2';
-import * as C from '../../library/camus2/adl-gen/config';
+import * as aws from './aws.ts';
+import * as roles from './roles.ts';
+import * as shared from './shared.ts';
+import * as s3 from './s3.ts';
+import * as bootscript from '../bootscript.ts';
+import * as policies from './policies.ts';
+import * as docker from '../docker.ts';
+import * as camus2 from '../camus2/camus2.ts';
+import * as C from '../../library/camus2/adl-gen/config.ts';
 
 import {
   EndPoint,
   getDefaultAmi,
   httpsFqdnsFromEndpoints,
   ec2InstallScript,
-} from './ec2-deployment';
-import { contextTagsWithName, Customize, applyCustomize } from '../util';
-import { assertNever } from '../../utils';
+} from './ec2-deployment.ts';
+import { contextTagsWithName, Customize, applyCustomize } from '../util.ts';
 
 /**
  *  Creates a logical application frontend service on an aws EC2 autoscaling group, including:

@@ -1,7 +1,7 @@
 /* @generated from adl module state */
 
-import * as ADL from './runtime/adl';
-import * as types from './types';
+import * as ADL from './runtime/adl.ts';
+import * as types from './types.ts';
 
 export interface State {
   deploys: types.StringKeyMap<types.DeployLabel, Deploy>;

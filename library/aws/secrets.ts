@@ -1,8 +1,7 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
-import * as _ from 'lodash';
-import { ArnT } from '../../providers/aws/types';
-import { SharedResources } from './shared';
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import { ArnT } from '../../providers/aws/types.ts';
+import { SharedResources } from './shared.ts';
 
 export type ArnSecret = ArnT<'SecretsmanagerSecret'>;
 

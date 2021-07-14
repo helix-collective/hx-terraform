@@ -6,19 +6,18 @@
  *   in providers
  */
 
-import * as _ from 'lodash';
-import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
-import * as policies from './policies';
-import * as shared from "./shared";
+import * as TF from '../../core/core.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import * as policies from './policies.ts';
+import * as shared from "./shared.ts";
 import {
   contextTagsWithName,
   Customize,
   ingressOnPort,
   egress_all,
   applyCustomize,
-} from '../util';
+} from '../util.ts';
 
 export interface InstanceParams {
   instance_type: AT.InstanceType;
@@ -112,11 +111,13 @@ export function createS3Bucket(
   name: string,
   params0: AR.S3BucketParams
 ): AR.S3Bucket {
-  const params = _.cloneDeep(params0);
-  params.tags = {
-    ...tfgen.tagsContext(),
-    ...params.tags,
-  };
+  const params = {
+    ...params0,
+    tags: {
+      ...tfgen.tagsContext(),
+      ...params0.tags,
+    }
+  }
   return AR.createS3Bucket(tfgen, name, params);
 }
 
@@ -130,12 +131,14 @@ export function createSecurityGroupInVpc(
   sr: shared.SharedResources,
   params0: AR.SecurityGroupParams
 ): AR.SecurityGroup {
-  const params = _.cloneDeep(params0);
-  params.vpc_id = sr.vpc.id;
-  params.tags = {
-    ...contextTagsWithName(tfgen, name),
-    ...params.tags,
-  };
+  const params = {
+    ...params0,
+    vpc_id: sr.vpc.id,
+    tags: {
+      ...contextTagsWithName(tfgen, name),
+      ...params0.tags,
+    }
+  }
   return AR.createSecurityGroup(tfgen, name, params);
 }
 

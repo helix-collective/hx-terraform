@@ -1,11 +1,9 @@
 /**
  *  Core types and logic for TSTF, Helix's EDSL for terraform generation
  */
-import * as fs from 'fs';
-import * as p from 'path';
-import  crypto from 'crypto';
+import { fs, path, hash } from "../deps.ts";
 
-/**
+/**a
  * The interface for generating terraform
  */
 export interface Generator {
@@ -774,49 +772,52 @@ export function fileGenerator(): FileGenerator {
   };
 }
 
+
+
 class Manifest {
   private contents : {file:string, hash:string}[] = [];
   private manifestFile: string;
 
   constructor(public name: string, public outdir: string) {
-    this.manifestFile = p.join(outdir,`.manifest.${name}`);
+    this.manifestFile = path.join(outdir,`.manifest.${name}`);
     this.load();
   }
 
   load() {
     if (fs.existsSync(this.manifestFile)) {
-      const data : {file:string, hash:string}[] = JSON.parse(fs.readFileSync(this.manifestFile).toString());
+      const content = Deno.readFileSync(this.manifestFile);
+      const data : {file:string, hash:string}[] = JSON.parse(new TextDecoder().decode(content));
       this.contents = data;
     }
   }
 
   clearFiles() {
     for(const c of this.contents) {
-      const path = p.join(this.outdir,c.file);
-      if(fs.existsSync(path)) {
-        fs.unlinkSync(path);
+      const fpath = path.join(this.outdir,c.file);
+      if(fs.existsSync(fpath)) {
+        Deno.removeSync(fpath);
       }
     }
     this.contents = [];
   }
 
-  writeFile(path: string, content: string) : void {
-    const shasum = crypto.createHash('sha1');
+  writeFile(fpath: string, content: string) : void {
+    const shasum = hash.createHash('sha1');
     shasum.update(content);
 
     this.contents.push({
-      file:path,
-      hash:shasum.digest('hex')
+      file:fpath,
+      hash:shasum.toString('hex')
     });
 
     if (!fs.existsSync(this.outdir)) {
-      fs.mkdirSync(this.outdir,{recursive:true});
+      Deno.mkdirSync(this.outdir,{recursive:true});
     }
-    fs.writeFileSync(p.join(this.outdir,path),content);
+    Deno.writeFileSync(path.join(this.outdir,fpath),new TextEncoder().encode(content));
   }
 
   save() {
-    fs.writeFileSync(this.manifestFile, JSON.stringify(this.contents, null, 2) + '\n');
+    Deno.writeFileSync(this.manifestFile, new TextEncoder().encode(JSON.stringify(this.contents, null, 2) + '\n'));
   }
 };
 

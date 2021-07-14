@@ -1,7 +1,7 @@
 /* @generated from adl module release */
 
-import * as ADL from './runtime/adl';
-import * as types from './types';
+import * as ADL from './runtime/adl.ts';
+import * as types from './types.ts';
 
 /**
  * Configuration for a package to be customized

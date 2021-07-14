@@ -1,12 +1,12 @@
-import * as s3 from '../aws/s3';
-import * as bootscript from '../bootscript';
-import * as rds from '../aws/rds';
-import { release_url } from './releaseurl';
-import * as C from './adl-gen/config';
-import { createJsonBinding } from './adl-gen/runtime/json';
-import { RESOLVER } from './adl-gen/resolver';
-import { Maybe } from './adl-gen/runtime/sys/types';
-import { ArnSecret } from '../aws/secrets';
+import * as s3 from '../aws/s3.ts';
+import * as bootscript from '../bootscript.ts';
+import * as rds from '../aws/rds.ts';
+import { release_url } from './releaseurl.ts';
+import * as C from './adl-gen/config.ts';
+import { createJsonBinding } from './adl-gen/runtime/json.ts';
+import { RESOLVER } from './adl-gen/resolver.ts';
+import { Maybe } from './adl-gen/runtime/sys/types.ts';
+import { ArnSecret } from '../aws/secrets.ts';
 
 export type Camus2Params = {
   username: string;

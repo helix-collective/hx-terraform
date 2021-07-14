@@ -1,19 +1,18 @@
-import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults';
-import * as _ from 'lodash';
-import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
+import { DEFAULT_NGINX_DOCKER_VERSION } from './defaults.ts';
+import * as TF from '../../core/core.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
 
-import * as aws from './aws';
-import * as roles from './roles';
-import * as policies from './policies';
-import * as shared from './shared';
-import * as util from '../util';
-import * as s3 from './s3';
-import * as bootscript from '../bootscript';
-import * as docker from '../docker';
-import * as camus2 from '../camus2/camus2';
-import * as C from '../../library/camus2/adl-gen/config';
+import * as aws from './aws.ts';
+import * as roles from './roles.ts';
+import * as policies from './policies.ts';
+import * as shared from './shared.ts';
+import * as util from '../util.ts';
+import * as s3 from './s3.ts';
+import * as bootscript from '../bootscript.ts';
+import * as docker from '../docker.ts';
+import * as camus2 from '../camus2/camus2.ts';
+import * as C from '../../library/camus2/adl-gen/config.ts';
 
 /**
  *  Creates a logical deployment on a single publicly addressable EC2 instance, including:

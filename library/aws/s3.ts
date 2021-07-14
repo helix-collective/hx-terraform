@@ -1,5 +1,5 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
 
 /**
  * Represents an object reference in a specified S3 bucket

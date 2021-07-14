@@ -1,6 +1,6 @@
-import * as TF from '../core/core';
-import * as AT from '../providers/aws/types';
-import * as AR from '../providers/aws/resources';
+import * as TF from '../core/core.ts';
+import * as AT from '../providers/aws/types.ts';
+import * as AR from '../providers/aws/resources.ts';
 
 /**
  * Create resource for a subsystem in their own scope

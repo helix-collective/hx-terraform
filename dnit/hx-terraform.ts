@@ -5,7 +5,6 @@ import type { TasksObject } from "./types.ts";
 import { rglobfiles } from './filesystem.ts';
 
 import {ROOT} from './workingDir.ts'
-import { YarnTasks } from './yarn.ts';
 
 /// Manifests help dependency tracking
 // changes to backend result in re-run of terraform init
@@ -27,8 +26,7 @@ export interface HxTerraformTasks extends TasksObject {
   manifests: Manifests;
 };
 
-export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<HxTerraformTasks> {
-  const {yarn} = params;
+export async function makeHxTerraformTasks(params: {}) : Promise<HxTerraformTasks> {
 
   // typescript terraform providers generated:
   const generatedProviderSrcs = [
@@ -44,16 +42,13 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
     description: 'Generate typescript for providers',
     action: async () => {
       await runConsole(
-        ['npx', 'ts-node', 'hx-terraform/tools/gen-providers.ts'],
+        ['deno', 'run', '--quiet', '--allow-read', '--allow-write', '--unstable', 'hx-terraform/tools/gen-providers.ts'],
         {
           cwd: path.join(ROOT, 'typescript'),
         }
       );
     },
     deps: [
-      yarn.tasks.local,
-      yarn.tasks.hxTerraform,
-
       trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-helpers.ts')),
       trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-providers.ts')),
 
@@ -79,13 +74,13 @@ export async function makeHxTerraformTasks(params: {yarn: YarnTasks}) : Promise<
     name: 'generateTerraform',
     description: 'Generate terraform files from the terraform EDSL',
     action: async () => {
-      await runConsole(['npx','ts-node', 'main.ts'], {
+      await runConsole(
+      ['deno', 'run', '--quiet', '--allow-read', '--allow-write', '--unstable', 'main.ts'],
+      {
         cwd: path.join(ROOT, 'typescript'),
       });
     },
     deps: [
-      yarn.tasks.local,
-      yarn.tasks.hxTerraform,
       generateProviders,
       ...generatedProviderSrcs,
       asyncFiles(async ()=>{

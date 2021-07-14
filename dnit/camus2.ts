@@ -1,7 +1,7 @@
 import { fs, jszip, path, runAlways, Task, task } from "./deps.ts";
 import { removeDir, rglobfiles } from "./filesystem.ts";
-import { getAdlStdlib, runAdlc } from './adl.ts';
 import type { TasksObject } from "./types.ts";
+import { run } from "./deps.ts"
 
 import {ROOT} from './workingDir.ts';
 
@@ -54,22 +54,21 @@ export async function makeCamus2Tasks({}) : Promise<Camus2Tasks> {
 
       ctx.logger.info('Generating typescript...');
 
-      const adlStdlibSrcs = await getAdlStdlib();
-
       const adlSrcs = await rglobfiles(path.join(camus2dir, 'adl'), {
         exts:['.adl']
       });
 
-      await runAdlc([
-        'typescript',
+      await run([
+        'adlc', 'typescript',
+        '--ts-style', 'deno',
         '--searchdir', path.join(camus2dir, 'adl'),
         '--runtime-dir', 'runtime',
         '--outputdir', path.join(camus2dir, 'adl-gen'),
         '--include-rt',
         '--include-resolver',
+        '--generate-transitive',
         '--manifest', path.join(camus2dir, 'adl-gen', '.manifest'),
         ...adlSrcs,
-        ...adlStdlibSrcs,
       ]);
 
       await Deno.writeTextFile(

@@ -4,12 +4,12 @@
  *  (includes VPC and networking etc)
  */
 
-import * as TF from '../../core/core';
-import * as AT from '../../providers/aws/types';
-import * as AR from '../../providers/aws/resources';
-import * as s3 from './s3';
-import { Customize, ingressOnPort, egress_all, contextTagsWithName } from '../util';
-import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
+import * as TF from '../../core/core.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import * as s3 from './s3.ts';
+import { Customize, ingressOnPort, egress_all, contextTagsWithName } from '../util.ts';
+import { s3ModifyPolicy, ecr_modify_all_policy } from './policies.ts';
 
 /**
  * A configuration for an entire VPC, with a public

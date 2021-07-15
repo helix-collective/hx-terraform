@@ -17,9 +17,6 @@ export {
   run,
   runConsole,
   runProcess,
-  dockerRunConsole,
-  dockerRun,
-  currentUserOpts,
   confirmation,
 } from 'https://denopkg.com/helix-collective/dnit-utils@v1.2.5/mod.ts';
 

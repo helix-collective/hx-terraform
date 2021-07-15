@@ -1,11 +1,8 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
-import * as AT from '../../providers/aws/types';
-import * as shared from '../aws/shared';
-import * as util from '../util';
-import * as aws from '../aws/aws';
-import * as roles from '../aws/roles';
-import * as policies from '../aws/policies';
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import * as AT from '../../providers/aws/types.ts';
+import * as shared from '../aws/shared.ts';
+import * as util from '../util.ts';
 
 export interface VpcLambdaFunctionParams {
   handler: string;

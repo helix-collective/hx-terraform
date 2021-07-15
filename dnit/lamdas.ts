@@ -11,7 +11,7 @@ import { TasksObject } from './types.ts';
 
 export interface LambdaTasks extends TasksObject {
   tasks: {
-    typescriptBuild: Task;
+    // typescriptBuild: Task;
   },
   trackedFiles: {
     lambdaSourceFiles: TrackedFile[];
@@ -20,23 +20,23 @@ export interface LambdaTasks extends TasksObject {
 
 /** make tasks for building AWS lambda functions */
 export async function makeLambdaTasks({}): Promise<LambdaTasks> {
-  // elastisearch cleaning tool:
-  const esToolBuildFile = trackFile(
-    path.join(ROOT, 'typescript/build/hx-terraform/tools/es-tool.js')
-  );
+ // // elastisearch cleaning tool:
+ // const esToolBuildFile = trackFile(
+ //   path.join(ROOT, 'typescript/build/hx-terraform/tools/es-tool.js')
+ // );
 
-  /// Builds entire typescript tree in order to get es-tool.js built.  TODO: refactor es-tool to different typescript tree.
-  const typescriptBuild = task({
-    name: 'typescriptBuild',
-    description: 'yarn build typescript tree',
-    action: async () => {
-      await runConsole(['yarn', 'build'], {
-        cwd: path.join(ROOT, 'typescript'),
-      });
-    },
-    deps: [trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/es-tool.ts'))],
-    targets: [esToolBuildFile],
-  });
+ // /// Builds entire typescript tree in order to get es-tool.js built.  TODO: refactor es-tool to different typescript tree.
+ // const typescriptBuild = task({
+ //   name: 'typescriptBuild',
+ //   description: 'yarn build typescript tree',
+ //   action: async () => {
+ //     await runConsole(['yarn', 'build'], {
+ //       cwd: path.join(ROOT, 'typescript'),
+ //     });
+ //   },
+ //   deps: [trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/es-tool.ts'))],
+ //   targets: [esToolBuildFile],
+ // });
 
   // other (python) source lambdas that only need copy and zip (no build step):
   // any possible lamdas in projects' repos:
@@ -54,7 +54,7 @@ export async function makeLambdaTasks({}): Promise<LambdaTasks> {
   const lambdaSourceFiles = [
     ...localLambdaZipSources,
     ...hxtAwsLambdaZipSources,
-    esToolBuildFile,
+ //   esToolBuildFile,
   ];
 
   const lambdaTasks = lambdaSourceFiles.map(src => {
@@ -84,7 +84,7 @@ export async function makeLambdaTasks({}): Promise<LambdaTasks> {
   return {
     tasks: {
       ...tasksByName,
-      typescriptBuild,
+ //     typescriptBuild,
     },
     trackedFiles: {
       lambdaSourceFiles

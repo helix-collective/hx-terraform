@@ -2,7 +2,7 @@
 
 import { confirmation, asyncFiles, runAlways, Task, TrackedFile, trackFile, path, task } from './deps.ts'
 import { fileAgeMs, removeIfExists, rglobfiles } from './filesystem.ts';
-import { runDockerizedTerraform } from './docker.ts';
+import { runTerraform } from './docker.ts';
 import { HxTerraformTasks } from './hx-terraform.ts';
 import { LambdaTasks } from './lamdas.ts';
 import { GroupsTasksObject, TasksObject } from './types.ts';
@@ -32,7 +32,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     description:
       '(Re)Initialize terraform on initial setup and/or changes to backend/provider',
     action: async () => {
-      await runDockerizedTerraform(['init', '--force-copy']);
+      await runTerraform(['init', '--force-copy']);
     },
     deps: [
       deps.hxTerraform.manifests.backend,
@@ -42,16 +42,17 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
 
   const generatedTerraformPlan = trackFile(path.join(ROOT, 'terraform', 'tfplan'));
 
+
   const terraformPlan = task({
     name: 'plan',
     description:
       'Execute terraform plan to show pending infrastructure changes and save the plan',
     action: async () => {
-      await runDockerizedTerraform(['plan', '-parallelism=20', '-out=tfplan']);
+      await runTerraform(['plan', '-parallelism=20', '-out=tfplan']);
     },
     deps: [
       terraformInit,
-      ...Object.values(deps.lambda.tasks),
+      //...Object.values(deps.lambda.tasks),
       ...Object.values(deps.hxTerraform.manifests),
 
       asyncFiles(async ()=>{
@@ -95,7 +96,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
           throw new Error('Apply aborted');
         }
 
-        await runDockerizedTerraform(['apply', 'tfplan']);
+        await runTerraform(['apply', 'tfplan']);
       }
       finally {
         // remove the former plan after use or error
@@ -110,7 +111,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     description:
       'Run terraform refresh to update state from current deployed resources',
     action: async () => {
-      await runDockerizedTerraform(['refresh']);
+      await runTerraform(['refresh']);
     },
     uptodate: runAlways,
   });
@@ -119,7 +120,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     name: 'output',
     description: 'Run terraform to show terraform outputs',
     action: async () => {
-      await runDockerizedTerraform(['output']);
+      await runTerraform(['output']);
     },
     uptodate: runAlways,
   });

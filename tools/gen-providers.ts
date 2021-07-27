@@ -550,6 +550,23 @@ const s3_bucket_public_access_block: RecordDecl = {
   ],
 };
 
+
+const s3_bucket_ownership_controls_rule: RecordDecl = {
+  name: 's3_bucket_ownership_controls_rule',
+  fields: [
+    optionalField('object_ownership', enumType(['BucketOwnerPreferred', 'ObjectWriter'])),
+  ]
+}
+
+const s3_bucket_ownership_controls: RecordDecl = {
+  name: 's3_bucket_ownership_controls',
+  fields: [
+    requiredField('bucket', STRING),
+    requiredField('rule', recordType(s3_bucket_ownership_controls_rule)),
+  ],
+};
+
+
 const iam_user: RecordDecl = {
   name: 'iam_user',
   fields: [
@@ -2759,6 +2776,12 @@ function generateAws(gen: Generator) {
     [stringAttr('id')]
   );
 
+  gen.generateResource(
+    'Provides a resource to manage S3 Bucket Ownership Controls. For more information, see the S3 Developer Guide.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls',
+    s3_bucket_ownership_controls,
+    [stringAttr('id')]
+  );
 
   gen.generateResource(
     'Provides an SNS topic resource',
@@ -3499,6 +3522,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);
   gen.generateParams(s3_bucket_public_access_block);
+  gen.generateParams(s3_bucket_ownership_controls);
+  gen.generateParams(s3_bucket_ownership_controls_rule);
   gen.generateParams(sns_topic);
   gen.generateParams(sns_sms_preferences);
   gen.generateParams(iam_user);

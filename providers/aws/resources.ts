@@ -784,6 +784,28 @@ export interface S3BucketPublicAccessBlock extends TF.ResourceT<'S3BucketPublicA
 export type S3BucketPublicAccessBlockId = {type:'S3BucketPublicAccessBlockId',value:string};
 
 /**
+ *  Provides a resource to manage S3 Bucket Ownership Controls. For more information, see the S3 Developer Guide.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls
+ */
+export function createS3BucketOwnershipControls(tfgen: TF.Generator, rname: string, params: S3BucketOwnershipControlsParams): S3BucketOwnershipControls {
+  const fields = fieldsFromS3BucketOwnershipControlsParams(params);
+  const resource = tfgen.createTypedResource('S3BucketOwnershipControls', 'aws_s3_bucket_ownership_controls', rname, fields);
+  const id: string =  '${' + TF.resourceName(resource) + '.id}';
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketOwnershipControls extends TF.ResourceT<'S3BucketOwnershipControls'> {
+  id: string;
+}
+
+export type S3BucketOwnershipControlsId = {type:'S3BucketOwnershipControlsId',value:string};
+
+/**
  *  Provides an SNS topic resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/sns_topic.html
@@ -3414,6 +3436,28 @@ export function fieldsFromS3BucketPublicAccessBlockParams(params: S3BucketPublic
   TF.addOptionalField(fields, "block_public_policy", params.block_public_policy, TF.booleanValue);
   TF.addOptionalField(fields, "ignore_public_acls", params.ignore_public_acls, TF.booleanValue);
   TF.addOptionalField(fields, "restrict_public_buckets", params.restrict_public_buckets, TF.booleanValue);
+  return fields;
+}
+
+export interface S3BucketOwnershipControlsParams {
+  bucket: string;
+  rule: S3BucketOwnershipControlsRuleParams;
+}
+
+export function fieldsFromS3BucketOwnershipControlsParams(params: S3BucketOwnershipControlsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromS3BucketOwnershipControlsRuleParams(v)));
+  return fields;
+}
+
+export interface S3BucketOwnershipControlsRuleParams {
+  object_ownership?: 'BucketOwnerPreferred' | 'ObjectWriter';
+}
+
+export function fieldsFromS3BucketOwnershipControlsRuleParams(params: S3BucketOwnershipControlsRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "object_ownership", params.object_ownership, TF.stringValue);
   return fields;
 }
 

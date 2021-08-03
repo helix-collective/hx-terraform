@@ -22,7 +22,7 @@ export interface LambdaTasks extends TasksObject {
 export async function makeLambdaTasks({}): Promise<LambdaTasks> {
  // // elastisearch cleaning tool:
  // const esToolBuildFile = trackFile(
- //   path.join(ROOT, 'typescript/build/hx-terraform/tools/es-tool.js')
+ //   path.join(ROOT, 'gen-terraform/build/hx-terraform/tools/es-tool.js')
  // );
 
  // /// Builds entire typescript tree in order to get es-tool.js built.  TODO: refactor es-tool to different typescript tree.
@@ -31,10 +31,10 @@ export async function makeLambdaTasks({}): Promise<LambdaTasks> {
  //   description: 'yarn build typescript tree',
  //   action: async () => {
  //     await runConsole(['yarn', 'build'], {
- //       cwd: path.join(ROOT, 'typescript'),
+ //       cwd: path.join(ROOT, 'gen-terraform'),
  //     });
  //   },
- //   deps: [trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/es-tool.ts'))],
+ //   deps: [trackFile(path.join(ROOT, 'gen-terraform/hx-terraform/tools/es-tool.ts'))],
  //   targets: [esToolBuildFile],
  // });
 
@@ -45,7 +45,7 @@ export async function makeLambdaTasks({}): Promise<LambdaTasks> {
   // lamdas in hx-terraform aws lambdas:
   const lambda_zip_sources = path.join(
     ROOT,
-    'typescript/hx-terraform/aws/lambdas'
+    'gen-terraform/hx-terraform/aws/lambdas'
   );
 
   const localLambdaZipSources = (await rglobfiles(local_lambda_zip_sources)).map(trackFile);

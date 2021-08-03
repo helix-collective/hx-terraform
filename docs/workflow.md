@@ -15,7 +15,7 @@ There are two git repositories here:
  - the primary one specifies the infrastructure within a single AWS account.
  Changes to this repo should submitted and reviewed according to the project
   policies.
- - a git submodule of shared library code at typescript/hx-terraform. Changes
+ - a git submodule of shared library code at gen-terraform/hx-terraform. Changes
  to this repo must be reviewed by helix, either through phabricator or
  bitbucket pull requests.
 
@@ -81,7 +81,7 @@ output through your favourite code review process:
     * If you've made changes to hx-terraform, submit a pull request to
     hx-terraform and ensure that your changes are landed on `origin/master`.
 
-    * In the parent repo, ensure changes to ./typescript/hx-terraform are added.
+    * In the parent repo, ensure changes to ./gen-terraform/hx-terraform are added.
 
     * Submit the parent repo's code changes and `doit plan` output for review.
 

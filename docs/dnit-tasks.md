@@ -56,7 +56,7 @@ Use extension `@ext:denoland.vscode-deno` version 1.26.0 (version 2.0+ is broken
 | `.`  	|  (Current directory) root of a parent repository 	|
 | `./dnit`  	|  Directory for deno sources.  Having it separate keeps it clear which are deno and which are node.js flavoured typescript sources.  The `dnit` tool searches for the `dnit/main.ts` directory and file to execute. |
 | `./dnit/hxtd`  	|  Symlink to the `hx-terraform/dnit` directory. |
-| `./typescript/hx-terraform` | Location of the git submodule for `hx-terraform` |
-| `./typescript/hx-terraform/dnit` | deno typescript shared utils relating to infrastructure. |
+| `./gen-terraform/hx-terraform` | Location of the git submodule for `hx-terraform` |
+| `./gen-terraform/hx-terraform/dnit` | deno typescript shared utils relating to infrastructure. |
 | `https://denopkg.com/helix-collective/dnit-utils@v1.1.0/mod.ts` | deno HTTPS import of typescript sources - Helix utils for deno and dnit relating to processes, git, docker etc (not infrastructure specific).  `denopkg.com` redirects this import url from `https://github.com/helix-collective/dnit-utils` |
 | `https://deno.land/x/dnit@dnit-vX.X.X/mod.ts` | (deno) HTTPS import of typescript sources.  Non Helix specific task exec tool for deno. `deno.land/x/` pulls sources from `https://github.com/PaulThompson/dnit` |

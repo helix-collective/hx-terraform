@@ -31,9 +31,9 @@ export async function makeHxTerraformTasks(params: {}) : Promise<HxTerraformTask
   // typescript terraform providers generated:
   const generatedProviderSrcs = [
     trackFile(
-      path.join(ROOT, 'typescript/hx-terraform/providers/aws/resources.ts')),
+      path.join(ROOT, 'gen-terraform/hx-terraform/providers/aws/resources.ts')),
     trackFile(
-      path.join(ROOT, 'typescript/hx-terraform/providers/random/resources.ts')
+      path.join(ROOT, 'gen-terraform/hx-terraform/providers/random/resources.ts')
     ),
   ];
 
@@ -44,17 +44,17 @@ export async function makeHxTerraformTasks(params: {}) : Promise<HxTerraformTask
       await runConsole(
         ['deno', 'run', '--quiet', '--allow-read', '--allow-write', '--unstable', 'hx-terraform/tools/gen-providers.ts'],
         {
-          cwd: path.join(ROOT, 'typescript'),
+          cwd: path.join(ROOT, 'gen-terraform'),
         }
       );
     },
     deps: [
-      trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-helpers.ts')),
-      trackFile(path.join(ROOT, 'typescript/hx-terraform/tools/gen-providers.ts')),
+      trackFile(path.join(ROOT, 'gen-terraform/hx-terraform/tools/gen-helpers.ts')),
+      trackFile(path.join(ROOT, 'gen-terraform/hx-terraform/tools/gen-providers.ts')),
 
       asyncFiles(async ()=>{
         // all provider sources other than (the generated) resources.ts
-        const providers = await rglobfiles(path.join(ROOT, 'typescript/hx-terraform/providers'), {
+        const providers = await rglobfiles(path.join(ROOT, 'gen-terraform/hx-terraform/providers'), {
           skip: [/.*resources.ts/],
         });
         return providers.map(trackFile)
@@ -77,7 +77,7 @@ export async function makeHxTerraformTasks(params: {}) : Promise<HxTerraformTask
       await runConsole(
       ['deno', 'run', '--quiet', '--allow-read', '--allow-write', '--unstable', 'main.ts'],
       {
-        cwd: path.join(ROOT, 'typescript'),
+        cwd: path.join(ROOT, 'gen-terraform'),
       });
     },
     deps: [
@@ -85,8 +85,8 @@ export async function makeHxTerraformTasks(params: {}) : Promise<HxTerraformTask
       ...generatedProviderSrcs,
       asyncFiles(async ()=>{
         // all typescript sources excl node_modules
-        const sources = await rglobfiles(path.join(ROOT, 'typescript'), {
-          skip: [/node_modules/, /typescript\/build/],
+        const sources = await rglobfiles(path.join(ROOT, 'gen-terraform'), {
+          skip: [/node_modules/, /gen-terraform\/build/],
         });
         return sources.map(trackFile)
       })

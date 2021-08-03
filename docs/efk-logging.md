@@ -15,7 +15,7 @@ fluentd to send log records to the agregators (along with appropriate credential
 
 # Setup
 
-1) Use the typescript/terraform [flow] to setup the shared infrastructure first (ie VPC, networking, standard
+1) Use the gen-terraform/terraform [flow] to setup the shared infrastructure first (ie VPC, networking, standard
    S3 buckets, etc)
 
 2) Decide on what your logging aggregator DNS name will be. Typically this is `logging` in the shared dns zone,

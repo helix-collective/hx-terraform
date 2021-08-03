@@ -3,7 +3,7 @@
  *  repo/
  *    dnit/
  *      main.ts
- *    typescript/
+ *    gen-terraform/
  *      hx-terraform
  *
  *  dnit tool changes dir before executing main.ts such that Deno.cwd() is at root of the user project repo.

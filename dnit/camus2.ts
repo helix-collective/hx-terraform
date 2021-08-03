@@ -19,7 +19,7 @@ export async function makeCamus2Tasks({}) : Promise<Camus2Tasks> {
     action: async ctx => {
       const camus2dir = path.join(
         ROOT,
-        'typescript/hx-terraform/library/camus2'
+        'gen-terraform/hx-terraform/library/camus2'
       );
 
       type Args = {
@@ -72,7 +72,7 @@ export async function makeCamus2Tasks({}) : Promise<Camus2Tasks> {
       ]);
 
       await Deno.writeTextFile(
-        path.join(ROOT, 'typescript/hx-terraform/library/camus2/releaseurl.ts'),
+        path.join(ROOT, 'gen-terraform/hx-terraform/library/camus2/releaseurl.ts'),
         `export const release_url: string = "${releaseUrl} -O /opt/bin/camus2.gz";\n`
       );
     },

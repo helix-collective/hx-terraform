@@ -1,11 +1,11 @@
-import * as TF from '../../core/core';
-import * as AR from '../../providers/aws/resources';
-import * as AT from '../../providers/aws/types';
+import * as TF from '../../core/core.ts';
+import * as AR from '../../providers/aws/resources.ts';
+import * as AT from '../../providers/aws/types.ts';
 
-import * as secrets from './secrets';
-import * as shared from './shared';
-import * as policies from './policies';
-import * as roles from './roles';
+import * as secrets from './secrets.ts';
+import * as shared from './shared.ts';
+import * as policies from './policies.ts';
+import * as roles from './roles.ts';
 
 /**
  * A simple periodic schedule.

@@ -10,9 +10,7 @@ import { ROOT } from './workingDir.ts'
 import { TasksObject } from './types.ts';
 
 export interface LambdaTasks extends TasksObject {
-  tasks: {
-    // typescriptBuild: Task;
-  },
+  tasks: {[key:string]:Task},
   trackedFiles: {
     lambdaSourceFiles: TrackedFile[];
   }

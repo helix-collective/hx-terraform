@@ -42,7 +42,6 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
 
   const generatedTerraformPlan = trackFile(path.join(ROOT, 'terraform', 'tfplan'));
 
-
   const terraformPlan = task({
     name: 'plan',
     description:
@@ -52,7 +51,7 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     },
     deps: [
       terraformInit,
-      //...Object.values(deps.lambda.tasks),
+      ...Object.values(deps.lambda.tasks),
       ...Object.values(deps.hxTerraform.manifests),
 
       asyncFiles(async ()=>{

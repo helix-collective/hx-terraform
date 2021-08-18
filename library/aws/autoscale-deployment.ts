@@ -179,6 +179,7 @@ export function createController(
 
   const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
     instance_type: AT.t2_micro,
+    ubuntu_version: params.controller_ubuntu_version, 
     ami: params.controller_amis || getDefaultAmi,
     security_group: sr.bastion_security_group,
     key_name: params.key_name,
@@ -272,7 +273,7 @@ export function createProcessorAutoScaleGroup(
     key_name: params.key_name,
     image_id: params.appserver_amis
       ? params.appserver_amis(sr.region)
-      : getDefaultAmi(sr.region),
+      : getDefaultAmi(sr.region, params.appserver_ubuntu_version),
     instance_type: params.appserver_instance_type,
     iam_instance_profile: instance_profile.id,
     security_groups: [sr.appserver_security_group.id],
@@ -679,6 +680,7 @@ export interface AutoscaleProcessorParams {
    */
   controller_extra_policies?: policies.NamedPolicy[];
 
+  controller_ubuntu_version: aws.UbuntuVersion;
   /**
    * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI
    * for the appropriate region.
@@ -706,6 +708,7 @@ export interface AutoscaleProcessorParams {
    */
   appserver_instance_type: AT.InstanceType;
 
+  appserver_ubuntu_version: aws.UbuntuVersion;
   /**
    * Specifies the AMI for the EC2 instances. Defaults to an ubuntu 16.04 AMI
    * for the appropriate region.

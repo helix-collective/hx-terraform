@@ -19,9 +19,12 @@ import {
   applyCustomize,
 } from '../util.ts';
 
+export type UbuntuVersion = "1604" | "2004";
+
 export interface InstanceParams {
   instance_type: AT.InstanceType;
-  ami(region: AT.Region): AT.Ami;
+  ubuntu_version: UbuntuVersion;
+  ami(region: AT.Region, ubuntu_version?: UbuntuVersion): AT.Ami;
   security_group: AR.SecurityGroup;
   key_name: AT.KeyName;
   ignoreUserDataChanges?: boolean,
@@ -66,7 +69,7 @@ export function createInstance(
   params0: InstanceParams
 ): AR.Instance {
   const instance_params: AR.InstanceParams = {
-    ami: params0.ami(sr.region),
+    ami: params0.ami(sr.region, params0.ubuntu_version),
     instance_type: params0.instance_type,
     key_name: params0.key_name,
     subnet_id,

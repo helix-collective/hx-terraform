@@ -5761,6 +5761,7 @@ export interface BatchComputeEnvironmentComputeResourceParams {
   image_id?: AT.Ami;
   instance_role: AT.ArnT<"IamInstanceProfile">;
   instance_type: (string)[];
+  launch_template?: BatchComputeEnvironmentComputeResourceLaunchTemplateParams;
   max_vcpus: number;
   min_vcpus: number;
   security_group_ids: (SecurityGroupId)[];
@@ -5779,6 +5780,7 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
   TF.addOptionalField(fields, "image_id", params.image_id, TF.stringAliasValue);
   TF.addField(fields, "instance_role", params.instance_role, TF.resourceArnValue);
   TF.addField(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
+  TF.addOptionalField(fields, "launch_template", params.launch_template, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams(v)));
   TF.addField(fields, "max_vcpus", params.max_vcpus, TF.numberValue);
   TF.addField(fields, "min_vcpus", params.min_vcpus, TF.numberValue);
   TF.addField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
@@ -5786,6 +5788,20 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
   TF.addField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
   TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   TF.addField(fields, "type", params.type, TF.stringValue);
+  return fields;
+}
+
+export interface BatchComputeEnvironmentComputeResourceLaunchTemplateParams {
+  launch_template_id?: LaunchTemplateId;
+  launch_template_name?: string;
+  version?: number;
+}
+
+export function fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams(params: BatchComputeEnvironmentComputeResourceLaunchTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "launch_template_id", params.launch_template_id, TF.resourceIdValue);
+  TF.addOptionalField(fields, "launch_template_name", params.launch_template_name, TF.stringValue);
+  TF.addOptionalField(fields, "version", params.version, TF.numberValue);
   return fields;
 }
 

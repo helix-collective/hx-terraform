@@ -1140,6 +1140,68 @@ const launch_configuration: RecordDecl = {
   ],
 };
 
+// Minimal LaunchTemplate
+const launch_template_block_device_mapping_ebs: RecordDecl = {
+  name: 'launch_template_block_device_mapping_ebs',
+  fields: [
+    optionalField('delete_on_termination', BOOLEAN),
+    // optionalField('encrypted', BOOLEAN),
+    optionalField('iops', NUMBER),
+    // kms_key_id
+    optionalField('snapshot_id', STRING),
+    optionalField('throughput', NUMBER),
+    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
+    optionalField('volume_size', NUMBER),
+  ],
+};
+
+const launch_template_block_device_mapping: RecordDecl = {
+  name: 'launch_template_block_device_mapping',
+  fields: [
+    requiredField('device_name', STRING),
+    requiredField('ebs', recordType(launch_template_block_device_mapping_ebs)),
+  ],
+};
+
+const launch_template: RecordDecl = {
+  name: 'launch_template',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    optionalField('description', STRING),
+    // default_version - Default Version of the launch template.
+    // update_default_version - Whether to update Default Version each update. Conflicts with default_version.
+    optionalField('block_device_mappings', recordType(launch_template_block_device_mapping)),
+    // capacity_reservation_specification - Targeting for EC2 capacity reservations. See Capacity Reservation Specification below for more details.
+    // cpu_options - The CPU options for the instance. See CPU Options below for more details.
+    // credit_specification - Customize the credit specification of the instance. See Credit Specification below for more details.
+    // disable_api_termination - If true, enables EC2 Instance Termination Protection
+    // ebs_optimized - If true, the launched EC2 instance will be EBS-optimized.
+    // elastic_gpu_specifications - The elastic GPU to attach to the instance. See Elastic GPU below for more details.
+    // elastic_inference_accelerator - (Optional) Configuration block containing an Elastic Inference Accelerator to attach to the instance. See Elastic Inference Accelerator below for more details.
+    // iam_instance_profile - The IAM Instance Profile to launch the instance with. See Instance Profile below for more details.
+    // image_id - The AMI from which to launch the instance.
+    // instance_initiated_shutdown_behavior - Shutdown behavior for the instance. Can be stop or terminate. (Default: stop).
+    // instance_market_options - The market (purchasing) option for the instance. See Market Options below for details.
+    // instance_type - The type of the instance.
+    // kernel_id - The kernel ID.
+    // key_name - The key name to use for the instance.
+    // license_specification - A list of license specifications to associate with. See License Specification below for more details.
+    // metadata_options - (Optional) Customize the metadata options for the instance. See Metadata Options below for more details.
+    // monitoring - The monitoring option for the instance. See Monitoring below for more details.
+    // network_interfaces - Customize network interfaces to be attached at instance boot time. See Network Interfaces below for more details.
+    // placement - The placement of the instance. See Placement below for more details.
+    // ram_disk_id - The ID of the RAM disk.
+    // security_group_names - A list of security group names to associate with. If you are creating Instances in a VPC, use vpc_security_group_ids instead.
+    // vpc_security_group_ids - A list of security group IDs to associate with. Conflicts with network_interfaces.security_groups
+    // tag_specifications - The tags to apply to the resources during launch. See Tag Specifications below for more details.
+    // tags - (Optional) A map of tags to assign to the launch template. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
+    // user_data - The Base64-encoded user data to provide when launching the instance.
+    // hibernation_options - The hibernation options for the instance. See Hibernation Options below for more details.
+    // enclave_options - (Optional) Enable Nitro Enclaves on launched instances. See Enclave Options below for more details.
+  ],
+};
+
 // https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#tag-and-tags
 const autoscaling_group_tag: RecordDecl = {
   name: 'autoscaling_group_tag',
@@ -3072,6 +3134,16 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides aws_launch_template',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template',
+    launch_template,
+    [
+      resourceIdAttr('id', launch_template),
+      stringAttr('name')
+    ]
+  );
+
+  gen.generateResource(
     'Provides a Kinesis Firehose Delivery Stream resource',
     'https://www.terraform.io/docs/providers/aws/r/kinesis_firehose_delivery_stream.html',
     kinesis_firehose_delivery_stream,
@@ -3568,6 +3640,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);
   gen.generateParams(launch_configuration);
+  gen.generateParams(launch_template_block_device_mapping_ebs);
+  gen.generateParams(launch_template_block_device_mapping);
+  gen.generateParams(launch_template);
   gen.generateParams(cloudwatch_logging_options);
   gen.generateParams(extended_s3_configuration);
   gen.generateParams(kinesis_firehose_delivery_stream);

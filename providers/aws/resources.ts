@@ -1556,6 +1556,31 @@ export interface LaunchConfiguration extends TF.ResourceT<'LaunchConfiguration'>
 export type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
 
 /**
+ *  Provides aws_launch_template
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template
+ */
+export function createLaunchTemplate(tfgen: TF.Generator, rname: string, params: LaunchTemplateParams): LaunchTemplate {
+  const fields = fieldsFromLaunchTemplateParams(params);
+  const resource = tfgen.createTypedResource('LaunchTemplate', 'aws_launch_template', rname, fields);
+  const id: LaunchTemplateId =  {type: 'LaunchTemplateId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    id,
+    name,
+  };
+}
+
+export interface LaunchTemplate extends TF.ResourceT<'LaunchTemplate'> {
+  id: LaunchTemplateId;
+  name: string;
+}
+
+export type LaunchTemplateId = {type:'LaunchTemplateId',value:string};
+
+/**
  *  Provides a Kinesis Firehose Delivery Stream resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/kinesis_firehose_delivery_stream.html
@@ -4294,6 +4319,54 @@ export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationP
   TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
   TF.addOptionalField(fields, "spot_price", params.spot_price, TF.numberStringValue);
+  return fields;
+}
+
+export interface LaunchTemplateBlockDeviceMappingEbsParams {
+  delete_on_termination?: boolean;
+  iops?: number;
+  snapshot_id?: string;
+  throughput?: number;
+  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
+  volume_size?: number;
+}
+
+export function fieldsFromLaunchTemplateBlockDeviceMappingEbsParams(params: LaunchTemplateBlockDeviceMappingEbsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalField(fields, "snapshot_id", params.snapshot_id, TF.stringValue);
+  TF.addOptionalField(fields, "throughput", params.throughput, TF.numberValue);
+  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
+  return fields;
+}
+
+export interface LaunchTemplateBlockDeviceMappingParams {
+  device_name: string;
+  ebs: LaunchTemplateBlockDeviceMappingEbsParams;
+}
+
+export function fieldsFromLaunchTemplateBlockDeviceMappingParams(params: LaunchTemplateBlockDeviceMappingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addField(fields, "ebs", params.ebs, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingEbsParams(v)));
+  return fields;
+}
+
+export interface LaunchTemplateParams {
+  name?: string;
+  name_prefix?: string;
+  description?: string;
+  block_device_mappings?: LaunchTemplateBlockDeviceMappingParams;
+}
+
+export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingParams(v)));
   return fields;
 }
 

@@ -2295,6 +2295,15 @@ const eks_cluster: RecordDecl = {
   ],
 };
 
+const batch_compute_environment_compute_resource_launch_template: RecordDecl = {
+  name: 'batch_compute_environment_compute_resource_launch_template',
+  fields: [
+    optionalField('launch_template_id', resourceIdType('LaunchTemplateId')),
+    optionalField('launch_template_name', STRING),
+    optionalField('version', NUMBER),
+  ],
+};
+
 const batch_compute_environment_compute_resource: RecordDecl = {
   name: 'batch_compute_environment_compute_resource',
   fields: [
@@ -2309,7 +2318,7 @@ const batch_compute_environment_compute_resource: RecordDecl = {
     optionalField('image_id', stringAliasType('AT.Ami')),
     requiredField('instance_role', arnType(iam_instance_profile)),
     requiredField('instance_type', listType(STRING)),
-    // launch template
+    optionalField('launch_template', recordType(batch_compute_environment_compute_resource_launch_template)),
     requiredField('max_vcpus', NUMBER),
     requiredField('min_vcpus', NUMBER),
     requiredField('security_group_ids', listType(resourceIdType('SecurityGroupId'))),
@@ -3855,6 +3864,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(eks_cluster_vpc_config);
   gen.generateParams(batch_compute_environment);
   gen.generateParams(batch_compute_environment_compute_resource);
+  gen.generateParams(batch_compute_environment_compute_resource_launch_template);
   gen.generateParams(batch_job_definition_retry_strategy);
   gen.generateParams(batch_job_definition_timeout);
   gen.generateParams(batch_job_definition);

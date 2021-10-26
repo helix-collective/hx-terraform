@@ -850,7 +850,7 @@ const lb_target_group: RecordDecl = {
     optionalField('proxy_protocol_v2', BOOLEAN),
     optionalField('stickiness', recordType(lb_target_group_stickiness)),
     optionalField('health_check', recordType(lb_target_group_health_check)),
-    optionalField('target_type', enumType(['instance', 'ip'])),
+    optionalField('target_type', enumType(['instance', 'ip', 'lambda', 'alb'])),
     optionalField('tags', TAGS_MAP),
   ],
 };

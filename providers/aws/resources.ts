@@ -3988,7 +3988,7 @@ export interface LbTargetGroupParams {
   proxy_protocol_v2?: boolean;
   stickiness?: LbTargetGroupStickinessParams;
   health_check?: LbTargetGroupHealthCheckParams;
-  target_type?: 'instance' | 'ip';
+  target_type?: 'instance' | 'ip' | 'lambda' | 'alb';
   tags?: TF.TagsMap;
 }
 

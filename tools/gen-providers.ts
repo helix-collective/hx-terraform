@@ -3623,16 +3623,47 @@ function generateAws(gen: Generator) {
   gen.generateParams(sqs_queue);
   gen.generateParams(sqs_queue_policy);
   gen.generateParams(lb);
+  gen.generateDataSource(
+    'Datasource for lb',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb',
+    lb,
+    [
+      stringAliasAttr('arn', "Arn", "AT.Arn"),
+      stringAttr("name"),
+      // "tags"
+    ]
+  );
   gen.generateParams(lb_access_logs);
   gen.generateParams(lb_subnet_mapping);
   gen.generateParams(lb_listener);
   gen.generateParams(lb_listener_action);
   gen.generateParams(lb_listener_action_redirect);
   gen.generateParams(lb_listener_action_fixed_response);
+  gen.generateDataSource(
+    'Datasource for lb_listener',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb_listener',
+    lb_listener,
+    [
+      stringAliasAttr('arn', "Arn", "AT.Arn"),
+      stringAliasAttr('load_balancer_arn', "Arn", "AT.Arn"),
+      stringAttr("name"),
+    ]
+  );
+
   gen.generateParams(lb_target_group);
   gen.generateParams(lb_target_group_health_check);
   gen.generateParams(lb_target_group_stickiness);
   gen.generateParams(lb_target_group_attachment);
+  gen.generateDataSource(
+    'Datasource for lb_target_group',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb_target_group',
+    lb_target_group,
+    [
+      stringAliasAttr('arn', "Arn", "AT.Arn"),
+      stringAttr("name"),
+    ]
+  );
+
   gen.generateParams(lb_listener_rule);
   gen.generateParams(lb_listener_rule_values);
   gen.generateParams(lb_listener_rule_condition);

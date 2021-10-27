@@ -3835,6 +3835,29 @@ export function fieldsFromLbParams(params: LbParams) : TF.ResourceFieldMap {
   return fields;
 }
 
+/**
+ *  Datasource for lb
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb
+ */
+export function getLbData(tfgen: TF.Generator, dname: string, params: LbParams): LbData {
+  const fields = fieldsFromLbParams(params);
+  const resource = tfgen.createTypedDataSource('Lb', 'aws_lb', dname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.arn}'};
+  const name: string = '${' + TF.dataSourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    arn,
+    name,
+  };
+}
+
+export interface LbData extends TF.DataSourceT<'Lb'> {
+  arn: AT.Arn;
+  name: string;
+}
+
 export interface LbAccessLogsParams {
   bucket: string;
   bucket_prefix?: string;
@@ -3933,6 +3956,32 @@ export function fieldsFromLbListenerActionFixedResponseParams(params: LbListener
   return fields;
 }
 
+/**
+ *  Datasource for lb_listener
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb_listener
+ */
+export function getLbListenerData(tfgen: TF.Generator, dname: string, params: LbListenerParams): LbListenerData {
+  const fields = fieldsFromLbListenerParams(params);
+  const resource = tfgen.createTypedDataSource('LbListener', 'aws_lb_listener', dname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.arn}'};
+  const load_balancer_arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.load_balancer_arn}'};
+  const name: string = '${' + TF.dataSourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    arn,
+    load_balancer_arn,
+    name,
+  };
+}
+
+export interface LbListenerData extends TF.DataSourceT<'LbListener'> {
+  arn: AT.Arn;
+  load_balancer_arn: AT.Arn;
+  name: string;
+}
+
 export interface LbTargetGroupParams {
   name?: string;
   name_prefix?: string;
@@ -4017,6 +4066,29 @@ export function fieldsFromLbTargetGroupAttachmentParams(params: LbTargetGroupAtt
   TF.addOptionalField(fields, "port", params.port, TF.numberValue);
   TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
   return fields;
+}
+
+/**
+ *  Datasource for lb_target_group
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/lb_target_group
+ */
+export function getLbTargetGroupData(tfgen: TF.Generator, dname: string, params: LbTargetGroupParams): LbTargetGroupData {
+  const fields = fieldsFromLbTargetGroupParams(params);
+  const resource = tfgen.createTypedDataSource('LbTargetGroup', 'aws_lb_target_group', dname, fields);
+  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.arn}'};
+  const name: string = '${' + TF.dataSourceName(resource) + '.name}';
+
+  return {
+    ...resource,
+    arn,
+    name,
+  };
+}
+
+export interface LbTargetGroupData extends TF.DataSourceT<'LbTargetGroup'> {
+  arn: AT.Arn;
+  name: string;
 }
 
 export interface LbListenerRuleParams {

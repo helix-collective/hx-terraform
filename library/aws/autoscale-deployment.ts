@@ -347,6 +347,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
   params: {
     acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
+    alb_name?: string;
   } ): LoadBalancerAndListeners {
     const lbParams: AR.LbParams = {
       name: tfgen.scopedName(tfname).join('-'),
@@ -357,7 +358,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
     };
     const lb = AR.createLb(
       tfgen,
-      'alb',
+      params.alb_name || 'alb',
       applyCustomize(params.customize_lb, lbParams)
     );
   const lb_http_listener = AR.createLbListener(tfgen, tfname + '_http', {

@@ -309,6 +309,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
     customize_lb?: Customize<AR.LbParams>;
     customize_http_listener?: Customize<AR.LbListenerParams>;
     customize_https_listener?: Customize<AR.LbListenerParams>;
+    alb_name?: string;
   } ): LoadBalancerAndListeners {
     const lbParams: AR.LbParams = {
       name: tfgen.scopedName(tfname).join('-'),
@@ -319,7 +320,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
     };
     const lb = AR.createLb(
       tfgen,
-      'alb',
+      params.alb_name || 'alb',
       applyCustomize(params.customize_lb, lbParams)
     );
   const http_listener_params: AR.LbListenerParams = {
@@ -337,7 +338,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
   };
   const lb_http_listener = AR.createLbListener(
     tfgen,
-    tfname + '_http', 
+    tfname + '_http',
     applyCustomize(params.customize_http_listener, http_listener_params)
   );
 
@@ -356,7 +357,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
     }
   };
   const lb_https_listener = AR.createLbListener(
-    tfgen, 
+    tfgen,
     tfname + '_https',
     applyCustomize(params.customize_https_listener, https_listener_params),
   );
@@ -725,13 +726,13 @@ export interface ControllerParams {
     * for the appropriate region.
     */
    amis: amis.AmiSelector;
- 
+
    /**
     * The context files are fetched from S3 and made available to the controller instance for
     * interpolation into the deployed application configuration.
     */
    deploy_contexts?: camus2.DeployContext[];
- 
+
    /**
     * Label the deploy master instance and associated resources for client convenience
     */
@@ -868,9 +869,9 @@ class ControllerBootScriptFactory implements BootScriptFactory {
     const app_user = appUserOrDefault(this.params.app_user);
     const releases_s3 = this.params.releases_s3;
     const state_s3 = this.params.state_s3;
-  
+
     const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
-  
+
     return camus2.configureCamus2({
         username: app_user,
         releases: releases_s3,
@@ -888,7 +889,7 @@ class ControllerBootScriptFactory implements BootScriptFactory {
     bs.include(this.configure())
     return bs
   }
-  
+
 };
 
 // Factory to build asg instance bootscripts
@@ -912,7 +913,7 @@ class AsgBootScriptFactory implements BootScriptFactory {
     const deploy_contexts: camus2.DeployContext[] =
       this.params.appserver_deploy_contexts || [];
     const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
-  
+
     return camus2.configureCamus2({
         username: app_user,
         releases: this.params.releases_s3,

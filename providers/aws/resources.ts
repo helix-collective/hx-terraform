@@ -3624,11 +3624,41 @@ export function fieldsFromIamGroupPolicyParams(params: IamGroupPolicyParams) : T
 
 export interface EcrRepositoryParams {
   name: string;
+  encryption_configuration?: EcrRepositoryEncryptionConfigurationParams;
+  image_tag_mutability?: 'MUTABLE' | 'IMMUTABLE';
+  image_scanning_configuration?: EcrRepositoryImageScanningConfigurationParams;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromEcrRepositoryParams(params: EcrRepositoryParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "encryption_configuration", params.encryption_configuration, (v) => TF.mapValue(fieldsFromEcrRepositoryEncryptionConfigurationParams(v)));
+  TF.addOptionalField(fields, "image_tag_mutability", params.image_tag_mutability, TF.stringValue);
+  TF.addOptionalField(fields, "image_scanning_configuration", params.image_scanning_configuration, (v) => TF.mapValue(fieldsFromEcrRepositoryImageScanningConfigurationParams(v)));
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface EcrRepositoryImageScanningConfigurationParams {
+  scan_on_push: boolean;
+}
+
+export function fieldsFromEcrRepositoryImageScanningConfigurationParams(params: EcrRepositoryImageScanningConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "scan_on_push", params.scan_on_push, TF.booleanValue);
+  return fields;
+}
+
+export interface EcrRepositoryEncryptionConfigurationParams {
+  encryption_type?: 'AES256' | 'KMS';
+  kms_key?: string;
+}
+
+export function fieldsFromEcrRepositoryEncryptionConfigurationParams(params: EcrRepositoryEncryptionConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "encryption_type", params.encryption_type, TF.stringValue);
+  TF.addOptionalField(fields, "kms_key", params.kms_key, TF.stringValue);
   return fields;
 }
 

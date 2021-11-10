@@ -610,9 +610,33 @@ const iam_group_policy: RecordDecl = {
   ],
 };
 
+// AWS 3.x only
+const ecr_repository_encryption_configuration: RecordDecl = {
+  name: 'ecr_repository_encryption_configuration',
+  fields: [
+    optionalField('encryption_type', enumType(['AES256', 'KMS'])),
+    // The ARN of the KMS key to use when encryption_type is KMS
+    optionalField('kms_key', STRING),
+  ],
+};
+
+const ecr_repository_image_scanning_configuration: RecordDecl = {
+  name: 'ecr_repository_image_scanning_configuration',
+  fields: [
+    requiredField('scan_on_push', BOOLEAN),
+  ],
+};
+
 const ecr_repository: RecordDecl = {
   name: 'ecr_repository',
-  fields: [requiredField('name', STRING)],
+  fields: [
+    requiredField('name', STRING),
+    // AWS 3.x encryption_configuration options
+    optionalField('encryption_configuration', recordType(ecr_repository_encryption_configuration)),
+    optionalField('image_tag_mutability', enumType(['MUTABLE', 'IMMUTABLE'])),
+    optionalField('image_scanning_configuration', recordType(ecr_repository_image_scanning_configuration)),
+    optionalField('tags', TAGS_MAP),
+  ],
 };
 
 const db_subnet_group: RecordDecl = {
@@ -1792,7 +1816,7 @@ const wafv2_web_acl: RecordDecl = {
 const wafv2_web_acl_association: RecordDecl = {
   name: 'wafv2_web_acl_association',
   fields: [
-    requiredField('resource_arn', STRING), 
+    requiredField('resource_arn', STRING),
     requiredField('web_acl_arn', arnType(wafv2_web_acl)),
   ]
 }
@@ -3734,6 +3758,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_group);
   gen.generateParams(iam_group_policy);
   gen.generateParams(ecr_repository);
+  gen.generateParams(ecr_repository_image_scanning_configuration);
+  gen.generateParams(ecr_repository_encryption_configuration);
   gen.generateParams(db_subnet_group);
   gen.generateParams(cloudwatch_metric_alarm);
   gen.generateParams(iam_instance_profile);

@@ -58,7 +58,7 @@ export const publish_metrics_policy = {
   },
 };
 
-export function s3ReadonlyPolicy(name: string, bucket: string) {
+export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
   return {
     name,
     policy: {
@@ -72,14 +72,14 @@ export function s3ReadonlyPolicy(name: string, bucket: string) {
         {
           Action: ['s3:GetObject'],
           Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/*`],
+          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
         },
       ],
     },
   };
 }
 
-export function s3PublicReadonlyPolicy(name: string, bucket: string) {
+export function s3PublicReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
   return {
     name,
     policy: {
@@ -89,14 +89,14 @@ export function s3PublicReadonlyPolicy(name: string, bucket: string) {
           Action: ['s3:GetObject'],
           Effect: 'Allow',
           Principal: '*',
-          Resource: [`arn:aws:s3:::${bucket}/*`],
+          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
         },
       ],
     },
   };
 }
 
-export function s3ModifyPolicy(name: string, bucket: string) {
+export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string = '*') {
   return {
     name,
     policy: {
@@ -116,7 +116,7 @@ export function s3ModifyPolicy(name: string, bucket: string) {
             's3:DeleteObject',
           ],
           Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/*`],
+          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
         },
       ],
     },
@@ -354,7 +354,7 @@ export function autoscalingGroupEnableSetInstanceProtection(
 
 /**
  * Allow sending of SMS, but not sns messages to topics, etc.
- * 
+ *
  * https://stackoverflow.com/questions/38871201/authorization-when-sending-a-text-message-using-amazonsnsclient
  */
 export const snsPostSmsPolicy: NamedPolicy = {

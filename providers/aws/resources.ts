@@ -1975,6 +1975,51 @@ export interface WafregionalWebAclAssociation extends TF.ResourceT<'WafregionalW
 export type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociationId',value:string};
 
 /**
+ *  Creates a WAFv2 Web ACL resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl
+ */
+export function createWafv2WebAcl(tfgen: TF.Generator, rname: string, params: Wafv2WebAclParams): Wafv2WebAcl {
+  const fields = fieldsFromWafv2WebAclParams(params);
+  const resource = tfgen.createTypedResource('Wafv2WebAcl', 'aws_wafv2_web_acl', rname, fields);
+  const id: Wafv2WebAclId =  {type: 'Wafv2WebAclId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const arn: Wafv2WebAclArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Wafv2WebAcl');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface Wafv2WebAcl extends TF.ResourceT<'Wafv2WebAcl'> {
+  id: Wafv2WebAclId;
+  arn: Wafv2WebAclArn;
+}
+
+export type Wafv2WebAclId = {type:'Wafv2WebAclId',value:string};
+export type Wafv2WebAclArn = AT.ArnT<"Wafv2WebAcl">;
+
+/**
+ *  Creates a WAFv2 Web ACL Association.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association
+ */
+export function createWafv2WebAclAssociation(tfgen: TF.Generator, rname: string, params: Wafv2WebAclAssociationParams): Wafv2WebAclAssociation {
+  const fields = fieldsFromWafv2WebAclAssociationParams(params);
+  const resource = tfgen.createTypedResource('Wafv2WebAclAssociation', 'aws_wafv2_web_acl_association', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface Wafv2WebAclAssociation extends TF.ResourceT<'Wafv2WebAclAssociation'> {
+}
+
+export type Wafv2WebAclAssociationId = {type:'Wafv2WebAclAssociationId',value:string};
+
+/**
  *  Provides a resource to manage AWS Secrets Manager secret metadata.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html
@@ -4785,6 +4830,154 @@ export function fieldsFromWafregionalWebAclAssociationParams(params: Wafregional
   const fields: TF.ResourceFieldMap = [];
   TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
   TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface Wafv2EmptyParams {
+}
+
+export function fieldsFromWafv2EmptyParams(params: Wafv2EmptyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  return fields;
+}
+
+export interface Wafv2OverrideActionParams {
+  count?: Wafv2EmptyParams;
+  none?: Wafv2EmptyParams;
+}
+
+export function fieldsFromWafv2OverrideActionParams(params: Wafv2OverrideActionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "count", params.count, (v) => TF.mapValue(fieldsFromWafv2EmptyParams(v)));
+  TF.addOptionalField(fields, "none", params.none, (v) => TF.mapValue(fieldsFromWafv2EmptyParams(v)));
+  return fields;
+}
+
+export interface Wafv2AllowParams {
+}
+
+export function fieldsFromWafv2AllowParams(params: Wafv2AllowParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  return fields;
+}
+
+export interface Wafv2BlockParams {
+}
+
+export function fieldsFromWafv2BlockParams(params: Wafv2BlockParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  return fields;
+}
+
+export interface Wafv2DefaultActionParams {
+  allow?: Wafv2AllowParams;
+  block?: Wafv2BlockParams;
+}
+
+export function fieldsFromWafv2DefaultActionParams(params: Wafv2DefaultActionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "allow", params.allow, (v) => TF.mapValue(fieldsFromWafv2AllowParams(v)));
+  TF.addOptionalField(fields, "block", params.block, (v) => TF.mapValue(fieldsFromWafv2BlockParams(v)));
+  return fields;
+}
+
+export interface Wafv2VisibilityConfigParams {
+  cloudwatch_metrics_enabled: boolean;
+  metric_name: string;
+  sampled_requests_enabled: boolean;
+}
+
+export function fieldsFromWafv2VisibilityConfigParams(params: Wafv2VisibilityConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "cloudwatch_metrics_enabled", params.cloudwatch_metrics_enabled, TF.booleanValue);
+  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addField(fields, "sampled_requests_enabled", params.sampled_requests_enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface Wafv2ExcludedRuleParams {
+  name: string;
+}
+
+export function fieldsFromWafv2ExcludedRuleParams(params: Wafv2ExcludedRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  return fields;
+}
+
+export interface Wafv2ManagedRuleGroupStatementParams {
+  name: string;
+  vendor_name: string;
+  excluded_rule?: (Wafv2ExcludedRuleParams)[];
+}
+
+export function fieldsFromWafv2ManagedRuleGroupStatementParams(params: Wafv2ManagedRuleGroupStatementParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addField(fields, "vendor_name", params.vendor_name, TF.stringValue);
+  TF.addOptionalField(fields, "excluded_rule", params.excluded_rule, TF.listValue((v) => TF.mapValue(fieldsFromWafv2ExcludedRuleParams(v))));
+  return fields;
+}
+
+export interface Wafv2StatementParams {
+  managed_rule_group_statement?: Wafv2ManagedRuleGroupStatementParams;
+}
+
+export function fieldsFromWafv2StatementParams(params: Wafv2StatementParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalField(fields, "managed_rule_group_statement", params.managed_rule_group_statement, (v) => TF.mapValue(fieldsFromWafv2ManagedRuleGroupStatementParams(v)));
+  return fields;
+}
+
+export interface Wafv2RuleParams {
+  name: string;
+  override_action?: Wafv2OverrideActionParams;
+  priority?: number;
+  statement: Wafv2StatementParams;
+  visibility_config: Wafv2VisibilityConfigParams;
+}
+
+export function fieldsFromWafv2RuleParams(params: Wafv2RuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "override_action", params.override_action, (v) => TF.mapValue(fieldsFromWafv2OverrideActionParams(v)));
+  TF.addOptionalField(fields, "priority", params.priority, TF.numberValue);
+  TF.addField(fields, "statement", params.statement, (v) => TF.mapValue(fieldsFromWafv2StatementParams(v)));
+  TF.addField(fields, "visibility_config", params.visibility_config, (v) => TF.mapValue(fieldsFromWafv2VisibilityConfigParams(v)));
+  return fields;
+}
+
+export interface Wafv2WebAclParams {
+  default_action: Wafv2DefaultActionParams;
+  description?: string;
+  name: string;
+  rule?: (Wafv2RuleParams)[];
+  scope: 'CLOUDFRONT' | 'REGIONAL';
+  tags?: TF.TagsMap;
+  visibility_config: Wafv2VisibilityConfigParams;
+}
+
+export function fieldsFromWafv2WebAclParams(params: Wafv2WebAclParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromWafv2DefaultActionParams(v)));
+  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalField(fields, "rule", params.rule, TF.listValue((v) => TF.mapValue(fieldsFromWafv2RuleParams(v))));
+  TF.addField(fields, "scope", params.scope, TF.stringValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addField(fields, "visibility_config", params.visibility_config, (v) => TF.mapValue(fieldsFromWafv2VisibilityConfigParams(v)));
+  return fields;
+}
+
+export interface Wafv2WebAclAssociationParams {
+  resource_arn: string;
+  web_acl_arn: AT.ArnT<"Wafv2WebAcl">;
+}
+
+export function fieldsFromWafv2WebAclAssociationParams(params: Wafv2WebAclAssociationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addField(fields, "resource_arn", params.resource_arn, TF.stringValue);
+  TF.addField(fields, "web_acl_arn", params.web_acl_arn, TF.resourceArnValue);
   return fields;
 }
 

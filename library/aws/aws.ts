@@ -98,9 +98,10 @@ export function createInstance(
 /**
  * Create an EC2 Container Registry Repository, for storing docker images.
  */
-export function createEcrRepository(tfgen: TF.Generator, name: string) {
+export function createEcrRepository(tfgen: TF.Generator, name: string, params?: Partial<AR.EcrRepositoryParams>) {
   return AR.createEcrRepository(tfgen, name.replace(/\//g, '_'), {
     name,
+    ...params,
   });
 }
 

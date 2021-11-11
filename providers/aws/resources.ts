@@ -1410,7 +1410,7 @@ export type LbTargetGroupId = {type:'LbTargetGroupId',value:string};
 export type LbTargetGroupArn = AT.ArnT<"LbTargetGroup">;
 
 /**
- *  Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group. 
+ *  Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/lb_target_group_attachment.html
  */
@@ -3187,7 +3187,7 @@ export interface RouteParams {
   Note according to the terraform docs
   'gateway_id - (Optional) Identifier of a VPC internet gateway or a virtual private gateway'
   Currently this 'or' is difficult to capture, so it has been left up to the client code
-  
+
   When using a vpn use the following in the client
   'gateway_id: { type: 'InternetGatewayId', value: vpn_gw.id.value }'
   */
@@ -3634,9 +3634,11 @@ export function fieldsFromDbSubnetGroupParams(params: DbSubnetGroupParams) : TF.
   return fields;
 }
 
+export type CloudwatchMetricAlarmComparisonOperator = 'GreaterThanOrEqualToThreshold' | 'GreaterThanThreshold' | 'LessThanThreshold' | 'LessThanOrEqualToThreshold';
+
 export interface CloudwatchMetricAlarmParams {
   alarm_name: string;
-  comparison_operator: 'GreaterThanOrEqualToThreshold' | 'GreaterThanThreshold' | 'LessThanThreshold' | 'LessThanOrEqualToThreshold';
+  comparison_operator: CloudwatchMetricAlarmComparisonOperator,
   /**
   The number of periods over which data is compared to the specified threshold.
   */

@@ -347,6 +347,8 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
   params: {
     acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
+    customize_http_listener?: Customize<AR.LbListenerParams>;
+    customize_https_listener?: Customize<AR.LbListenerParams>;
   } ): LoadBalancerAndListeners {
     const lbParams: AR.LbParams = {
       name: tfgen.scopedName(tfname).join('-'),
@@ -360,7 +362,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
       'alb',
       applyCustomize(params.customize_lb, lbParams)
     );
-  const lb_http_listener = AR.createLbListener(tfgen, tfname + '_http', {
+  const http_listener_params: AR.LbListenerParams = {
     load_balancer_arn: lb.arn,
     port: 80,
     protocol: 'HTTP',
@@ -372,9 +374,14 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
         status_code: 'HTTP_301',
       },
     },
-  });
+  };
+  const lb_http_listener = AR.createLbListener(
+    tfgen,
+    tfname + '_http', 
+    applyCustomize(params.customize_http_listener, http_listener_params)
+  );
 
-  const lb_https_listener = AR.createLbListener(tfgen, tfname + '_https', {
+  const https_listener_params: AR.LbListenerParams = {
     load_balancer_arn: lb.arn,
     port: 443,
     protocol: 'HTTPS',
@@ -386,8 +393,13 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
         message_body: 'Invalid host',
         status_code: 503,
       }
-    },
-  });
+    }
+  };
+  const lb_https_listener = AR.createLbListener(
+    tfgen, 
+    tfname + '_https',
+    applyCustomize(params.customize_https_listener, https_listener_params),
+  );
 
   return {lb, http_listener: lb_http_listener, https_listener: lb_https_listener};
 }

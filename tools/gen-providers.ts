@@ -1616,6 +1616,110 @@ const wafregional_web_acl_association: RecordDecl = {
   ],
 };
 
+const wafv2_allow: RecordDecl = {
+  name: 'wafv2_allow',
+  fields: [
+    // TODO: complete when needed
+  ]
+}
+
+const wafv2_block: RecordDecl = {
+  name: 'wafv2_block',
+  fields: [
+    // TODO: complete when needed
+  ]
+}
+
+const wafv2_default_action: RecordDecl = {
+  name: 'wafv2_default_action',
+  fields: [
+    optionalField('allow', recordType(wafv2_allow)),
+    optionalField('block', recordType(wafv2_block)),
+  ]
+}
+
+const wafv2_visibility_config: RecordDecl = {
+  name: 'wafv2_visibility_config',
+  fields: [
+    requiredField('cloudwatch_metrics_enabled', BOOLEAN),
+    requiredField('metric_name', STRING),
+    requiredField('sampled_requests_enabled', BOOLEAN),
+  ]
+}
+
+const wafv2_excluded_rule: RecordDecl = {
+  name: 'wafv2_excluded_rule',
+  fields: [
+    requiredField('name', STRING),
+  ]
+}
+
+const wafv2_managed_rule_group_statement: RecordDecl = {
+  name: 'wafv2_managed_rule_group_statement',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('vendor_name', STRING),
+    optionalField('excluded_rule', listType(recordType(wafv2_excluded_rule))),
+  ]
+}
+
+const wafv2_statement: RecordDecl = {
+  name: 'wafv2_statement',
+  fields: [
+    optionalField('managed_rule_group_statement', recordType(wafv2_managed_rule_group_statement)),
+    // ... TODO: complete when needed
+  ]
+}
+
+const wafv2_empty: RecordDecl = {
+  name: 'wafv2_empty',
+  fields: [
+  ]
+}
+
+const wafv2_override_action: RecordDecl = {
+  name: 'wafv2_override_action',
+  fields: [
+    optionalField('count', recordType(wafv2_empty)),
+    optionalField('none', recordType(wafv2_empty)),
+  ]
+}
+
+const wafv2_rule: RecordDecl = {
+  name: 'wafv2_rule',
+  fields: [
+    // TODO: optionalField('action', ...),
+    requiredField('name', STRING),
+    optionalField('override_action', recordType(wafv2_override_action)),
+    optionalField('priority', NUMBER),
+    requiredField('statement', recordType(wafv2_statement)),
+    requiredField('visibility_config', recordType(wafv2_visibility_config)),
+  ]
+}
+
+const wafv2_web_acl: RecordDecl = {
+  name: 'wafv2_web_acl',
+  fields: [
+    requiredField('default_action', recordType(wafv2_default_action)),
+    optionalField('description', STRING),
+    requiredField('name', STRING),
+    optionalField('rule', listType(recordType(wafv2_rule))),
+    requiredField('scope', enumType(['CLOUDFRONT', 'REGIONAL'])),
+    optionalField('tags', TAGS_MAP),
+    requiredField('visibility_config', recordType(wafv2_visibility_config)),
+  ]
+}
+
+const wafv2_web_acl_association: RecordDecl = {
+  name: 'wafv2_web_acl_association',
+  fields: [
+    requiredField('resource_arn', STRING), 
+    requiredField('web_acl_arn', arnType(wafv2_web_acl)),
+  ]
+}
+
+
+
 const secretsmanager_secret: RecordDecl = {
   name: 'secretsmanager_secret',
   fields: [
@@ -3231,6 +3335,23 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Creates a WAFv2 Web ACL resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl',
+    wafv2_web_acl,
+    [resourceIdAttr('id', wafv2_web_acl)],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
+    'Creates a WAFv2 Web ACL Association.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association',
+    wafv2_web_acl_association,
+    [],
+  );
+
+  gen.generateResource(
     'Provides a resource to manage AWS Secrets Manager secret metadata.',
     'https://www.terraform.io/docs/providers/aws/r/secretsmanager_secret.html',
     secretsmanager_secret,
@@ -3579,6 +3700,20 @@ function generateAws(gen: Generator) {
   gen.generateParams(rule);
   gen.generateParams(wafregional_web_acl);
   gen.generateParams(wafregional_web_acl_association);
+
+  gen.generateParams(wafv2_empty);
+  gen.generateParams(wafv2_override_action);
+  gen.generateParams(wafv2_allow);
+  gen.generateParams(wafv2_block);
+  gen.generateParams(wafv2_default_action);
+  gen.generateParams(wafv2_visibility_config);
+  gen.generateParams(wafv2_excluded_rule);
+  gen.generateParams(wafv2_managed_rule_group_statement);
+  gen.generateParams(wafv2_statement);
+  gen.generateParams(wafv2_rule);
+  gen.generateParams(wafv2_web_acl);
+  gen.generateParams(wafv2_web_acl_association);
+
   gen.generateParams(secretsmanager_secret);
   gen.generateParams(secretsmanager_secret_version);
   gen.generateParams(cloudfront_cookies);

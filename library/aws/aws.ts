@@ -11,6 +11,7 @@ import * as AT from '../../providers/aws/types.ts';
 import * as AR from '../../providers/aws/resources.ts';
 import * as policies from './policies.ts';
 import * as shared from "./shared.ts";
+import * as amis from "./amis.ts";
 import {
   contextTagsWithName,
   Customize,
@@ -19,12 +20,10 @@ import {
   applyCustomize,
 } from '../util.ts';
 
-export type UbuntuVersion = "1604" | "2004";
 
 export interface InstanceParams {
   instance_type: AT.InstanceType;
-  ubuntu_version: UbuntuVersion;
-  ami(region: AT.Region, ubuntu_version?: UbuntuVersion): AT.Ami;
+  ami: amis.AmiSelector;
   security_group: AR.SecurityGroup;
   key_name: AT.KeyName;
   ignoreUserDataChanges?: boolean,
@@ -69,7 +68,7 @@ export function createInstance(
   params0: InstanceParams
 ): AR.Instance {
   const instance_params: AR.InstanceParams = {
-    ami: params0.ami(sr.region, params0.ubuntu_version),
+    ami: params0.ami(sr.region),
     instance_type: params0.instance_type,
     key_name: params0.key_name,
     subnet_id,

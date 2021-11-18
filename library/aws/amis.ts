@@ -82,7 +82,7 @@ const ec2_ami_2004_amd64 = [
   {region: "eu-west-3", ami: "ami-06d3fffafe8d48b35"},
 ]
 
-export const ubuntu_2004: AmiSelector = makeAmiSelector(ec2_ami_1604_amd64);
+export const ubuntu_2004: AmiSelector = makeAmiSelector(ec2_ami_2004_amd64);
 
 export function makeAmiSelector(ec2_ami_data: {region: string, ami: string}[]): AmiSelector {
   return (region: AT.Region) => {

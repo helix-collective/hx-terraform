@@ -43,14 +43,17 @@ export function createAutoscaleFrontend(
     throw new Error("params.health_check.outgoingPath must start with '/'")
   }
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-    const controller = createController(
-      tfgen,
-      'controller',
-      sr,
-      params,
-      params.endpoints,
-      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-    );
+    if (params.create_controller) {
+      createController(
+        tfgen,
+        'controller',
+        sr,
+        params,
+        params.create_controller,
+        params.endpoints,
+        nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+      );
+    }
     const autoscale_processor = createProcessorAutoScaleGroup(
       tfgen,
       'asg',
@@ -101,15 +104,18 @@ export function createAutoscaleProcessor(
   params: AutoscaleProcessorParams,
 ): AutoscaleProcessor {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-    const controller = createController(
-      tfgen,
-      'controller',
-      sr,
-      params,
-      [],
-      params.nginxDockerVersion === undefined
-          ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
-    );
+    if (params.create_controller) {
+      createController(
+        tfgen,
+        'controller',
+        sr,
+        params,
+        params.create_controller,
+        [],
+        params.nginxDockerVersion === undefined
+            ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
+      );
+    }
     return createProcessorAutoScaleGroup(
       tfgen,
       'asg',
@@ -126,25 +132,26 @@ export function createController(
   tfgen: TF.Generator,
   name: string,
   sr: shared.SharedResources,
-  params: AutoscaleProcessorParams,
+  pparams: AutoscaleProcessorParams,
+  cparams: ControllerParams,
   endpoints: EndPoint[],
   nginxDockerVersion: string,
 ) {
-  const app_user = appUserOrDefault(params.app_user);
-  const releases_s3 = params.releases_s3;
-  const state_s3 = params.state_s3;
-  const controller_label = params.controller_label || name;
+  const app_user = appUserOrDefault(pparams.app_user);
+  const releases_s3 = pparams.releases_s3;
+  const state_s3 = pparams.state_s3;
+  const controller_label = cparams.label || name;
   const subnetId = shared.externalSubnetIds(sr)[0];
 
   const deploy_contexts: camus2.DeployContext[] =
-    params.controller_deploy_contexts || [];
+    cparams.deploy_contexts || [];
 
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
-  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
+  const docker_config = pparams.docker_config || docker.DEFAULT_CONFIG;
 
   // Build the bootscript for the controller
   const bs = bootscript.newBootscript();
-  const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
+  const include_install = pparams.bootscripts_include_install === undefined ? true : pparams.bootscripts_include_install;
   if (include_install) {
     bs.include(ec2InstallScript(app_user, docker_config, true));
   }
@@ -156,19 +163,19 @@ export function createController(
       deployContexts: deploy_contexts,
       proxy: camus2.remoteProxyMaster(proxy_endpoints, state_s3),
       nginxDockerVersion,
-      healthCheck: params.health_check,
-      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
+      healthCheck: pparams.health_check,
+      frontendproxy_nginx_conf_tpl: pparams.frontendproxy_nginx_conf_tpl,
     })
   );
 
-  if (params.controller_extra_bootscript) {
-    bs.include(params.controller_extra_bootscript);
+  if (cparams.extra_bootscript) {
+    bs.include(cparams.extra_bootscript);
   }
 
   let controller_iampolicies: policies.NamedPolicy[] = [aws.s3DeployBucketModifyPolicy(sr)];
 
-  if (params.controller_extra_policies) {
-    controller_iampolicies = controller_iampolicies.concat(params.controller_extra_policies);
+  if (cparams.extra_policies) {
+    controller_iampolicies = controller_iampolicies.concat(cparams.extra_policies);
   }
 
   const controller_instance_profile = roles.createInstanceProfileWithPolicies(
@@ -179,9 +186,9 @@ export function createController(
 
   const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
     instance_type: AT.t2_micro,
-    ami: params.controller_amis,
+    ami: cparams.amis,
     security_group: sr.bastion_security_group,
-    key_name: params.key_name,
+    key_name: pparams.key_name,
     customize_instance: (i: AR.InstanceParams) => {
       i.user_data = bs.compile();
       i.iam_instance_profile = controller_instance_profile.id;
@@ -193,7 +200,7 @@ export function createController(
     tfgen,
     controller_label,
     sr,
-    params.controller_dns_name,
+    cparams.dns_name,
     [controller.eip.public_ip],
     '3600'
   );
@@ -650,12 +657,6 @@ export interface AutoscaleProcessorParams {
    */
   key_name: AT.KeyName;
 
-  /**
-   * The DNS name of the controller machine. This is a prefix to the shared primary DNS zone.
-   * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
-   * will be aaa.helix.com).
-   */
-  controller_dns_name: string;
 
   /**
    * The S3 location where hx-deploy-tool releases are stored.
@@ -673,10 +674,7 @@ export interface AutoscaleProcessorParams {
    */
   app_user?: string;
 
-  /**
-   * Additional operations for the controller first boot can be passed vis the operation.
-   */
-  controller_extra_bootscript?: bootscript.BootScript;
+
 
   /**
    * If true (or not specified), the bootscripts includes ec2InstallScript().
@@ -684,27 +682,6 @@ export interface AutoscaleProcessorParams {
    */
   bootscripts_include_install?: boolean;
 
-  /**
-   * Additional controller IAM policies can be specified here.
-   */
-  controller_extra_policies?: policies.NamedPolicy[];
-
-  /**
-   * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI
-   * for the appropriate region.
-   */
-  controller_amis: amis.AmiSelector;
-
-  /**
-   * The context files are fetched from S3 and made available to the controller instance for
-   * interpolation into the deployed application configuration.
-   */
-  controller_deploy_contexts?: camus2.DeployContext[];
-
-  /**
-   * Label the deploy master instance and associated resources for client convenience
-   */
-  controller_label?: string;
 
   /**
    * Additional operations for the EC2 instances first boot can be passed vis the operation.
@@ -770,7 +747,51 @@ export interface AutoscaleProcessorParams {
    * Nginx version to use for camus2
    */
   nginxDockerVersion?: string,
+
+  /**
+   * If set, create a controller/bastion machine
+   */
+  create_controller?: ControllerParams;
 }
+
+
+export interface ControllerParams {
+  /**
+   * The DNS name of the controller machine. This is a prefix to the shared primary DNS zone.
+   * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
+   * will be aaa.helix.com).
+   */
+  dns_name: string;
+
+  /**
+   * Additional operations for the controller first boot can be passed vis the operation.
+   */
+  extra_bootscript?: bootscript.BootScript;
+
+  /**
+   * Additional controller IAM policies can be specified here.
+   */
+   extra_policies?: policies.NamedPolicy[];
+
+   /**
+    * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI
+    * for the appropriate region.
+    */
+   amis: amis.AmiSelector;
+ 
+   /**
+    * The context files are fetched from S3 and made available to the controller instance for
+    * interpolation into the deployed application configuration.
+    */
+   deploy_contexts?: camus2.DeployContext[];
+ 
+   /**
+    * Label the deploy master instance and associated resources for client convenience
+    */
+   label?: string;
+};
+
+
 
 export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
   /**
@@ -807,6 +828,11 @@ export interface AutoscaleFrontendParams extends AutoscaleProcessorParams {
    * Health check config
    */
   health_check: C.HealthCheckConfig;
+
+  /**
+   * If set, create a controller/bastion machine
+   */
+  create_controller?: ControllerParams;
 }
 
 type AcmCertificateSource =

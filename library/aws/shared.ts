@@ -93,6 +93,13 @@ export function createResources(
       enabled: true,
     },
     tags: tfgen.tagsContext(),
+    server_side_encryption_configuration: {
+      rule: {
+        apply_server_side_encryption_by_default: {
+          sse_algorithm: "AES256"
+        }
+      }
+    }
   });
 
   const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
@@ -102,6 +109,13 @@ export function createResources(
       enabled: true,
     },
     tags: tfgen.tagsContext(),
+    server_side_encryption_configuration: {
+      rule: {
+        apply_server_side_encryption_by_default: {
+          sse_algorithm: "AES256"
+        }
+      }
+    }
   });
 
   // const config_bucket_name = s3_bucket_prefix + "-shared-config";

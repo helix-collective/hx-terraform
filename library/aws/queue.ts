@@ -1,2 +1,2 @@
-export { s3BucketNotificationsToSqsQueue } from './aws';
-export { createSqsQueue } from './aws';
+export { s3BucketNotificationsToSqsQueue } from './aws.ts';
+export { createSqsQueue } from './aws.ts';

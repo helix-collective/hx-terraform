@@ -1,7 +1,7 @@
 import * as TF from '../../core/core.ts';
 import * as AR from '../../providers/aws/resources.ts';
 import { Customize } from "../util.ts";
-import { CloudwatchMetricAlarmParams, CloudwatchMetricAlarmComparisonOperator } from "../../providers/aws/resources.ts";
+import { CloudwatchMetricAlarmParams } from "../../providers/aws/resources.ts";
 
 // How to prepare alarms:
 //    Use AWS console cloudwatch metrics to browse through metrics and pick instances/auto scale groups etc
@@ -382,7 +382,7 @@ export function createAutoScaleGroupActiveInstancesAlarm(
   tfgen: TF.Generator,
   topic: AR.SnsTopic,
   autoscaling_group: AR.AutoscalingGroup,
-  comparison_operator: CloudwatchMetricAlarmComparisonOperator,
+  comparison_operator: CloudwatchMetricAlarmParams['comparison_operator'],
   threshold: number,
   period: number = 1,
   // MountPath: string = "/",

@@ -137,40 +137,13 @@ export function createController(
   endpoints: EndPoint[],
   nginxDockerVersion: string,
 ) {
-  const app_user = appUserOrDefault(pparams.app_user);
-  const releases_s3 = pparams.releases_s3;
-  const state_s3 = pparams.state_s3;
   const controller_label = cparams.label || name;
   const subnetId = shared.externalSubnetIds(sr)[0];
 
-  const deploy_contexts: camus2.DeployContext[] =
-    cparams.deploy_contexts || [];
-
-  const proxy_endpoints = deployToolEndpoints(sr, endpoints);
-  const docker_config = pparams.docker_config || docker.DEFAULT_CONFIG;
-
-  // Build the bootscript for the controller
-  const bs = bootscript.newBootscript();
-  const include_install = pparams.bootscripts_include_install === undefined ? true : pparams.bootscripts_include_install;
-  if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, true));
-  }
-
-  bs.include(
-    camus2.configureCamus2({
-      username: app_user,
-      releases: releases_s3,
-      deployContexts: deploy_contexts,
-      proxy: camus2.remoteProxyMaster(proxy_endpoints, state_s3),
-      nginxDockerVersion,
-      healthCheck: pparams.health_check,
-      frontendproxy_nginx_conf_tpl: pparams.frontendproxy_nginx_conf_tpl,
-    })
-  );
-
-  if (cparams.extra_bootscript) {
-    bs.include(cparams.extra_bootscript);
-  }
+  const bsf = new ControllerBootScriptFactory(sr, pparams,cparams.deploy_contexts || [],  endpoints, nginxDockerVersion);
+  const bs = cparams.bootscript
+   ? cparams.bootscript(bsf)
+   : bsf.installAndConfigure();
 
   let controller_iampolicies: policies.NamedPolicy[] = [aws.s3DeployBucketModifyPolicy(sr)];
 
@@ -224,27 +197,10 @@ export function createProcessorAutoScaleGroup(
   const proxy_endpoints = deployToolEndpoints(sr, endpoints);
 
   // Build the bootscript for the instance
-  const bs = bootscript.newBootscript();
-  const include_install = params.bootscripts_include_install === undefined ? true : params.bootscripts_include_install;
-  if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, true));
-  }
-
-  bs.include(
-    camus2.configureCamus2({
-      username: app_user,
-      releases: params.releases_s3,
-      deployContexts: deploy_contexts,
-      proxy: camus2.remoteProxySlave(proxy_endpoints, state_s3),
-      nginxDockerVersion,
-      healthCheck: params.health_check,
-      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
-    })
-  );
-
-  if (params.appserver_extra_bootscript) {
-    bs.include(params.appserver_extra_bootscript);
-  }
+  const bsf = new AsgBootScriptFactory(sr, params, endpoints, nginxDockerVersion);
+  const bs = params.appserver_bootscript
+   ? params.appserver_bootscript(bsf)
+   : bsf.installAndConfigure();
 
   const asgName = tfgen.scopedName(name).join('-');
 
@@ -674,19 +630,10 @@ export interface AutoscaleProcessorParams {
    */
   app_user?: string;
 
-
-
   /**
-   * If true (or not specified), the bootscripts includes ec2InstallScript().
-   * Otherwise it's assumed this software is baked into the AMI
+   * Override the default bootscript
    */
-  bootscripts_include_install?: boolean;
-
-
-  /**
-   * Additional operations for the EC2 instances first boot can be passed vis the operation.
-   */
-  appserver_extra_bootscript?: bootscript.BootScript;
+  appserver_bootscript?(bsf: BootScriptFactory) : bootscript.BootScript,
 
   /**
    * The AWS instance type (ie mem and cores) for the EC2 instance.
@@ -764,9 +711,9 @@ export interface ControllerParams {
   dns_name: string;
 
   /**
-   * Additional operations for the controller first boot can be passed vis the operation.
+   * Override the bootscript for the controller.
    */
-  extra_bootscript?: bootscript.BootScript;
+   bootscript?(bsf: BootScriptFactory) : bootscript.BootScript,
 
   /**
    * Additional controller IAM policies can be specified here.
@@ -888,4 +835,100 @@ interface AutoscalingCronRule {
   desired_capacity?: number;
 }
 
+/// Factory for the components of an ec2 instance bootscript
+export interface BootScriptFactory {
+
+  // Install software including camus2
+  install(): bootscript.BootScript,
+
+  // Configure software including camus2
+  configure(): bootscript.BootScript
+
+  // Install & Configure software including camus2
+  installAndConfigure(): bootscript.BootScript
+}
+
+// Factory to build controller bootscripts
+class ControllerBootScriptFactory implements BootScriptFactory {
+  constructor(
+    readonly sr: shared.SharedResources,
+    readonly params: AutoscaleProcessorParams,
+    readonly deployContexts: camus2.DeployContext[],
+    readonly endpoints: EndPoint[],
+    readonly nginxDockerVersion: string,
+  ) {}
+
+  install(): bootscript.BootScript {
+    const app_user = appUserOrDefault(this.params.app_user);
+    const docker_config = this.params.docker_config || docker.DEFAULT_CONFIG;
+    return ec2InstallScript(app_user, docker_config, true);
+  }
+
+  configure(): bootscript.BootScript {
+    const app_user = appUserOrDefault(this.params.app_user);
+    const releases_s3 = this.params.releases_s3;
+    const state_s3 = this.params.state_s3;
+  
+    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+  
+    return camus2.configureCamus2({
+        username: app_user,
+        releases: releases_s3,
+        deployContexts: this.deployContexts,
+        proxy: camus2.remoteProxyMaster(proxy_endpoints, state_s3),
+        nginxDockerVersion: this.nginxDockerVersion,
+        healthCheck: this.params.health_check,
+        frontendproxy_nginx_conf_tpl: this.params.frontendproxy_nginx_conf_tpl,
+    })
+  }
+
+  installAndConfigure(): bootscript.BootScript {
+    const bs = new bootscript.BootScript()
+    bs.include(this.install())
+    bs.include(this.configure())
+    return bs
+  }
+  
+};
+
+// Factory to build asg instance bootscripts
+class AsgBootScriptFactory implements BootScriptFactory {
+  constructor(
+    readonly sr: shared.SharedResources,
+    readonly params: AutoscaleProcessorParams,
+    readonly endpoints: EndPoint[],
+    readonly nginxDockerVersion: string,
+  ) {}
+
+  install(): bootscript.BootScript {
+    const app_user = appUserOrDefault(this.params.app_user);
+    const docker_config = this.params.docker_config || docker.DEFAULT_CONFIG;
+    return ec2InstallScript(app_user, docker_config, true);
+  }
+
+  configure(): bootscript.BootScript {
+    const app_user = appUserOrDefault(this.params.app_user);
+    const state_s3 = this.params.state_s3;
+    const deploy_contexts: camus2.DeployContext[] =
+      this.params.appserver_deploy_contexts || [];
+    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+  
+    return camus2.configureCamus2({
+        username: app_user,
+        releases: this.params.releases_s3,
+        deployContexts: deploy_contexts,
+        proxy: camus2.remoteProxySlave(proxy_endpoints, state_s3),
+        nginxDockerVersion: this.nginxDockerVersion,
+        healthCheck: this.params.health_check,
+        frontendproxy_nginx_conf_tpl: this.params.frontendproxy_nginx_conf_tpl,
+      })
+  }
+
+  installAndConfigure(): bootscript.BootScript {
+    const bs = new bootscript.BootScript()
+    bs.include(this.install())
+    bs.include(this.configure())
+    return bs
+  }
+};
 

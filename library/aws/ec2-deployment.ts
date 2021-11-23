@@ -34,7 +34,11 @@ export function createEc2Deployment(
   const letsencrypt_challenge_type = params.letsencrypt_challenge_type
     ? params.letsencrypt_challenge_type
     : "http-01";
-  const bs = createBuildScript(sr, params, letsencrypt_challenge_type);
+  const bsf = new Ec2BootscriptFactory(sr, params, letsencrypt_challenge_type);
+  const bs = params.bootscript
+    ? params.bootscript(bsf)
+    : bsf.installAndConfigure();
+
   const instance_profile = createIamInstanceProfile(tfgen, name, sr, params);
   const appserver = aws.createInstanceWithEip(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
@@ -59,7 +63,11 @@ export function createInternalEc2Deployment(
   sr: shared.SharedResources,
   params: Ec2InternalDeploymentParams,
 ): AR.Instance {
-  const bs = createBuildScript(sr, params, "dns-01");
+  const bsf = new Ec2BootscriptFactory(sr, params,  "dns-01");
+  const bs = params.bootscript
+    ? params.bootscript(bsf)
+    : bsf.installAndConfigure();
+
   const instance_profile = createIamInstanceProfile(tfgen, name, sr, params);
   const appserver = aws.createInstance(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
@@ -113,46 +121,6 @@ function addDNS(
       dns_ttl
     );
   }
-}
-
-// Build the bootscript for the instance
-function createBuildScript(
-  dr: shared.DomainResources,
-  params: Ec2InstanceDeploymentParams,
-  letsencrypt_challenge_type: 'http-01' | 'dns-01',
-): bootscript.BootScript {
-  const app_user = params.app_user || 'app';
-  const docker_config = params.docker_config || docker.DEFAULT_CONFIG;
-  const bs = bootscript.newBootscript();
-  const include_install = params.bootscript_include_install === undefined ? true : params.bootscript_include_install;
-  if (include_install) {
-    bs.include(ec2InstallScript(app_user, docker_config, false));
-  }
-  let deploy_contexts: camus2.DeployContext[];
-  if (params.deploy_contexts) {
-    deploy_contexts = params.deploy_contexts;
-  } else {
-    deploy_contexts = [];
-  }
-  const proxy_endpoints = deployToolEndpoints(dr, params.endpoints);
-  const health_check = undefined;
-  bs.include(
-    camus2.configureCamus2({
-      username: app_user,
-      releases: params.releases_s3,
-      deployContexts: deploy_contexts,
-      proxy: camus2.localProxy(proxy_endpoints, letsencrypt_challenge_type),
-      nginxDockerVersion: params.nginxDockerVersion === undefined
-          ? DEFAULT_NGINX_DOCKER_VERSION : params.nginxDockerVersion,
-      healthCheck: health_check,
-      frontendproxy_nginx_conf_tpl: params.frontendproxy_nginx_conf_tpl,
-      ssl_cert_email: params.ssl_cert_email,
-    })
-  );
-  if (params.extra_bootscript) {
-    bs.include(params.extra_bootscript);
-  }
-  return bs;
 }
 
 function createIamInstanceProfile(
@@ -299,11 +267,8 @@ export interface Ec2InstanceDeploymentParams {
   // The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
   // into the deployed application configuration.
   deploy_contexts?: { name: string; source: C.JsonSource }[];
-  // If true (or not specified), the bootscript includes ec2InstallScript().
-  // Otherwise it's assumed this software is baked into the AMI
-  bootscript_include_install?: boolean;
-  // Additional operations for the EC2 instances first boot can be passed vis the operation.
-  extra_bootscript?: bootscript.BootScript;
+  // Override the default script for the first boot of a machine
+  bootscript?(bsf: BootScriptFactory) : bootscript.BootScript,
   // Override the default docker config.
   docker_config?: docker.DockerConfig;
   // Specify the DNS ttl value.
@@ -392,6 +357,7 @@ export interface Ec2Deployment {
   ec2: AR.Instance;
 }
 
+/** Bootscript to install camus2 dependencies on an ec2 instance */
 export function ec2InstallScript(
   app_user: string,
   docker_config: docker.DockerConfig,
@@ -412,3 +378,68 @@ export function ec2InstallScript(
   install.include(camus2.installCamus2(app_user));
   return install;
 }
+
+
+/// Factory for the components of an ec2 instance bootscript
+export interface BootScriptFactory {
+
+  // Install software including camus2
+  install(): bootscript.BootScript,
+
+  // Configure software including camus2
+  configure(): bootscript.BootScript
+
+  // Install & Configure software including camus2
+  installAndConfigure(): bootscript.BootScript
+}
+
+// Factory to build ec2 bootscripts
+class Ec2BootscriptFactory implements BootScriptFactory {
+  constructor(
+    readonly dr: shared.DomainResources,
+    readonly params: Ec2InstanceDeploymentParams,
+    readonly letsencrypt_challenge_type: 'http-01' | 'dns-01',
+  ) {}
+
+  install(): bootscript.BootScript {
+    const app_user = this.params.app_user || 'app';
+    const docker_config = this.params.docker_config || docker.DEFAULT_CONFIG;
+    return ec2InstallScript(app_user, docker_config, true);
+  }
+
+  configure(): bootscript.BootScript {
+    const app_user = this.params.app_user || 'app';
+    const bs = bootscript.newBootscript();
+  
+    let deploy_contexts: camus2.DeployContext[];
+    if (this.params.deploy_contexts) {
+      deploy_contexts = this.params.deploy_contexts;
+    } else {
+      deploy_contexts = [];
+    }
+    const proxy_endpoints = deployToolEndpoints(this.dr, this.params.endpoints);
+    const health_check = undefined;
+    bs.include(
+      camus2.configureCamus2({
+        username: app_user,
+        releases: this.params.releases_s3,
+        deployContexts: deploy_contexts,
+        proxy: camus2.localProxy(proxy_endpoints, this.letsencrypt_challenge_type),
+        nginxDockerVersion: this.params.nginxDockerVersion === undefined
+            ? DEFAULT_NGINX_DOCKER_VERSION : this.params.nginxDockerVersion,
+        healthCheck: health_check,
+        frontendproxy_nginx_conf_tpl: this.params.frontendproxy_nginx_conf_tpl,
+        ssl_cert_email: this.params.ssl_cert_email,
+      })
+    );
+    return bs;
+  }
+
+  installAndConfigure(): bootscript.BootScript {
+    const bs = new bootscript.BootScript()
+    bs.include(this.install())
+    bs.include(this.configure())
+    return bs
+  }
+  
+};

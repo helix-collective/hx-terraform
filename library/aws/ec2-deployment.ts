@@ -404,7 +404,7 @@ class Ec2BootscriptFactory implements BootScriptFactory {
   install(): bootscript.BootScript {
     const app_user = this.params.app_user || 'app';
     const docker_config = this.params.docker_config || docker.DEFAULT_CONFIG;
-    return ec2InstallScript(app_user, docker_config, true);
+    return ec2InstallScript(app_user, docker_config, false);
   }
 
   configure(): bootscript.BootScript {

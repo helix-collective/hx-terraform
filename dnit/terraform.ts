@@ -26,7 +26,7 @@ export interface TerraformDeps extends GroupsTasksObject {
   hxTerraform: HxTerraformTasks
 };
 
-export async function makeTerraformTasks(deps: TerraformDeps) : Promise<TerraformTasks> {
+export async function makeTerraformTasks(deps: TerraformDeps, ageThresholdMs: number) : Promise<TerraformTasks> {
   const terraformInit = task({
     name: 'init',
     description:
@@ -74,9 +74,6 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
         if (!(await generatedTerraformPlan.exists())) {
           throw new Error("No plan file found - Run 'dnit plan' first.");
         }
-
-        // Ensure the plan is not too old - couple of minutes
-        const ageThresholdMs = 5 * 60 * 1000;
 
         const planAgeMs = await fileAgeMs(generatedTerraformPlan.path);
         if (planAgeMs > ageThresholdMs) {

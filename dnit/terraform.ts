@@ -75,8 +75,8 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
           throw new Error("No plan file found - Run 'dnit plan' first.");
         }
 
-        // Ensure the plan is not too old - couple of minutes
-        const ageThresholdMs = 5 * 60 * 1000;
+        // Ensure the plan is not too old - 20 minutes should be reasonably enough
+        const ageThresholdMs = 20 * 60 * 1000;
 
         const planAgeMs = await fileAgeMs(generatedTerraformPlan.path);
         if (planAgeMs > ageThresholdMs) {

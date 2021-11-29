@@ -12,7 +12,7 @@ import { Manifest } from "./manifest.ts";
  */
 export interface Generator {
   /** Construct a terraform provider */
-  createProvider(type: string, fields: ProviderFieldMap): Provider;
+  createProvider(type: string, fields: hcl2.BodyItem[]): Provider;
 
   /** Construct a terraform resource */
   createResource(
@@ -49,7 +49,7 @@ export interface Generator {
   createAdhocFile(path: string, content: string): void;
 
   /** Construct a terraform output */
-  createOutput(name: string, value: ResourceValue): void;
+  createOutput(name: string, value: hcl2.Expression): void;
 
   /** Mark a field of a resource to indicate that changes to that field should not
    cause the resource to be updated */
@@ -104,103 +104,129 @@ export type StringAlias<T> = {
   value: string;
 };
 
-export type ResourceValue = RFText | RFList | RFMap;
-export type RFText = { kind: 'text'; text: string };
-export type RFList = { kind: 'list'; values: ResourceValue[] };
-export type RFMap = { kind: 'map'; map: ResourceFieldMap };
+export type ResourceFieldMap = hcl2.BodyItem[];
 
-// we can't use a regular object map here, as repeated keys are allowed
-export type ResourceField = { key: string; value: ResourceValue };
-export type ResourceFieldMap = ResourceField[];
-
-export type ProviderType = string;
-export type Provider = { tftype: ProviderType };
-export type ProviderFieldMap = ResourceFieldMap;
-export type ProviderDetails = Provider & {
-  fields: ProviderFieldMap;
-};
+export type Provider = hcl2.Block;
 
 export type TagsMap = { [key: string]: string };
 
-export function booleanValue(value: boolean): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value) };
+export function booleanValue(value: boolean): hcl2.Expression {
+  return hcl2.booleanLit(value);
 }
 
-export function stringValue(value: string): ResourceValue {
-  return { kind: 'text', text: quotedText(value) };
+export function stringValue(value: string): hcl2.Expression {
+  return hcl2ExprFromString(value);
 }
 
-// We use that function and QUOTED_STRING type when we need to preserve
-// quoting semantics instead of heredocs for strings need quoting.
-export function quotedStringValue(value: string): ResourceValue {
-  return { kind: 'text', text: quotedTextNoEof(value) };
+export function numberStringValue(value: number): hcl2.Expression {
+  return  hcl2.stringLit(JSON.stringify(value));
 }
 
-export function numberStringValue(value: number): ResourceValue {
-  return { kind: 'text', text: `"${value}"` };
+export function stringAliasValue(value: { value: string }): hcl2.Expression {
+  return hcl2ExprFromString(value.value);
 }
 
-export function stringAliasValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
+export function numberValue(value: number): hcl2.Expression {
+  return hcl2.numericLit(value);
 }
 
-export function numberValue(value: number): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value) };
+export function resourceIdValue(value: { value: string }): hcl2.Expression {
+  return hcl2ExprFromString(value.value);
 }
 
-export function resourceIdValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
-}
-
-export function resourceArnValue(value: { value: string }): ResourceValue {
-  return { kind: 'text', text: JSON.stringify(value.value) };
+export function resourceArnValue(value: { value: string }): hcl2.Expression {
+  return hcl2ExprFromString(value.value);
 }
 
 export function listValue<T>(
-  conv: (t: T) => ResourceValue
-): (values: T[]) => ResourceValue {
-  function convList(values: T[]): ResourceValue {
-    return { kind: 'list', values: values.map(conv) };
+  conv: (t: T) =>  hcl2.Expression
+): (values: T[]) =>  hcl2.Expression {
+  function convList(values: T[]):  hcl2.Expression {
+    return hcl2.tupleExpr(values.map(conv));
   }
   return convList;
 }
 
-export function tagsValue(tags: TagsMap): ResourceValue {
-  const map: ResourceFieldMap = [];
-  for (const key in tags) {
-    const value: ResourceValue = stringValue(tags[key]);
-    map.push({ key, value });
+export function repeatedBlockValue<T>(
+  conv: (t: T) =>  hcl2.Expression
+): (values: T[]) =>  hcl2.Expression {
+  function convList(values: T[]):  hcl2.Expression {
+    return hcl2.tupleExpr(values.map(conv));
   }
-  return mapValue(map);
+  return convList;
 }
 
-export function mapValue(map: ResourceFieldMap): ResourceValue {
-  return { map, kind: 'map' };
+export function tagsValue(tags: TagsMap): hcl2.Expression {
+  const map: {key: string, value: hcl2.ExprTerm}[] = [];
+  for (const key in tags) {
+    map.push({ key, value: hcl2.stringLit(tags[key])});
+  }
+  return hcl2.objectExpr(map);
 }
 
-export function addField<T>(
+
+export function addAttribute<T>(
   fields: ResourceFieldMap,
   key: string,
   value: T,
-  valuefn: (t: T) => ResourceValue
+  valuefn: (t: T) => hcl2.Expression
 ) {
-  fields.push({ key, value: valuefn(value) });
+  fields.push(hcl2.attribute(key, valuefn(value)));
 }
 
-export function addOptionalField<T>(
+export function addOptionalAttribute<T>(
   fields: ResourceFieldMap,
   key: string,
   value: T | undefined,
-  valuefn: (t: T) => ResourceValue
+  valuefn: (t: T) => hcl2.Expression
 ) {
   if (value !== undefined) {
-    fields.push({ key, value: valuefn(value) });
+    addAttribute(fields, key, value, valuefn);
+  }
+}
+
+export function addBlock<T>(
+  fields: ResourceFieldMap,
+  key: string,
+  value: T,
+  valuefn: (t: T) => hcl2.BodyItem[]
+) {
+  fields.push(hcl2.block(key, [], valuefn(value)));
+}
+
+export function addOptionalBlock<T>(
+  fields: ResourceFieldMap,
+  key: string,
+  value: T | undefined,
+  valuefn: (t: T) => hcl2.BodyItem[]
+) {
+  if (value !== undefined) {
+    addBlock(fields, key, value, valuefn);
+  }
+}
+
+export function addRepeatedBlock<T>(
+  fields: ResourceFieldMap,
+  key: string,
+  value: T[] | undefined,
+  valuefn: (t: T) => hcl2.BodyItem[]
+) {
+  if (value === undefined) {
+    return;
+  }
+  for (const v of value) {
+    addBlock(fields, key, v, valuefn);
   }
 }
 
 export function resourceName<T>(r: Resource): string {
   return r.tftype + '.' + r.tfname.join('_');
 }
+
+export function resourceAttribute(r: Resource, attr: string): string {
+  return  '${' + resourceName(r) + "." + attr + "}";
+}
+
 
 export function dataSourceName<T>(d: DataSource): string {
   return "data." + d.tftype + '.' + d.tfname.join('_');
@@ -228,6 +254,7 @@ export function withProviderAlias<T>(
 }
 
 export function fileGenerator(): FileGenerator {
+
   interface ResourceDetails extends Resource {
     fields: ResourceFieldMap;
     ignoreChanges: string[];
@@ -246,11 +273,11 @@ export function fileGenerator(): FileGenerator {
 
   interface OutputDetails {
     tfname: ResourceName;
-    value: ResourceValue;
+    value: hcl2.Expression;
   }
 
   interface Generated {
-    providers: ProviderDetails[];
+    providers: hcl2.Block[];
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
     adhocFiles: { [path: string]: string };
@@ -269,17 +296,11 @@ export function fileGenerator(): FileGenerator {
     providerAliases0: ProviderAliasMap
   ): Generator {
     function createProvider(
-      tftype: string,
-      fields: ProviderFieldMap
+      identifier: string,
+      fields: hcl2.BodyItem[]
     ): Provider {
-      const provider: Provider = {
-        tftype,
-      };
-      const providerDetails: ProviderDetails = {
-        ...provider,
-        fields,
-      };
-      addProviderDetails(generated, providerDetails);
+      const provider =  hcl2.block("provider", [hcl2.stringLit(identifier)], fields);
+      addProviderDetails(generated, provider);
       return provider;
     }
 
@@ -376,7 +397,7 @@ export function fileGenerator(): FileGenerator {
       return { tftype, tfname };
     }
 
-    function createOutput(name: string, value: ResourceValue) : void {
+    function createOutput(name: string, value: hcl2.Expression) : void {
       const tfname = nameContext0.concat(name);
       addOutput(generated, tfname, value);
     }
@@ -475,8 +496,9 @@ export function fileGenerator(): FileGenerator {
     return 'root.tf';
   }
 
-  function providerFile(tftype: ProviderType): string {
-    return `${tftype}.tf`;
+
+  function providerFile(identifier: string): string {
+    return `${identifier}.tf`;
   }
 
   function emptyGenerated(): Generated {
@@ -491,7 +513,7 @@ export function fileGenerator(): FileGenerator {
     };
   }
 
-  function addProviderDetails(generated: Generated, provider: ProviderDetails) {
+  function addProviderDetails(generated: Generated, provider: hcl2.Block) {
     generated.providers.push(provider);
   }
 
@@ -510,7 +532,7 @@ export function fileGenerator(): FileGenerator {
   function addOutput(
     generated: Generated,
     tfname: ResourceName,
-    value: ResourceValue
+    value: hcl2.Expression,
   ) {
     generated.outputs.push({ tfname, value });
   }
@@ -530,7 +552,7 @@ export function fileGenerator(): FileGenerator {
       if (result[file] === undefined) {
         result[file] = emptyGenerated();
       }
-      addOutput(result[file], output.tfname, output.value);
+      result[file].outputs.push(output);
     }
     for (const datasrc of generated.datasources) {
       const file = resourceFile(datasrc.tfname);
@@ -545,7 +567,7 @@ export function fileGenerator(): FileGenerator {
     const result: { [file: string]: Generated } = {};
 
     for (const provider of generated.providers) {
-      const file = providerFile(provider.tftype);
+      const file = providerFile(provider.labels[0].value);
       if (result[file] === undefined) {
         result[file] = emptyGenerated();
       }
@@ -560,181 +582,74 @@ export function fileGenerator(): FileGenerator {
     return [indent + prefix + text];
   }
 
-  function renderResourceValue(indent: string, prefix: string, value: ResourceValue) {
-    const field = {value};
-
-    let result : string[] = [];
-    switch (field.value.kind) {
-      case 'text':
-        result = result.concat(
-          textLines(indent + INDENT, prefix + ' = ', field.value.text)
-        );
-        break;
-      case 'map':
-        result = result.concat(
-          mapLines(indent + INDENT, prefix, field.value.map)
-        );
-        break;
-      case 'list':
-        // The HCL syntax sucks. If it's a list of maps, we repeat the key section.
-        // whereas for primitive we generate a json style list.
-        if (field.value.values.length > 0) {
-          const value0 = field.value.values[0];
-          switch (value0.kind) {
-            case 'map':
-              for (const value of field.value.values) {
-                if (value.kind === 'map') {
-                  result = result.concat(
-                    mapLines(indent + INDENT, prefix + ' = ', value.map)
-                  );
-                }
-              }
-              break;
-            case 'text':
-              const items: string[] = [];
-              for (const value of field.value.values) {
-                if (value.kind === 'text') {
-                  items.push(value.text);
-                }
-              }
-              result = result.concat(
-                textLines(
-                  indent + INDENT,
-                  prefix + ' = ',
-                  '[' + items.join(', ') + ']'
-                )
-              );
-              break;
-            case 'list':
-              throw new Error('list of lists not implemented');
-          }
-        } else {
-          throw new Error('empty lists not implemented');
-        }
-        break;
+  function textValue(t: string):  hcl2.ExprTerm {
+    const imatch =  t.match(/^"\${([0-9A-Za-z._]+)}\"$/);
+    if (imatch != null) {
+      return hcl2.getVariable(imatch[1]);
+    } else if (t.startsWith('"') && t.endsWith('"')) {
+      return hcl2.stringLit(t.substr(1, t.length-2));
+    } else {
+      return hcl2.stringLit(t);
     }
-    return result;
   }
 
-  function mapLines(
-    indent: string,
-    prefix0: string,
-    fields: ResourceFieldMap,
-    closingBrace: boolean = true
-  ): string[] {
-    let result = [indent + prefix0 + ' {'];
-    for (const field of fields) {
-      // Quote the field key if required
-      const fieldkey = field.key.match(/\//) ? `"${field.key}"` : field.key;
 
-      const prefix = indent + fieldkey;
-      result = result.concat(renderResourceValue(indent, prefix, field.value));
+  function generateMetadata(resource: ResourceDetails): hcl2.BodyItem[] {
+    const items: hcl2.BodyItem[] = [];
+
+    {
+    const lifecycle_items: hcl2.BodyItem[] = [];
+    if (resource.ignoreChanges.length > 0) {
+        lifecycle_items.push(hcl2.attribute('ignore_changes', hcl2.tupleExpr(resource.ignoreChanges.map(s => hcl2.getVariable(s)))));
+      }
+      if (resource.createBeforeDestroy) {
+        lifecycle_items.push(hcl2.attribute('create_before_destroy', hcl2.booleanLit(resource.createBeforeDestroy)));
+      }
+      if (lifecycle_items.length > 0) {
+        items.push(hcl2.block("lifecycle", [], lifecycle_items));
+      }
     }
-    if (closingBrace) {
-      result.push(indent + '}');
+
+    if (resource.dependsOn.length > 0) {
+      items.push(hcl2.attribute("depends_on", hcl2.tupleExpr(resource.dependsOn.map(
+        r => hcl2.getVariable(`${r.tftype}.${r.tfname.join('_')}`)
+      ))));
     }
-    return result;
+
+    for (const p of resource.provisioners) {
+      items.push(hcl2.block("provisioner", [hcl2.stringLit("local-exec")], [
+        hcl2.attribute("command", hcl2.heredocTemplate('EOF',p.script)),
+      ]));
+    }
+
+    return items;
   }
 
   function generateFile(generated: Generated) : string {
-    const indent = '';
-    let lines: string[] = [];
-    for (const provider of generated.providers) {
-      const prefix = `provider "${provider.tftype}"`;
-      const fields = provider.fields.concat([]);
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
-      lines.push('}');
-      lines.push('');
+    const config : hcl2.ConfigFile = [];
+
+    for (const p of generated.providers) {
+      config.push(p);
     }
-    for (const resource of generated.resources) {
-      const prefix =
-        'resource "' +
-        resource.tftype +
-        '" "' +
-        resource.tfname.join('_') +
-        '"';
-      const fields = resource.fields.concat([]);
-      if (resource.dependsOn.length > 0) {
-        const dependsOn = resource.dependsOn.map(r => {
-          return `"${r.tftype}.${r.tfname.join('_')}"`;
-        });
-        fields.push({
-          key: 'depends_on',
-          value: { kind: 'text', text: `[${dependsOn.join(', ')}]` },
-        });
-      }
-      if (resource.provider !== '') {
-        fields.push({
-          key: 'provider',
-          value: { kind: 'text', text: `"${resource.provider}"` },
-        });
-      }
-      if (resource.ignoreChanges.length > 0 || resource.createBeforeDestroy) {
-        const lifecycleFieldMap: ResourceField[] = [];
-        if (resource.ignoreChanges.length > 0) {
-          const ignoreChanges = resource.ignoreChanges.map(f => '"' + f + '"');
-          lifecycleFieldMap.push({
-            key: 'ignore_changes',
-            value: { kind: 'text', text: `[${ignoreChanges.join(', ')}]` },
-          });
-        }
-        if (resource.createBeforeDestroy) {
-          lifecycleFieldMap.push({
-            key: 'create_before_destroy',
-            value: { kind: 'text', text: 'true' },
-          });
-        }
-        const lifecycleField: ResourceField = {
-          key: 'lifecycle',
-          value: {
-            kind: 'map',
-            map: lifecycleFieldMap,
-          },
-        };
-        fields.push(lifecycleField);
-      }
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
-      for (const provisioner of resource.provisioners) {
-        if (provisioner.kind === 'local-exec') {
-          lines.push('  provisioner "local-exec" {');
-          lines.push('    command = <<EOF');
-          lines.push(provisioner.script);
-          lines.push('EOF');
-          lines.push('  }');
-        }
-      }
-      lines.push('}');
-      lines.push('');
+
+    for (const r of generated.resources) {
+      const metadata = generateMetadata(r);
+      config.push(hcl2.block(
+        "resource", 
+        [hcl2.stringLit(r.tftype), hcl2.stringLit(r.tfname.join("_"))],
+        [...r.fields, ...metadata]
+      ));
     }
-    for (const datasrc of generated.datasources) {
-      const prefix =
-        'data "' + datasrc.tftype + '" "' + datasrc.tfname.join('_') + '"';
-      const fields = datasrc.fields.concat([]);
-      // https://www.terraform.io/docs/configuration/data-sources.html#non-default-provider-configurations
-      if (datasrc.provider !== '') {
-        fields.push({
-          key: 'provider',
-          value: { kind: 'text', text: `"${datasrc.provider}"` },
-        });
-      }
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
-      lines.push('}');
-      lines.push('');
+
+    for (const o of generated.outputs) {
+      config.push(hcl2.block("output", [hcl2.stringLit(o.tfname.join("_"))], [
+        hcl2.attribute("value", o.value)
+      ]));
+
     }
-    for (const output of generated.outputs) {
-      const fields : ResourceFieldMap = [
-        {
-          key: 'value',
-          value: output.value
-        }
-      ];
-      const prefix = `output "${output.tfname.join('_')}"`;
-      lines = lines.concat(mapLines(indent, prefix, fields, false));
-      lines.push('}');
-      lines.push('');
-    }
-    return lines.join('\n');
+    return hcl2.generate(config);
   }
+
 
   function writeFiles(outdir: string) {
     // write files including manifest & hash
@@ -776,11 +691,27 @@ export function fileGenerator(): FileGenerator {
   };
 }
 
-
-
-
-
+const VAR_REGEX = /\${([a-zA-Z0-9_.]+)}$/;
 const RAW_EXPR_PREFIX = 'TFRAWEXPR:';
+
+
+export function hcl2ExprFromString(value:string): hcl2.Expression {
+  const varmatch = value.match(VAR_REGEX);
+  if (varmatch) {
+    return hcl2.getVariable(varmatch[1]);
+  }
+  if (value.startsWith(RAW_EXPR_PREFIX)) {
+    return hcl2.getVariable(value.substr(RAW_EXPR_PREFIX.length));
+  }
+  const needsQuoting = value.includes('\n') || value.includes('"');
+  if (needsQuoting) {
+    const eof = getUniqueEof(value);
+    return hcl2.heredocTemplate(eof,value);
+  } else {
+    return hcl2.stringLit(value);
+  }
+}
+
 
 /**
  * Create a raw string that will be passed to terraform as is.
@@ -790,34 +721,6 @@ const RAW_EXPR_PREFIX = 'TFRAWEXPR:';
  */
 export function rawExpr(s: string): string {
   return RAW_EXPR_PREFIX + s;
-}
-
-function quotedText(s: string) {
-  if (s.startsWith(RAW_EXPR_PREFIX)) {
-    return s.slice(RAW_EXPR_PREFIX.length);
-  }
-
-  const needsQuoting = s.includes('\n') || s.includes('"');
-
-  if (needsQuoting) {
-    const eof = getUniqueEof(s);
-    const trailing = s.endsWith('\n') ? '' : '\n';
-    return `<<${eof}\n${s}${trailing}${eof}\n`;
-  }
-  return JSON.stringify(s);
-}
-
-function quotedTextNoEof(s: string) {
-  if (s.startsWith(RAW_EXPR_PREFIX)) {
-    return s.slice(RAW_EXPR_PREFIX.length);
-  }
-
-  const needsQuoting = s.includes('"');
-
-  if (needsQuoting) {
-    s = s.replace(/"/g, "\"");
-  }
-  return JSON.stringify(s);
 }
 
 function getUniqueEof(s: string): string {

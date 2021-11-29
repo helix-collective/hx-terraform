@@ -11,7 +11,7 @@ import * as TF from "../../core/core.ts";
 export function createCustomerGateway(tfgen: TF.Generator, rname: string, params: CustomerGatewayParams): CustomerGateway {
   const fields = fieldsFromCustomerGatewayParams(params);
   const resource = tfgen.createTypedResource('CustomerGateway', 'aws_customer_gateway', rname, fields);
-  const id: CustomerGatewayId =  {type: 'CustomerGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: CustomerGatewayId =  {type: 'CustomerGatewayId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -33,7 +33,7 @@ export type CustomerGatewayId = {type:'CustomerGatewayId',value:string};
 export function createVpnGateway(tfgen: TF.Generator, rname: string, params: VpnGatewayParams): VpnGateway {
   const fields = fieldsFromVpnGatewayParams(params);
   const resource = tfgen.createTypedResource('VpnGateway', 'aws_vpn_gateway', rname, fields);
-  const id: VpnGatewayId =  {type: 'VpnGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: VpnGatewayId =  {type: 'VpnGatewayId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -55,7 +55,7 @@ export type VpnGatewayId = {type:'VpnGatewayId',value:string};
 export function createVpnGatewayAttachment(tfgen: TF.Generator, rname: string, params: VpnGatewayAttachmentParams): VpnGatewayAttachment {
   const fields = fieldsFromVpnGatewayAttachmentParams(params);
   const resource = tfgen.createTypedResource('VpnGatewayAttachment', 'aws_vpn_gateway_attachment', rname, fields);
-  const id: VpnGatewayAttachmentId =  {type: 'VpnGatewayAttachmentId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: VpnGatewayAttachmentId =  {type: 'VpnGatewayAttachmentId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -77,8 +77,8 @@ export type VpnGatewayAttachmentId = {type:'VpnGatewayAttachmentId',value:string
 export function createVpnConnection(tfgen: TF.Generator, rname: string, params: VpnConnectionParams): VpnConnection {
   const fields = fieldsFromVpnConnectionParams(params);
   const resource = tfgen.createTypedResource('VpnConnection', 'aws_vpn_connection', rname, fields);
-  const id: VpnConnectionId =  {type: 'VpnConnectionId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: VpnConnectionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VpnConnection');
+  const id: VpnConnectionId =  {type: 'VpnConnectionId', value: TF.resourceAttribute(resource, "id")};
+  const arn: VpnConnectionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'VpnConnection');
 
   return {
     ...resource,
@@ -141,9 +141,9 @@ export type AutoscalingAttachmentId = {type:'AutoscalingAttachmentId',value:stri
 export function createAutoscalingGroup(tfgen: TF.Generator, rname: string, params: AutoscalingGroupParams): AutoscalingGroup {
   const fields = fieldsFromAutoscalingGroupParams(params);
   const resource = tfgen.createTypedResource('AutoscalingGroup', 'aws_autoscaling_group', rname, fields);
-  const id: AutoscalingGroupId =  {type: 'AutoscalingGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: AutoscalingGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingGroup');
+  const id: AutoscalingGroupId =  {type: 'AutoscalingGroupId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const arn: AutoscalingGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'AutoscalingGroup');
 
   return {
     ...resource,
@@ -170,7 +170,7 @@ export type AutoscalingGroupArn = AT.ArnT<"AutoscalingGroup">;
 export function createAutoscalingSchedule(tfgen: TF.Generator, rname: string, params: AutoscalingScheduleParams): AutoscalingSchedule {
   const fields = fieldsFromAutoscalingScheduleParams(params);
   const resource = tfgen.createTypedResource('AutoscalingSchedule', 'aws_autoscaling_schedule', rname, fields);
-  const arn: AutoscalingScheduleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingSchedule');
+  const arn: AutoscalingScheduleArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'AutoscalingSchedule');
 
   return {
     ...resource,
@@ -193,13 +193,13 @@ export type AutoscalingScheduleArn = AT.ArnT<"AutoscalingSchedule">;
 export function createInstance(tfgen: TF.Generator, rname: string, params: InstanceParams): Instance {
   const fields = fieldsFromInstanceParams(params);
   const resource = tfgen.createTypedResource('Instance', 'aws_instance', rname, fields);
-  const id: InstanceId =  {type: 'InstanceId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: '${' + TF.resourceName(resource) + '.availability_zone}'};
-  const public_dns: string =  '${' + TF.resourceName(resource) + '.public_dns}';
-  const public_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.public_ip}'};
-  const private_dns: string =  '${' + TF.resourceName(resource) + '.private_dns}';
-  const private_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.private_ip}'};
-  const arn: InstanceArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Instance');
+  const id: InstanceId =  {type: 'InstanceId', value: TF.resourceAttribute(resource, "id")};
+  const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: TF.resourceAttribute(resource, "availability_zone")};
+  const public_dns: string =  TF.resourceAttribute(resource, "public_dns");
+  const public_ip: AT.IpAddress =  {type: 'IpAddress', value: TF.resourceAttribute(resource, "public_ip")};
+  const private_dns: string =  TF.resourceAttribute(resource, "private_dns");
+  const private_ip: AT.IpAddress =  {type: 'IpAddress', value: TF.resourceAttribute(resource, "private_ip")};
+  const arn: InstanceArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'Instance');
 
   return {
     ...resource,
@@ -234,8 +234,8 @@ export type InstanceArn = AT.ArnT<"Instance">;
 export function createEbsVolume(tfgen: TF.Generator, rname: string, params: EbsVolumeParams): EbsVolume {
   const fields = fieldsFromEbsVolumeParams(params);
   const resource = tfgen.createTypedResource('EbsVolume', 'aws_ebs_volume', rname, fields);
-  const id: EbsVolumeId =  {type: 'EbsVolumeId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: EbsVolumeArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EbsVolume');
+  const id: EbsVolumeId =  {type: 'EbsVolumeId', value: TF.resourceAttribute(resource, "id")};
+  const arn: EbsVolumeArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EbsVolume');
 
   return {
     ...resource,
@@ -260,10 +260,10 @@ export type EbsVolumeArn = AT.ArnT<"EbsVolume">;
 export function createVolumeAttachment(tfgen: TF.Generator, rname: string, params: VolumeAttachmentParams): VolumeAttachment {
   const fields = fieldsFromVolumeAttachmentParams(params);
   const resource = tfgen.createTypedResource('VolumeAttachment', 'aws_volume_attachment', rname, fields);
-  const device_name: string =  '${' + TF.resourceName(resource) + '.device_name}';
-  const instance_id: InstanceId =  {type: 'InstanceId', value: '${' + TF.resourceName(resource) + '.instance_id}'};
-  const volume_id: VolumeAttachmentId =  {type: 'VolumeAttachmentId', value: '${' + TF.resourceName(resource) + '.volume_id}'};
-  const arn: VolumeAttachmentArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VolumeAttachment');
+  const device_name: string =  TF.resourceAttribute(resource, "device_name");
+  const instance_id: InstanceId =  {type: 'InstanceId', value: TF.resourceAttribute(resource, "instance_id")};
+  const volume_id: VolumeAttachmentId =  {type: 'VolumeAttachmentId', value: TF.resourceAttribute(resource, "volume_id")};
+  const arn: VolumeAttachmentArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'VolumeAttachment');
 
   return {
     ...resource,
@@ -292,13 +292,13 @@ export type VolumeAttachmentArn = AT.ArnT<"VolumeAttachment">;
 export function createDbInstance(tfgen: TF.Generator, rname: string, params: DbInstanceParams): DbInstance {
   const fields = fieldsFromDbInstanceParams(params);
   const resource = tfgen.createTypedResource('DbInstance', 'aws_db_instance', rname, fields);
-  const id: DbInstanceId =  {type: 'DbInstanceId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const username: string =  '${' + TF.resourceName(resource) + '.username}';
-  const address: string =  '${' + TF.resourceName(resource) + '.address}';
-  const port: string =  '${' + TF.resourceName(resource) + '.port}';
-  const engine_version: string =  '${' + TF.resourceName(resource) + '.engine_version}';
-  const arn: DbInstanceArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbInstance');
+  const id: DbInstanceId =  {type: 'DbInstanceId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const username: string =  TF.resourceAttribute(resource, "username");
+  const address: string =  TF.resourceAttribute(resource, "address");
+  const port: string =  TF.resourceAttribute(resource, "port");
+  const engine_version: string =  TF.resourceAttribute(resource, "engine_version");
+  const arn: DbInstanceArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'DbInstance');
 
   return {
     ...resource,
@@ -333,8 +333,8 @@ export type DbInstanceArn = AT.ArnT<"DbInstance">;
 export function createDbParameterGroup(tfgen: TF.Generator, rname: string, params: DbParameterGroupParams): DbParameterGroup {
   const fields = fieldsFromDbParameterGroupParams(params);
   const resource = tfgen.createTypedResource('DbParameterGroup', 'aws_db_parameter_group', rname, fields);
-  const id: DbParameterGroupId =  {type: 'DbParameterGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: DbParameterGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbParameterGroup');
+  const id: DbParameterGroupId =  {type: 'DbParameterGroupId', value: TF.resourceAttribute(resource, "id")};
+  const arn: DbParameterGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'DbParameterGroup');
 
   return {
     ...resource,
@@ -359,9 +359,9 @@ export type DbParameterGroupArn = AT.ArnT<"DbParameterGroup">;
 export function createEip(tfgen: TF.Generator, rname: string, params: EipParams): Eip {
   const fields = fieldsFromEipParams(params);
   const resource = tfgen.createTypedResource('Eip', 'aws_eip', rname, fields);
-  const id: EipId =  {type: 'EipId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const public_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.public_ip}'};
-  const private_ip: AT.IpAddress =  {type: 'IpAddress', value: '${' + TF.resourceName(resource) + '.private_ip}'};
+  const id: EipId =  {type: 'EipId', value: TF.resourceAttribute(resource, "id")};
+  const public_ip: AT.IpAddress =  {type: 'IpAddress', value: TF.resourceAttribute(resource, "public_ip")};
+  const private_ip: AT.IpAddress =  {type: 'IpAddress', value: TF.resourceAttribute(resource, "private_ip")};
 
   return {
     ...resource,
@@ -387,8 +387,8 @@ export type EipId = {type:'EipId',value:string};
 export function createVpc(tfgen: TF.Generator, rname: string, params: VpcParams): Vpc {
   const fields = fieldsFromVpcParams(params);
   const resource = tfgen.createTypedResource('Vpc', 'aws_vpc', rname, fields);
-  const id: VpcId =  {type: 'VpcId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: '${' + TF.resourceName(resource) + '.default_route_table_id}'};
+  const id: VpcId =  {type: 'VpcId', value: TF.resourceAttribute(resource, "id")};
+  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: TF.resourceAttribute(resource, "default_route_table_id")};
 
   return {
     ...resource,
@@ -412,8 +412,8 @@ export type VpcId = {type:'VpcId',value:string};
 export function createDefaultVpc(tfgen: TF.Generator, rname: string, params: DefaultVpcParams): DefaultVpc {
   const fields = fieldsFromDefaultVpcParams(params);
   const resource = tfgen.createTypedResource('DefaultVpc', 'aws_default_vpc', rname, fields);
-  const id: VpcId =  {type: 'VpcId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: '${' + TF.resourceName(resource) + '.default_route_table_id}'};
+  const id: VpcId =  {type: 'VpcId', value: TF.resourceAttribute(resource, "id")};
+  const default_route_table_id: RouteTableId =  {type: 'RouteTableId', value: TF.resourceAttribute(resource, "default_route_table_id")};
 
   return {
     ...resource,
@@ -437,7 +437,7 @@ export type DefaultVpcId = {type:'DefaultVpcId',value:string};
 export function createSubnet(tfgen: TF.Generator, rname: string, params: SubnetParams): Subnet {
   const fields = fieldsFromSubnetParams(params);
   const resource = tfgen.createTypedResource('Subnet', 'aws_subnet', rname, fields);
-  const id: SubnetId =  {type: 'SubnetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: SubnetId =  {type: 'SubnetId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -459,8 +459,8 @@ export type SubnetId = {type:'SubnetId',value:string};
 export function createDefaultSubnet(tfgen: TF.Generator, rname: string, params: DefaultSubnetParams): DefaultSubnet {
   const fields = fieldsFromDefaultSubnetParams(params);
   const resource = tfgen.createTypedResource('DefaultSubnet', 'aws_default_subnet', rname, fields);
-  const id: SubnetId =  {type: 'SubnetId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: '${' + TF.resourceName(resource) + '.availability_zone}'};
+  const id: SubnetId =  {type: 'SubnetId', value: TF.resourceAttribute(resource, "id")};
+  const availability_zone: AT.AvailabilityZone =  {type: 'AvailabilityZone', value: TF.resourceAttribute(resource, "availability_zone")};
 
   return {
     ...resource,
@@ -484,10 +484,10 @@ export type DefaultSubnetId = {type:'DefaultSubnetId',value:string};
 export function createVpcEndpoint(tfgen: TF.Generator, rname: string, params: VpcEndpointParams): VpcEndpoint {
   const fields = fieldsFromVpcEndpointParams(params);
   const resource = tfgen.createTypedResource('VpcEndpoint', 'aws_vpc_endpoint', rname, fields);
-  const id: VpcEndpointId =  {type: 'VpcEndpointId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const owner_id: string =  '${' + TF.resourceName(resource) + '.owner_id}';
-  const prefix_list_id: string =  '${' + TF.resourceName(resource) + '.prefix_list_id}';
-  const arn: VpcEndpointArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'VpcEndpoint');
+  const id: VpcEndpointId =  {type: 'VpcEndpointId', value: TF.resourceAttribute(resource, "id")};
+  const owner_id: string =  TF.resourceAttribute(resource, "owner_id");
+  const prefix_list_id: string =  TF.resourceAttribute(resource, "prefix_list_id");
+  const arn: VpcEndpointArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'VpcEndpoint');
 
   return {
     ...resource,
@@ -516,8 +516,8 @@ export type VpcEndpointArn = AT.ArnT<"VpcEndpoint">;
 export function createSecurityGroup(tfgen: TF.Generator, rname: string, params: SecurityGroupParams): SecurityGroup {
   const fields = fieldsFromSecurityGroupParams(params);
   const resource = tfgen.createTypedResource('SecurityGroup', 'aws_security_group', rname, fields);
-  const id: SecurityGroupId =  {type: 'SecurityGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const owner_id: string =  '${' + TF.resourceName(resource) + '.owner_id}';
+  const id: SecurityGroupId =  {type: 'SecurityGroupId', value: TF.resourceAttribute(resource, "id")};
+  const owner_id: string =  TF.resourceAttribute(resource, "owner_id");
 
   return {
     ...resource,
@@ -541,7 +541,7 @@ export type SecurityGroupId = {type:'SecurityGroupId',value:string};
 export function createSecurityGroupRule(tfgen: TF.Generator, rname: string, params: SecurityGroupRuleParams): SecurityGroupRule {
   const fields = fieldsFromSecurityGroupRuleParams(params);
   const resource = tfgen.createTypedResource('SecurityGroupRule', 'aws_security_group_rule', rname, fields);
-  const id: SecurityGroupId =  {type: 'SecurityGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: SecurityGroupId =  {type: 'SecurityGroupId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -563,7 +563,7 @@ export type SecurityGroupRuleId = {type:'SecurityGroupRuleId',value:string};
 export function createInternetGateway(tfgen: TF.Generator, rname: string, params: InternetGatewayParams): InternetGateway {
   const fields = fieldsFromInternetGatewayParams(params);
   const resource = tfgen.createTypedResource('InternetGateway', 'aws_internet_gateway', rname, fields);
-  const id: InternetGatewayId =  {type: 'InternetGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: InternetGatewayId =  {type: 'InternetGatewayId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -585,7 +585,7 @@ export type InternetGatewayId = {type:'InternetGatewayId',value:string};
 export function createNatGateway(tfgen: TF.Generator, rname: string, params: NatGatewayParams): NatGateway {
   const fields = fieldsFromNatGatewayParams(params);
   const resource = tfgen.createTypedResource('NatGateway', 'aws_nat_gateway', rname, fields);
-  const id: NatGatewayId =  {type: 'NatGatewayId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: NatGatewayId =  {type: 'NatGatewayId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -607,7 +607,7 @@ export type NatGatewayId = {type:'NatGatewayId',value:string};
 export function createRouteTable(tfgen: TF.Generator, rname: string, params: RouteTableParams): RouteTable {
   const fields = fieldsFromRouteTableParams(params);
   const resource = tfgen.createTypedResource('RouteTable', 'aws_route_table', rname, fields);
-  const id: RouteTableId =  {type: 'RouteTableId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: RouteTableId =  {type: 'RouteTableId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -648,7 +648,7 @@ export type RouteId = {type:'RouteId',value:string};
 export function createRouteTableAssociation(tfgen: TF.Generator, rname: string, params: RouteTableAssociationParams): RouteTableAssociation {
   const fields = fieldsFromRouteTableAssociationParams(params);
   const resource = tfgen.createTypedResource('RouteTableAssociation', 'aws_route_table_association', rname, fields);
-  const id: RouteTableAssociationId =  {type: 'RouteTableAssociationId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: RouteTableAssociationId =  {type: 'RouteTableAssociationId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -670,8 +670,8 @@ export type RouteTableAssociationId = {type:'RouteTableAssociationId',value:stri
 export function createRoute53Record(tfgen: TF.Generator, rname: string, params: Route53RecordParams): Route53Record {
   const fields = fieldsFromRoute53RecordParams(params);
   const resource = tfgen.createTypedResource('Route53Record', 'aws_route53_record', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const fqdn: string =  '${' + TF.resourceName(resource) + '.fqdn}';
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const fqdn: string =  TF.resourceAttribute(resource, "fqdn");
 
   return {
     ...resource,
@@ -695,8 +695,8 @@ export type Route53RecordId = {type:'Route53RecordId',value:string};
 export function createS3Bucket(tfgen: TF.Generator, rname: string, params: S3BucketParams): S3Bucket {
   const fields = fieldsFromS3BucketParams(params);
   const resource = tfgen.createTypedResource('S3Bucket', 'aws_s3_bucket', rname, fields);
-  const id: string =  '${' + TF.resourceName(resource) + '.id}';
-  const arn: S3BucketArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'S3Bucket');
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const arn: S3BucketArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'S3Bucket');
 
   return {
     ...resource,
@@ -740,9 +740,9 @@ export type S3BucketPolicyId = {type:'S3BucketPolicyId',value:string};
 export function createS3BucketObject(tfgen: TF.Generator, rname: string, params: S3BucketObjectParams): S3BucketObject {
   const fields = fieldsFromS3BucketObjectParams(params);
   const resource = tfgen.createTypedResource('S3BucketObject', 'aws_s3_bucket_object', rname, fields);
-  const id: string =  '${' + TF.resourceName(resource) + '.id}';
-  const etag: string =  '${' + TF.resourceName(resource) + '.etag}';
-  const version_id: string =  '${' + TF.resourceName(resource) + '.version_id}';
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const etag: string =  TF.resourceAttribute(resource, "etag");
+  const version_id: string =  TF.resourceAttribute(resource, "version_id");
 
   return {
     ...resource,
@@ -768,7 +768,7 @@ export type S3BucketObjectId = {type:'S3BucketObjectId',value:string};
 export function createS3BucketPublicAccessBlock(tfgen: TF.Generator, rname: string, params: S3BucketPublicAccessBlockParams): S3BucketPublicAccessBlock {
   const fields = fieldsFromS3BucketPublicAccessBlockParams(params);
   const resource = tfgen.createTypedResource('S3BucketPublicAccessBlock', 'aws_s3_bucket_public_access_block', rname, fields);
-  const id: string =  '${' + TF.resourceName(resource) + '.id}';
+  const id: string =  TF.resourceAttribute(resource, "id");
 
   return {
     ...resource,
@@ -790,7 +790,7 @@ export type S3BucketPublicAccessBlockId = {type:'S3BucketPublicAccessBlockId',va
 export function createS3BucketOwnershipControls(tfgen: TF.Generator, rname: string, params: S3BucketOwnershipControlsParams): S3BucketOwnershipControls {
   const fields = fieldsFromS3BucketOwnershipControlsParams(params);
   const resource = tfgen.createTypedResource('S3BucketOwnershipControls', 'aws_s3_bucket_ownership_controls', rname, fields);
-  const id: string =  '${' + TF.resourceName(resource) + '.id}';
+  const id: string =  TF.resourceAttribute(resource, "id");
 
   return {
     ...resource,
@@ -812,8 +812,8 @@ export type S3BucketOwnershipControlsId = {type:'S3BucketOwnershipControlsId',va
 export function createSnsTopic(tfgen: TF.Generator, rname: string, params: SnsTopicParams): SnsTopic {
   const fields = fieldsFromSnsTopicParams(params);
   const resource = tfgen.createTypedResource('SnsTopic', 'aws_sns_topic', rname, fields);
-  const id: SnsTopicId =  {type: 'SnsTopicId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: SnsTopicArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SnsTopic');
+  const id: SnsTopicId =  {type: 'SnsTopicId', value: TF.resourceAttribute(resource, "id")};
+  const arn: SnsTopicArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'SnsTopic');
 
   return {
     ...resource,
@@ -857,9 +857,9 @@ export type SnsSmsPreferencesId = {type:'SnsSmsPreferencesId',value:string};
 export function createIamUser(tfgen: TF.Generator, rname: string, params: IamUserParams): IamUser {
   const fields = fieldsFromIamUserParams(params);
   const resource = tfgen.createTypedResource('IamUser', 'aws_iam_user', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
-  const arn: IamUserArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamUser');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const unique_id: string =  TF.resourceAttribute(resource, "unique_id");
+  const arn: IamUserArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamUser');
 
   return {
     ...resource,
@@ -924,9 +924,9 @@ export type IamUserPolicyAttachmentId = {type:'IamUserPolicyAttachmentId',value:
 export function createIamGroup(tfgen: TF.Generator, rname: string, params: IamGroupParams): IamGroup {
   const fields = fieldsFromIamGroupParams(params);
   const resource = tfgen.createTypedResource('IamGroup', 'aws_iam_group', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
-  const arn: IamGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamGroup');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const unique_id: string =  TF.resourceAttribute(resource, "unique_id");
+  const arn: IamGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamGroup');
 
   return {
     ...resource,
@@ -972,10 +972,10 @@ export type IamGroupPolicyId = {type:'IamGroupPolicyId',value:string};
 export function createEcrRepository(tfgen: TF.Generator, rname: string, params: EcrRepositoryParams): EcrRepository {
   const fields = fieldsFromEcrRepositoryParams(params);
   const resource = tfgen.createTypedResource('EcrRepository', 'aws_ecr_repository', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const registry_id: string =  '${' + TF.resourceName(resource) + '.registry_id}';
-  const repository_url: string =  '${' + TF.resourceName(resource) + '.repository_url}';
-  const arn: EcrRepositoryArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EcrRepository');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const registry_id: string =  TF.resourceAttribute(resource, "registry_id");
+  const repository_url: string =  TF.resourceAttribute(resource, "repository_url");
+  const arn: EcrRepositoryArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EcrRepository');
 
   return {
     ...resource,
@@ -1004,9 +1004,9 @@ export type EcrRepositoryArn = AT.ArnT<"EcrRepository">;
 export function createDbSubnetGroup(tfgen: TF.Generator, rname: string, params: DbSubnetGroupParams): DbSubnetGroup {
   const fields = fieldsFromDbSubnetGroupParams(params);
   const resource = tfgen.createTypedResource('DbSubnetGroup', 'aws_db_subnet_group', rname, fields);
-  const id: DbSubnetGroupId =  {type: 'DbSubnetGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: DbSubnetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'DbSubnetGroup');
+  const id: DbSubnetGroupId =  {type: 'DbSubnetGroupId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const arn: DbSubnetGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'DbSubnetGroup');
 
   return {
     ...resource,
@@ -1033,7 +1033,7 @@ export type DbSubnetGroupArn = AT.ArnT<"DbSubnetGroup">;
 export function createCloudwatchMetricAlarm(tfgen: TF.Generator, rname: string, params: CloudwatchMetricAlarmParams): CloudwatchMetricAlarm {
   const fields = fieldsFromCloudwatchMetricAlarmParams(params);
   const resource = tfgen.createTypedResource('CloudwatchMetricAlarm', 'aws_cloudwatch_metric_alarm', rname, fields);
-  const id: CloudwatchMetricAlarmId =  {type: 'CloudwatchMetricAlarmId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: CloudwatchMetricAlarmId =  {type: 'CloudwatchMetricAlarmId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1055,12 +1055,12 @@ export type CloudwatchMetricAlarmId = {type:'CloudwatchMetricAlarmId',value:stri
 export function createIamRole(tfgen: TF.Generator, rname: string, params: IamRoleParams): IamRole {
   const fields = fieldsFromIamRoleParams(params);
   const resource = tfgen.createTypedResource('IamRole', 'aws_iam_role', rname, fields);
-  const id: IamRoleId =  {type: 'IamRoleId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const create_date: string =  '${' + TF.resourceName(resource) + '.create_date}';
-  const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
-  const description: string =  '${' + TF.resourceName(resource) + '.description}';
-  const arn: IamRoleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamRole');
+  const id: IamRoleId =  {type: 'IamRoleId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const create_date: string =  TF.resourceAttribute(resource, "create_date");
+  const unique_id: string =  TF.resourceAttribute(resource, "unique_id");
+  const description: string =  TF.resourceAttribute(resource, "description");
+  const arn: IamRoleArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamRole');
 
   return {
     ...resource,
@@ -1093,10 +1093,10 @@ export type IamRoleArn = AT.ArnT<"IamRole">;
 export function createIamRolePolicy(tfgen: TF.Generator, rname: string, params: IamRolePolicyParams): IamRolePolicy {
   const fields = fieldsFromIamRolePolicyParams(params);
   const resource = tfgen.createTypedResource('IamRolePolicy', 'aws_iam_role_policy', rname, fields);
-  const id: string =  '${' + TF.resourceName(resource) + '.id}';
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const policy: string =  '${' + TF.resourceName(resource) + '.policy}';
-  const role: string =  '${' + TF.resourceName(resource) + '.role}';
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const policy: string =  TF.resourceAttribute(resource, "policy");
+  const role: string =  TF.resourceAttribute(resource, "role");
 
   return {
     ...resource,
@@ -1124,8 +1124,8 @@ export type IamRolePolicyId = {type:'IamRolePolicyId',value:string};
 export function createIamPolicy(tfgen: TF.Generator, rname: string, params: IamPolicyParams): IamPolicy {
   const fields = fieldsFromIamPolicyParams(params);
   const resource = tfgen.createTypedResource('IamPolicy', 'aws_iam_policy', rname, fields);
-  const id: IamPolicyId =  {type: 'IamPolicyId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: IamPolicyArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamPolicy');
+  const id: IamPolicyId =  {type: 'IamPolicyId', value: TF.resourceAttribute(resource, "id")};
+  const arn: IamPolicyArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamPolicy');
 
   return {
     ...resource,
@@ -1169,12 +1169,12 @@ export type IamRolePolicyAttachmentId = {type:'IamRolePolicyAttachmentId',value:
 export function createIamInstanceProfile(tfgen: TF.Generator, rname: string, params: IamInstanceProfileParams): IamInstanceProfile {
   const fields = fieldsFromIamInstanceProfileParams(params);
   const resource = tfgen.createTypedResource('IamInstanceProfile', 'aws_iam_instance_profile', rname, fields);
-  const id: IamInstanceProfileId =  {type: 'IamInstanceProfileId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const create_date: string =  '${' + TF.resourceName(resource) + '.create_date}';
-  const unique_id: string =  '${' + TF.resourceName(resource) + '.unique_id}';
-  const role: string =  '${' + TF.resourceName(resource) + '.role}';
-  const arn: IamInstanceProfileArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'IamInstanceProfile');
+  const id: IamInstanceProfileId =  {type: 'IamInstanceProfileId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const create_date: string =  TF.resourceAttribute(resource, "create_date");
+  const unique_id: string =  TF.resourceAttribute(resource, "unique_id");
+  const role: string =  TF.resourceAttribute(resource, "role");
+  const arn: IamInstanceProfileArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamInstanceProfile');
 
   return {
     ...resource,
@@ -1207,9 +1207,9 @@ export type IamInstanceProfileArn = AT.ArnT<"IamInstanceProfile">;
 export function createSqsQueue(tfgen: TF.Generator, rname: string, params: SqsQueueParams): SqsQueue {
   const fields = fieldsFromSqsQueueParams(params);
   const resource = tfgen.createTypedResource('SqsQueue', 'aws_sqs_queue', rname, fields);
-  const id: SqsQueueId =  {type: 'SqsQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: SqsQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SqsQueue');
+  const id: SqsQueueId =  {type: 'SqsQueueId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const arn: SqsQueueArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'SqsQueue');
 
   return {
     ...resource,
@@ -1255,10 +1255,10 @@ export type SqsQueuePolicyId = {type:'SqsQueuePolicyId',value:string};
 export function createLb(tfgen: TF.Generator, rname: string, params: LbParams): Lb {
   const fields = fieldsFromLbParams(params);
   const resource = tfgen.createTypedResource('Lb', 'aws_lb', rname, fields);
-  const id: LbId =  {type: 'LbId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const dns_name: string =  '${' + TF.resourceName(resource) + '.dns_name}';
-  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
-  const arn: LbArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Lb');
+  const id: LbId =  {type: 'LbId', value: TF.resourceAttribute(resource, "id")};
+  const dns_name: string =  TF.resourceAttribute(resource, "dns_name");
+  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: TF.resourceAttribute(resource, "zone_id")};
+  const arn: LbArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'Lb');
 
   return {
     ...resource,
@@ -1287,8 +1287,8 @@ export type LbArn = AT.ArnT<"Lb">;
 export function createLbListener(tfgen: TF.Generator, rname: string, params: LbListenerParams): LbListener {
   const fields = fieldsFromLbListenerParams(params);
   const resource = tfgen.createTypedResource('LbListener', 'aws_lb_listener', rname, fields);
-  const id: LbListenerId =  {type: 'LbListenerId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: LbListenerArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbListener');
+  const id: LbListenerId =  {type: 'LbListenerId', value: TF.resourceAttribute(resource, "id")};
+  const arn: LbListenerArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'LbListener');
 
   return {
     ...resource,
@@ -1313,8 +1313,8 @@ export type LbListenerArn = AT.ArnT<"LbListener">;
 export function createAcmCertificate(tfgen: TF.Generator, rname: string, params: AcmCertificateParams): AcmCertificate {
   const fields = fieldsFromAcmCertificateParams(params);
   const resource = tfgen.createTypedResource('AcmCertificate', 'aws_acm_certificate', rname, fields);
-  const id: AcmCertificateId =  {type: 'AcmCertificateId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AcmCertificateArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AcmCertificate');
+  const id: AcmCertificateId =  {type: 'AcmCertificateId', value: TF.resourceAttribute(resource, "id")};
+  const arn: AcmCertificateArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'AcmCertificate');
 
   return {
     ...resource,
@@ -1358,8 +1358,8 @@ export type AcmCertificateValidationId = {type:'AcmCertificateValidationId',valu
 export function createLbListenerCertificate(tfgen: TF.Generator, rname: string, params: LbListenerCertificateParams): LbListenerCertificate {
   const fields = fieldsFromLbListenerCertificateParams(params);
   const resource = tfgen.createTypedResource('LbListenerCertificate', 'aws_lb_listener_certificate', rname, fields);
-  const id: LbListenerCertificateId =  {type: 'LbListenerCertificateId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: LbListenerCertificateArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbListenerCertificate');
+  const id: LbListenerCertificateId =  {type: 'LbListenerCertificateId', value: TF.resourceAttribute(resource, "id")};
+  const arn: LbListenerCertificateArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'LbListenerCertificate');
 
   return {
     ...resource,
@@ -1384,10 +1384,10 @@ export type LbListenerCertificateArn = AT.ArnT<"LbListenerCertificate">;
 export function createLbTargetGroup(tfgen: TF.Generator, rname: string, params: LbTargetGroupParams): LbTargetGroup {
   const fields = fieldsFromLbTargetGroupParams(params);
   const resource = tfgen.createTypedResource('LbTargetGroup', 'aws_lb_target_group', rname, fields);
-  const id: LbTargetGroupId =  {type: 'LbTargetGroupId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn_suffix: string =  '${' + TF.resourceName(resource) + '.arn_suffix}';
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: LbTargetGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LbTargetGroup');
+  const id: LbTargetGroupId =  {type: 'LbTargetGroupId', value: TF.resourceAttribute(resource, "id")};
+  const arn_suffix: string =  TF.resourceAttribute(resource, "arn_suffix");
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const arn: LbTargetGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'LbTargetGroup');
 
   return {
     ...resource,
@@ -1416,7 +1416,7 @@ export type LbTargetGroupArn = AT.ArnT<"LbTargetGroup">;
 export function createLbTargetGroupAttachment(tfgen: TF.Generator, rname: string, params: LbTargetGroupAttachmentParams): LbTargetGroupAttachment {
   const fields = fieldsFromLbTargetGroupAttachmentParams(params);
   const resource = tfgen.createTypedResource('LbTargetGroupAttachment', 'aws_lb_target_group_attachment', rname, fields);
-  const id: LbTargetGroupAttachmentId =  {type: 'LbTargetGroupAttachmentId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: LbTargetGroupAttachmentId =  {type: 'LbTargetGroupAttachmentId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1438,8 +1438,8 @@ export type LbTargetGroupAttachmentId = {type:'LbTargetGroupAttachmentId',value:
 export function createLbListenerRule(tfgen: TF.Generator, rname: string, params: LbListenerRuleParams): LbListenerRule {
   const fields = fieldsFromLbListenerRuleParams(params);
   const resource = tfgen.createTypedResource('LbListenerRule', 'aws_lb_listener_rule', rname, fields);
-  const id: LbListenerRuleId =  {type: 'LbListenerRuleId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const id: LbListenerRuleId =  {type: 'LbListenerRuleId', value: TF.resourceAttribute(resource, "id")};
+  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
 
   return {
     ...resource,
@@ -1463,10 +1463,10 @@ export type LbListenerRuleId = {type:'LbListenerRuleId',value:string};
 export function createElasticsearchDomain(tfgen: TF.Generator, rname: string, params: ElasticsearchDomainParams): ElasticsearchDomain {
   const fields = fieldsFromElasticsearchDomainParams(params);
   const resource = tfgen.createTypedResource('ElasticsearchDomain', 'aws_elasticsearch_domain', rname, fields);
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
-  const domain_id: string =  '${' + TF.resourceName(resource) + '.domain_id}';
-  const domain_name: string =  '${' + TF.resourceName(resource) + '.domain_name}';
-  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
+  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
+  const domain_id: string =  TF.resourceAttribute(resource, "domain_id");
+  const domain_name: string =  TF.resourceAttribute(resource, "domain_name");
+  const endpoint: string =  TF.resourceAttribute(resource, "endpoint");
 
   return {
     ...resource,
@@ -1494,7 +1494,7 @@ export type ElasticsearchDomainId = {type:'ElasticsearchDomainId',value:string};
 export function createElasticsearchDomainPolicy(tfgen: TF.Generator, rname: string, params: ElasticsearchDomainPolicyParams): ElasticsearchDomainPolicy {
   const fields = fieldsFromElasticsearchDomainPolicyParams(params);
   const resource = tfgen.createTypedResource('ElasticsearchDomainPolicy', 'aws_elasticsearch_domain_policy', rname, fields);
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
 
   return {
     ...resource,
@@ -1516,7 +1516,7 @@ export type ElasticsearchDomainPolicyId = {type:'ElasticsearchDomainPolicyId',va
 export function createCloudwatchLogGroup(tfgen: TF.Generator, rname: string, params: CloudwatchLogGroupParams): CloudwatchLogGroup {
   const fields = fieldsFromCloudwatchLogGroupParams(params);
   const resource = tfgen.createTypedResource('CloudwatchLogGroup', 'aws_cloudwatch_log_group', rname, fields);
-  const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.arn}'};
+  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
 
   return {
     ...resource,
@@ -1538,8 +1538,8 @@ export type CloudwatchLogGroupId = {type:'CloudwatchLogGroupId',value:string};
 export function createLaunchConfiguration(tfgen: TF.Generator, rname: string, params: LaunchConfigurationParams): LaunchConfiguration {
   const fields = fieldsFromLaunchConfigurationParams(params);
   const resource = tfgen.createTypedResource('LaunchConfiguration', 'aws_launch_configuration', rname, fields);
-  const id: LaunchConfigurationId =  {type: 'LaunchConfigurationId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const id: LaunchConfigurationId =  {type: 'LaunchConfigurationId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
 
   return {
     ...resource,
@@ -1563,8 +1563,8 @@ export type LaunchConfigurationId = {type:'LaunchConfigurationId',value:string};
 export function createLaunchTemplate(tfgen: TF.Generator, rname: string, params: LaunchTemplateParams): LaunchTemplate {
   const fields = fieldsFromLaunchTemplateParams(params);
   const resource = tfgen.createTypedResource('LaunchTemplate', 'aws_launch_template', rname, fields);
-  const id: LaunchTemplateId =  {type: 'LaunchTemplateId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const id: LaunchTemplateId =  {type: 'LaunchTemplateId', value: TF.resourceAttribute(resource, "id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
 
   return {
     ...resource,
@@ -1588,8 +1588,8 @@ export type LaunchTemplateId = {type:'LaunchTemplateId',value:string};
 export function createKinesisFirehoseDeliveryStream(tfgen: TF.Generator, rname: string, params: KinesisFirehoseDeliveryStreamParams): KinesisFirehoseDeliveryStream {
   const fields = fieldsFromKinesisFirehoseDeliveryStreamParams(params);
   const resource = tfgen.createTypedResource('KinesisFirehoseDeliveryStream', 'aws_kinesis_firehose_delivery_stream', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const arn: KinesisFirehoseDeliveryStreamArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'KinesisFirehoseDeliveryStream');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const arn: KinesisFirehoseDeliveryStreamArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'KinesisFirehoseDeliveryStream');
 
   return {
     ...resource,
@@ -1633,10 +1633,10 @@ export type S3BucketMetricId = {type:'S3BucketMetricId',value:string};
 export function createElasticacheParameterGroup(tfgen: TF.Generator, rname: string, params: ElasticacheParameterGroupParams): ElasticacheParameterGroup {
   const fields = fieldsFromElasticacheParameterGroupParams(params);
   const resource = tfgen.createTypedResource('ElasticacheParameterGroup', 'aws_elasticache_parameter_group', rname, fields);
-  const name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: '${' + TF.resourceName(resource) + '.name}'};
-  const family: AT.ElasticacheParameterGroupFamily =  {type: 'ElasticacheParameterGroupFamily', value: '${' + TF.resourceName(resource) + '.family}'};
-  const description: string =  '${' + TF.resourceName(resource) + '.description}';
-  const arn: ElasticacheParameterGroupArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheParameterGroup');
+  const name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: TF.resourceAttribute(resource, "name")};
+  const family: AT.ElasticacheParameterGroupFamily =  {type: 'ElasticacheParameterGroupFamily', value: TF.resourceAttribute(resource, "family")};
+  const description: string =  TF.resourceAttribute(resource, "description");
+  const arn: ElasticacheParameterGroupArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'ElasticacheParameterGroup');
 
   return {
     ...resource,
@@ -1665,7 +1665,7 @@ export type ElasticacheParameterGroupArn = AT.ArnT<"ElasticacheParameterGroup">;
 export function createElasticacheSubnetGroup(tfgen: TF.Generator, rname: string, params: ElasticacheSubnetGroupParams): ElasticacheSubnetGroup {
   const fields = fieldsFromElasticacheSubnetGroupParams(params);
   const resource = tfgen.createTypedResource('ElasticacheSubnetGroup', 'aws_elasticache_subnet_group', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const name: string =  TF.resourceAttribute(resource, "name");
 
   return {
     ...resource,
@@ -1687,13 +1687,13 @@ export type ElasticacheSubnetGroupId = {type:'ElasticacheSubnetGroupId',value:st
 export function createElasticacheCluster(tfgen: TF.Generator, rname: string, params: ElasticacheClusterParams): ElasticacheCluster {
   const fields = fieldsFromElasticacheClusterParams(params);
   const resource = tfgen.createTypedResource('ElasticacheCluster', 'aws_elasticache_cluster', rname, fields);
-  const cluster_id: string =  '${' + TF.resourceName(resource) + '.cluster_id}';
-  const engine: string =  '${' + TF.resourceName(resource) + '.engine}';
-  const node_type: string =  '${' + TF.resourceName(resource) + '.node_type}';
-  const parameter_group_name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: '${' + TF.resourceName(resource) + '.parameter_group_name}'};
-  const configuration_endpoint: string =  '${' + TF.resourceName(resource) + '.configuration_endpoint}';
-  const cluster_address: string =  '${' + TF.resourceName(resource) + '.cluster_address}';
-  const arn: ElasticacheClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'ElasticacheCluster');
+  const cluster_id: string =  TF.resourceAttribute(resource, "cluster_id");
+  const engine: string =  TF.resourceAttribute(resource, "engine");
+  const node_type: string =  TF.resourceAttribute(resource, "node_type");
+  const parameter_group_name: AT.ElasticacheParameterGroupName =  {type: 'ElasticacheParameterGroupName', value: TF.resourceAttribute(resource, "parameter_group_name")};
+  const configuration_endpoint: string =  TF.resourceAttribute(resource, "configuration_endpoint");
+  const cluster_address: string =  TF.resourceAttribute(resource, "cluster_address");
+  const arn: ElasticacheClusterArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'ElasticacheCluster');
 
   return {
     ...resource,
@@ -1728,9 +1728,9 @@ export type ElasticacheClusterArn = AT.ArnT<"ElasticacheCluster">;
 export function createLambdaFunction(tfgen: TF.Generator, rname: string, params: LambdaFunctionParams): LambdaFunction {
   const fields = fieldsFromLambdaFunctionParams(params);
   const resource = tfgen.createTypedResource('LambdaFunction', 'aws_lambda_function', rname, fields);
-  const function_name: string =  '${' + TF.resourceName(resource) + '.function_name}';
-  const role: IamRoleId =  {type: 'IamRoleId', value: '${' + TF.resourceName(resource) + '.role}'};
-  const arn: LambdaFunctionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LambdaFunction');
+  const function_name: string =  TF.resourceAttribute(resource, "function_name");
+  const role: IamRoleId =  {type: 'IamRoleId', value: TF.resourceAttribute(resource, "role")};
+  const arn: LambdaFunctionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'LambdaFunction');
 
   return {
     ...resource,
@@ -1758,10 +1758,10 @@ export type LambdaFunctionArn = AT.ArnT<"LambdaFunction">;
 export function createLambdaPermission(tfgen: TF.Generator, rname: string, params: LambdaPermissionParams): LambdaPermission {
   const fields = fieldsFromLambdaPermissionParams(params);
   const resource = tfgen.createTypedResource('LambdaPermission', 'aws_lambda_permission', rname, fields);
-  const action: AT.LambdaPermissionAction =  {type: 'LambdaPermissionAction', value: '${' + TF.resourceName(resource) + '.action}'};
-  const function_name: string =  '${' + TF.resourceName(resource) + '.function_name}';
-  const principal: string =  '${' + TF.resourceName(resource) + '.principal}';
-  const arn: LambdaPermissionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'LambdaPermission');
+  const action: AT.LambdaPermissionAction =  {type: 'LambdaPermissionAction', value: TF.resourceAttribute(resource, "action")};
+  const function_name: string =  TF.resourceAttribute(resource, "function_name");
+  const principal: string =  TF.resourceAttribute(resource, "principal");
+  const arn: LambdaPermissionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'LambdaPermission');
 
   return {
     ...resource,
@@ -1790,10 +1790,10 @@ export type LambdaPermissionArn = AT.ArnT<"LambdaPermission">;
 export function createCloudwatchEventRule(tfgen: TF.Generator, rname: string, params: CloudwatchEventRuleParams): CloudwatchEventRule {
   const fields = fieldsFromCloudwatchEventRuleParams(params);
   const resource = tfgen.createTypedResource('CloudwatchEventRule', 'aws_cloudwatch_event_rule', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const schedule_expression: string =  '${' + TF.resourceName(resource) + '.schedule_expression}';
-  const description: string =  '${' + TF.resourceName(resource) + '.description}';
-  const arn: CloudwatchEventRuleArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudwatchEventRule');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const schedule_expression: string =  TF.resourceAttribute(resource, "schedule_expression");
+  const description: string =  TF.resourceAttribute(resource, "description");
+  const arn: CloudwatchEventRuleArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CloudwatchEventRule');
 
   return {
     ...resource,
@@ -1822,7 +1822,7 @@ export type CloudwatchEventRuleArn = AT.ArnT<"CloudwatchEventRule">;
 export function createCloudwatchEventTarget(tfgen: TF.Generator, rname: string, params: CloudwatchEventTargetParams): CloudwatchEventTarget {
   const fields = fieldsFromCloudwatchEventTargetParams(params);
   const resource = tfgen.createTypedResource('CloudwatchEventTarget', 'aws_cloudwatch_event_target', rname, fields);
-  const arn: CloudwatchEventTargetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudwatchEventTarget');
+  const arn: CloudwatchEventTargetArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CloudwatchEventTarget');
 
   return {
     ...resource,
@@ -1845,7 +1845,7 @@ export type CloudwatchEventTargetArn = AT.ArnT<"CloudwatchEventTarget">;
 export function createWafByteMatchSet(tfgen: TF.Generator, rname: string, params: WafByteMatchSetParams): WafByteMatchSet {
   const fields = fieldsFromWafByteMatchSetParams(params);
   const resource = tfgen.createTypedResource('WafByteMatchSet', 'aws_waf_byte_match_set', rname, fields);
-  const id: WafByteMatchSetId =  {type: 'WafByteMatchSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafByteMatchSetId =  {type: 'WafByteMatchSetId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1867,8 +1867,8 @@ export type WafByteMatchSetId = {type:'WafByteMatchSetId',value:string};
 export function createWafIpset(tfgen: TF.Generator, rname: string, params: WafIpsetParams): WafIpset {
   const fields = fieldsFromWafIpsetParams(params);
   const resource = tfgen.createTypedResource('WafIpset', 'aws_waf_ipset', rname, fields);
-  const id: WafIpsetId =  {type: 'WafIpsetId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: WafIpsetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'WafIpset');
+  const id: WafIpsetId =  {type: 'WafIpsetId', value: TF.resourceAttribute(resource, "id")};
+  const arn: WafIpsetArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'WafIpset');
 
   return {
     ...resource,
@@ -1893,7 +1893,7 @@ export type WafIpsetArn = AT.ArnT<"WafIpset">;
 export function createWafregionalRegexMatchSet(tfgen: TF.Generator, rname: string, params: WafregionalRegexMatchSetParams): WafregionalRegexMatchSet {
   const fields = fieldsFromWafregionalRegexMatchSetParams(params);
   const resource = tfgen.createTypedResource('WafregionalRegexMatchSet', 'aws_wafregional_regex_match_set', rname, fields);
-  const id: WafregionalRegexMatchSetId =  {type: 'WafregionalRegexMatchSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafregionalRegexMatchSetId =  {type: 'WafregionalRegexMatchSetId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1915,7 +1915,7 @@ export type WafregionalRegexMatchSetId = {type:'WafregionalRegexMatchSetId',valu
 export function createWafregionalRegexPatternSet(tfgen: TF.Generator, rname: string, params: WafregionalRegexPatternSetParams): WafregionalRegexPatternSet {
   const fields = fieldsFromWafregionalRegexPatternSetParams(params);
   const resource = tfgen.createTypedResource('WafregionalRegexPatternSet', 'aws_wafregional_regex_pattern_set', rname, fields);
-  const id: WafregionalRegexPatternSetId =  {type: 'WafregionalRegexPatternSetId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafregionalRegexPatternSetId =  {type: 'WafregionalRegexPatternSetId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1937,8 +1937,8 @@ export type WafregionalRegexPatternSetId = {type:'WafregionalRegexPatternSetId',
 export function createWafregionalIpset(tfgen: TF.Generator, rname: string, params: WafregionalIpsetParams): WafregionalIpset {
   const fields = fieldsFromWafregionalIpsetParams(params);
   const resource = tfgen.createTypedResource('WafregionalIpset', 'aws_wafregional_ipset', rname, fields);
-  const id: WafregionalIpsetId =  {type: 'WafregionalIpsetId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: WafregionalIpsetArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'WafregionalIpset');
+  const id: WafregionalIpsetId =  {type: 'WafregionalIpsetId', value: TF.resourceAttribute(resource, "id")};
+  const arn: WafregionalIpsetArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'WafregionalIpset');
 
   return {
     ...resource,
@@ -1963,7 +1963,7 @@ export type WafregionalIpsetArn = AT.ArnT<"WafregionalIpset">;
 export function createWafregionalRule(tfgen: TF.Generator, rname: string, params: WafregionalRuleParams): WafregionalRule {
   const fields = fieldsFromWafregionalRuleParams(params);
   const resource = tfgen.createTypedResource('WafregionalRule', 'aws_wafregional_rule', rname, fields);
-  const id: WafregionalRuleId =  {type: 'WafregionalRuleId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafregionalRuleId =  {type: 'WafregionalRuleId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -1985,7 +1985,7 @@ export type WafregionalRuleId = {type:'WafregionalRuleId',value:string};
 export function createWafregionalWebAcl(tfgen: TF.Generator, rname: string, params: WafregionalWebAclParams): WafregionalWebAcl {
   const fields = fieldsFromWafregionalWebAclParams(params);
   const resource = tfgen.createTypedResource('WafregionalWebAcl', 'aws_wafregional_web_acl', rname, fields);
-  const id: WafregionalWebAclId =  {type: 'WafregionalWebAclId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafregionalWebAclId =  {type: 'WafregionalWebAclId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -2007,7 +2007,7 @@ export type WafregionalWebAclId = {type:'WafregionalWebAclId',value:string};
 export function createWafregionalWebAclAssociation(tfgen: TF.Generator, rname: string, params: WafregionalWebAclAssociationParams): WafregionalWebAclAssociation {
   const fields = fieldsFromWafregionalWebAclAssociationParams(params);
   const resource = tfgen.createTypedResource('WafregionalWebAclAssociation', 'aws_wafregional_web_acl_association', rname, fields);
-  const id: WafregionalWebAclAssociationId =  {type: 'WafregionalWebAclAssociationId', value: '${' + TF.resourceName(resource) + '.id}'};
+  const id: WafregionalWebAclAssociationId =  {type: 'WafregionalWebAclAssociationId', value: TF.resourceAttribute(resource, "id")};
 
   return {
     ...resource,
@@ -2029,8 +2029,8 @@ export type WafregionalWebAclAssociationId = {type:'WafregionalWebAclAssociation
 export function createWafv2WebAcl(tfgen: TF.Generator, rname: string, params: Wafv2WebAclParams): Wafv2WebAcl {
   const fields = fieldsFromWafv2WebAclParams(params);
   const resource = tfgen.createTypedResource('Wafv2WebAcl', 'aws_wafv2_web_acl', rname, fields);
-  const id: Wafv2WebAclId =  {type: 'Wafv2WebAclId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: Wafv2WebAclArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'Wafv2WebAcl');
+  const id: Wafv2WebAclId =  {type: 'Wafv2WebAclId', value: TF.resourceAttribute(resource, "id")};
+  const arn: Wafv2WebAclArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'Wafv2WebAcl');
 
   return {
     ...resource,
@@ -2074,8 +2074,8 @@ export type Wafv2WebAclAssociationId = {type:'Wafv2WebAclAssociationId',value:st
 export function createSecretsmanagerSecret(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretParams): SecretsmanagerSecret {
   const fields = fieldsFromSecretsmanagerSecretParams(params);
   const resource = tfgen.createTypedResource('SecretsmanagerSecret', 'aws_secretsmanager_secret', rname, fields);
-  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: SecretsmanagerSecretArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecret');
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: TF.resourceAttribute(resource, "id")};
+  const arn: SecretsmanagerSecretArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'SecretsmanagerSecret');
 
   return {
     ...resource,
@@ -2100,8 +2100,8 @@ export type SecretsmanagerSecretArn = AT.ArnT<"SecretsmanagerSecret">;
 export function createSecretsmanagerSecretVersion(tfgen: TF.Generator, rname: string, params: SecretsmanagerSecretVersionParams): SecretsmanagerSecretVersion {
   const fields = fieldsFromSecretsmanagerSecretVersionParams(params);
   const resource = tfgen.createTypedResource('SecretsmanagerSecretVersion', 'aws_secretsmanager_secret_version', rname, fields);
-  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: SecretsmanagerSecretVersionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'SecretsmanagerSecretVersion');
+  const id: SecretsmanagerSecretId =  {type: 'SecretsmanagerSecretId', value: TF.resourceAttribute(resource, "id")};
+  const arn: SecretsmanagerSecretVersionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'SecretsmanagerSecretVersion');
 
   return {
     ...resource,
@@ -2126,10 +2126,10 @@ export type SecretsmanagerSecretVersionArn = AT.ArnT<"SecretsmanagerSecretVersio
 export function createCloudfrontDistribution(tfgen: TF.Generator, rname: string, params: CloudfrontDistributionParams): CloudfrontDistribution {
   const fields = fieldsFromCloudfrontDistributionParams(params);
   const resource = tfgen.createTypedResource('CloudfrontDistribution', 'aws_cloudfront_distribution', rname, fields);
-  const id: CloudfrontDistributionId =  {type: 'CloudfrontDistributionId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const domain_name: string =  '${' + TF.resourceName(resource) + '.domain_name}';
-  const hosted_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.hosted_zone_id}'};
-  const arn: CloudfrontDistributionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CloudfrontDistribution');
+  const id: CloudfrontDistributionId =  {type: 'CloudfrontDistributionId', value: TF.resourceAttribute(resource, "id")};
+  const domain_name: string =  TF.resourceAttribute(resource, "domain_name");
+  const hosted_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: TF.resourceAttribute(resource, "hosted_zone_id")};
+  const arn: CloudfrontDistributionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CloudfrontDistribution');
 
   return {
     ...resource,
@@ -2158,8 +2158,8 @@ export type CloudfrontDistributionArn = AT.ArnT<"CloudfrontDistribution">;
 export function createApiGatewayRestApi(tfgen: TF.Generator, rname: string, params: ApiGatewayRestApiParams): ApiGatewayRestApi {
   const fields = fieldsFromApiGatewayRestApiParams(params);
   const resource = tfgen.createTypedResource('ApiGatewayRestApi', 'aws_api_gateway_rest_api', rname, fields);
-  const id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const root_resource_id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: '${' + TF.resourceName(resource) + '.root_resource_id}'};
+  const id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: TF.resourceAttribute(resource, "id")};
+  const root_resource_id: ApiGatewayRestApiId =  {type: 'ApiGatewayRestApiId', value: TF.resourceAttribute(resource, "root_resource_id")};
 
   return {
     ...resource,
@@ -2183,8 +2183,8 @@ export type ApiGatewayRestApiId = {type:'ApiGatewayRestApiId',value:string};
 export function createApiGatewayResource(tfgen: TF.Generator, rname: string, params: ApiGatewayResourceParams): ApiGatewayResource {
   const fields = fieldsFromApiGatewayResourceParams(params);
   const resource = tfgen.createTypedResource('ApiGatewayResource', 'aws_api_gateway_resource', rname, fields);
-  const id: ApiGatewayResourceId =  {type: 'ApiGatewayResourceId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const path: string =  '${' + TF.resourceName(resource) + '.path}';
+  const id: ApiGatewayResourceId =  {type: 'ApiGatewayResourceId', value: TF.resourceAttribute(resource, "id")};
+  const path: string =  TF.resourceAttribute(resource, "path");
 
   return {
     ...resource,
@@ -2284,9 +2284,9 @@ export type ApiGatewayIntegrationResponseId = {type:'ApiGatewayIntegrationRespon
 export function createApiGatewayDeployment(tfgen: TF.Generator, rname: string, params: ApiGatewayDeploymentParams): ApiGatewayDeployment {
   const fields = fieldsFromApiGatewayDeploymentParams(params);
   const resource = tfgen.createTypedResource('ApiGatewayDeployment', 'aws_api_gateway_deployment', rname, fields);
-  const id: ApiGatewayDeploymentId =  {type: 'ApiGatewayDeploymentId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const invoke_url: string =  '${' + TF.resourceName(resource) + '.invoke_url}';
-  const execution_arn: AT.Arn =  {type: 'Arn', value: '${' + TF.resourceName(resource) + '.execution_arn}'};
+  const id: ApiGatewayDeploymentId =  {type: 'ApiGatewayDeploymentId', value: TF.resourceAttribute(resource, "id")};
+  const invoke_url: string =  TF.resourceAttribute(resource, "invoke_url");
+  const execution_arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "execution_arn")};
 
   return {
     ...resource,
@@ -2312,9 +2312,9 @@ export type ApiGatewayDeploymentId = {type:'ApiGatewayDeploymentId',value:string
 export function createApiGatewayDomainName(tfgen: TF.Generator, rname: string, params: ApiGatewayDomainNameParams): ApiGatewayDomainName {
   const fields = fieldsFromApiGatewayDomainNameParams(params);
   const resource = tfgen.createTypedResource('ApiGatewayDomainName', 'aws_api_gateway_domain_name', rname, fields);
-  const id: ApiGatewayDomainNameId =  {type: 'ApiGatewayDomainNameId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const cloudfront_domain_name: string =  '${' + TF.resourceName(resource) + '.cloudfront_domain_name}';
-  const cloudfront_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.cloudfront_zone_id}'};
+  const id: ApiGatewayDomainNameId =  {type: 'ApiGatewayDomainNameId', value: TF.resourceAttribute(resource, "id")};
+  const cloudfront_domain_name: string =  TF.resourceAttribute(resource, "cloudfront_domain_name");
+  const cloudfront_zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: TF.resourceAttribute(resource, "cloudfront_zone_id")};
 
   return {
     ...resource,
@@ -2378,9 +2378,9 @@ export type S3BucketNotificationId = {type:'S3BucketNotificationId',value:string
 export function createCognitoUserPool(tfgen: TF.Generator, rname: string, params: CognitoUserPoolParams): CognitoUserPool {
   const fields = fieldsFromCognitoUserPoolParams(params);
   const resource = tfgen.createTypedResource('CognitoUserPool', 'aws_cognito_user_pool', rname, fields);
-  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
-  const arn: CognitoUserPoolArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoUserPool');
+  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: TF.resourceAttribute(resource, "id")};
+  const endpoint: string =  TF.resourceAttribute(resource, "endpoint");
+  const arn: CognitoUserPoolArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CognitoUserPool');
 
   return {
     ...resource,
@@ -2407,9 +2407,9 @@ export type CognitoUserPoolArn = AT.ArnT<"CognitoUserPool">;
 export function createCognitoUserPoolClient(tfgen: TF.Generator, rname: string, params: CognitoUserPoolClientParams): CognitoUserPoolClient {
   const fields = fieldsFromCognitoUserPoolClientParams(params);
   const resource = tfgen.createTypedResource('CognitoUserPoolClient', 'aws_cognito_user_pool_client', rname, fields);
-  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const client_secret: string =  '${' + TF.resourceName(resource) + '.client_secret}';
-  const arn: CognitoUserPoolClientArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoUserPoolClient');
+  const id: CognitoUserPoolId =  {type: 'CognitoUserPoolId', value: TF.resourceAttribute(resource, "id")};
+  const client_secret: string =  TF.resourceAttribute(resource, "client_secret");
+  const arn: CognitoUserPoolClientArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CognitoUserPoolClient');
 
   return {
     ...resource,
@@ -2455,8 +2455,8 @@ export type CognitoUserPoolDomainId = {type:'CognitoUserPoolDomainId',value:stri
 export function createCognitoIdentityPool(tfgen: TF.Generator, rname: string, params: CognitoIdentityPoolParams): CognitoIdentityPool {
   const fields = fieldsFromCognitoIdentityPoolParams(params);
   const resource = tfgen.createTypedResource('CognitoIdentityPool', 'aws_cognito_identity_pool', rname, fields);
-  const id: CognitoIdentityPoolId =  {type: 'CognitoIdentityPoolId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: CognitoIdentityPoolArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'CognitoIdentityPool');
+  const id: CognitoIdentityPoolId =  {type: 'CognitoIdentityPoolId', value: TF.resourceAttribute(resource, "id")};
+  const arn: CognitoIdentityPoolArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CognitoIdentityPool');
 
   return {
     ...resource,
@@ -2500,13 +2500,13 @@ export type CognitoIdentityPoolRolesAttachmentId = {type:'CognitoIdentityPoolRol
 export function createEksCluster(tfgen: TF.Generator, rname: string, params: EksClusterParams): EksCluster {
   const fields = fieldsFromEksClusterParams(params);
   const resource = tfgen.createTypedResource('EksCluster', 'aws_eks_cluster', rname, fields);
-  const id: EksClusterId =  {type: 'EksClusterId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const endpoint: string =  '${' + TF.resourceName(resource) + '.endpoint}';
-  const platform_version: string =  '${' + TF.resourceName(resource) + '.platform_version}';
-  const status: string =  '${' + TF.resourceName(resource) + '.status}';
-  const version: string =  '${' + TF.resourceName(resource) + '.version}';
-  const certificate_authority: string =  '${' + TF.resourceName(resource) + '.certificate_authority}';
-  const arn: EksClusterArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'EksCluster');
+  const id: EksClusterId =  {type: 'EksClusterId', value: TF.resourceAttribute(resource, "id")};
+  const endpoint: string =  TF.resourceAttribute(resource, "endpoint");
+  const platform_version: string =  TF.resourceAttribute(resource, "platform_version");
+  const status: string =  TF.resourceAttribute(resource, "status");
+  const version: string =  TF.resourceAttribute(resource, "version");
+  const certificate_authority: string =  TF.resourceAttribute(resource, "certificate_authority");
+  const arn: EksClusterArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EksCluster');
 
   return {
     ...resource,
@@ -2541,10 +2541,10 @@ export type EksClusterArn = AT.ArnT<"EksCluster">;
 export function createBatchComputeEnvironment(tfgen: TF.Generator, rname: string, params: BatchComputeEnvironmentParams): BatchComputeEnvironment {
   const fields = fieldsFromBatchComputeEnvironmentParams(params);
   const resource = tfgen.createTypedResource('BatchComputeEnvironment', 'aws_batch_compute_environment', rname, fields);
-  const id: BatchComputeEnvironmentId =  {type: 'BatchComputeEnvironmentId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const status: string =  '${' + TF.resourceName(resource) + '.status}';
-  const status_reason: string =  '${' + TF.resourceName(resource) + '.status_reason}';
-  const arn: BatchComputeEnvironmentArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchComputeEnvironment');
+  const id: BatchComputeEnvironmentId =  {type: 'BatchComputeEnvironmentId', value: TF.resourceAttribute(resource, "id")};
+  const status: string =  TF.resourceAttribute(resource, "status");
+  const status_reason: string =  TF.resourceAttribute(resource, "status_reason");
+  const arn: BatchComputeEnvironmentArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'BatchComputeEnvironment');
 
   return {
     ...resource,
@@ -2573,9 +2573,9 @@ export type BatchComputeEnvironmentArn = AT.ArnT<"BatchComputeEnvironment">;
 export function createBatchJobDefinition(tfgen: TF.Generator, rname: string, params: BatchJobDefinitionParams): BatchJobDefinition {
   const fields = fieldsFromBatchJobDefinitionParams(params);
   const resource = tfgen.createTypedResource('BatchJobDefinition', 'aws_batch_job_definition', rname, fields);
-  const id: BatchJobDefinitionId =  {type: 'BatchJobDefinitionId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const revision: string =  '${' + TF.resourceName(resource) + '.revision}';
-  const arn: BatchJobDefinitionArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchJobDefinition');
+  const id: BatchJobDefinitionId =  {type: 'BatchJobDefinitionId', value: TF.resourceAttribute(resource, "id")};
+  const revision: string =  TF.resourceAttribute(resource, "revision");
+  const arn: BatchJobDefinitionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'BatchJobDefinition');
 
   return {
     ...resource,
@@ -2602,8 +2602,8 @@ export type BatchJobDefinitionArn = AT.ArnT<"BatchJobDefinition">;
 export function createBatchJobQueue(tfgen: TF.Generator, rname: string, params: BatchJobQueueParams): BatchJobQueue {
   const fields = fieldsFromBatchJobQueueParams(params);
   const resource = tfgen.createTypedResource('BatchJobQueue', 'aws_batch_job_queue', rname, fields);
-  const id: BatchJobQueueId =  {type: 'BatchJobQueueId', value: '${' + TF.resourceName(resource) + '.id}'};
-  const arn: BatchJobQueueArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'BatchJobQueue');
+  const id: BatchJobQueueId =  {type: 'BatchJobQueueId', value: TF.resourceAttribute(resource, "id")};
+  const arn: BatchJobQueueArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'BatchJobQueue');
 
   return {
     ...resource,
@@ -2628,9 +2628,9 @@ export interface AutoscalingGroupTagParams {
 
 export function fieldsFromAutoscalingGroupTagParams(params: AutoscalingGroupTagParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "key", params.key, TF.stringValue);
-  TF.addField(fields, "value", params.value, TF.stringValue);
-  TF.addField(fields, "propagate_at_launch", params.propagate_at_launch, TF.booleanValue);
+  TF.addAttribute(fields, "key", params.key, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
+  TF.addAttribute(fields, "propagate_at_launch", params.propagate_at_launch, TF.booleanValue);
   return fields;
 }
 
@@ -2644,23 +2644,23 @@ export interface AutoscalingGroupParams {
   launch_configuration: string;
   load_balancers?: (string)[];
   enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
-  tags?: (AutoscalingGroupTagParams)[];
+  tag?: (AutoscalingGroupTagParams)[];
   termination_policies?: ('OldestInstance' | 'NewestInstance' | 'OldestLaunchConfiguration' | 'ClosestToNextInstanceHour' | 'OldestLaunchTemplate' | 'AllocationStrategy' | 'Default')[];
 }
 
 export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addField(fields, "min_size", params.min_size, TF.numberValue);
-  TF.addOptionalField(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
-  TF.addField(fields, "max_size", params.max_size, TF.numberValue);
-  TF.addOptionalField(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
-  TF.addField(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
-  TF.addOptionalField(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "tags", params.tags, TF.listValue((v) => TF.mapValue(fieldsFromAutoscalingGroupTagParams(v))));
-  TF.addOptionalField(fields, "termination_policies", params.termination_policies, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addAttribute(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
+  TF.addAttribute(fields, "max_size", params.max_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
+  TF.addOptionalAttribute(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
+  TF.addRepeatedBlock(fields, "tag", params.tag, fieldsFromAutoscalingGroupTagParams);
+  TF.addOptionalAttribute(fields, "termination_policies", params.termination_policies, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -2677,14 +2677,14 @@ export interface AutoscalingScheduleParams {
 
 export function fieldsFromAutoscalingScheduleParams(params: AutoscalingScheduleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.stringValue);
-  TF.addField(fields, "scheduled_action_name", params.scheduled_action_name, TF.stringValue);
-  TF.addOptionalField(fields, "start_time", params.start_time, TF.stringValue);
-  TF.addOptionalField(fields, "end_time", params.end_time, TF.stringValue);
-  TF.addOptionalField(fields, "recurrence", params.recurrence, TF.stringValue);
-  TF.addOptionalField(fields, "min_size", params.min_size, TF.numberValue);
-  TF.addOptionalField(fields, "max_size", params.max_size, TF.numberValue);
-  TF.addOptionalField(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
+  TF.addAttribute(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.stringValue);
+  TF.addAttribute(fields, "scheduled_action_name", params.scheduled_action_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "start_time", params.start_time, TF.stringValue);
+  TF.addOptionalAttribute(fields, "end_time", params.end_time, TF.stringValue);
+  TF.addOptionalAttribute(fields, "recurrence", params.recurrence, TF.stringValue);
+  TF.addOptionalAttribute(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "max_size", params.max_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
   return fields;
 }
 
@@ -2695,8 +2695,8 @@ export interface AutoscalingAttachmentParams {
 
 export function fieldsFromAutoscalingAttachmentParams(params: AutoscalingAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
-  TF.addField(fields, "alb_target_group_arn", params.alb_target_group_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
+  TF.addAttribute(fields, "alb_target_group_arn", params.alb_target_group_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -2712,10 +2712,10 @@ export interface CustomerGatewayParams {
 
 export function fieldsFromCustomerGatewayParams(params: CustomerGatewayParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bgp_asn", params.bgp_asn, TF.numberValue);
-  TF.addField(fields, "ip_address", params.ip_address, TF.stringAliasValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "bgp_asn", params.bgp_asn, TF.numberValue);
+  TF.addAttribute(fields, "ip_address", params.ip_address, TF.stringAliasValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -2726,8 +2726,8 @@ export interface VpnGatewayParams {
 
 export function fieldsFromVpnGatewayParams(params: VpnGatewayParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -2738,8 +2738,8 @@ export interface VpnGatewayAttachmentParams {
 
 export function fieldsFromVpnGatewayAttachmentParams(params: VpnGatewayAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addField(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -2752,10 +2752,10 @@ export interface VpnConnectionParams {
 
 export function fieldsFromVpnConnectionParams(params: VpnConnectionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
-  TF.addField(fields, "customer_gateway_id", params.customer_gateway_id, TF.resourceIdValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addField(fields, "static_routes_only", params.static_routes_only, TF.booleanValue);
+  TF.addAttribute(fields, "vpn_gateway_id", params.vpn_gateway_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "customer_gateway_id", params.customer_gateway_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "static_routes_only", params.static_routes_only, TF.booleanValue);
   return fields;
 }
 
@@ -2766,8 +2766,8 @@ export interface VpnConnectionRouteParams {
 
 export function fieldsFromVpnConnectionRouteParams(params: VpnConnectionRouteParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "destination_cidr_block", params.destination_cidr_block, TF.stringAliasValue);
-  TF.addField(fields, "vpn_connection_id", params.vpn_connection_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "destination_cidr_block", params.destination_cidr_block, TF.stringAliasValue);
+  TF.addAttribute(fields, "vpn_connection_id", params.vpn_connection_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -2780,10 +2780,10 @@ export interface InstanceRootBlockDeviceParams {
 
 export function fieldsFromInstanceRootBlockDeviceParams(params: InstanceRootBlockDeviceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
-  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
-  TF.addOptionalField(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalAttribute(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
   return fields;
 }
 
@@ -2800,11 +2800,11 @@ export interface EbsBlockDeviceParams {
 
 export function fieldsFromEbsBlockDeviceParams(params: EbsBlockDeviceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
-  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
-  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
-  TF.addOptionalField(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  TF.addAttribute(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalAttribute(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
   return fields;
 }
 
@@ -2818,8 +2818,8 @@ export interface EphemeralBlockDeviceParams {
 
 export function fieldsFromEphemeralBlockDeviceParams(params: EphemeralBlockDeviceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "device_name", params.device_name, TF.stringValue);
-  TF.addOptionalField(fields, "virtual_name", params.virtual_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "virtual_name", params.virtual_name, TF.stringValue);
   return fields;
 }
 
@@ -2844,22 +2844,22 @@ export interface InstanceParams {
 
 export function fieldsFromInstanceParams(params: InstanceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "ami", params.ami, TF.stringAliasValue);
-  TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
-  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
-  TF.addOptionalField(fields, "disable_api_termination", params.disable_api_termination, TF.booleanValue);
-  TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
-  TF.addOptionalField(fields, "monitoring", params.monitoring, TF.booleanValue);
-  TF.addOptionalField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
-  TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
-  TF.addOptionalField(fields, "ebs_block_device", params.ebs_block_device, TF.listValue((v) => TF.mapValue(fieldsFromEbsBlockDeviceParams(v))));
-  TF.addOptionalField(fields, "ephemeral_block_device", params.ephemeral_block_device, (v) => TF.mapValue(fieldsFromEphemeralBlockDeviceParams(v)));
-  TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
-  TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
-  TF.addOptionalField(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "ami", params.ami, TF.stringAliasValue);
+  TF.addAttribute(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "disable_api_termination", params.disable_api_termination, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "key_name", params.key_name, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "monitoring", params.monitoring, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
+  TF.addOptionalBlock(fields, "root_block_device", params.root_block_device, fieldsFromInstanceRootBlockDeviceParams);
+  TF.addRepeatedBlock(fields, "ebs_block_device", params.ebs_block_device, fieldsFromEbsBlockDeviceParams);
+  TF.addOptionalBlock(fields, "ephemeral_block_device", params.ephemeral_block_device, fieldsFromEphemeralBlockDeviceParams);
+  TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
+  TF.addOptionalAttribute(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -2873,11 +2873,11 @@ export interface EbsVolumeParams {
 
 export function fieldsFromEbsVolumeParams(params: EbsVolumeParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
-  TF.addOptionalField(fields, "size", params.size, TF.numberValue);
-  TF.addOptionalField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalAttribute(fields, "size", params.size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -2889,9 +2889,9 @@ export interface VolumeAttachmentParams {
 
 export function fieldsFromVolumeAttachmentParams(params: VolumeAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
-  TF.addField(fields, "instance_id", params.instance_id, TF.resourceIdValue);
-  TF.addField(fields, "volume_id", params.volume_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addAttribute(fields, "instance_id", params.instance_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "volume_id", params.volume_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -2929,35 +2929,35 @@ export interface DbInstanceParams {
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "allocated_storage", params.allocated_storage, TF.numberValue);
-  TF.addField(fields, "engine", params.engine, TF.stringAliasValue);
-  TF.addField(fields, "instance_class", params.instance_class, TF.stringAliasValue);
-  TF.addField(fields, "username", params.username, TF.stringValue);
-  TF.addOptionalField(fields, "password", params.password, TF.stringValue);
-  TF.addOptionalField(fields, "engine_version", params.engine_version, TF.stringValue);
-  TF.addOptionalField(fields, "identifier", params.identifier, TF.stringValue);
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "port", params.port, TF.numberValue);
-  TF.addOptionalField(fields, "publicly_accessible", params.publicly_accessible, TF.booleanValue);
-  TF.addOptionalField(fields, "backup_retention_period", params.backup_retention_period, TF.numberValue);
-  TF.addOptionalField(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "deletion_protection", params.deletion_protection, TF.booleanValue);
-  TF.addOptionalField(fields, "performance_insights_enabled", params.performance_insights_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "parameter_group_name", params.parameter_group_name, TF.stringValue);
-  TF.addOptionalField(fields, "db_subnet_group_name", params.db_subnet_group_name, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addOptionalField(fields, "skip_final_snapshot", params.skip_final_snapshot, TF.booleanValue);
-  TF.addOptionalField(fields, "final_snapshot_identifier", params.final_snapshot_identifier, TF.stringValue);
-  TF.addOptionalField(fields, "multi_az", params.multi_az, TF.booleanValue);
-  TF.addOptionalField(fields, "license_model", params.license_model, TF.stringValue);
-  TF.addOptionalField(fields, "auto_minor_version_upgrade", params.auto_minor_version_upgrade, TF.booleanValue);
-  TF.addOptionalField(fields, "replicate_source_db", params.replicate_source_db, TF.stringAliasValue);
-  TF.addOptionalField(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
-  TF.addOptionalField(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
-  TF.addOptionalField(fields, "storage_type", params.storage_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
-  TF.addOptionalField(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
-  TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
+  TF.addAttribute(fields, "allocated_storage", params.allocated_storage, TF.numberValue);
+  TF.addAttribute(fields, "engine", params.engine, TF.stringAliasValue);
+  TF.addAttribute(fields, "instance_class", params.instance_class, TF.stringAliasValue);
+  TF.addAttribute(fields, "username", params.username, TF.stringValue);
+  TF.addOptionalAttribute(fields, "password", params.password, TF.stringValue);
+  TF.addOptionalAttribute(fields, "engine_version", params.engine_version, TF.stringValue);
+  TF.addOptionalAttribute(fields, "identifier", params.identifier, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "publicly_accessible", params.publicly_accessible, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "backup_retention_period", params.backup_retention_period, TF.numberValue);
+  TF.addOptionalAttribute(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "deletion_protection", params.deletion_protection, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "performance_insights_enabled", params.performance_insights_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "parameter_group_name", params.parameter_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "db_subnet_group_name", params.db_subnet_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "skip_final_snapshot", params.skip_final_snapshot, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "final_snapshot_identifier", params.final_snapshot_identifier, TF.stringValue);
+  TF.addOptionalAttribute(fields, "multi_az", params.multi_az, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "license_model", params.license_model, TF.stringValue);
+  TF.addOptionalAttribute(fields, "auto_minor_version_upgrade", params.auto_minor_version_upgrade, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "replicate_source_db", params.replicate_source_db, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "apply_immediately", params.apply_immediately, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "storage_encrypted", params.storage_encrypted, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "storage_type", params.storage_type, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalAttribute(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
+  TF.addOptionalAttribute(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
   return fields;
 }
 
@@ -2971,11 +2971,11 @@ export interface DbParameterGroupParams {
 
 export function fieldsFromDbParameterGroupParams(params: DbParameterGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "family", params.family, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addOptionalField(fields, "parameter", params.parameter, TF.listValue((v) => TF.mapValue(fieldsFromDbParameterGroupParameterParams(v))));
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "family", params.family, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addRepeatedBlock(fields, "parameter", params.parameter, fieldsFromDbParameterGroupParameterParams);
   return fields;
 }
 
@@ -2988,10 +2988,10 @@ export interface DbParameterGroupParameterParams {
 
 export function fieldsFromDbParameterGroupParameterParams(params: DbParameterGroupParameterParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "value", params.value, TF.stringValue);
-  TF.addOptionalField(fields, "apply_method", params.apply_method, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
+  TF.addOptionalAttribute(fields, "apply_method", params.apply_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3003,9 +3003,9 @@ export interface EipParams {
 
 export function fieldsFromEipParams(params: EipParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "vpc", params.vpc, TF.booleanValue);
-  TF.addOptionalField(fields, "instance", params.instance, TF.resourceIdValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "vpc", params.vpc, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "instance", params.instance, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3020,12 +3020,12 @@ export interface VpcParams {
 
 export function fieldsFromVpcParams(params: VpcParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "cidr_block", params.cidr_block, TF.stringAliasValue);
-  TF.addOptionalField(fields, "instance_tenancy", params.instance_tenancy, TF.stringValue);
-  TF.addOptionalField(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "cidr_block", params.cidr_block, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "instance_tenancy", params.instance_tenancy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3038,10 +3038,10 @@ export interface DefaultVpcParams {
 
 export function fieldsFromDefaultVpcParams(params: DefaultVpcParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3055,11 +3055,11 @@ export interface SubnetParams {
 
 export function fieldsFromSubnetParams(params: SubnetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addField(fields, "cidr_block", params.cidr_block, TF.stringAliasValue);
-  TF.addOptionalField(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
-  TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "cidr_block", params.cidr_block, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3071,9 +3071,9 @@ export interface DefaultSubnetParams {
 
 export function fieldsFromDefaultSubnetParams(params: DefaultSubnetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
-  TF.addOptionalField(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "map_public_ip_on_launch", params.map_public_ip_on_launch, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3092,16 +3092,16 @@ export interface VpcEndpointParams {
 
 export function fieldsFromVpcEndpointParams(params: VpcEndpointParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "service_name", params.service_name, TF.stringValue);
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "auto_accept", params.auto_accept, TF.booleanValue);
-  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
-  TF.addOptionalField(fields, "private_dns_enabled", params.private_dns_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "route_table_ids", params.route_table_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addOptionalField(fields, "vpc_endpoint_type", params.vpc_endpoint_type, TF.stringValue);
+  TF.addAttribute(fields, "service_name", params.service_name, TF.stringValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "auto_accept", params.auto_accept, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "private_dns_enabled", params.private_dns_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "route_table_ids", params.route_table_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "vpc_endpoint_type", params.vpc_endpoint_type, TF.stringValue);
   return fields;
 }
 
@@ -3117,13 +3117,13 @@ export interface SecurityGroupParams {
 
 export function fieldsFromSecurityGroupParams(params: SecurityGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "ingress", params.ingress, TF.listValue((v) => TF.mapValue(fieldsFromIngressRuleParams(v))));
-  TF.addOptionalField(fields, "egress", params.egress, TF.listValue((v) => TF.mapValue(fieldsFromEgressRuleParams(v))));
-  TF.addOptionalField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addRepeatedBlock(fields, "ingress", params.ingress, fieldsFromIngressRuleParams);
+  TF.addRepeatedBlock(fields, "egress", params.egress, fieldsFromEgressRuleParams);
+  TF.addOptionalAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3140,14 +3140,14 @@ export interface SecurityGroupRuleParams {
 
 export function fieldsFromSecurityGroupRuleParams(params: SecurityGroupRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addField(fields, "from_port", params.from_port, TF.numberValue);
-  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addOptionalField(fields, "security_group_id", params.security_group_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "source_security_group_id", params.source_security_group_id, TF.resourceIdValue);
-  TF.addField(fields, "to_port", params.to_port, TF.numberValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "from_port", params.from_port, TF.numberValue);
+  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "security_group_id", params.security_group_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "source_security_group_id", params.source_security_group_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "to_port", params.to_port, TF.numberValue);
   return fields;
 }
 
@@ -3161,11 +3161,11 @@ export interface IngressRuleParams {
 
 export function fieldsFromIngressRuleParams(params: IngressRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "from_port", params.from_port, TF.numberValue);
-  TF.addField(fields, "to_port", params.to_port, TF.numberValue);
-  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "from_port", params.from_port, TF.numberValue);
+  TF.addAttribute(fields, "to_port", params.to_port, TF.numberValue);
+  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addAttribute(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -3179,11 +3179,11 @@ export interface EgressRuleParams {
 
 export function fieldsFromEgressRuleParams(params: EgressRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "from_port", params.from_port, TF.numberValue);
-  TF.addField(fields, "to_port", params.to_port, TF.numberValue);
-  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "from_port", params.from_port, TF.numberValue);
+  TF.addAttribute(fields, "to_port", params.to_port, TF.numberValue);
+  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addAttribute(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -3194,8 +3194,8 @@ export interface InternetGatewayParams {
 
 export function fieldsFromInternetGatewayParams(params: InternetGatewayParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3206,8 +3206,8 @@ export interface NatGatewayParams {
 
 export function fieldsFromNatGatewayParams(params: NatGatewayParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
-  TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -3218,8 +3218,8 @@ export interface RouteTableParams {
 
 export function fieldsFromRouteTableParams(params: RouteTableParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3240,10 +3240,10 @@ export interface RouteParams {
 
 export function fieldsFromRouteParams(params: RouteParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "route_table_id", params.route_table_id, TF.resourceIdValue);
-  TF.addField(fields, "destination_cidr_block", params.destination_cidr_block, TF.stringAliasValue);
-  TF.addOptionalField(fields, "nat_gateway_id", params.nat_gateway_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "gateway_id", params.gateway_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "route_table_id", params.route_table_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "destination_cidr_block", params.destination_cidr_block, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "nat_gateway_id", params.nat_gateway_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "gateway_id", params.gateway_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -3254,8 +3254,8 @@ export interface RouteTableAssociationParams {
 
 export function fieldsFromRouteTableAssociationParams(params: RouteTableAssociationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
-  TF.addField(fields, "route_table_id", params.route_table_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "route_table_id", params.route_table_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -3271,13 +3271,13 @@ export interface Route53RecordParams {
 
 export function fieldsFromRoute53RecordParams(params: Route53RecordParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "zone_id", params.zone_id, TF.stringAliasValue);
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "ttl", params.ttl, TF.stringValue);
-  TF.addOptionalField(fields, "records", params.records, TF.listValue(TF.quotedStringValue));
-  TF.addOptionalField(fields, "alias", params.alias, (v) => TF.mapValue(fieldsFromRoute53AliasParams(v)));
-  TF.addOptionalField(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
+  TF.addAttribute(fields, "zone_id", params.zone_id, TF.stringAliasValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ttl", params.ttl, TF.stringValue);
+  TF.addOptionalAttribute(fields, "records", params.records, TF.listValue(TF.stringValue));
+  TF.addOptionalBlock(fields, "alias", params.alias, fieldsFromRoute53AliasParams);
+  TF.addOptionalAttribute(fields, "allow_overwrite", params.allow_overwrite, TF.booleanValue);
   return fields;
 }
 
@@ -3289,9 +3289,9 @@ export interface Route53AliasParams {
 
 export function fieldsFromRoute53AliasParams(params: Route53AliasParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "zone_id", params.zone_id, TF.stringAliasValue);
-  TF.addField(fields, "evaluate_target_health", params.evaluate_target_health, TF.booleanValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "zone_id", params.zone_id, TF.stringAliasValue);
+  TF.addAttribute(fields, "evaluate_target_health", params.evaluate_target_health, TF.booleanValue);
   return fields;
 }
 
@@ -3302,8 +3302,8 @@ export interface BucketVersioningParams {
 
 export function fieldsFromBucketVersioningParams(params: BucketVersioningParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "mfa_delete", params.mfa_delete, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "mfa_delete", params.mfa_delete, TF.booleanValue);
   return fields;
 }
 
@@ -3321,9 +3321,9 @@ export interface ExpirationParams {
 
 export function fieldsFromExpirationParams(params: ExpirationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "days", params.days, TF.numberValue);
-  TF.addOptionalField(fields, "date", params.date, TF.stringValue);
-  TF.addOptionalField(fields, "expired_object_delete_marker", params.expired_object_delete_marker, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "days", params.days, TF.numberValue);
+  TF.addOptionalAttribute(fields, "date", params.date, TF.stringValue);
+  TF.addOptionalAttribute(fields, "expired_object_delete_marker", params.expired_object_delete_marker, TF.booleanValue);
   return fields;
 }
 
@@ -3344,9 +3344,9 @@ export interface TransitionParams {
 
 export function fieldsFromTransitionParams(params: TransitionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "date", params.date, TF.stringValue);
-  TF.addOptionalField(fields, "days", params.days, TF.numberValue);
-  TF.addField(fields, "storage_class", params.storage_class, TF.stringValue);
+  TF.addOptionalAttribute(fields, "date", params.date, TF.stringValue);
+  TF.addOptionalAttribute(fields, "days", params.days, TF.numberValue);
+  TF.addAttribute(fields, "storage_class", params.storage_class, TF.stringValue);
   return fields;
 }
 
@@ -3360,11 +3360,11 @@ export interface LifecycleRuleParams {
 
 export function fieldsFromLifecycleRuleParams(params: LifecycleRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addOptionalField(fields, "prefix", params.prefix, TF.stringValue);
-  TF.addField(fields, "enabled", params.enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "expiration", params.expiration, (v) => TF.mapValue(fieldsFromExpirationParams(v)));
-  TF.addOptionalField(fields, "transition", params.transition, (v) => TF.mapValue(fieldsFromTransitionParams(v)));
+  TF.addOptionalAttribute(fields, "id", params.id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalBlock(fields, "expiration", params.expiration, fieldsFromExpirationParams);
+  TF.addOptionalBlock(fields, "transition", params.transition, fieldsFromTransitionParams);
   return fields;
 }
 
@@ -3378,11 +3378,11 @@ export interface CorsRuleParams {
 
 export function fieldsFromCorsRuleParams(params: CorsRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "allowed_headers", params.allowed_headers, TF.listValue(TF.stringValue));
-  TF.addField(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
-  TF.addField(fields, "allowed_origins", params.allowed_origins, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "expose_headers", params.expose_headers, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "max_age_seconds", params.max_age_seconds, TF.numberValue);
+  TF.addOptionalAttribute(fields, "allowed_headers", params.allowed_headers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "allowed_origins", params.allowed_origins, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "expose_headers", params.expose_headers, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "max_age_seconds", params.max_age_seconds, TF.numberValue);
   return fields;
 }
 
@@ -3393,8 +3393,8 @@ export interface ApplyServerSideEncryptionByDefaultParams {
 
 export function fieldsFromApplyServerSideEncryptionByDefaultParams(params: ApplyServerSideEncryptionByDefaultParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "sse_algorithm", params.sse_algorithm, TF.stringValue);
-  TF.addOptionalField(fields, "kms_master_key_id", params.kms_master_key_id, TF.stringValue);
+  TF.addAttribute(fields, "sse_algorithm", params.sse_algorithm, TF.stringValue);
+  TF.addOptionalAttribute(fields, "kms_master_key_id", params.kms_master_key_id, TF.stringValue);
   return fields;
 }
 
@@ -3405,8 +3405,8 @@ export interface SseRuleParams {
 
 export function fieldsFromSseRuleParams(params: SseRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "apply_server_side_encryption_by_default", params.apply_server_side_encryption_by_default, (v) => TF.mapValue(fieldsFromApplyServerSideEncryptionByDefaultParams(v)));
-  TF.addOptionalField(fields, "bucket_key_enabled", params.bucket_key_enabled, TF.booleanValue);
+  TF.addBlock(fields, "apply_server_side_encryption_by_default", params.apply_server_side_encryption_by_default, fieldsFromApplyServerSideEncryptionByDefaultParams);
+  TF.addOptionalAttribute(fields, "bucket_key_enabled", params.bucket_key_enabled, TF.booleanValue);
   return fields;
 }
 
@@ -3416,7 +3416,7 @@ export interface ServerSideEncryptionConfigurationParams {
 
 export function fieldsFromServerSideEncryptionConfigurationParams(params: ServerSideEncryptionConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromSseRuleParams(v)));
+  TF.addBlock(fields, "rule", params.rule, fieldsFromSseRuleParams);
   return fields;
 }
 
@@ -3434,15 +3434,15 @@ export interface S3BucketParams {
 
 export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "acl", params.acl, TF.stringAliasValue);
-  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
-  TF.addOptionalField(fields, "versioning", params.versioning, (v) => TF.mapValue(fieldsFromBucketVersioningParams(v)));
-  TF.addOptionalField(fields, "lifecycle_rule", params.lifecycle_rule, TF.listValue((v) => TF.mapValue(fieldsFromLifecycleRuleParams(v))));
-  TF.addOptionalField(fields, "cors_rule", params.cors_rule, (v) => TF.mapValue(fieldsFromCorsRuleParams(v)));
-  TF.addOptionalField(fields, "server_side_encryption_configuration", params.server_side_encryption_configuration, (v) => TF.mapValue(fieldsFromServerSideEncryptionConfigurationParams(v)));
-  TF.addOptionalField(fields, "website", params.website, (v) => TF.mapValue(fieldsFromWebsiteParams(v)));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "acl", params.acl, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalBlock(fields, "versioning", params.versioning, fieldsFromBucketVersioningParams);
+  TF.addRepeatedBlock(fields, "lifecycle_rule", params.lifecycle_rule, fieldsFromLifecycleRuleParams);
+  TF.addOptionalBlock(fields, "cors_rule", params.cors_rule, fieldsFromCorsRuleParams);
+  TF.addOptionalBlock(fields, "server_side_encryption_configuration", params.server_side_encryption_configuration, fieldsFromServerSideEncryptionConfigurationParams);
+  TF.addOptionalBlock(fields, "website", params.website, fieldsFromWebsiteParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3453,8 +3453,8 @@ export interface S3BucketPolicyParams {
 
 export function fieldsFromS3BucketPolicyParams(params: S3BucketPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }
 
@@ -3467,10 +3467,10 @@ export interface WebsiteParams {
 
 export function fieldsFromWebsiteParams(params: WebsiteParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "index_document", params.index_document, TF.stringValue);
-  TF.addOptionalField(fields, "error_document", params.error_document, TF.stringValue);
-  TF.addOptionalField(fields, "redirect_all_requests_to", params.redirect_all_requests_to, TF.stringValue);
-  TF.addOptionalField(fields, "routing_rules", params.routing_rules, TF.stringValue);
+  TF.addOptionalAttribute(fields, "index_document", params.index_document, TF.stringValue);
+  TF.addOptionalAttribute(fields, "error_document", params.error_document, TF.stringValue);
+  TF.addOptionalAttribute(fields, "redirect_all_requests_to", params.redirect_all_requests_to, TF.stringValue);
+  TF.addOptionalAttribute(fields, "routing_rules", params.routing_rules, TF.stringValue);
   return fields;
 }
 
@@ -3483,10 +3483,10 @@ export interface S3BucketObjectParams {
 
 export function fieldsFromS3BucketObjectParams(params: S3BucketObjectParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addField(fields, "key", params.key, TF.stringValue);
-  TF.addOptionalField(fields, "source", params.source, TF.stringValue);
-  TF.addOptionalField(fields, "content", params.content, TF.stringValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addAttribute(fields, "key", params.key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "source", params.source, TF.stringValue);
+  TF.addOptionalAttribute(fields, "content", params.content, TF.stringValue);
   return fields;
 }
 
@@ -3500,11 +3500,11 @@ export interface S3BucketPublicAccessBlockParams {
 
 export function fieldsFromS3BucketPublicAccessBlockParams(params: S3BucketPublicAccessBlockParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "block_public_acls", params.block_public_acls, TF.booleanValue);
-  TF.addOptionalField(fields, "block_public_policy", params.block_public_policy, TF.booleanValue);
-  TF.addOptionalField(fields, "ignore_public_acls", params.ignore_public_acls, TF.booleanValue);
-  TF.addOptionalField(fields, "restrict_public_buckets", params.restrict_public_buckets, TF.booleanValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "block_public_acls", params.block_public_acls, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "block_public_policy", params.block_public_policy, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "ignore_public_acls", params.ignore_public_acls, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "restrict_public_buckets", params.restrict_public_buckets, TF.booleanValue);
   return fields;
 }
 
@@ -3515,8 +3515,8 @@ export interface S3BucketOwnershipControlsParams {
 
 export function fieldsFromS3BucketOwnershipControlsParams(params: S3BucketOwnershipControlsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromS3BucketOwnershipControlsRuleParams(v)));
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addBlock(fields, "rule", params.rule, fieldsFromS3BucketOwnershipControlsRuleParams);
   return fields;
 }
 
@@ -3526,7 +3526,7 @@ export interface S3BucketOwnershipControlsRuleParams {
 
 export function fieldsFromS3BucketOwnershipControlsRuleParams(params: S3BucketOwnershipControlsRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "object_ownership", params.object_ownership, TF.stringValue);
+  TF.addOptionalAttribute(fields, "object_ownership", params.object_ownership, TF.stringValue);
   return fields;
 }
 
@@ -3537,8 +3537,8 @@ export interface SnsTopicParams {
 
 export function fieldsFromSnsTopicParams(params: SnsTopicParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "display_name", params.display_name, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "display_name", params.display_name, TF.stringValue);
   return fields;
 }
 
@@ -3550,9 +3550,9 @@ export interface SnsSmsPreferencesParams {
 
 export function fieldsFromSnsSmsPreferencesParams(params: SnsSmsPreferencesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "monthly_spend_limit", params.monthly_spend_limit, TF.numberValue);
-  TF.addOptionalField(fields, "default_sender_id", params.default_sender_id, TF.stringValue);
-  TF.addOptionalField(fields, "default_sms_type", params.default_sms_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "monthly_spend_limit", params.monthly_spend_limit, TF.numberValue);
+  TF.addOptionalAttribute(fields, "default_sender_id", params.default_sender_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "default_sms_type", params.default_sms_type, TF.stringValue);
   return fields;
 }
 
@@ -3564,9 +3564,9 @@ export interface IamUserParams {
 
 export function fieldsFromIamUserParams(params: IamUserParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addOptionalField(fields, "force_destroy", params.force_destroy, TF.booleanValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "force_destroy", params.force_destroy, TF.booleanValue);
   return fields;
 }
 
@@ -3578,9 +3578,9 @@ export interface IamUserPolicyParams {
 
 export function fieldsFromIamUserPolicyParams(params: IamUserPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "policy", params.policy, TF.stringValue);
-  TF.addField(fields, "user", params.user, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addAttribute(fields, "user", params.user, TF.stringValue);
   return fields;
 }
 
@@ -3591,8 +3591,8 @@ export interface IamUserPolicyAttachmentParams {
 
 export function fieldsFromIamUserPolicyAttachmentParams(params: IamUserPolicyAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "user", params.user, TF.stringValue);
-  TF.addField(fields, "policy_arn", params.policy_arn, TF.stringAliasValue);
+  TF.addAttribute(fields, "user", params.user, TF.stringValue);
+  TF.addAttribute(fields, "policy_arn", params.policy_arn, TF.stringAliasValue);
   return fields;
 }
 
@@ -3603,8 +3603,8 @@ export interface IamGroupParams {
 
 export function fieldsFromIamGroupParams(params: IamGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
   return fields;
 }
 
@@ -3616,9 +3616,9 @@ export interface IamGroupPolicyParams {
 
 export function fieldsFromIamGroupPolicyParams(params: IamGroupPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "policy", params.policy, TF.stringValue);
-  TF.addField(fields, "group", params.group, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addAttribute(fields, "group", params.group, TF.stringValue);
   return fields;
 }
 
@@ -3632,11 +3632,11 @@ export interface EcrRepositoryParams {
 
 export function fieldsFromEcrRepositoryParams(params: EcrRepositoryParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "encryption_configuration", params.encryption_configuration, (v) => TF.mapValue(fieldsFromEcrRepositoryEncryptionConfigurationParams(v)));
-  TF.addOptionalField(fields, "image_tag_mutability", params.image_tag_mutability, TF.stringValue);
-  TF.addOptionalField(fields, "image_scanning_configuration", params.image_scanning_configuration, (v) => TF.mapValue(fieldsFromEcrRepositoryImageScanningConfigurationParams(v)));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalBlock(fields, "encryption_configuration", params.encryption_configuration, fieldsFromEcrRepositoryEncryptionConfigurationParams);
+  TF.addOptionalAttribute(fields, "image_tag_mutability", params.image_tag_mutability, TF.stringValue);
+  TF.addOptionalBlock(fields, "image_scanning_configuration", params.image_scanning_configuration, fieldsFromEcrRepositoryImageScanningConfigurationParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3646,7 +3646,7 @@ export interface EcrRepositoryImageScanningConfigurationParams {
 
 export function fieldsFromEcrRepositoryImageScanningConfigurationParams(params: EcrRepositoryImageScanningConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "scan_on_push", params.scan_on_push, TF.booleanValue);
+  TF.addAttribute(fields, "scan_on_push", params.scan_on_push, TF.booleanValue);
   return fields;
 }
 
@@ -3657,8 +3657,8 @@ export interface EcrRepositoryEncryptionConfigurationParams {
 
 export function fieldsFromEcrRepositoryEncryptionConfigurationParams(params: EcrRepositoryEncryptionConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "encryption_type", params.encryption_type, TF.stringValue);
-  TF.addOptionalField(fields, "kms_key", params.kms_key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "encryption_type", params.encryption_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "kms_key", params.kms_key, TF.stringValue);
   return fields;
 }
 
@@ -3671,10 +3671,10 @@ export interface DbSubnetGroupParams {
 
 export function fieldsFromDbSubnetGroupParams(params: DbSubnetGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3727,23 +3727,23 @@ export interface CloudwatchMetricAlarmParams {
 
 export function fieldsFromCloudwatchMetricAlarmParams(params: CloudwatchMetricAlarmParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "alarm_name", params.alarm_name, TF.stringValue);
-  TF.addField(fields, "comparison_operator", params.comparison_operator, TF.stringValue);
-  TF.addField(fields, "evaluation_periods", params.evaluation_periods, TF.numberValue);
-  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
-  TF.addField(fields, "namespace", params.namespace, TF.stringValue);
-  TF.addField(fields, "period", params.period, TF.numberValue);
-  TF.addField(fields, "statistic", params.statistic, TF.stringValue);
-  TF.addField(fields, "threshold", params.threshold, TF.numberValue);
-  TF.addOptionalField(fields, "actions_enabled", params.actions_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "alarm_actions", params.alarm_actions, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "alarm_description", params.alarm_description, TF.stringValue);
-  TF.addOptionalField(fields, "datapoints_to_alarm", params.datapoints_to_alarm, TF.numberValue);
-  TF.addOptionalField(fields, "dimensions", params.dimensions, TF.tagsValue);
-  TF.addOptionalField(fields, "insufficient_data_actions", params.insufficient_data_actions, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "ok_actions", params.ok_actions, TF.listValue(TF.stringAliasValue));
-  TF.addOptionalField(fields, "unit", params.unit, TF.stringValue);
-  TF.addOptionalField(fields, "treat_missing_data", params.treat_missing_data, TF.stringValue);
+  TF.addAttribute(fields, "alarm_name", params.alarm_name, TF.stringValue);
+  TF.addAttribute(fields, "comparison_operator", params.comparison_operator, TF.stringValue);
+  TF.addAttribute(fields, "evaluation_periods", params.evaluation_periods, TF.numberValue);
+  TF.addAttribute(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addAttribute(fields, "namespace", params.namespace, TF.stringValue);
+  TF.addAttribute(fields, "period", params.period, TF.numberValue);
+  TF.addAttribute(fields, "statistic", params.statistic, TF.stringValue);
+  TF.addAttribute(fields, "threshold", params.threshold, TF.numberValue);
+  TF.addOptionalAttribute(fields, "actions_enabled", params.actions_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "alarm_actions", params.alarm_actions, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "alarm_description", params.alarm_description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "datapoints_to_alarm", params.datapoints_to_alarm, TF.numberValue);
+  TF.addOptionalAttribute(fields, "dimensions", params.dimensions, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "insufficient_data_actions", params.insufficient_data_actions, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "ok_actions", params.ok_actions, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalAttribute(fields, "unit", params.unit, TF.stringValue);
+  TF.addOptionalAttribute(fields, "treat_missing_data", params.treat_missing_data, TF.stringValue);
   return fields;
 }
 
@@ -3757,11 +3757,11 @@ export interface IamInstanceProfileParams {
 
 export function fieldsFromIamInstanceProfileParams(params: IamInstanceProfileParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addOptionalField(fields, "roles", params.roles, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "role", params.role, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "roles", params.roles, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "role", params.role, TF.stringValue);
   return fields;
 }
 
@@ -3776,12 +3776,12 @@ export interface IamRoleParams {
 
 export function fieldsFromIamRoleParams(params: IamRoleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addField(fields, "assume_role_policy", params.assume_role_policy, TF.stringValue);
-  TF.addOptionalField(fields, "max_session_duration", params.max_session_duration, TF.numberValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addAttribute(fields, "assume_role_policy", params.assume_role_policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "max_session_duration", params.max_session_duration, TF.numberValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -3793,9 +3793,9 @@ export interface IamRolePolicyParams {
 
 export function fieldsFromIamRolePolicyParams(params: IamRolePolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "policy", params.policy, TF.stringValue);
-  TF.addField(fields, "role", params.role, TF.resourceIdValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addAttribute(fields, "role", params.role, TF.resourceIdValue);
   return fields;
 }
 
@@ -3809,11 +3809,11 @@ export interface IamPolicyParams {
 
 export function fieldsFromIamPolicyParams(params: IamPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addField(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }
 
@@ -3824,8 +3824,8 @@ export interface IamRolePolicyAttachmentParams {
 
 export function fieldsFromIamRolePolicyAttachmentParams(params: IamRolePolicyAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "role", params.role, TF.stringValue);
-  TF.addField(fields, "policy_arn", params.policy_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "role", params.role, TF.stringValue);
+  TF.addAttribute(fields, "policy_arn", params.policy_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -3846,18 +3846,18 @@ export interface SqsQueueParams {
 
 export function fieldsFromSqsQueueParams(params: SqsQueueParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "visibility_timeout_seconds", params.visibility_timeout_seconds, TF.numberValue);
-  TF.addOptionalField(fields, "message_retention_seconds ", params.message_retention_seconds , TF.numberValue);
-  TF.addOptionalField(fields, "max_message_size", params.max_message_size, TF.numberValue);
-  TF.addOptionalField(fields, "delay_seconds", params.delay_seconds, TF.numberValue);
-  TF.addOptionalField(fields, "receive_wait_time_seconds", params.receive_wait_time_seconds, TF.numberValue);
-  TF.addOptionalField(fields, "policy", params.policy, TF.stringValue);
-  TF.addOptionalField(fields, "redrive_policy", params.redrive_policy, TF.stringValue);
-  TF.addOptionalField(fields, "fifo_queue", params.fifo_queue, TF.booleanValue);
-  TF.addOptionalField(fields, "content_based_deduplication", params.content_based_deduplication, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "visibility_timeout_seconds", params.visibility_timeout_seconds, TF.numberValue);
+  TF.addOptionalAttribute(fields, "message_retention_seconds ", params.message_retention_seconds , TF.numberValue);
+  TF.addOptionalAttribute(fields, "max_message_size", params.max_message_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "delay_seconds", params.delay_seconds, TF.numberValue);
+  TF.addOptionalAttribute(fields, "receive_wait_time_seconds", params.receive_wait_time_seconds, TF.numberValue);
+  TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "redrive_policy", params.redrive_policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "fifo_queue", params.fifo_queue, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "content_based_deduplication", params.content_based_deduplication, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3868,8 +3868,8 @@ export interface SqsQueuePolicyParams {
 
 export function fieldsFromSqsQueuePolicyParams(params: SqsQueuePolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "queue_url", params.queue_url, TF.stringValue);
-  TF.addField(fields, "policy", params.policy, TF.stringValue);
+  TF.addAttribute(fields, "queue_url", params.queue_url, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }
 
@@ -3892,20 +3892,20 @@ export interface LbParams {
 
 export function fieldsFromLbParams(params: LbParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "internal", params.internal, TF.booleanValue);
-  TF.addOptionalField(fields, "load_balancer_type", params.load_balancer_type, TF.stringValue);
-  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "access_logs", params.access_logs, (v) => TF.mapValue(fieldsFromLbAccessLogsParams(v)));
-  TF.addOptionalField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "subnet_mapping", params.subnet_mapping, TF.listValue((v) => TF.mapValue(fieldsFromLbSubnetMappingParams(v))));
-  TF.addOptionalField(fields, "idle_timeout", params.idle_timeout, TF.numberValue);
-  TF.addOptionalField(fields, "enable_deletion_protection", params.enable_deletion_protection, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_cross_zone_load_balancing", params.enable_cross_zone_load_balancing, TF.booleanValue);
-  TF.addOptionalField(fields, "enable_http2", params.enable_http2, TF.booleanValue);
-  TF.addOptionalField(fields, "ip_address_type", params.ip_address_type, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "internal", params.internal, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "load_balancer_type", params.load_balancer_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalBlock(fields, "access_logs", params.access_logs, fieldsFromLbAccessLogsParams);
+  TF.addOptionalAttribute(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
+  TF.addRepeatedBlock(fields, "subnet_mapping", params.subnet_mapping, fieldsFromLbSubnetMappingParams);
+  TF.addOptionalAttribute(fields, "idle_timeout", params.idle_timeout, TF.numberValue);
+  TF.addOptionalAttribute(fields, "enable_deletion_protection", params.enable_deletion_protection, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_cross_zone_load_balancing", params.enable_cross_zone_load_balancing, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_http2", params.enable_http2, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "ip_address_type", params.ip_address_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -3918,10 +3918,10 @@ export interface LbAccessLogsParams {
 
 export function fieldsFromLbAccessLogsParams(params: LbAccessLogsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "bucket_prefix", params.bucket_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "interval", params.interval, TF.numberValue);
-  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "bucket_prefix", params.bucket_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "interval", params.interval, TF.numberValue);
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
   return fields;
 }
 
@@ -3932,8 +3932,8 @@ export interface LbSubnetMappingParams {
 
 export function fieldsFromLbSubnetMappingParams(params: LbSubnetMappingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
-  TF.addField(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "subnet_id", params.subnet_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "allocation_id", params.allocation_id, TF.resourceIdValue);
   return fields;
 }
 
@@ -3948,12 +3948,12 @@ export interface LbListenerParams {
 
 export function fieldsFromLbListenerParams(params: LbListenerParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "load_balancer_arn", params.load_balancer_arn, TF.resourceArnValue);
-  TF.addField(fields, "port", params.port, TF.numberValue);
-  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addOptionalField(fields, "ssl_policy", params.ssl_policy, TF.stringValue);
-  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
-  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
+  TF.addAttribute(fields, "load_balancer_arn", params.load_balancer_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ssl_policy", params.ssl_policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addBlock(fields, "default_action", params.default_action, fieldsFromLbListenerActionParams);
   return fields;
 }
 
@@ -3966,10 +3966,10 @@ export interface LbListenerActionParams {
 
 export function fieldsFromLbListenerActionParams(params: LbListenerActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "redirect", params.redirect, (v) => TF.mapValue(fieldsFromLbListenerActionRedirectParams(v)));
-  TF.addOptionalField(fields, "fixed_response", params.fixed_response, (v) => TF.mapValue(fieldsFromLbListenerActionFixedResponseParams(v)));
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
+  TF.addOptionalBlock(fields, "redirect", params.redirect, fieldsFromLbListenerActionRedirectParams);
+  TF.addOptionalBlock(fields, "fixed_response", params.fixed_response, fieldsFromLbListenerActionFixedResponseParams);
   return fields;
 }
 
@@ -3984,12 +3984,12 @@ export interface LbListenerActionRedirectParams {
 
 export function fieldsFromLbListenerActionRedirectParams(params: LbListenerActionRedirectParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "host", params.host, TF.stringValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addOptionalField(fields, "port", params.port, TF.stringValue);
-  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addOptionalField(fields, "query", params.query, TF.stringValue);
-  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
+  TF.addOptionalAttribute(fields, "host", params.host, TF.stringValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.stringValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "query", params.query, TF.stringValue);
+  TF.addAttribute(fields, "status_code", params.status_code, TF.stringValue);
   return fields;
 }
 
@@ -4001,9 +4001,9 @@ export interface LbListenerActionFixedResponseParams {
 
 export function fieldsFromLbListenerActionFixedResponseParams(params: LbListenerActionFixedResponseParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "content_type", params.content_type, TF.stringValue);
-  TF.addOptionalField(fields, "message_body", params.message_body, TF.stringValue);
-  TF.addOptionalField(fields, "status_code", params.status_code, TF.numberValue);
+  TF.addAttribute(fields, "content_type", params.content_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "message_body", params.message_body, TF.stringValue);
+  TF.addOptionalAttribute(fields, "status_code", params.status_code, TF.numberValue);
   return fields;
 }
 
@@ -4024,18 +4024,18 @@ export interface LbTargetGroupParams {
 
 export function fieldsFromLbTargetGroupParams(params: LbTargetGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addField(fields, "port", params.port, TF.numberValue);
-  TF.addField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
-  TF.addOptionalField(fields, "slow_start", params.slow_start, TF.numberValue);
-  TF.addOptionalField(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
-  TF.addOptionalField(fields, "stickiness", params.stickiness, (v) => TF.mapValue(fieldsFromLbTargetGroupStickinessParams(v)));
-  TF.addOptionalField(fields, "health_check", params.health_check, (v) => TF.mapValue(fieldsFromLbTargetGroupHealthCheckParams(v)));
-  TF.addOptionalField(fields, "target_type", params.target_type, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
+  TF.addOptionalAttribute(fields, "slow_start", params.slow_start, TF.numberValue);
+  TF.addOptionalAttribute(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
+  TF.addOptionalBlock(fields, "stickiness", params.stickiness, fieldsFromLbTargetGroupStickinessParams);
+  TF.addOptionalBlock(fields, "health_check", params.health_check, fieldsFromLbTargetGroupHealthCheckParams);
+  TF.addOptionalAttribute(fields, "target_type", params.target_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4052,14 +4052,14 @@ export interface LbTargetGroupHealthCheckParams {
 
 export function fieldsFromLbTargetGroupHealthCheckParams(params: LbTargetGroupHealthCheckParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "interval", params.interval, TF.numberValue);
-  TF.addOptionalField(fields, "path", params.path, TF.stringValue);
-  TF.addOptionalField(fields, "port", params.port, TF.stringValue);
-  TF.addOptionalField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addOptionalField(fields, "timeout", params.timeout, TF.numberValue);
-  TF.addOptionalField(fields, "healthy_threshold", params.healthy_threshold, TF.numberValue);
-  TF.addOptionalField(fields, "unhealthy_threshold", params.unhealthy_threshold, TF.numberValue);
-  TF.addOptionalField(fields, "matcher", params.matcher, TF.stringValue);
+  TF.addOptionalAttribute(fields, "interval", params.interval, TF.numberValue);
+  TF.addOptionalAttribute(fields, "path", params.path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.stringValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalAttribute(fields, "healthy_threshold", params.healthy_threshold, TF.numberValue);
+  TF.addOptionalAttribute(fields, "unhealthy_threshold", params.unhealthy_threshold, TF.numberValue);
+  TF.addOptionalAttribute(fields, "matcher", params.matcher, TF.stringValue);
   return fields;
 }
 
@@ -4071,9 +4071,9 @@ export interface LbTargetGroupStickinessParams {
 
 export function fieldsFromLbTargetGroupStickinessParams(params: LbTargetGroupStickinessParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addOptionalField(fields, "cookie_duration", params.cookie_duration, TF.numberValue);
-  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cookie_duration", params.cookie_duration, TF.numberValue);
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
   return fields;
 }
 
@@ -4086,10 +4086,10 @@ export interface LbTargetGroupAttachmentParams {
 
 export function fieldsFromLbTargetGroupAttachmentParams(params: LbTargetGroupAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
-  TF.addField(fields, "target_id", params.target_id, TF.stringValue);
-  TF.addOptionalField(fields, "port", params.port, TF.numberValue);
-  TF.addOptionalField(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
+  TF.addAttribute(fields, "target_group_arn", params.target_group_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "target_id", params.target_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "availability_zone", params.availability_zone, TF.stringAliasValue);
   return fields;
 }
 
@@ -4102,10 +4102,10 @@ export interface LbListenerRuleParams {
 
 export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "priority", params.priority, TF.numberValue);
-  TF.addField(fields, "action", params.action, (v) => TF.mapValue(fieldsFromLbListenerActionParams(v)));
-  TF.addField(fields, "condition", params.condition, (v) => TF.mapValue(fieldsFromLbListenerRuleConditionParams(v)));
+  TF.addAttribute(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "priority", params.priority, TF.numberValue);
+  TF.addBlock(fields, "action", params.action, fieldsFromLbListenerActionParams);
+  TF.addBlock(fields, "condition", params.condition, fieldsFromLbListenerRuleConditionParams);
   return fields;
 }
 
@@ -4115,7 +4115,7 @@ export interface LbListenerRuleValuesParams {
 
 export function fieldsFromLbListenerRuleValuesParams(params: LbListenerRuleValuesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "values", params.values, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -4128,10 +4128,10 @@ export interface LbListenerRuleConditionParams {
 
 export function fieldsFromLbListenerRuleConditionParams(params: LbListenerRuleConditionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "host_header", params.host_header, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
-  TF.addOptionalField(fields, "http_request_method", params.http_request_method, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
-  TF.addOptionalField(fields, "path_pattern", params.path_pattern, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
-  TF.addOptionalField(fields, "source_ip", params.source_ip, (v) => TF.mapValue(fieldsFromLbListenerRuleValuesParams(v)));
+  TF.addOptionalBlock(fields, "host_header", params.host_header, fieldsFromLbListenerRuleValuesParams);
+  TF.addOptionalBlock(fields, "http_request_method", params.http_request_method, fieldsFromLbListenerRuleValuesParams);
+  TF.addOptionalBlock(fields, "path_pattern", params.path_pattern, fieldsFromLbListenerRuleValuesParams);
+  TF.addOptionalBlock(fields, "source_ip", params.source_ip, fieldsFromLbListenerRuleValuesParams);
   return fields;
 }
 
@@ -4144,10 +4144,10 @@ export interface CloudwatchLogGroupParams {
 
 export function fieldsFromCloudwatchLogGroupParams(params: CloudwatchLogGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "retention_in_days", params.retention_in_days, TF.numberValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "retention_in_days", params.retention_in_days, TF.numberValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4157,7 +4157,7 @@ export interface AwsParams {
 
 export function fieldsFromAwsParams(params: AwsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "region", params.region, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "region", params.region, TF.stringAliasValue);
   return fields;
 }
 
@@ -4176,16 +4176,16 @@ export interface ElasticsearchDomainParams {
 
 export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addOptionalField(fields, "access_policies", params.access_policies, TF.stringValue);
-  TF.addOptionalField(fields, "advanced_options", params.advanced_options, TF.tagsValue);
-  TF.addOptionalField(fields, "ebs_options", params.ebs_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainEbsOptionsParams(v)));
-  TF.addOptionalField(fields, "cluster_config", params.cluster_config, (v) => TF.mapValue(fieldsFromElasticsearchDomainClusterConfigParams(v)));
-  TF.addOptionalField(fields, "snapshot_options", params.snapshot_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainSnapshotOptionsParams(v)));
-  TF.addOptionalField(fields, "cognito_options", params.cognito_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainCognitoOptionsParams(v)));
-  TF.addOptionalField(fields, "vpc_options", params.vpc_options, (v) => TF.mapValue(fieldsFromElasticsearchDomainVpcOptionsParams(v)));
-  TF.addOptionalField(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "access_policies", params.access_policies, TF.stringValue);
+  TF.addOptionalAttribute(fields, "advanced_options", params.advanced_options, TF.tagsValue);
+  TF.addOptionalBlock(fields, "ebs_options", params.ebs_options, fieldsFromElasticsearchDomainEbsOptionsParams);
+  TF.addOptionalBlock(fields, "cluster_config", params.cluster_config, fieldsFromElasticsearchDomainClusterConfigParams);
+  TF.addOptionalBlock(fields, "snapshot_options", params.snapshot_options, fieldsFromElasticsearchDomainSnapshotOptionsParams);
+  TF.addOptionalBlock(fields, "cognito_options", params.cognito_options, fieldsFromElasticsearchDomainCognitoOptionsParams);
+  TF.addOptionalBlock(fields, "vpc_options", params.vpc_options, fieldsFromElasticsearchDomainVpcOptionsParams);
+  TF.addOptionalAttribute(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4200,12 +4200,12 @@ export interface ElasticsearchDomainClusterConfigParams {
 
 export function fieldsFromElasticsearchDomainClusterConfigParams(params: ElasticsearchDomainClusterConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "instance_count", params.instance_count, TF.numberValue);
-  TF.addOptionalField(fields, "dedicated_master_enabled", params.dedicated_master_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "dedicated_master_type", params.dedicated_master_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "dedicated_master_count", params.dedicated_master_count, TF.numberValue);
-  TF.addOptionalField(fields, "zone_awareness_enabled", params.zone_awareness_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "instance_count", params.instance_count, TF.numberValue);
+  TF.addOptionalAttribute(fields, "dedicated_master_enabled", params.dedicated_master_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "dedicated_master_type", params.dedicated_master_type, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "dedicated_master_count", params.dedicated_master_count, TF.numberValue);
+  TF.addOptionalAttribute(fields, "zone_awareness_enabled", params.zone_awareness_enabled, TF.booleanValue);
   return fields;
 }
 
@@ -4218,10 +4218,10 @@ export interface ElasticsearchDomainEbsOptionsParams {
 
 export function fieldsFromElasticsearchDomainEbsOptionsParams(params: ElasticsearchDomainEbsOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "ebs_enabled", params.ebs_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
-  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
+  TF.addAttribute(fields, "ebs_enabled", params.ebs_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
   return fields;
 }
 
@@ -4231,7 +4231,7 @@ export interface ElasticsearchDomainSnapshotOptionsParams {
 
 export function fieldsFromElasticsearchDomainSnapshotOptionsParams(params: ElasticsearchDomainSnapshotOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "automated_snapshot_start_hour", params.automated_snapshot_start_hour, TF.numberValue);
+  TF.addAttribute(fields, "automated_snapshot_start_hour", params.automated_snapshot_start_hour, TF.numberValue);
   return fields;
 }
 
@@ -4242,8 +4242,8 @@ export interface ElasticsearchDomainVpcOptionsParams {
 
 export function fieldsFromElasticsearchDomainVpcOptionsParams(params: ElasticsearchDomainVpcOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 
@@ -4256,10 +4256,10 @@ export interface ElasticsearchDomainCognitoOptionsParams {
 
 export function fieldsFromElasticsearchDomainCognitoOptionsParams(params: ElasticsearchDomainCognitoOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
-  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
-  TF.addField(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
-  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addAttribute(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -4270,8 +4270,8 @@ export interface ElasticsearchDomainPolicyParams {
 
 export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchDomainPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addOptionalField(fields, "access_policies", params.access_policies, TF.stringValue);
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "access_policies", params.access_policies, TF.stringValue);
   return fields;
 }
 
@@ -4284,10 +4284,10 @@ export interface AcmCertificateParams {
 
 export function fieldsFromAcmCertificateParams(params: AcmCertificateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addOptionalField(fields, "subject_alternative_names", params.subject_alternative_names, TF.listValue(TF.stringValue));
-  TF.addField(fields, "validation_method", params.validation_method, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "subject_alternative_names", params.subject_alternative_names, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "validation_method", params.validation_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4298,8 +4298,8 @@ export interface AcmCertificateValidationParams {
 
 export function fieldsFromAcmCertificateValidationParams(params: AcmCertificateValidationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "validation_record_fqdns", params.validation_record_fqdns, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "validation_record_fqdns", params.validation_record_fqdns, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -4310,8 +4310,8 @@ export interface LbListenerCertificateParams {
 
 export function fieldsFromLbListenerCertificateParams(params: LbListenerCertificateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
-  TF.addField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -4336,19 +4336,19 @@ export interface LaunchConfigurationParams {
 
 export function fieldsFromLaunchConfigurationParams(params: LaunchConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addField(fields, "image_id", params.image_id, TF.stringAliasValue);
-  TF.addField(fields, "instance_type", params.instance_type, TF.stringAliasValue);
-  TF.addOptionalField(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
-  TF.addOptionalField(fields, "key_name", params.key_name, TF.stringAliasValue);
-  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
-  TF.addOptionalField(fields, "user_data", params.user_data, TF.stringValue);
-  TF.addOptionalField(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
-  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
-  TF.addOptionalField(fields, "root_block_device", params.root_block_device, (v) => TF.mapValue(fieldsFromInstanceRootBlockDeviceParams(v)));
-  TF.addOptionalField(fields, "spot_price", params.spot_price, TF.numberStringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addAttribute(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addAttribute(fields, "instance_type", params.instance_type, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "key_name", params.key_name, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enable_monitoring", params.enable_monitoring, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
+  TF.addOptionalBlock(fields, "root_block_device", params.root_block_device, fieldsFromInstanceRootBlockDeviceParams);
+  TF.addOptionalAttribute(fields, "spot_price", params.spot_price, TF.numberStringValue);
   return fields;
 }
 
@@ -4363,12 +4363,12 @@ export interface LaunchTemplateBlockDeviceMappingEbsParams {
 
 export function fieldsFromLaunchTemplateBlockDeviceMappingEbsParams(params: LaunchTemplateBlockDeviceMappingEbsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
-  TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
-  TF.addOptionalField(fields, "snapshot_id", params.snapshot_id, TF.stringValue);
-  TF.addOptionalField(fields, "throughput", params.throughput, TF.numberValue);
-  TF.addOptionalField(fields, "volume_type", params.volume_type, TF.stringValue);
-  TF.addOptionalField(fields, "volume_size", params.volume_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
+  TF.addOptionalAttribute(fields, "snapshot_id", params.snapshot_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "throughput", params.throughput, TF.numberValue);
+  TF.addOptionalAttribute(fields, "volume_type", params.volume_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "volume_size", params.volume_size, TF.numberValue);
   return fields;
 }
 
@@ -4379,8 +4379,8 @@ export interface LaunchTemplateBlockDeviceMappingParams {
 
 export function fieldsFromLaunchTemplateBlockDeviceMappingParams(params: LaunchTemplateBlockDeviceMappingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "device_name", params.device_name, TF.stringValue);
-  TF.addField(fields, "ebs", params.ebs, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingEbsParams(v)));
+  TF.addAttribute(fields, "device_name", params.device_name, TF.stringValue);
+  TF.addBlock(fields, "ebs", params.ebs, fieldsFromLaunchTemplateBlockDeviceMappingEbsParams);
   return fields;
 }
 
@@ -4393,10 +4393,10 @@ export interface LaunchTemplateParams {
 
 export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingParams(v)));
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalBlock(fields, "block_device_mappings", params.block_device_mappings, fieldsFromLaunchTemplateBlockDeviceMappingParams);
   return fields;
 }
 
@@ -4408,9 +4408,9 @@ export interface CloudwatchLoggingOptionsParams {
 
 export function fieldsFromCloudwatchLoggingOptionsParams(params: CloudwatchLoggingOptionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "enabled", params.enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "log_group_name", params.log_group_name, TF.stringValue);
-  TF.addOptionalField(fields, "log_stream_name", params.log_stream_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "log_group_name", params.log_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "log_stream_name", params.log_stream_name, TF.stringValue);
   return fields;
 }
 
@@ -4424,11 +4424,11 @@ export interface ExtendedS3ConfigurationParams {
 
 export function fieldsFromExtendedS3ConfigurationParams(params: ExtendedS3ConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
-  TF.addField(fields, "bucket_arn", params.bucket_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "buffer_size", params.buffer_size, TF.numberValue);
-  TF.addOptionalField(fields, "buffer_interval", params.buffer_interval, TF.numberValue);
-  TF.addOptionalField(fields, "cloudwatch_logging_options", params.cloudwatch_logging_options, (v) => TF.mapValue(fieldsFromCloudwatchLoggingOptionsParams(v)));
+  TF.addAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "bucket_arn", params.bucket_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "buffer_size", params.buffer_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "buffer_interval", params.buffer_interval, TF.numberValue);
+  TF.addOptionalBlock(fields, "cloudwatch_logging_options", params.cloudwatch_logging_options, fieldsFromCloudwatchLoggingOptionsParams);
   return fields;
 }
 
@@ -4441,10 +4441,10 @@ export interface KinesisFirehoseDeliveryStreamParams {
 
 export function fieldsFromKinesisFirehoseDeliveryStreamParams(params: KinesisFirehoseDeliveryStreamParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "destination", params.destination, TF.stringValue);
-  TF.addOptionalField(fields, "extended_s3_configuration", params.extended_s3_configuration, (v) => TF.mapValue(fieldsFromExtendedS3ConfigurationParams(v)));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "destination", params.destination, TF.stringValue);
+  TF.addOptionalBlock(fields, "extended_s3_configuration", params.extended_s3_configuration, fieldsFromExtendedS3ConfigurationParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4455,8 +4455,8 @@ export interface S3BucketMetricParams {
 
 export function fieldsFromS3BucketMetricParams(params: S3BucketMetricParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
   return fields;
 }
 
@@ -4467,8 +4467,8 @@ export interface ElasticacheParameterGroupParameterParams {
 
 export function fieldsFromElasticacheParameterGroupParameterParams(params: ElasticacheParameterGroupParameterParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "value", params.value, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
   return fields;
 }
 
@@ -4481,10 +4481,10 @@ export interface ElasticacheParameterGroupParams {
 
 export function fieldsFromElasticacheParameterGroupParams(params: ElasticacheParameterGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "family", params.family, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "parameter", params.parameter, TF.listValue((v) => TF.mapValue(fieldsFromElasticacheParameterGroupParameterParams(v))));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "family", params.family, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addRepeatedBlock(fields, "parameter", params.parameter, fieldsFromElasticacheParameterGroupParameterParams);
   return fields;
 }
 
@@ -4496,9 +4496,9 @@ export interface ElasticacheSubnetGroupParams {
 
 export function fieldsFromElasticacheSubnetGroupParams(params: ElasticacheSubnetGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 
@@ -4517,16 +4517,16 @@ export interface ElasticacheClusterParams {
 
 export function fieldsFromElasticacheClusterParams(params: ElasticacheClusterParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "cluster_id", params.cluster_id, TF.stringValue);
-  TF.addField(fields, "engine", params.engine, TF.stringValue);
-  TF.addOptionalField(fields, "engine_version", params.engine_version, TF.stringValue);
-  TF.addField(fields, "node_type", params.node_type, TF.stringAliasValue);
-  TF.addField(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
-  TF.addField(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
-  TF.addOptionalField(fields, "port", params.port, TF.numberValue);
-  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "subnet_group_name", params.subnet_group_name, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "cluster_id", params.cluster_id, TF.stringValue);
+  TF.addAttribute(fields, "engine", params.engine, TF.stringValue);
+  TF.addOptionalAttribute(fields, "engine_version", params.engine_version, TF.stringValue);
+  TF.addAttribute(fields, "node_type", params.node_type, TF.stringAliasValue);
+  TF.addAttribute(fields, "num_cache_nodes", params.num_cache_nodes, TF.numberValue);
+  TF.addAttribute(fields, "parameter_group_name", params.parameter_group_name, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "subnet_group_name", params.subnet_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4537,8 +4537,8 @@ export interface VpcConfigParams {
 
 export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
-  TF.addField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 
@@ -4560,19 +4560,19 @@ export interface LambdaFunctionParams {
 
 export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "function_name", params.function_name, TF.stringValue);
-  TF.addOptionalField(fields, "filename", params.filename, TF.stringValue);
-  TF.addOptionalField(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
-  TF.addOptionalField(fields, "s3_key", params.s3_key, TF.stringValue);
-  TF.addOptionalField(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
-  TF.addField(fields, "role", params.role, TF.resourceArnValue);
-  TF.addField(fields, "handler", params.handler, TF.stringValue);
-  TF.addField(fields, "runtime", params.runtime, TF.stringAliasValue);
-  TF.addOptionalField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromVpcConfigParams(v)));
-  TF.addOptionalField(fields, "environment", params.environment, (v) => TF.mapValue(fieldsFromLambdaFunctionEnvironmentParams(v)));
-  TF.addOptionalField(fields, "timeout", params.timeout, TF.numberValue);
-  TF.addOptionalField(fields, "memory_size", params.memory_size, TF.numberValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "filename", params.filename, TF.stringValue);
+  TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
+  TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
+  TF.addAttribute(fields, "handler", params.handler, TF.stringValue);
+  TF.addAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
+  TF.addOptionalBlock(fields, "vpc_config", params.vpc_config, fieldsFromVpcConfigParams);
+  TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
+  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4582,7 +4582,7 @@ export interface LambdaFunctionEnvironmentParams {
 
 export function fieldsFromLambdaFunctionEnvironmentParams(params: LambdaFunctionEnvironmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "variables", params.variables, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "variables", params.variables, TF.tagsValue);
   return fields;
 }
 
@@ -4595,10 +4595,10 @@ export interface LambdaPermissionParams {
 
 export function fieldsFromLambdaPermissionParams(params: LambdaPermissionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "action", params.action, TF.stringAliasValue);
-  TF.addField(fields, "function_name", params.function_name, TF.stringValue);
-  TF.addField(fields, "principal", params.principal, TF.stringValue);
-  TF.addOptionalField(fields, "source_arn", params.source_arn, TF.stringAliasValue);
+  TF.addAttribute(fields, "action", params.action, TF.stringAliasValue);
+  TF.addAttribute(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addAttribute(fields, "principal", params.principal, TF.stringValue);
+  TF.addOptionalAttribute(fields, "source_arn", params.source_arn, TF.stringAliasValue);
   return fields;
 }
 
@@ -4615,14 +4615,14 @@ export interface CloudwatchEventRuleParams {
 
 export function fieldsFromCloudwatchEventRuleParams(params: CloudwatchEventRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "schedule_expression", params.schedule_expression, TF.stringValue);
-  TF.addOptionalField(fields, "event_pattern", params.event_pattern, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "is_enabled", params.is_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "schedule_expression", params.schedule_expression, TF.stringValue);
+  TF.addOptionalAttribute(fields, "event_pattern", params.event_pattern, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "is_enabled", params.is_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -4643,18 +4643,18 @@ export interface CloudwatchEventTargetParams {
 
 export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rule", params.rule, TF.stringValue);
-  TF.addField(fields, "arn", params.arn, TF.stringAliasValue);
-  TF.addOptionalField(fields, "input", params.input, TF.stringValue);
-  TF.addOptionalField(fields, "input_path", params.input_path, TF.stringValue);
-  TF.addOptionalField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "run_command_target", params.run_command_target, (v) => TF.mapValue(fieldsFromRunCommandTargetsParams(v)));
-  TF.addOptionalField(fields, "kinesis_target", params.kinesis_target, (v) => TF.mapValue(fieldsFromKinesisTargetParams(v)));
-  TF.addOptionalField(fields, "sqs_target", params.sqs_target, (v) => TF.mapValue(fieldsFromSqsTargetParams(v)));
-  TF.addOptionalField(fields, "http_target", params.http_target, (v) => TF.mapValue(fieldsFromHttpTargetParams(v)));
-  TF.addOptionalField(fields, "input_transformer", params.input_transformer, (v) => TF.mapValue(fieldsFromInputTransformerParams(v)));
-  TF.addOptionalField(fields, "retry_policy", params.retry_policy, (v) => TF.mapValue(fieldsFromRetryPolicyParams(v)));
-  TF.addOptionalField(fields, "dead_letter_config", params.dead_letter_config, (v) => TF.mapValue(fieldsFromDeadLetterConfigParams(v)));
+  TF.addAttribute(fields, "rule", params.rule, TF.stringValue);
+  TF.addAttribute(fields, "arn", params.arn, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "input", params.input, TF.stringValue);
+  TF.addOptionalAttribute(fields, "input_path", params.input_path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalBlock(fields, "run_command_target", params.run_command_target, fieldsFromRunCommandTargetsParams);
+  TF.addOptionalBlock(fields, "kinesis_target", params.kinesis_target, fieldsFromKinesisTargetParams);
+  TF.addOptionalBlock(fields, "sqs_target", params.sqs_target, fieldsFromSqsTargetParams);
+  TF.addOptionalBlock(fields, "http_target", params.http_target, fieldsFromHttpTargetParams);
+  TF.addOptionalBlock(fields, "input_transformer", params.input_transformer, fieldsFromInputTransformerParams);
+  TF.addOptionalBlock(fields, "retry_policy", params.retry_policy, fieldsFromRetryPolicyParams);
+  TF.addOptionalBlock(fields, "dead_letter_config", params.dead_letter_config, fieldsFromDeadLetterConfigParams);
   return fields;
 }
 
@@ -4672,8 +4672,8 @@ export interface RunCommandTargetsParams {
 
 export function fieldsFromRunCommandTargetsParams(params: RunCommandTargetsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "key", params.key, TF.stringValue);
-  TF.addField(fields, "values", params.values, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "key", params.key, TF.stringValue);
+  TF.addAttribute(fields, "values", params.values, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -4686,7 +4686,7 @@ export interface KinesisTargetParams {
 
 export function fieldsFromKinesisTargetParams(params: KinesisTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "partition_key_path", params.partition_key_path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "partition_key_path", params.partition_key_path, TF.stringValue);
   return fields;
 }
 
@@ -4699,7 +4699,7 @@ export interface SqsTargetParams {
 
 export function fieldsFromSqsTargetParams(params: SqsTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "message_group_id", params.message_group_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "message_group_id", params.message_group_id, TF.stringValue);
   return fields;
 }
 
@@ -4722,9 +4722,9 @@ export interface HttpTargetParams {
 
 export function fieldsFromHttpTargetParams(params: HttpTargetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "path_parameter_values", params.path_parameter_values, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "query_string_parameters", params.query_string_parameters, TF.tagsValue);
-  TF.addOptionalField(fields, "header_parameters", params.header_parameters, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "path_parameter_values", params.path_parameter_values, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "query_string_parameters", params.query_string_parameters, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "header_parameters", params.header_parameters, TF.tagsValue);
   return fields;
 }
 
@@ -4748,8 +4748,8 @@ export interface InputTransformerParams {
 
 export function fieldsFromInputTransformerParams(params: InputTransformerParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "input_paths", params.input_paths, TF.tagsValue);
-  TF.addField(fields, "input_template", params.input_template, TF.stringValue);
+  TF.addOptionalAttribute(fields, "input_paths", params.input_paths, TF.tagsValue);
+  TF.addAttribute(fields, "input_template", params.input_template, TF.stringValue);
   return fields;
 }
 
@@ -4766,8 +4766,8 @@ export interface RetryPolicyParams {
 
 export function fieldsFromRetryPolicyParams(params: RetryPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "maximum_event_age_in_seconds", params.maximum_event_age_in_seconds, TF.numberValue);
-  TF.addOptionalField(fields, "maximum_retry_attempts", params.maximum_retry_attempts, TF.numberValue);
+  TF.addOptionalAttribute(fields, "maximum_event_age_in_seconds", params.maximum_event_age_in_seconds, TF.numberValue);
+  TF.addOptionalAttribute(fields, "maximum_retry_attempts", params.maximum_retry_attempts, TF.numberValue);
   return fields;
 }
 
@@ -4780,7 +4780,7 @@ export interface DeadLetterConfigParams {
 
 export function fieldsFromDeadLetterConfigParams(params: DeadLetterConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "arn", params.arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "arn", params.arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -4791,8 +4791,8 @@ export interface FieldToMatchParams {
 
 export function fieldsFromFieldToMatchParams(params: FieldToMatchParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "data", params.data, TF.stringValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "data", params.data, TF.stringValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -4804,9 +4804,9 @@ export interface ByteMatchTuplesParams {
 
 export function fieldsFromByteMatchTuplesParams(params: ByteMatchTuplesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "field_to_match", params.field_to_match, (v) => TF.mapValue(fieldsFromFieldToMatchParams(v)));
-  TF.addField(fields, "positional_constraint", params.positional_constraint, TF.stringAliasValue);
-  TF.addOptionalField(fields, "target_string", params.target_string, TF.stringValue);
+  TF.addBlock(fields, "field_to_match", params.field_to_match, fieldsFromFieldToMatchParams);
+  TF.addAttribute(fields, "positional_constraint", params.positional_constraint, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "target_string", params.target_string, TF.stringValue);
   return fields;
 }
 
@@ -4817,8 +4817,8 @@ export interface WafByteMatchSetParams {
 
 export function fieldsFromWafByteMatchSetParams(params: WafByteMatchSetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "byte_match_tuples", params.byte_match_tuples, (v) => TF.mapValue(fieldsFromByteMatchTuplesParams(v)));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addBlock(fields, "byte_match_tuples", params.byte_match_tuples, fieldsFromByteMatchTuplesParams);
   return fields;
 }
 
@@ -4829,8 +4829,8 @@ export interface IpSetDescriptorsParams {
 
 export function fieldsFromIpSetDescriptorsParams(params: IpSetDescriptorsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addField(fields, "value", params.value, TF.stringValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
   return fields;
 }
 
@@ -4841,8 +4841,8 @@ export interface WafIpsetParams {
 
 export function fieldsFromWafIpsetParams(params: WafIpsetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "ip_set_descriptors", params.ip_set_descriptors, (v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v)));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addBlock(fields, "ip_set_descriptors", params.ip_set_descriptors, fieldsFromIpSetDescriptorsParams);
   return fields;
 }
 
@@ -4853,8 +4853,8 @@ export interface WafregionalRegexPatternSetParams {
 
 export function fieldsFromWafregionalRegexPatternSetParams(params: WafregionalRegexPatternSetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "regex_pattern_strings", params.regex_pattern_strings, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "regex_pattern_strings", params.regex_pattern_strings, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -4866,9 +4866,9 @@ export interface RegexMatchTupleParams {
 
 export function fieldsFromRegexMatchTupleParams(params: RegexMatchTupleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "field_to_match", params.field_to_match, (v) => TF.mapValue(fieldsFromFieldToMatchParams(v)));
-  TF.addField(fields, "regex_pattern_set_id", params.regex_pattern_set_id, TF.resourceIdValue);
-  TF.addField(fields, "text_transformation", params.text_transformation, TF.stringAliasValue);
+  TF.addBlock(fields, "field_to_match", params.field_to_match, fieldsFromFieldToMatchParams);
+  TF.addAttribute(fields, "regex_pattern_set_id", params.regex_pattern_set_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "text_transformation", params.text_transformation, TF.stringAliasValue);
   return fields;
 }
 
@@ -4879,8 +4879,8 @@ export interface WafregionalRegexMatchSetParams {
 
 export function fieldsFromWafregionalRegexMatchSetParams(params: WafregionalRegexMatchSetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "regex_match_tuple", params.regex_match_tuple, (v) => TF.mapValue(fieldsFromRegexMatchTupleParams(v)));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addBlock(fields, "regex_match_tuple", params.regex_match_tuple, fieldsFromRegexMatchTupleParams);
   return fields;
 }
 
@@ -4891,8 +4891,8 @@ export interface WafregionalIpsetParams {
 
 export function fieldsFromWafregionalIpsetParams(params: WafregionalIpsetParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "ip_set_descriptor", params.ip_set_descriptor, TF.listValue((v) => TF.mapValue(fieldsFromIpSetDescriptorsParams(v))));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addRepeatedBlock(fields, "ip_set_descriptor", params.ip_set_descriptor, fieldsFromIpSetDescriptorsParams);
   return fields;
 }
 
@@ -4904,9 +4904,9 @@ export interface PredicateParams {
 
 export function fieldsFromPredicateParams(params: PredicateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
-  TF.addField(fields, "data_id", params.data_id, TF.stringValue);
-  TF.addField(fields, "negated", params.negated, TF.booleanValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "data_id", params.data_id, TF.stringValue);
+  TF.addAttribute(fields, "negated", params.negated, TF.booleanValue);
   return fields;
 }
 
@@ -4918,9 +4918,9 @@ export interface WafregionalRuleParams {
 
 export function fieldsFromWafregionalRuleParams(params: WafregionalRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
-  TF.addOptionalField(fields, "predicate", params.predicate, TF.listValue((v) => TF.mapValue(fieldsFromPredicateParams(v))));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addRepeatedBlock(fields, "predicate", params.predicate, fieldsFromPredicateParams);
   return fields;
 }
 
@@ -4930,7 +4930,7 @@ export interface ActionParams {
 
 export function fieldsFromActionParams(params: ActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -4944,11 +4944,11 @@ export interface RuleParams {
 
 export function fieldsFromRuleParams(params: RuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "action", params.action, (v) => TF.mapValue(fieldsFromActionParams(v)));
-  TF.addOptionalField(fields, "override_action", params.override_action, (v) => TF.mapValue(fieldsFromActionParams(v)));
-  TF.addField(fields, "priority", params.priority, TF.numberValue);
-  TF.addField(fields, "rule_id", params.rule_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "type", params.type, TF.stringValue);
+  TF.addBlock(fields, "action", params.action, fieldsFromActionParams);
+  TF.addOptionalBlock(fields, "override_action", params.override_action, fieldsFromActionParams);
+  TF.addAttribute(fields, "priority", params.priority, TF.numberValue);
+  TF.addAttribute(fields, "rule_id", params.rule_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -4961,10 +4961,10 @@ export interface WafregionalWebAclParams {
 
 export function fieldsFromWafregionalWebAclParams(params: WafregionalWebAclParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
-  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromActionParams(v)));
-  TF.addField(fields, "rule", params.rule, (v) => TF.mapValue(fieldsFromRuleParams(v)));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addBlock(fields, "default_action", params.default_action, fieldsFromActionParams);
+  TF.addBlock(fields, "rule", params.rule, fieldsFromRuleParams);
   return fields;
 }
 
@@ -4975,8 +4975,8 @@ export interface WafregionalWebAclAssociationParams {
 
 export function fieldsFromWafregionalWebAclAssociationParams(params: WafregionalWebAclAssociationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
-  TF.addField(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "web_acl_id", params.web_acl_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "resource_arn", params.resource_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -4995,8 +4995,8 @@ export interface Wafv2OverrideActionParams {
 
 export function fieldsFromWafv2OverrideActionParams(params: Wafv2OverrideActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "count", params.count, (v) => TF.mapValue(fieldsFromWafv2EmptyParams(v)));
-  TF.addOptionalField(fields, "none", params.none, (v) => TF.mapValue(fieldsFromWafv2EmptyParams(v)));
+  TF.addOptionalBlock(fields, "count", params.count, fieldsFromWafv2EmptyParams);
+  TF.addOptionalBlock(fields, "none", params.none, fieldsFromWafv2EmptyParams);
   return fields;
 }
 
@@ -5023,8 +5023,8 @@ export interface Wafv2DefaultActionParams {
 
 export function fieldsFromWafv2DefaultActionParams(params: Wafv2DefaultActionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "allow", params.allow, (v) => TF.mapValue(fieldsFromWafv2AllowParams(v)));
-  TF.addOptionalField(fields, "block", params.block, (v) => TF.mapValue(fieldsFromWafv2BlockParams(v)));
+  TF.addOptionalBlock(fields, "allow", params.allow, fieldsFromWafv2AllowParams);
+  TF.addOptionalBlock(fields, "block", params.block, fieldsFromWafv2BlockParams);
   return fields;
 }
 
@@ -5036,9 +5036,9 @@ export interface Wafv2VisibilityConfigParams {
 
 export function fieldsFromWafv2VisibilityConfigParams(params: Wafv2VisibilityConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "cloudwatch_metrics_enabled", params.cloudwatch_metrics_enabled, TF.booleanValue);
-  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
-  TF.addField(fields, "sampled_requests_enabled", params.sampled_requests_enabled, TF.booleanValue);
+  TF.addAttribute(fields, "cloudwatch_metrics_enabled", params.cloudwatch_metrics_enabled, TF.booleanValue);
+  TF.addAttribute(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addAttribute(fields, "sampled_requests_enabled", params.sampled_requests_enabled, TF.booleanValue);
   return fields;
 }
 
@@ -5048,7 +5048,7 @@ export interface Wafv2ExcludedRuleParams {
 
 export function fieldsFromWafv2ExcludedRuleParams(params: Wafv2ExcludedRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
   return fields;
 }
 
@@ -5060,9 +5060,9 @@ export interface Wafv2ManagedRuleGroupStatementParams {
 
 export function fieldsFromWafv2ManagedRuleGroupStatementParams(params: Wafv2ManagedRuleGroupStatementParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "vendor_name", params.vendor_name, TF.stringValue);
-  TF.addOptionalField(fields, "excluded_rule", params.excluded_rule, TF.listValue((v) => TF.mapValue(fieldsFromWafv2ExcludedRuleParams(v))));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "vendor_name", params.vendor_name, TF.stringValue);
+  TF.addRepeatedBlock(fields, "excluded_rule", params.excluded_rule, fieldsFromWafv2ExcludedRuleParams);
   return fields;
 }
 
@@ -5072,7 +5072,7 @@ export interface Wafv2StatementParams {
 
 export function fieldsFromWafv2StatementParams(params: Wafv2StatementParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "managed_rule_group_statement", params.managed_rule_group_statement, (v) => TF.mapValue(fieldsFromWafv2ManagedRuleGroupStatementParams(v)));
+  TF.addOptionalBlock(fields, "managed_rule_group_statement", params.managed_rule_group_statement, fieldsFromWafv2ManagedRuleGroupStatementParams);
   return fields;
 }
 
@@ -5086,11 +5086,11 @@ export interface Wafv2RuleParams {
 
 export function fieldsFromWafv2RuleParams(params: Wafv2RuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "override_action", params.override_action, (v) => TF.mapValue(fieldsFromWafv2OverrideActionParams(v)));
-  TF.addOptionalField(fields, "priority", params.priority, TF.numberValue);
-  TF.addField(fields, "statement", params.statement, (v) => TF.mapValue(fieldsFromWafv2StatementParams(v)));
-  TF.addField(fields, "visibility_config", params.visibility_config, (v) => TF.mapValue(fieldsFromWafv2VisibilityConfigParams(v)));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalBlock(fields, "override_action", params.override_action, fieldsFromWafv2OverrideActionParams);
+  TF.addOptionalAttribute(fields, "priority", params.priority, TF.numberValue);
+  TF.addBlock(fields, "statement", params.statement, fieldsFromWafv2StatementParams);
+  TF.addBlock(fields, "visibility_config", params.visibility_config, fieldsFromWafv2VisibilityConfigParams);
   return fields;
 }
 
@@ -5106,13 +5106,13 @@ export interface Wafv2WebAclParams {
 
 export function fieldsFromWafv2WebAclParams(params: Wafv2WebAclParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "default_action", params.default_action, (v) => TF.mapValue(fieldsFromWafv2DefaultActionParams(v)));
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "rule", params.rule, TF.listValue((v) => TF.mapValue(fieldsFromWafv2RuleParams(v))));
-  TF.addField(fields, "scope", params.scope, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addField(fields, "visibility_config", params.visibility_config, (v) => TF.mapValue(fieldsFromWafv2VisibilityConfigParams(v)));
+  TF.addBlock(fields, "default_action", params.default_action, fieldsFromWafv2DefaultActionParams);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addRepeatedBlock(fields, "rule", params.rule, fieldsFromWafv2RuleParams);
+  TF.addAttribute(fields, "scope", params.scope, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addBlock(fields, "visibility_config", params.visibility_config, fieldsFromWafv2VisibilityConfigParams);
   return fields;
 }
 
@@ -5123,8 +5123,8 @@ export interface Wafv2WebAclAssociationParams {
 
 export function fieldsFromWafv2WebAclAssociationParams(params: Wafv2WebAclAssociationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "resource_arn", params.resource_arn, TF.stringValue);
-  TF.addField(fields, "web_acl_arn", params.web_acl_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "resource_arn", params.resource_arn, TF.stringValue);
+  TF.addAttribute(fields, "web_acl_arn", params.web_acl_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -5137,10 +5137,10 @@ export interface SecretsmanagerSecretParams {
 
 export function fieldsFromSecretsmanagerSecretParams(params: SecretsmanagerSecretParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -5153,10 +5153,10 @@ export interface SecretsmanagerSecretVersionParams {
 
 export function fieldsFromSecretsmanagerSecretVersionParams(params: SecretsmanagerSecretVersionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "secret_id", params.secret_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "secret_string", params.secret_string, TF.stringValue);
-  TF.addOptionalField(fields, "secret_binary", params.secret_binary, TF.stringValue);
-  TF.addOptionalField(fields, "version_stages", params.version_stages, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "secret_id", params.secret_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "secret_string", params.secret_string, TF.stringValue);
+  TF.addOptionalAttribute(fields, "secret_binary", params.secret_binary, TF.stringValue);
+  TF.addOptionalAttribute(fields, "version_stages", params.version_stages, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -5167,8 +5167,8 @@ export interface CloudfrontCookiesParams {
 
 export function fieldsFromCloudfrontCookiesParams(params: CloudfrontCookiesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "forward", params.forward, TF.stringValue);
-  TF.addOptionalField(fields, "whitelisted_names", params.whitelisted_names, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "forward", params.forward, TF.stringValue);
+  TF.addOptionalAttribute(fields, "whitelisted_names", params.whitelisted_names, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -5183,12 +5183,12 @@ export interface CloudfrontCustomOriginConfigParams {
 
 export function fieldsFromCloudfrontCustomOriginConfigParams(params: CloudfrontCustomOriginConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "http_port", params.http_port, TF.numberValue);
-  TF.addField(fields, "https_port", params.https_port, TF.numberValue);
-  TF.addField(fields, "origin_protocol_policy", params.origin_protocol_policy, TF.stringValue);
-  TF.addField(fields, "origin_ssl_protocols", params.origin_ssl_protocols, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "origin_keepalive_timeout", params.origin_keepalive_timeout, TF.numberValue);
-  TF.addOptionalField(fields, "origin_read_timeout", params.origin_read_timeout, TF.numberValue);
+  TF.addAttribute(fields, "http_port", params.http_port, TF.numberValue);
+  TF.addAttribute(fields, "https_port", params.https_port, TF.numberValue);
+  TF.addAttribute(fields, "origin_protocol_policy", params.origin_protocol_policy, TF.stringValue);
+  TF.addAttribute(fields, "origin_ssl_protocols", params.origin_ssl_protocols, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "origin_keepalive_timeout", params.origin_keepalive_timeout, TF.numberValue);
+  TF.addOptionalAttribute(fields, "origin_read_timeout", params.origin_read_timeout, TF.numberValue);
   return fields;
 }
 
@@ -5201,10 +5201,10 @@ export interface CloudfrontCustomErrorResponseParams {
 
 export function fieldsFromCloudfrontCustomErrorResponseParams(params: CloudfrontCustomErrorResponseParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "error_code", params.error_code, TF.numberValue);
-  TF.addOptionalField(fields, "response_code", params.response_code, TF.numberValue);
-  TF.addOptionalField(fields, "response_page_path", params.response_page_path, TF.stringValue);
-  TF.addOptionalField(fields, "error_caching_min_ttl", params.error_caching_min_ttl, TF.numberValue);
+  TF.addAttribute(fields, "error_code", params.error_code, TF.numberValue);
+  TF.addOptionalAttribute(fields, "response_code", params.response_code, TF.numberValue);
+  TF.addOptionalAttribute(fields, "response_page_path", params.response_page_path, TF.stringValue);
+  TF.addOptionalAttribute(fields, "error_caching_min_ttl", params.error_caching_min_ttl, TF.numberValue);
   return fields;
 }
 
@@ -5226,16 +5226,16 @@ export interface CloudfrontCacheBehaviourParams {
 
 export function fieldsFromCloudfrontCacheBehaviourParams(params: CloudfrontCacheBehaviourParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
-  TF.addField(fields, "cached_methods", params.cached_methods, TF.listValue(TF.stringValue));
-  TF.addField(fields, "forwarded_values", params.forwarded_values, (v) => TF.mapValue(fieldsFromCloudfrontForwardedValuesParams(v)));
-  TF.addOptionalField(fields, "path_pattern", params.path_pattern, TF.stringValue);
-  TF.addOptionalField(fields, "compress", params.compress, TF.booleanValue);
-  TF.addOptionalField(fields, "default_ttl", params.default_ttl, TF.numberValue);
-  TF.addOptionalField(fields, "min_ttl", params.min_ttl, TF.numberValue);
-  TF.addOptionalField(fields, "max_ttl", params.max_ttl, TF.numberValue);
-  TF.addField(fields, "target_origin_id", params.target_origin_id, TF.stringValue);
-  TF.addField(fields, "viewer_protocol_policy", params.viewer_protocol_policy, TF.stringValue);
+  TF.addAttribute(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "cached_methods", params.cached_methods, TF.listValue(TF.stringValue));
+  TF.addBlock(fields, "forwarded_values", params.forwarded_values, fieldsFromCloudfrontForwardedValuesParams);
+  TF.addOptionalAttribute(fields, "path_pattern", params.path_pattern, TF.stringValue);
+  TF.addOptionalAttribute(fields, "compress", params.compress, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "default_ttl", params.default_ttl, TF.numberValue);
+  TF.addOptionalAttribute(fields, "min_ttl", params.min_ttl, TF.numberValue);
+  TF.addOptionalAttribute(fields, "max_ttl", params.max_ttl, TF.numberValue);
+  TF.addAttribute(fields, "target_origin_id", params.target_origin_id, TF.stringValue);
+  TF.addAttribute(fields, "viewer_protocol_policy", params.viewer_protocol_policy, TF.stringValue);
   return fields;
 }
 
@@ -5253,15 +5253,15 @@ export interface CloudfrontDistributionParams {
 
 export function fieldsFromCloudfrontDistributionParams(params: CloudfrontDistributionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "default_cache_behavior", params.default_cache_behavior, (v) => TF.mapValue(fieldsFromCloudfrontCacheBehaviourParams(v)));
-  TF.addField(fields, "enabled", params.enabled, TF.booleanValue);
-  TF.addField(fields, "origin", params.origin, TF.listValue((v) => TF.mapValue(fieldsFromCloudfrontOriginParams(v))));
-  TF.addField(fields, "restrictions", params.restrictions, (v) => TF.mapValue(fieldsFromCloudfrontRestrictionsParams(v)));
-  TF.addField(fields, "viewer_certificate", params.viewer_certificate, (v) => TF.mapValue(fieldsFromCloudfrontViewerCertificateParams(v)));
-  TF.addOptionalField(fields, "aliases", params.aliases, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "is_ipv6_enabled", params.is_ipv6_enabled, TF.booleanValue);
-  TF.addOptionalField(fields, "custom_error_response", params.custom_error_response, TF.listValue((v) => TF.mapValue(fieldsFromCloudfrontCustomErrorResponseParams(v))));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addBlock(fields, "default_cache_behavior", params.default_cache_behavior, fieldsFromCloudfrontCacheBehaviourParams);
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addRepeatedBlock(fields, "origin", params.origin, fieldsFromCloudfrontOriginParams);
+  TF.addBlock(fields, "restrictions", params.restrictions, fieldsFromCloudfrontRestrictionsParams);
+  TF.addBlock(fields, "viewer_certificate", params.viewer_certificate, fieldsFromCloudfrontViewerCertificateParams);
+  TF.addOptionalAttribute(fields, "aliases", params.aliases, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "is_ipv6_enabled", params.is_ipv6_enabled, TF.booleanValue);
+  TF.addRepeatedBlock(fields, "custom_error_response", params.custom_error_response, fieldsFromCloudfrontCustomErrorResponseParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -5273,9 +5273,9 @@ export interface CloudfrontForwardedValuesParams {
 
 export function fieldsFromCloudfrontForwardedValuesParams(params: CloudfrontForwardedValuesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "cookies", params.cookies, (v) => TF.mapValue(fieldsFromCloudfrontCookiesParams(v)));
-  TF.addOptionalField(fields, "headers", params.headers, TF.listValue(TF.stringValue));
-  TF.addField(fields, "query_string", params.query_string, TF.booleanValue);
+  TF.addBlock(fields, "cookies", params.cookies, fieldsFromCloudfrontCookiesParams);
+  TF.addOptionalAttribute(fields, "headers", params.headers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "query_string", params.query_string, TF.booleanValue);
   return fields;
 }
 
@@ -5288,10 +5288,10 @@ export interface CloudfrontOriginParams {
 
 export function fieldsFromCloudfrontOriginParams(params: CloudfrontOriginParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addField(fields, "origin_id", params.origin_id, TF.stringValue);
-  TF.addOptionalField(fields, "s3_origin_config", params.s3_origin_config, (v) => TF.mapValue(fieldsFromCloudfrontS3OriginConfigParams(v)));
-  TF.addOptionalField(fields, "custom_origin_config", params.custom_origin_config, (v) => TF.mapValue(fieldsFromCloudfrontCustomOriginConfigParams(v)));
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addAttribute(fields, "origin_id", params.origin_id, TF.stringValue);
+  TF.addOptionalBlock(fields, "s3_origin_config", params.s3_origin_config, fieldsFromCloudfrontS3OriginConfigParams);
+  TF.addOptionalBlock(fields, "custom_origin_config", params.custom_origin_config, fieldsFromCloudfrontCustomOriginConfigParams);
   return fields;
 }
 
@@ -5302,8 +5302,8 @@ export interface CloudfrontGeoRestrictionsParams {
 
 export function fieldsFromCloudfrontGeoRestrictionsParams(params: CloudfrontGeoRestrictionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "restriction_type", params.restriction_type, TF.stringValue);
-  TF.addOptionalField(fields, "locations", params.locations, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "restriction_type", params.restriction_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "locations", params.locations, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -5313,7 +5313,7 @@ export interface CloudfrontRestrictionsParams {
 
 export function fieldsFromCloudfrontRestrictionsParams(params: CloudfrontRestrictionsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "geo_restriction", params.geo_restriction, (v) => TF.mapValue(fieldsFromCloudfrontGeoRestrictionsParams(v)));
+  TF.addBlock(fields, "geo_restriction", params.geo_restriction, fieldsFromCloudfrontGeoRestrictionsParams);
   return fields;
 }
 
@@ -5334,10 +5334,10 @@ export interface CloudfrontViewerCertificateParams {
 
 export function fieldsFromCloudfrontViewerCertificateParams(params: CloudfrontViewerCertificateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "cloudfront_default_certificate", params.cloudfront_default_certificate, TF.booleanValue);
-  TF.addOptionalField(fields, "acm_certificate_arn", params.acm_certificate_arn, TF.resourceArnValue);
-  TF.addOptionalField(fields, "minimum_protocol_version", params.minimum_protocol_version, TF.stringValue);
-  TF.addOptionalField(fields, "ssl_support_method", params.ssl_support_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cloudfront_default_certificate", params.cloudfront_default_certificate, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "acm_certificate_arn", params.acm_certificate_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "minimum_protocol_version", params.minimum_protocol_version, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ssl_support_method", params.ssl_support_method, TF.stringValue);
   return fields;
 }
 
@@ -5348,8 +5348,8 @@ export interface ApiGatewayRestApiParams {
 
 export function fieldsFromApiGatewayRestApiParams(params: ApiGatewayRestApiParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -5361,9 +5361,9 @@ export interface ApiGatewayResourceParams {
 
 export function fieldsFromApiGatewayResourceParams(params: ApiGatewayResourceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "parent_id", params.parent_id, TF.resourceIdValue);
-  TF.addField(fields, "path_part", params.path_part, TF.stringValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "parent_id", params.parent_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "path_part", params.path_part, TF.stringValue);
   return fields;
 }
 
@@ -5376,10 +5376,10 @@ export interface ApiGatewayMethodParams {
 
 export function fieldsFromApiGatewayMethodParams(params: ApiGatewayMethodParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
-  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
-  TF.addField(fields, "authorization", params.authorization, TF.stringValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addAttribute(fields, "authorization", params.authorization, TF.stringValue);
   return fields;
 }
 
@@ -5394,12 +5394,12 @@ export interface ApiGatewayMethodResponseParams {
 
 export function fieldsFromApiGatewayMethodResponseParams(params: ApiGatewayMethodResponseParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
-  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
-  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
-  TF.addOptionalField(fields, "response_models", params.response_models, TF.tagsValue);
-  TF.addOptionalField(fields, "response_parameters", params.response_parameters, TF.tagsValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addAttribute(fields, "status_code", params.status_code, TF.stringValue);
+  TF.addOptionalAttribute(fields, "response_models", params.response_models, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "response_parameters", params.response_parameters, TF.tagsValue);
   return fields;
 }
 
@@ -5415,13 +5415,13 @@ export interface ApiGatewayIntegrationParams {
 
 export function fieldsFromApiGatewayIntegrationParams(params: ApiGatewayIntegrationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
-  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
-  TF.addOptionalField(fields, "integration_http_method", params.integration_http_method, TF.stringValue);
-  TF.addOptionalField(fields, "uri", params.uri, TF.stringValue);
-  TF.addOptionalField(fields, "request_templates", params.request_templates, TF.tagsValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "integration_http_method", params.integration_http_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "uri", params.uri, TF.stringValue);
+  TF.addOptionalAttribute(fields, "request_templates", params.request_templates, TF.tagsValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -5435,11 +5435,11 @@ export interface ApiGatewayIntegrationResponseParams {
 
 export function fieldsFromApiGatewayIntegrationResponseParams(params: ApiGatewayIntegrationResponseParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "resource_id", params.resource_id, TF.resourceIdValue);
-  TF.addField(fields, "http_method", params.http_method, TF.stringValue);
-  TF.addField(fields, "status_code", params.status_code, TF.stringValue);
-  TF.addOptionalField(fields, "response_parameters", params.response_parameters, TF.tagsValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "resource_id", params.resource_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "http_method", params.http_method, TF.stringValue);
+  TF.addAttribute(fields, "status_code", params.status_code, TF.stringValue);
+  TF.addOptionalAttribute(fields, "response_parameters", params.response_parameters, TF.tagsValue);
   return fields;
 }
 
@@ -5451,9 +5451,9 @@ export interface ApiGatewayDeploymentParams {
 
 export function fieldsFromApiGatewayDeploymentParams(params: ApiGatewayDeploymentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
-  TF.addField(fields, "stage_name", params.stage_name, TF.stringValue);
-  TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "rest_api_id", params.rest_api_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "stage_name", params.stage_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   return fields;
 }
 
@@ -5464,8 +5464,8 @@ export interface ApiGatewayDomainNameParams {
 
 export function fieldsFromApiGatewayDomainNameParams(params: ApiGatewayDomainNameParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -5478,10 +5478,10 @@ export interface ApiGatewayBasePathMappingParams {
 
 export function fieldsFromApiGatewayBasePathMappingParams(params: ApiGatewayBasePathMappingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain_name", params.domain_name, TF.stringValue);
-  TF.addField(fields, "api_id", params.api_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "stage_name", params.stage_name, TF.stringValue);
-  TF.addOptionalField(fields, "base_path", params.base_path, TF.stringValue);
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addAttribute(fields, "api_id", params.api_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "stage_name", params.stage_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "base_path", params.base_path, TF.stringValue);
   return fields;
 }
 
@@ -5495,11 +5495,11 @@ export interface S3BucketNotificationQueueParams {
 
 export function fieldsFromS3BucketNotificationQueueParams(params: S3BucketNotificationQueueParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "queue_arn", params.queue_arn, TF.resourceArnValue);
-  TF.addField(fields, "events", params.events, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "id", params.id, TF.stringValue);
+  TF.addAttribute(fields, "queue_arn", params.queue_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "events", params.events, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
   return fields;
 }
 
@@ -5513,11 +5513,11 @@ export interface S3BucketNotificationLambdaParams {
 
 export function fieldsFromS3BucketNotificationLambdaParams(params: S3BucketNotificationLambdaParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "id", params.id, TF.stringValue);
-  TF.addField(fields, "lambda_function_arn", params.lambda_function_arn, TF.resourceArnValue);
-  TF.addField(fields, "events", params.events, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "id", params.id, TF.stringValue);
+  TF.addAttribute(fields, "lambda_function_arn", params.lambda_function_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "events", params.events, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "filter_prefix", params.filter_prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "filter_suffix", params.filter_suffix, TF.stringValue);
   return fields;
 }
 
@@ -5529,9 +5529,9 @@ export interface S3BucketNotificationParams {
 
 export function fieldsFromS3BucketNotificationParams(params: S3BucketNotificationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "bucket", params.bucket, TF.stringValue);
-  TF.addOptionalField(fields, "queue", params.queue, (v) => TF.mapValue(fieldsFromS3BucketNotificationQueueParams(v)));
-  TF.addOptionalField(fields, "lambda_function", params.lambda_function, (v) => TF.mapValue(fieldsFromS3BucketNotificationLambdaParams(v)));
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalBlock(fields, "queue", params.queue, fieldsFromS3BucketNotificationQueueParams);
+  TF.addOptionalBlock(fields, "lambda_function", params.lambda_function, fieldsFromS3BucketNotificationLambdaParams);
   return fields;
 }
 
@@ -5543,9 +5543,9 @@ export interface CognitoInviteMessageTemplateParams {
 
 export function fieldsFromCognitoInviteMessageTemplateParams(params: CognitoInviteMessageTemplateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "email_message", params.email_message, TF.stringValue);
-  TF.addOptionalField(fields, "email_subject", params.email_subject, TF.stringValue);
-  TF.addOptionalField(fields, "sms_message", params.sms_message, TF.stringValue);
+  TF.addOptionalAttribute(fields, "email_message", params.email_message, TF.stringValue);
+  TF.addOptionalAttribute(fields, "email_subject", params.email_subject, TF.stringValue);
+  TF.addOptionalAttribute(fields, "sms_message", params.sms_message, TF.stringValue);
   return fields;
 }
 
@@ -5557,9 +5557,9 @@ export interface CognitoAdminCreateUsersParams {
 
 export function fieldsFromCognitoAdminCreateUsersParams(params: CognitoAdminCreateUsersParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "allow_admin_create_user_only", params.allow_admin_create_user_only, TF.booleanValue);
-  TF.addOptionalField(fields, "invite_message_template", params.invite_message_template, (v) => TF.mapValue(fieldsFromCognitoInviteMessageTemplateParams(v)));
-  TF.addOptionalField(fields, "unused_account_Validity_days", params.unused_account_Validity_days, TF.numberValue);
+  TF.addOptionalAttribute(fields, "allow_admin_create_user_only", params.allow_admin_create_user_only, TF.booleanValue);
+  TF.addOptionalBlock(fields, "invite_message_template", params.invite_message_template, fieldsFromCognitoInviteMessageTemplateParams);
+  TF.addOptionalAttribute(fields, "unused_account_Validity_days", params.unused_account_Validity_days, TF.numberValue);
   return fields;
 }
 
@@ -5575,13 +5575,13 @@ export interface CognitoSchemaAttributesParams {
 
 export function fieldsFromCognitoSchemaAttributesParams(params: CognitoSchemaAttributesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "attribute_data_type", params.attribute_data_type, TF.stringValue);
-  TF.addOptionalField(fields, "developer_only_attribute", params.developer_only_attribute, TF.booleanValue);
-  TF.addOptionalField(fields, "string_attribute_constraints", params.string_attribute_constraints, (v) => TF.mapValue(fieldsFromCognitoSchemaStringAttributeConstraintsParams(v)));
-  TF.addOptionalField(fields, "number_attribute_constraints", params.number_attribute_constraints, (v) => TF.mapValue(fieldsFromCognitoSchemaNumberAttributeConstraintsParams(v)));
-  TF.addOptionalField(fields, "mutable", params.mutable, TF.booleanValue);
-  TF.addOptionalField(fields, "required", params.required, TF.booleanValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "attribute_data_type", params.attribute_data_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "developer_only_attribute", params.developer_only_attribute, TF.booleanValue);
+  TF.addOptionalBlock(fields, "string_attribute_constraints", params.string_attribute_constraints, fieldsFromCognitoSchemaStringAttributeConstraintsParams);
+  TF.addOptionalBlock(fields, "number_attribute_constraints", params.number_attribute_constraints, fieldsFromCognitoSchemaNumberAttributeConstraintsParams);
+  TF.addOptionalAttribute(fields, "mutable", params.mutable, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "required", params.required, TF.booleanValue);
   return fields;
 }
 
@@ -5592,8 +5592,8 @@ export interface CognitoSchemaStringAttributeConstraintsParams {
 
 export function fieldsFromCognitoSchemaStringAttributeConstraintsParams(params: CognitoSchemaStringAttributeConstraintsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "min_length", params.min_length, TF.numberValue);
-  TF.addOptionalField(fields, "max_length", params.max_length, TF.numberValue);
+  TF.addOptionalAttribute(fields, "min_length", params.min_length, TF.numberValue);
+  TF.addOptionalAttribute(fields, "max_length", params.max_length, TF.numberValue);
   return fields;
 }
 
@@ -5604,8 +5604,8 @@ export interface CognitoSchemaNumberAttributeConstraintsParams {
 
 export function fieldsFromCognitoSchemaNumberAttributeConstraintsParams(params: CognitoSchemaNumberAttributeConstraintsParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "min_value", params.min_value, TF.numberValue);
-  TF.addOptionalField(fields, "max_value", params.max_value, TF.numberValue);
+  TF.addOptionalAttribute(fields, "min_value", params.min_value, TF.numberValue);
+  TF.addOptionalAttribute(fields, "max_value", params.max_value, TF.numberValue);
   return fields;
 }
 
@@ -5622,14 +5622,14 @@ export interface CognitoUserPoolParams {
 
 export function fieldsFromCognitoUserPoolParams(params: CognitoUserPoolParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "admin_create_user_config", params.admin_create_user_config, (v) => TF.mapValue(fieldsFromCognitoAdminCreateUsersParams(v)));
-  TF.addOptionalField(fields, "auto_verified_attributes", params.auto_verified_attributes, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "schema", params.schema, TF.listValue((v) => TF.mapValue(fieldsFromCognitoSchemaAttributesParams(v))));
-  TF.addOptionalField(fields, "username_attributes", params.username_attributes, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "sms_authentication_message", params.sms_authentication_message, TF.stringValue);
-  TF.addOptionalField(fields, "sms_verification_message", params.sms_verification_message, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalBlock(fields, "admin_create_user_config", params.admin_create_user_config, fieldsFromCognitoAdminCreateUsersParams);
+  TF.addOptionalAttribute(fields, "auto_verified_attributes", params.auto_verified_attributes, TF.listValue(TF.stringValue));
+  TF.addRepeatedBlock(fields, "schema", params.schema, fieldsFromCognitoSchemaAttributesParams);
+  TF.addOptionalAttribute(fields, "username_attributes", params.username_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "sms_authentication_message", params.sms_authentication_message, TF.stringValue);
+  TF.addOptionalAttribute(fields, "sms_verification_message", params.sms_verification_message, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -5648,16 +5648,16 @@ export interface CognitoUserPoolClientParams {
 
 export function fieldsFromCognitoUserPoolClientParams(params: CognitoUserPoolClientParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "read_attributes", params.read_attributes, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "write_attributes", params.write_attributes, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "allowed_oauth_flows", params.allowed_oauth_flows, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "allowed_oauth_flows_user_pool_client", params.allowed_oauth_flows_user_pool_client, TF.booleanValue);
-  TF.addOptionalField(fields, "allowed_oauth_scopes", params.allowed_oauth_scopes, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "callback_urls", params.callback_urls, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "logout_urls", params.logout_urls, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "supported_identity_providers", params.supported_identity_providers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "read_attributes", params.read_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "write_attributes", params.write_attributes, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "allowed_oauth_flows", params.allowed_oauth_flows, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "allowed_oauth_flows_user_pool_client", params.allowed_oauth_flows_user_pool_client, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "allowed_oauth_scopes", params.allowed_oauth_scopes, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "callback_urls", params.callback_urls, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "logout_urls", params.logout_urls, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "supported_identity_providers", params.supported_identity_providers, TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -5669,9 +5669,9 @@ export interface CognitoUserPoolDomainParams {
 
 export function fieldsFromCognitoUserPoolDomainParams(params: CognitoUserPoolDomainParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "domain", params.domain, TF.stringValue);
-  TF.addField(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
+  TF.addAttribute(fields, "domain", params.domain, TF.stringValue);
+  TF.addAttribute(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "certificate_arn", params.certificate_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -5683,9 +5683,9 @@ export interface CognitoIdentityProviderParams {
 
 export function fieldsFromCognitoIdentityProviderParams(params: CognitoIdentityProviderParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "client_id", params.client_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "provider_name", params.provider_name, TF.stringValue);
-  TF.addOptionalField(fields, "server_side_token_check", params.server_side_token_check, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "client_id", params.client_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "provider_name", params.provider_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "server_side_token_check", params.server_side_token_check, TF.booleanValue);
   return fields;
 }
 
@@ -5697,9 +5697,9 @@ export interface CognitoIdentityPoolParams {
 
 export function fieldsFromCognitoIdentityPoolParams(params: CognitoIdentityPoolParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
-  TF.addField(fields, "allow_unauthenticated_identities", params.allow_unauthenticated_identities, TF.booleanValue);
-  TF.addOptionalField(fields, "cognito_identity_providers", params.cognito_identity_providers, TF.listValue((v) => TF.mapValue(fieldsFromCognitoIdentityProviderParams(v))));
+  TF.addAttribute(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
+  TF.addAttribute(fields, "allow_unauthenticated_identities", params.allow_unauthenticated_identities, TF.booleanValue);
+  TF.addRepeatedBlock(fields, "cognito_identity_providers", params.cognito_identity_providers, fieldsFromCognitoIdentityProviderParams);
   return fields;
 }
 
@@ -5710,8 +5710,8 @@ export interface CognitoIdentityPoolRolesAttachmentParams {
 
 export function fieldsFromCognitoIdentityPoolRolesAttachmentParams(params: CognitoIdentityPoolRolesAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
-  TF.addField(fields, "roles", params.roles, (v) => TF.mapValue(fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(v)));
+  TF.addAttribute(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
+  TF.addBlock(fields, "roles", params.roles, fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams);
   return fields;
 }
 
@@ -5722,8 +5722,8 @@ export interface CognitoIdentityPoolRolesAttachmentRolesParams {
 
 export function fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams(params: CognitoIdentityPoolRolesAttachmentRolesParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "authenticated", params.authenticated, TF.resourceArnValue);
-  TF.addOptionalField(fields, "unauthenticated", params.unauthenticated, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "authenticated", params.authenticated, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "unauthenticated", params.unauthenticated, TF.resourceArnValue);
   return fields;
 }
 
@@ -5737,11 +5737,11 @@ export interface EksClusterParams {
 
 export function fieldsFromEksClusterParams(params: EksClusterParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "role_arn", params.role_arn, TF.resourceArnValue);
-  TF.addField(fields, "vpc_config", params.vpc_config, (v) => TF.mapValue(fieldsFromEksClusterVpcConfigParams(v)));
-  TF.addOptionalField(fields, "enabled_cluster_log_Types", params.enabled_cluster_log_Types, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "version", params.version, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addBlock(fields, "vpc_config", params.vpc_config, fieldsFromEksClusterVpcConfigParams);
+  TF.addOptionalAttribute(fields, "enabled_cluster_log_Types", params.enabled_cluster_log_Types, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "version", params.version, TF.stringValue);
   return fields;
 }
 
@@ -5754,10 +5754,10 @@ export interface EksClusterVpcConfigParams {
 
 export function fieldsFromEksClusterVpcConfigParams(params: EksClusterVpcConfigParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "endpoint_private_access", params.endpoint_private_access, TF.booleanValue);
-  TF.addOptionalField(fields, "endpoint_public_access", params.endpoint_public_access, TF.booleanValue);
-  TF.addOptionalField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addField(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "endpoint_private_access", params.endpoint_private_access, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "endpoint_public_access", params.endpoint_public_access, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "subnet_ids", params.subnet_ids, TF.listValue(TF.resourceIdValue));
   return fields;
 }
 
@@ -5773,13 +5773,13 @@ export interface BatchComputeEnvironmentParams {
 
 export function fieldsFromBatchComputeEnvironmentParams(params: BatchComputeEnvironmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "compute_environment_name", params.compute_environment_name, TF.stringValue);
-  TF.addOptionalField(fields, "compute_environment_name_prefix", params.compute_environment_name_prefix, TF.stringValue);
-  TF.addOptionalField(fields, "compute_resources", params.compute_resources, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceParams(v)));
-  TF.addField(fields, "service_role", params.service_role, TF.resourceArnValue);
-  TF.addOptionalField(fields, "state", params.state, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "compute_environment_name", params.compute_environment_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "compute_environment_name_prefix", params.compute_environment_name_prefix, TF.stringValue);
+  TF.addOptionalBlock(fields, "compute_resources", params.compute_resources, fieldsFromBatchComputeEnvironmentComputeResourceParams);
+  TF.addAttribute(fields, "service_role", params.service_role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "state", params.state, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -5803,21 +5803,21 @@ export interface BatchComputeEnvironmentComputeResourceParams {
 
 export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: BatchComputeEnvironmentComputeResourceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "allocation_strategy", params.allocation_strategy, TF.stringValue);
-  TF.addOptionalField(fields, "bid_percentage", params.bid_percentage, TF.numberValue);
-  TF.addOptionalField(fields, "desired_vcpus", params.desired_vcpus, TF.numberValue);
-  TF.addOptionalField(fields, "ec2_key_pair", params.ec2_key_pair, TF.stringAliasValue);
-  TF.addOptionalField(fields, "image_id", params.image_id, TF.stringAliasValue);
-  TF.addField(fields, "instance_role", params.instance_role, TF.resourceArnValue);
-  TF.addField(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "launch_template", params.launch_template, (v) => TF.mapValue(fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams(v)));
-  TF.addField(fields, "max_vcpus", params.max_vcpus, TF.numberValue);
-  TF.addField(fields, "min_vcpus", params.min_vcpus, TF.numberValue);
-  TF.addField(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "spot_iam_fleet_role", params.spot_iam_fleet_role, TF.resourceArnValue);
-  TF.addField(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "allocation_strategy", params.allocation_strategy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "bid_percentage", params.bid_percentage, TF.numberValue);
+  TF.addOptionalAttribute(fields, "desired_vcpus", params.desired_vcpus, TF.numberValue);
+  TF.addOptionalAttribute(fields, "ec2_key_pair", params.ec2_key_pair, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addAttribute(fields, "instance_role", params.instance_role, TF.resourceArnValue);
+  TF.addAttribute(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
+  TF.addOptionalBlock(fields, "launch_template", params.launch_template, fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams);
+  TF.addAttribute(fields, "max_vcpus", params.max_vcpus, TF.numberValue);
+  TF.addAttribute(fields, "min_vcpus", params.min_vcpus, TF.numberValue);
+  TF.addAttribute(fields, "security_group_ids", params.security_group_ids, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "spot_iam_fleet_role", params.spot_iam_fleet_role, TF.resourceArnValue);
+  TF.addAttribute(fields, "subnets", params.subnets, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -5829,9 +5829,9 @@ export interface BatchComputeEnvironmentComputeResourceLaunchTemplateParams {
 
 export function fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams(params: BatchComputeEnvironmentComputeResourceLaunchTemplateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "launch_template_id", params.launch_template_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "launch_template_name", params.launch_template_name, TF.stringValue);
-  TF.addOptionalField(fields, "version", params.version, TF.numberValue);
+  TF.addOptionalAttribute(fields, "launch_template_id", params.launch_template_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "launch_template_name", params.launch_template_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "version", params.version, TF.numberValue);
   return fields;
 }
 
@@ -5841,7 +5841,7 @@ export interface BatchJobDefinitionRetryStrategyParams {
 
 export function fieldsFromBatchJobDefinitionRetryStrategyParams(params: BatchJobDefinitionRetryStrategyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "attempts", params.attempts, TF.numberValue);
+  TF.addOptionalAttribute(fields, "attempts", params.attempts, TF.numberValue);
   return fields;
 }
 
@@ -5855,7 +5855,7 @@ export interface BatchJobDefinitionTimeoutParams {
 
 export function fieldsFromBatchJobDefinitionTimeoutParams(params: BatchJobDefinitionTimeoutParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addOptionalField(fields, "attempt_duration_seconds ", params.attempt_duration_seconds , TF.numberValue);
+  TF.addOptionalAttribute(fields, "attempt_duration_seconds ", params.attempt_duration_seconds , TF.numberValue);
   return fields;
 }
 
@@ -5874,13 +5874,13 @@ export interface BatchJobDefinitionParams {
 
 export function fieldsFromBatchJobDefinitionParams(params: BatchJobDefinitionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "container_properties", params.container_properties, TF.stringValue);
-  TF.addOptionalField(fields, "parameters", params.parameters, TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "retry_strategy", params.retry_strategy, (v) => TF.mapValue(fieldsFromBatchJobDefinitionRetryStrategyParams(v)));
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
-  TF.addOptionalField(fields, "timeout", params.timeout, (v) => TF.mapValue(fieldsFromBatchJobDefinitionTimeoutParams(v)));
-  TF.addField(fields, "type", params.type, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "container_properties", params.container_properties, TF.stringValue);
+  TF.addOptionalAttribute(fields, "parameters", params.parameters, TF.listValue(TF.stringValue));
+  TF.addOptionalBlock(fields, "retry_strategy", params.retry_strategy, fieldsFromBatchJobDefinitionRetryStrategyParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalBlock(fields, "timeout", params.timeout, fieldsFromBatchJobDefinitionTimeoutParams);
+  TF.addAttribute(fields, "type", params.type, TF.stringValue);
   return fields;
 }
 
@@ -5903,11 +5903,11 @@ export interface BatchJobQueueParams {
 
 export function fieldsFromBatchJobQueueParams(params: BatchJobQueueParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "compute_environments", params.compute_environments, TF.listValue(TF.resourceArnValue));
-  TF.addField(fields, "priority", params.priority, TF.numberValue);
-  TF.addField(fields, "state", params.state, TF.stringValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "compute_environments", params.compute_environments, TF.listValue(TF.resourceArnValue));
+  TF.addAttribute(fields, "priority", params.priority, TF.numberValue);
+  TF.addAttribute(fields, "state", params.state, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -5931,9 +5931,9 @@ export interface StepAdjustmentParams {
 
 export function fieldsFromStepAdjustmentParams(params: StepAdjustmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "scaling_adjustment ", params.scaling_adjustment , TF.numberValue);
-  TF.addOptionalField(fields, "metric_interval_lower_bound", params.metric_interval_lower_bound, TF.numberValue);
-  TF.addOptionalField(fields, "metric_interval_upper_bound", params.metric_interval_upper_bound, TF.numberValue);
+  TF.addAttribute(fields, "scaling_adjustment ", params.scaling_adjustment , TF.numberValue);
+  TF.addOptionalAttribute(fields, "metric_interval_lower_bound", params.metric_interval_lower_bound, TF.numberValue);
+  TF.addOptionalAttribute(fields, "metric_interval_upper_bound", params.metric_interval_upper_bound, TF.numberValue);
   return fields;
 }
 
@@ -5953,8 +5953,8 @@ export interface PredefinedMetricSpecificationParams {
 
 export function fieldsFromPredefinedMetricSpecificationParams(params: PredefinedMetricSpecificationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "predefined_metric_type", params.predefined_metric_type, TF.stringValue);
-  TF.addOptionalField(fields, "resource_label", params.resource_label, TF.stringValue);
+  TF.addAttribute(fields, "predefined_metric_type", params.predefined_metric_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "resource_label", params.resource_label, TF.stringValue);
   return fields;
 }
 
@@ -5965,8 +5965,8 @@ export interface MetricDimensionParams {
 
 export function fieldsFromMetricDimensionParams(params: MetricDimensionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "value", params.value, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
   return fields;
 }
 
@@ -5980,11 +5980,11 @@ export interface CustomizedMetricSpecificationParams {
 
 export function fieldsFromCustomizedMetricSpecificationParams(params: CustomizedMetricSpecificationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "metric_name", params.metric_name, TF.stringValue);
-  TF.addField(fields, "namespace", params.namespace, TF.stringValue);
-  TF.addField(fields, "statistic", params.statistic, TF.stringValue);
-  TF.addOptionalField(fields, "metric_dimension", params.metric_dimension, TF.listValue((v) => TF.mapValue(fieldsFromMetricDimensionParams(v))));
-  TF.addOptionalField(fields, "unit", params.unit, TF.stringValue);
+  TF.addAttribute(fields, "metric_name", params.metric_name, TF.stringValue);
+  TF.addAttribute(fields, "namespace", params.namespace, TF.stringValue);
+  TF.addAttribute(fields, "statistic", params.statistic, TF.stringValue);
+  TF.addRepeatedBlock(fields, "metric_dimension", params.metric_dimension, fieldsFromMetricDimensionParams);
+  TF.addOptionalAttribute(fields, "unit", params.unit, TF.stringValue);
   return fields;
 }
 
@@ -5997,10 +5997,10 @@ export interface TargetTrackingConfigurationParams {
 
 export function fieldsFromTargetTrackingConfigurationParams(params: TargetTrackingConfigurationParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "target_value", params.target_value, TF.numberValue);
-  TF.addOptionalField(fields, "predefined_metric_specification", params.predefined_metric_specification, (v) => TF.mapValue(fieldsFromPredefinedMetricSpecificationParams(v)));
-  TF.addOptionalField(fields, "customized_metric_specification", params.customized_metric_specification, (v) => TF.mapValue(fieldsFromCustomizedMetricSpecificationParams(v)));
-  TF.addOptionalField(fields, "disable_scale_in", params.disable_scale_in, TF.booleanValue);
+  TF.addAttribute(fields, "target_value", params.target_value, TF.numberValue);
+  TF.addOptionalBlock(fields, "predefined_metric_specification", params.predefined_metric_specification, fieldsFromPredefinedMetricSpecificationParams);
+  TF.addOptionalBlock(fields, "customized_metric_specification", params.customized_metric_specification, fieldsFromCustomizedMetricSpecificationParams);
+  TF.addOptionalAttribute(fields, "disable_scale_in", params.disable_scale_in, TF.booleanValue);
   return fields;
 }
 
@@ -6021,9 +6021,9 @@ export interface SimpleScalingParams {
 
 export function fieldsFromSimpleScalingParams(params: SimpleScalingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-  TF.addOptionalField(fields, "cooldown", params.cooldown, TF.numberValue);
-  TF.addField(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
+  TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cooldown", params.cooldown, TF.numberValue);
+  TF.addAttribute(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
   return fields;
 }
 
@@ -6040,10 +6040,10 @@ export interface StepScalingParams {
 
 export function fieldsFromStepScalingParams(params: StepScalingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-  TF.addField(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
-  TF.addField(fields, "step_adjustment", params.step_adjustment, TF.listValue((v) => TF.mapValue(fieldsFromStepAdjustmentParams(v))));
-  TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+  TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addAttribute(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
+  TF.addRepeatedBlock(fields, "step_adjustment", params.step_adjustment, fieldsFromStepAdjustmentParams);
+  TF.addOptionalAttribute(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
   return fields;
 }
 
@@ -6059,9 +6059,9 @@ export interface TargetTrackingScalingParams {
 
 export function fieldsFromTargetTrackingScalingParams(params: TargetTrackingScalingParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-  TF.addField(fields, "target_tracking_configuration", params.target_tracking_configuration, (v) => TF.mapValue(fieldsFromTargetTrackingConfigurationParams(v)));
-  TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+  TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+  TF.addBlock(fields, "target_tracking_configuration", params.target_tracking_configuration, fieldsFromTargetTrackingConfigurationParams);
+  TF.addOptionalAttribute(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
   return fields;
 }
 
@@ -6073,11 +6073,11 @@ export function fieldsFromTargetTrackingScalingParams(params: TargetTrackingScal
 export function createAutoscalingPolicy(tfgen: TF.Generator, rname: string, params: AutoscalingPolicyParams): AutoscalingPolicy {
   const fields = fieldsFromAutoscalingPolicyParams(params);
   const resource = tfgen.createTypedResource('AutoscalingPolicy', 'aws_autoscaling_policy', rname, fields);
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
-  const autoscaling_group_name: string =  '${' + TF.resourceName(resource) + '.autoscaling_group_name}';
-  const adjustment_type: string =  '${' + TF.resourceName(resource) + '.adjustment_type}';
-  const policy_type: string =  '${' + TF.resourceName(resource) + '.policy_type}';
-  const arn: AutoscalingPolicyArn = AT.arnT('${' + TF.resourceName(resource) + '.arn}', 'AutoscalingPolicy');
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const autoscaling_group_name: string =  TF.resourceAttribute(resource, "autoscaling_group_name");
+  const adjustment_type: string =  TF.resourceAttribute(resource, "adjustment_type");
+  const policy_type: string =  TF.resourceAttribute(resource, "policy_type");
+  const arn: AutoscalingPolicyArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'AutoscalingPolicy');
 
   return {
     ...resource,
@@ -6147,27 +6147,27 @@ export type AutoscalingPolicyParams = {
 
 export function fieldsFromAutoscalingPolicyParams(params: AutoscalingPolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addField(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
-  TF.addOptionalField(fields, "adjustment_type", params.adjustment_type, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "adjustment_type", params.adjustment_type, TF.stringValue);
   switch(params.kind){
     case "simple_scaling": {
-      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-      TF.addOptionalField(fields, "cooldown", params.cooldown, TF.numberValue);
-      TF.addField(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
+    TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+    TF.addOptionalAttribute(fields, "cooldown", params.cooldown, TF.numberValue);
+    TF.addAttribute(fields, "scaling_adjustment", params.scaling_adjustment, TF.numberValue);
       break;
     }
     case "step_scaling": {
-      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-      TF.addField(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
-      TF.addField(fields, "step_adjustment", params.step_adjustment, TF.listValue((v) => TF.mapValue(fieldsFromStepAdjustmentParams(v))));
-      TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+    TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+    TF.addAttribute(fields, "metric_aggregation_type", params.metric_aggregation_type, TF.stringValue);
+    TF.addRepeatedBlock(fields, "step_adjustment", params.step_adjustment, fieldsFromStepAdjustmentParams);
+    TF.addOptionalAttribute(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
       break;
     }
     case "target_tracking_scaling": {
-      TF.addField(fields, "policy_type", params.policy_type, TF.stringValue);
-      TF.addField(fields, "target_tracking_configuration", params.target_tracking_configuration, (v) => TF.mapValue(fieldsFromTargetTrackingConfigurationParams(v)));
-      TF.addOptionalField(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
+    TF.addAttribute(fields, "policy_type", params.policy_type, TF.stringValue);
+    TF.addBlock(fields, "target_tracking_configuration", params.target_tracking_configuration, fieldsFromTargetTrackingConfigurationParams);
+    TF.addOptionalAttribute(fields, "estimated_instance_warmup", params.estimated_instance_warmup, TF.numberValue);
       break;
     }
   }
@@ -6181,8 +6181,8 @@ export interface FilterParams {
 
 export function fieldsFromFilterParams(params: FilterParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name ", params.name , TF.stringValue);
-  TF.addField(fields, "values ", params.values , TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "name ", params.name , TF.stringValue);
+  TF.addAttribute(fields, "values ", params.values , TF.listValue(TF.stringValue));
   return fields;
 }
 
@@ -6214,10 +6214,10 @@ export interface AmiParams {
 
 export function fieldsFromAmiParams(params: AmiParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "owners ", params.owners , TF.listValue(TF.stringValue));
-  TF.addOptionalField(fields, "most_recent", params.most_recent, TF.booleanValue);
-  TF.addOptionalField(fields, "filter", params.filter, TF.listValue((v) => TF.mapValue(fieldsFromFilterParams(v))));
-  TF.addOptionalField(fields, "name_regex", params.name_regex, TF.stringValue);
+  TF.addAttribute(fields, "owners ", params.owners , TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "most_recent", params.most_recent, TF.booleanValue);
+  TF.addRepeatedBlock(fields, "filter", params.filter, fieldsFromFilterParams);
+  TF.addOptionalAttribute(fields, "name_regex", params.name_regex, TF.stringValue);
   return fields;
 }
 
@@ -6231,14 +6231,14 @@ export function getAmiData(tfgen: TF.Generator, dname: string, params: AmiParams
   const resource = tfgen.createTypedDataSource('Ami', 'aws_ami', dname, fields);
   const id: AT.Ami =  {type: 'Ami', value: '${' + TF.dataSourceName(resource) + '.id}'};
   const arn: AT.Arn =  {type: 'Arn', value: '${' + TF.dataSourceName(resource) + '.arn}'};
-  const description: string = '${' + TF.dataSourceName(resource) + '.description}';
+  const description: string = '${' + TF.dataSourceName(resource) + '.}}';
   const image_id: AT.Ami =  {type: 'Ami', value: '${' + TF.dataSourceName(resource) + '.image_id}'};
-  const name: string = '${' + TF.dataSourceName(resource) + '.name}';
-  const owner_id: string = '${' + TF.dataSourceName(resource) + '.owner_id}';
-  const public_: string = '${' + TF.dataSourceName(resource) + '.public}';
-  const root_device_name: string = '${' + TF.dataSourceName(resource) + '.root_device_name}';
-  const root_device_type: string = '${' + TF.dataSourceName(resource) + '.root_device_type}';
-  const virtualization_type: string = '${' + TF.dataSourceName(resource) + '.virtualization_type}';
+  const name: string = '${' + TF.dataSourceName(resource) + '.}}';
+  const owner_id: string = '${' + TF.dataSourceName(resource) + '.}}';
+  const public_: string = '${' + TF.dataSourceName(resource) + '.}}';
+  const root_device_name: string = '${' + TF.dataSourceName(resource) + '.}}';
+  const root_device_type: string = '${' + TF.dataSourceName(resource) + '.}}';
+  const virtualization_type: string = '${' + TF.dataSourceName(resource) + '.}}';
 
   return {
     ...resource,
@@ -6275,8 +6275,8 @@ export interface Route53ZoneVpcParams {
 
 export function fieldsFromRoute53ZoneVpcParams(params: Route53ZoneVpcParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
-  TF.addOptionalField(fields, "vpc_region", params.vpc_region, TF.stringAliasValue);
+  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "vpc_region", params.vpc_region, TF.stringAliasValue);
   return fields;
 }
 
@@ -6290,11 +6290,11 @@ export interface Route53ZoneParams {
 
 export function fieldsFromRoute53ZoneParams(params: Route53ZoneParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addField(fields, "name", params.name, TF.stringValue);
-  TF.addOptionalField(fields, "comment", params.comment, TF.stringValue);
-  TF.addOptionalField(fields, "vpc", params.vpc, (v) => TF.mapValue(fieldsFromRoute53ZoneVpcParams(v)));
-  TF.addOptionalField(fields, "force_destroy", params.force_destroy, TF.booleanValue);
-  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "comment", params.comment, TF.stringValue);
+  TF.addOptionalBlock(fields, "vpc", params.vpc, fieldsFromRoute53ZoneVpcParams);
+  TF.addOptionalAttribute(fields, "force_destroy", params.force_destroy, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 
@@ -6306,8 +6306,8 @@ export function fieldsFromRoute53ZoneParams(params: Route53ZoneParams) : TF.Reso
 export function createRoute53Zone(tfgen: TF.Generator, rname: string, params: Route53ZoneParams): Route53Zone {
   const fields = fieldsFromRoute53ZoneParams(params);
   const resource = tfgen.createTypedResource('Route53Zone', 'aws_route53_zone', rname, fields);
-  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: '${' + TF.resourceName(resource) + '.zone_id}'};
-  const name: string =  '${' + TF.resourceName(resource) + '.name}';
+  const zone_id: AT.HostedZoneId =  {type: 'HostedZoneId', value: TF.resourceAttribute(resource, "zone_id")};
+  const name: string =  TF.resourceAttribute(resource, "name");
 
   return {
     ...resource,

@@ -266,7 +266,7 @@ export function createProcessorAutoScaleGroup(
       // flush out old instances when asg size reduces
       'OldestInstance',
     ],
-    tags: Object.entries(contextTagsWithName(tfgen, name)).map(
+    tag: Object.entries(contextTagsWithName(tfgen, name)).map(
       ([key, value]) => {
         // note that tag and tags parameters appear to have the same function
         return {

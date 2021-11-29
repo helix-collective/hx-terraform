@@ -1,5 +1,4 @@
-import * as _ from 'lodash';
-import * as TF from '../../core/core';
+import * as TF from '../../core/core.ts';
 
 /**
  *  Registers the random provider

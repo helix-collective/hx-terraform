@@ -253,7 +253,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
   });
   s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
 
-  
+
 
   const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
   const backup_bucket = AR.createS3Bucket(tfgen, 'backup', {
@@ -420,9 +420,10 @@ export function createVpcEndpointsForServices(
 ) {
   // Don't go through GW for predefined services.
   for (const service of services) {
-    AR.createVpcEndpoint(tfgen, service, {
+    const rname = service.replaceAll('.', '-');
+    AR.createVpcEndpoint(tfgen, rname, {
       vpc_id: vpc.id,
-      tags: contextTagsWithName(tfgen, 'vpce_' + service),
+      tags: contextTagsWithName(tfgen, 'vpce_' + rname),
       service_name: 'com.amazonaws.' + region.value + '.' + service,
       ...endpointParams,
     });

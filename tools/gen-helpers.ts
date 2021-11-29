@@ -32,6 +32,7 @@ export type Type =
   | ConvertToPrimitive
   | PrimitiveType
   | ListType
+  | RepeatedBlockType
   | RecordType
   | StringAliasType
   | ResourceIdType
@@ -69,21 +70,25 @@ export const NUMBERSTR: ConvertToPrimitive = {
   terraform: 'string',
 };
 
-export const QUOTED_STRING: ConvertToPrimitive = {
-  kind: 'convert-to-primitive',
-  conv: 'str-to-str',
-  typescript: 'string',
-  terraform: 'string',
-};
 
 interface ListType {
   kind: 'list';
   type: Type;
 }
 
+interface RepeatedBlockType {
+  kind: 'repeatedblock';
+  type: RecordType;
+}
+
 export function listType(type: Type): ListType {
   return { type, kind: 'list' };
 }
+
+export function repeatedBlockType(type: RecordType): RepeatedBlockType {
+  return { type, kind: 'repeatedblock' };
+}
+
 
 interface RecordType {
   kind: 'record';
@@ -245,6 +250,8 @@ function genType(type: Type): string {
       return type.typescript;
     case 'list':
       return '(' + genType(type.type) + ')' + '[]';
+    case 'repeatedblock':
+      return '(' + genType(type.type) + ')' + '[]';
     case 'record':
       return paramsInterfaceName(type.name);
     case 'stringalias':
@@ -290,10 +297,7 @@ function genResourceFn(type: Type): string {
       return genResourceFnConvert(type);
     case 'list':
       return `TF.listValue(${genResourceFn(type.type)})`;
-    case 'record':
-      return `(v) => TF.mapValue(fieldsFrom${paramsInterfaceName(
-        type.name
-      )}(v))`;
+
     case 'stringalias':
       return 'TF.stringAliasValue';
     case 'arntype':
@@ -304,6 +308,50 @@ function genResourceFn(type: Type): string {
       return 'TF.tagsValue';
     case 'enum':
       return 'TF.stringValue';
+    case 'record':
+      return `(v) => TF.blockValue(fieldsFrom${paramsInterfaceName(
+        type.name
+      )}(v))`;
+
+
+    case 'repeatedblock':
+      //The cases shouldn't happen, as the are handled at a higher level
+      throw new Error("BUG: internal error");
+  }
+}
+
+function generateField(lines: string[], indent: string, field: FieldDecl) {
+  const fname = field.field;
+
+  if (field.type.kind == 'record') {
+    if (field.optional) {
+      lines.push(
+        indent + `TF.addOptionalBlock(fields, "${fname}", params.${fname}, fieldsFrom${paramsInterfaceName(field.type.name)});`
+      );
+    } else {
+      lines.push(
+        indent + `TF.addBlock(fields, "${fname}", params.${fname}, fieldsFrom${paramsInterfaceName(field.type.name)});`
+      );
+    }
+    return;
+  }
+
+  if (field.type.kind == 'repeatedblock') {
+    lines.push(
+      indent + `TF.addRepeatedBlock(fields, "${fname}", params.${fname}, fieldsFrom${paramsInterfaceName(field.type.type.name)});`
+    );
+    return;
+  }
+
+  const toResourceFn = genResourceFn(field.type);
+  if (field.optional) {
+    lines.push(
+      indent + `TF.addOptionalAttribute(fields, "${fname}", params.${fname}, ${toResourceFn});`
+    );
+  } else {
+    lines.push(
+      indent + `TF.addAttribute(fields, "${fname}", params.${fname}, ${toResourceFn});`
+    );
   }
 }
 
@@ -371,15 +419,13 @@ export function fileGenerator(
         lines.push(
           `  const ${
             escapeVariableName(attr.name)
-          }: string =  '\$\{' + TF.resourceName(resource) + '.${attr.name}}';`
+          }: string =  TF.resourceAttribute(resource, "${attr.name}");`
         );
       } else if (attr.type.kind === 'resourcearn') {
         lines.push(
           `  const ${escapeVariableName(attr.name)}: ${genAttrType(
             attr.type
-          )} = AT.arnT('\$\{' + TF.resourceName(resource) + '.${
-            attr.name
-          }}', '${name}');`
+          )} = AT.arnT(TF.resourceAttribute(resource, "${attr.name}"), '${name}');`
         );
       } else {
         lines.push(
@@ -387,7 +433,7 @@ export function fileGenerator(
             attr.type
           )} =  {type: '${genAttrTypeLabel(
             attr.type
-          )}', value: '\$\{' + TF.resourceName(resource) + '.${attr.name}}'};`
+          )}', value: TF.resourceAttribute(resource, "${attr.name}")};`
         );
       }
     }
@@ -441,7 +487,7 @@ export function fileGenerator(
         lines.push(
           `  const ${
             escapeVariableName(attr.name)
-          }: string = '\$\{' + TF.dataSourceName(resource) + '.${attr.name}}';`
+          }: string = '\$\{' + TF.dataSourceName(resource) + '.}}';`
         );
       } else if (attr.type.kind === 'resourcearn') {
         lines.push(
@@ -541,18 +587,11 @@ export function fileGenerator(
       `export function fieldsFrom${prefix}${interfaceName}(params: ${prefix}${interfaceName}) : TF.ResourceFieldMap {`
     );
     lines.push('  const fields: TF.ResourceFieldMap = [];');
+
+
+
     for (const field of record.fields) {
-      const fname = field.field;
-      const toResourceFn = genResourceFn(field.type);
-      if (field.optional) {
-        lines.push(
-          `  TF.addOptionalField(fields, "${fname}", params.${fname}, ${toResourceFn});`
-        );
-      } else {
-        lines.push(
-          `  TF.addField(fields, "${fname}", params.${fname}, ${toResourceFn});`
-        );
-      }
+      generateField(lines, '  ', field);
     }
 
     if (record.variants !== undefined) {
@@ -563,17 +602,7 @@ export function fileGenerator(
 
         lines.push(`    case "${v}": {`);
         for (const field of rec.fields) {
-          const fname = field.field;
-          const toResourceFn = genResourceFn(field.type);
-          if (field.optional) {
-            lines.push(
-              `      TF.addOptionalField(fields, "${fname}", params.${fname}, ${toResourceFn});`
-            );
-          } else {
-            lines.push(
-              `      TF.addField(fields, "${fname}", params.${fname}, ${toResourceFn});`
-            );
-          }
+          generateField(lines, '    ', field);
         }
         lines.push(`      break;`);
         lines.push(`    }`);

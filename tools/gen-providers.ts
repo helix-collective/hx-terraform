@@ -14,7 +14,6 @@ import {
   NUMBER,
   BOOLEAN,
   STRING,
-  QUOTED_STRING,
   TAGS_MAP,
   stringAliasType,
   arnType,
@@ -22,6 +21,7 @@ import {
   recordType,
   enumType,
   listType,
+  repeatedBlockType,
   Generator,
   fileGenerator,
   stringAttr,
@@ -78,7 +78,7 @@ const instance: RecordDecl = {
     optionalField('subnet_id', resourceIdType('SubnetId')),
     optionalField('associate_public_ip_address', BOOLEAN),
     optionalField('root_block_device', recordType(instance_root_block_device)),
-    optionalField('ebs_block_device', listType(recordType(ebs_block_device))),
+    optionalField('ebs_block_device', repeatedBlockType(recordType(ebs_block_device))),
     optionalField('ephemeral_block_device', recordType(ephemeral_block_device)),
     optionalField('user_data', STRING),
     optionalField(
@@ -170,7 +170,7 @@ const db_parameter_group: RecordDecl = {
     optionalField('tags', TAGS_MAP),
     optionalField(
       'parameter',
-      listType(recordType(db_parameter_group_parameter))
+      repeatedBlockType(recordType(db_parameter_group_parameter))
     ),
   ],
 };
@@ -270,8 +270,8 @@ const security_group: RecordDecl = {
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
     optionalField('description', STRING),
-    optionalField('ingress', listType(recordType(ingress_rule))),
-    optionalField('egress', listType(recordType(egress_rule))),
+    optionalField('ingress', repeatedBlockType(recordType(ingress_rule))),
+    optionalField('egress', repeatedBlockType(recordType(egress_rule))),
     optionalField('vpc_id', resourceIdType('VpcId')),
     optionalField('tags', TAGS_MAP),
   ],
@@ -411,7 +411,7 @@ const route53_record: RecordDecl = {
       ])
     ),
     optionalField('ttl', STRING),
-    optionalField('records', listType(QUOTED_STRING)),
+    optionalField('records', listType(STRING)),
     optionalField('alias', recordType(route53_alias)),
     optionalField('allow_overwrite', BOOLEAN),
   ],
@@ -513,7 +513,7 @@ const s3_bucket: RecordDecl = {
     optionalField('acl', stringAliasType('AT.CannedAcl')),
     optionalField('policy', STRING),
     optionalField('versioning', recordType(bucket_versioning)),
-    optionalField('lifecycle_rule', listType(recordType(lifecycle_rule))),
+    optionalField('lifecycle_rule', repeatedBlockType(recordType(lifecycle_rule))),
     optionalField('cors_rule', recordType(cors_rule)),
     optionalField('server_side_encryption_configuration', recordType(server_side_encryption_configuration)),
     optionalField('website', recordType(website)),
@@ -810,7 +810,7 @@ const lb: RecordDecl = {
     ),
     optionalField('access_logs', recordType(lb_access_logs)),
     optionalField('subnets', listType(resourceIdType('SubnetId'))),
-    optionalField('subnet_mapping', listType(recordType(lb_subnet_mapping))),
+    optionalField('subnet_mapping', repeatedBlockType(recordType(lb_subnet_mapping))),
     optionalField('idle_timeout', NUMBER),
     optionalField('enable_deletion_protection', BOOLEAN),
     optionalField('enable_cross_zone_load_balancing', BOOLEAN),
@@ -1278,7 +1278,7 @@ const autoscaling_group: RecordDecl = {
       )
     ),
 
-    optionalField('tags', listType(recordType(autoscaling_group_tag))),
+    optionalField('tag', repeatedBlockType(recordType(autoscaling_group_tag))),
 
     optionalField(
       'termination_policies',
@@ -1365,7 +1365,7 @@ const elasticache_parameter_group: RecordDecl = {
     requiredField('name', STRING),
     requiredField('family', STRING),
     optionalField('description', STRING),
-    optionalField('parameter', listType(recordType(elasticache_parameter_group_parameter)))
+    optionalField('parameter', repeatedBlockType(recordType(elasticache_parameter_group_parameter)))
   ],
 };
 
@@ -1651,7 +1651,7 @@ const wafregional_ipset: RecordDecl = {
     requiredField('name', STRING),
     optionalField(
       'ip_set_descriptor',
-      listType(recordType(ip_set_descriptors))
+      repeatedBlockType(recordType(ip_set_descriptors))
     ),
   ],
 };
@@ -1681,7 +1681,7 @@ const wafregional_rule: RecordDecl = {
   fields: [
     requiredField('name', STRING),
     requiredField('metric_name', STRING),
-    optionalField('predicate', listType(recordType(predicate))),
+    optionalField('predicate', repeatedBlockType(recordType(predicate))),
   ],
 };
 
@@ -1762,7 +1762,7 @@ const wafv2_managed_rule_group_statement: RecordDecl = {
   fields: [
     requiredField('name', STRING),
     requiredField('vendor_name', STRING),
-    optionalField('excluded_rule', listType(recordType(wafv2_excluded_rule))),
+    optionalField('excluded_rule', repeatedBlockType(recordType(wafv2_excluded_rule))),
   ]
 }
 
@@ -1806,7 +1806,7 @@ const wafv2_web_acl: RecordDecl = {
     requiredField('default_action', recordType(wafv2_default_action)),
     optionalField('description', STRING),
     requiredField('name', STRING),
-    optionalField('rule', listType(recordType(wafv2_rule))),
+    optionalField('rule', repeatedBlockType(recordType(wafv2_rule))),
     requiredField('scope', enumType(['CLOUDFRONT', 'REGIONAL'])),
     optionalField('tags', TAGS_MAP),
     requiredField('visibility_config', recordType(wafv2_visibility_config)),
@@ -1966,7 +1966,7 @@ const cloudfront_distribution: RecordDecl = {
       recordType(cloudfront_cache_behavior)
     ),
     requiredField('enabled', BOOLEAN),
-    requiredField('origin', listType(recordType(cloudfront_origin))),
+    requiredField('origin', repeatedBlockType(recordType(cloudfront_origin))),
     requiredField('restrictions', recordType(cloudfront_restrictions)),
     requiredField(
       'viewer_certificate',
@@ -1976,7 +1976,7 @@ const cloudfront_distribution: RecordDecl = {
     optionalField('is_ipv6_enabled', BOOLEAN),
     optionalField(
       'custom_error_response',
-      listType(recordType(cloudfront_custom_error_response))
+      repeatedBlockType(recordType(cloudfront_custom_error_response))
     ),
     optionalField('tags', TAGS_MAP),
   ],
@@ -2192,7 +2192,7 @@ const cognito_user_pool: RecordDecl = {
       'auto_verified_attributes',
       listType(enumType(['email', 'phone_number']))
     ),
-    optionalField('schema', listType(recordType(cognito_schema_attributes))),
+    optionalField('schema', repeatedBlockType(recordType(cognito_schema_attributes))),
     optionalField(
       'username_attributes',
       listType(enumType(['email', 'phone_number']))
@@ -2259,7 +2259,7 @@ const cognito_identity_pool: RecordDecl = {
     requiredField('allow_unauthenticated_identities', BOOLEAN),
     optionalField(
       'cognito_identity_providers',
-      listType(recordType(cognito_identity_provider))
+      repeatedBlockType(recordType(cognito_identity_provider))
     ),
     // TODO(timd): complete
   ],
@@ -2479,7 +2479,7 @@ function autoscaling_policy(gen: Generator): ResourcesParams {
       requiredField('metric_name', STRING),
       requiredField('namespace', STRING),
       requiredField('statistic', STRING),
-      optionalField('metric_dimension', listType(recordType(metric_dimension))),
+      optionalField('metric_dimension', repeatedBlockType(recordType(metric_dimension))),
       optionalField('unit', STRING),
     ],
   };
@@ -2535,7 +2535,7 @@ function autoscaling_policy(gen: Generator): ResourcesParams {
         'metric_aggregation_type',
         enumType(['Minimum', 'Maximum', 'Average'])
       ),
-      requiredField('step_adjustment', listType(recordType(step_adjustment))),
+      requiredField('step_adjustment', repeatedBlockType(recordType(step_adjustment))),
       optionalField('estimated_instance_warmup', NUMBER, [
         'The estimated time, in seconds, until a newly launched instance will contribute CloudWatch metrics.',
         "Without a value, AWS will default to the group's specified cooldown period.",
@@ -2641,7 +2641,7 @@ function amiDataSource(gen: Generator) : void {
         'If more than one result is returned, use the most recent AMI.',
       ]),
 
-      optionalField('filter', listType(recordType(amiFilterKeyVal)), [
+      optionalField('filter', repeatedBlockType(recordType(amiFilterKeyVal)), [
         'One or more name/value pairs to filter off of.',
         'There are several valid keys, for a full reference, check out describe-images in the AWS CLI reference'
       ]),

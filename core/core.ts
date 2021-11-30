@@ -159,7 +159,7 @@ export function repeatedBlockValue<T>(
 export function tagsValue(tags: TagsMap): hcl2.Expression {
   const map: {key: string, value: hcl2.ExprTerm}[] = [];
   for (const key in tags) {
-    map.push({ key, value: hcl2.stringLit(tags[key])});
+    map.push({ key, value:hcl2ExprFromString(tags[key])});
   }
   return hcl2.objectExpr(map);
 }

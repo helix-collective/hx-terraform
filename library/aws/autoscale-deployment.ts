@@ -171,7 +171,10 @@ function createController(
     bs.include(params.controller_extra_bootscript);
   }
 
-  const controller_iampolicies = [aws.s3DeployBucketModifyPolicy(sr)];
+  let controller_iampolicies: policies.NamedPolicy[] = [aws.s3DeployBucketModifyPolicy(sr)];
+  if (params.controller_extra_policies) {
+    controller_iampolicies = controller_iampolicies.concat(params.controller_extra_policies);
+  }
 
   const controller_instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
@@ -668,6 +671,12 @@ interface AutoscaleProcessorParams {
    * can be specified here.
    */
   appserver_extra_policies?: policies.NamedPolicy[];
+
+  /**
+   * The controller has sufficient policies to read and modify the state bucket to manage hx-deploy-tool. Any other
+   * required policies can be attached here.
+   */
+  controller_extra_policies?: policies.NamedPolicy[];
 
   /** Lower bound of EC2 instances for the Autoscaling group */
   min_size?: number;

@@ -48,6 +48,7 @@ export interface SharedResources {
   deploy_bucket: AR.S3Bucket;
   deploy_bucket_name: string;
   backup_bucket: AR.S3Bucket;
+  session_logs_bucket_name: string;
   backup_bucket_name: string;
   bastion_security_group: AR.SecurityGroup;
   appserver_security_group: AR.SecurityGroup;
@@ -116,6 +117,24 @@ export function createResources(
         }
       }
     }
+  });
+
+  // An S3 bucket for session logs
+  const session_logs_bucket_name = s3_bucket_prefix + '-shared-session-logs';
+  AR.createS3Bucket(tfgen, 'session_logs', {
+    bucket: session_logs_bucket_name,
+    versioning: {
+      enabled: true,
+    },
+    server_side_encryption_configuration: {
+      rule: {
+        apply_server_side_encryption_by_default: {
+          sse_algorithm: 'AES256'
+        }
+      }
+    },
+    acl: AT.ca_private,
+    tags: tfgen.tagsContext(),
   });
 
   // const config_bucket_name = s3_bucket_prefix + "-shared-config";
@@ -211,6 +230,7 @@ export function createResources(
     alert_topic,
     alarm_topic,
     s3_bucket_prefix,
+    session_logs_bucket_name,
   };
 }
 

@@ -9,7 +9,7 @@ import * as AT from '../../providers/aws/types';
 import * as AR from '../../providers/aws/resources';
 import * as s3 from './s3';
 import { ingressOnPort, egress_all, contextTagsWithName } from '../util';
-import { s3ModifyPolicy, ecr_modify_all_policy } from './policies';
+import { s3ModifyPolicy, ecr_modify_all_policy, NamedPolicy } from './policies';
 import { RSA_NO_PADDING } from 'constants';
 
 /**
@@ -371,4 +371,72 @@ export function getScopedS3Ref(
   sr: SharedResources
 ): s3.S3Ref {
   return new s3.S3Ref(sr.deploy_bucket_name, tfgen.nameContext().join('/'));
+}
+
+export function sessionManagerPolicy(session_log_bucket_name: string): NamedPolicy {
+  return {
+    name: 'sessionmanager',
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ssm:DescribeAssociation",
+            "ssm:GetDeployablePatchSnapshotForInstance",
+            "ssm:GetDocument",
+            "ssm:DescribeDocument",
+            "ssm:GetManifest",
+            "ssm:GetParameter",
+            "ssm:GetParameters",
+            "ssm:ListAssociations",
+            "ssm:ListInstanceAssociations",
+            "ssm:PutInventory",
+            "ssm:PutComplianceItems",
+            "ssm:PutConfigurePackageResult",
+            "ssm:UpdateAssociationStatus",
+            "ssm:UpdateInstanceAssociationStatus",
+            "ssm:UpdateInstanceInformation"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "ec2messages:AcknowledgeMessage",
+            "ec2messages:DeleteMessage",
+            "ec2messages:FailMessage",
+            "ec2messages:GetEndpoint",
+            "ec2messages:GetMessages",
+            "ec2messages:SendReply"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:PutObject"
+          ],
+          "Resource": `arn:aws:s3:::${session_log_bucket_name}/*`
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetEncryptionConfiguration"
+          ],
+          "Resource": "*"
+        }
+      ]
+    }
+  }
 }

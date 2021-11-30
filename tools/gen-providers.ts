@@ -1193,18 +1193,18 @@ const launch_template: RecordDecl = {
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
     optionalField('description', STRING),
-    // default_version - Default Version of the launch template.
-    // update_default_version - Whether to update Default Version each update. Conflicts with default_version.
+    optionalField('default_version', NUMBER),  // - Default Version of the launch template.
+    optionalField('update_default_version', BOOLEAN),  // - Whether to update Default Version each update. Conflicts with default_version.
     optionalField('block_device_mappings', recordType(launch_template_block_device_mapping)),
     // capacity_reservation_specification - Targeting for EC2 capacity reservations. See Capacity Reservation Specification below for more details.
     // cpu_options - The CPU options for the instance. See CPU Options below for more details.
     // credit_specification - Customize the credit specification of the instance. See Credit Specification below for more details.
-    // disable_api_termination - If true, enables EC2 Instance Termination Protection
-    // ebs_optimized - If true, the launched EC2 instance will be EBS-optimized.
+    optionalField('disable_api_termination', BOOLEAN),  // - If true, enables EC2 Instance Termination Protection
+    optionalField('ebs_optimized', BOOLEAN),  // - If true, the launched EC2 instance will be EBS-optimized.
     // elastic_gpu_specifications - The elastic GPU to attach to the instance. See Elastic GPU below for more details.
     // elastic_inference_accelerator - (Optional) Configuration block containing an Elastic Inference Accelerator to attach to the instance. See Elastic Inference Accelerator below for more details.
     // iam_instance_profile - The IAM Instance Profile to launch the instance with. See Instance Profile below for more details.
-    // image_id - The AMI from which to launch the instance.
+    optionalField('image_id', stringAliasType('AT.Ami')),  // - The AMI from which to launch the instance.
     // instance_initiated_shutdown_behavior - Shutdown behavior for the instance. Can be stop or terminate. (Default: stop).
     // instance_market_options - The market (purchasing) option for the instance. See Market Options below for details.
     // instance_type - The type of the instance.
@@ -1219,7 +1219,7 @@ const launch_template: RecordDecl = {
     // security_group_names - A list of security group names to associate with. If you are creating Instances in a VPC, use vpc_security_group_ids instead.
     // vpc_security_group_ids - A list of security group IDs to associate with. Conflicts with network_interfaces.security_groups
     // tag_specifications - The tags to apply to the resources during launch. See Tag Specifications below for more details.
-    // tags - (Optional) A map of tags to assign to the launch template. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
+    optionalField('tags', TAGS_MAP),  // - (Optional) A map of tags to assign to the launch template. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
     // user_data - The Base64-encoded user data to provide when launching the instance.
     // hibernation_options - The hibernation options for the instance. See Hibernation Options below for more details.
     // enclave_options - (Optional) Enable Nitro Enclaves on launched instances. See Enclave Options below for more details.

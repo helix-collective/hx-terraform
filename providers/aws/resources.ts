@@ -4388,7 +4388,13 @@ export interface LaunchTemplateParams {
   name?: string;
   name_prefix?: string;
   description?: string;
+  default_version?: number;
+  update_default_version?: boolean;
   block_device_mappings?: LaunchTemplateBlockDeviceMappingParams;
+  disable_api_termination?: boolean;
+  ebs_optimized?: boolean;
+  image_id?: AT.Ami;
+  tags?: TF.TagsMap;
 }
 
 export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
@@ -4396,7 +4402,13 @@ export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : T
   TF.addOptionalField(fields, "name", params.name, TF.stringValue);
   TF.addOptionalField(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalField(fields, "default_version", params.default_version, TF.numberValue);
+  TF.addOptionalField(fields, "update_default_version", params.update_default_version, TF.booleanValue);
   TF.addOptionalField(fields, "block_device_mappings", params.block_device_mappings, (v) => TF.mapValue(fieldsFromLaunchTemplateBlockDeviceMappingParams(v)));
+  TF.addOptionalField(fields, "disable_api_termination", params.disable_api_termination, TF.booleanValue);
+  TF.addOptionalField(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
+  TF.addOptionalField(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addOptionalField(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

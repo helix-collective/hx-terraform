@@ -157,14 +157,13 @@ export function createResources(
 
   const bastion_security_group = AR.createSecurityGroup(tfgen, 'bastion', {
     vpc_id: network.vpc.id,
-    ingress: [ingressOnPort(22)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'bastion'),
   });
 
   const appserver_security_group = AR.createSecurityGroup(tfgen, 'appserver', {
     vpc_id: network.vpc.id,
-    ingress: [ingressOnPort(22), ingressOnPort(80), ingressOnPort(443)],
+    ingress: [ingressOnPort(80), ingressOnPort(443)],
     egress: [egress_all],
     tags: contextTagsWithName(tfgen, 'appserver'),
   });

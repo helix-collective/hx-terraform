@@ -622,6 +622,10 @@ export function fileGenerator(): FileGenerator {
       ]));
     }
 
+    if (resource.provider !== '') {
+      items.push(hcl2.attribute("provider", hcl2ExprFromString(resource.provider)));
+    }
+
     return items;
   }
 

@@ -133,14 +133,14 @@ export function createScalingLowHostsAlarm(
     threshold: hosts_threshold,
     dimensions: {
       LoadBalancer: TF.rawExpr(
-        `"\${replace("${
+        `replace("${
           load_balancer.arn.value
-        }", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")}"`
+        }", "/arn:aws:elasticloadbalancing:([^:]*:)*loadbalancer[/]/", "")`
       ),
       TargetGroup: TF.rawExpr(
-        `"\${replace("${
+        `replace("${
           target_group.arn.value
-        }", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")}"`
+        }", "/arn:aws:elasticloadbalancing:([^:]*:)*/", "")`
       ),
     },
     alarm_description: 'Less than configured hosts across an autoscaling group',

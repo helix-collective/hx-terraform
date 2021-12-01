@@ -576,38 +576,18 @@ export function fileGenerator(): FileGenerator {
     return result;
   }
 
-  const INDENT = '  ';
-
-  function textLines(indent: string, prefix: string, text: string): string[] {
-    return [indent + prefix + text];
-  }
-
-  function textValue(t: string):  hcl2.ExprTerm {
-    const imatch =  t.match(/^"\${([0-9A-Za-z._]+)}\"$/);
-    if (imatch != null) {
-      return hcl2.getVariable(imatch[1]);
-    } else if (t.startsWith('"') && t.endsWith('"')) {
-      return hcl2.stringLit(t.substr(1, t.length-2));
-    } else {
-      return hcl2.stringLit(t);
-    }
-  }
-
-
   function generateMetadata(resource: ResourceDetails): hcl2.BodyItem[] {
     const items: hcl2.BodyItem[] = [];
 
-    {
     const lifecycle_items: hcl2.BodyItem[] = [];
     if (resource.ignoreChanges.length > 0) {
-        lifecycle_items.push(hcl2.attribute('ignore_changes', hcl2.tupleExpr(resource.ignoreChanges.map(s => hcl2.getVariable(s)))));
-      }
-      if (resource.createBeforeDestroy) {
-        lifecycle_items.push(hcl2.attribute('create_before_destroy', hcl2.booleanLit(resource.createBeforeDestroy)));
-      }
-      if (lifecycle_items.length > 0) {
-        items.push(hcl2.block("lifecycle", [], lifecycle_items));
-      }
+      lifecycle_items.push(hcl2.attribute('ignore_changes', hcl2.tupleExpr(resource.ignoreChanges.map(s => hcl2.getVariable(s)))));
+    }
+    if (resource.createBeforeDestroy) {
+      lifecycle_items.push(hcl2.attribute('create_before_destroy', hcl2.booleanLit(resource.createBeforeDestroy)));
+    }
+    if (lifecycle_items.length > 0) {
+      items.push(hcl2.block("lifecycle", [], lifecycle_items));
     }
 
     if (resource.dependsOn.length > 0) {
@@ -639,7 +619,7 @@ export function fileGenerator(): FileGenerator {
     for (const r of generated.resources) {
       const metadata = generateMetadata(r);
       config.push(hcl2.block(
-        "resource", 
+        "resource",
         [hcl2.stringLit(r.tftype), hcl2.stringLit(r.tfname.join("_"))],
         [...r.fields, ...metadata]
       ));

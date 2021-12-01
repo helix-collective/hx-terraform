@@ -78,7 +78,7 @@ export function createCronWebhooks(
     function_name: tfgen.scopedName(name).join('_'),
     role: role.arn,
     filename: zipfile,
-    source_code_hash: TF.rawExpr(`filesha256("${zipfile}")`),
+    source_code_hash: TF.rawExpr(`filebase64sha256("${zipfile}")`),
     tags: tfgen.tagsContext(),
   });
 

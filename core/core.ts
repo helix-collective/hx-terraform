@@ -7,10 +7,13 @@ import * as hcl2 from "./hcl2.ts";
 import { Manifest } from "./manifest.ts";
 
 
-/**a
+/**
  * The interface for generating terraform
  */
 export interface Generator {
+  /** TF 0.13+ provider versions */
+  createProviderVersion(type: string, version: ProviderVersion): void;
+
   /** Construct a terraform provider */
   createProvider(type: string, fields: hcl2.BodyItem[]): Provider;
 
@@ -107,6 +110,15 @@ export type StringAlias<T> = {
 export type ResourceFieldMap = hcl2.BodyItem[];
 
 export type Provider = hcl2.Block;
+
+/**
+ * TF 0.13+ provider version requirements
+ */
+export interface ProviderVersion {
+  source: string;
+  version: string;
+}
+
 
 export type TagsMap = { [key: string]: string };
 
@@ -277,6 +289,7 @@ export function fileGenerator(): FileGenerator {
   }
 
   interface Generated {
+    providerVersions: { [name: string]: ProviderVersion };
     providers: hcl2.Block[];
     resources: ResourceDetails[];
     resourcesByName: { [tname: string]: ResourceDetails };
@@ -295,6 +308,10 @@ export function fileGenerator(): FileGenerator {
     tagsContext0: TagsMap,
     providerAliases0: ProviderAliasMap
   ): Generator {
+    function createProviderVersion(type: string, version: ProviderVersion): void {
+      generated.providerVersions[type] = version;
+    }
+
     function createProvider(
       identifier: string,
       fields: hcl2.BodyItem[]
@@ -468,6 +485,7 @@ export function fileGenerator(): FileGenerator {
     }
 
     return {
+      createProviderVersion,
       createProvider,
       createResource,
       createTypedResource,
@@ -503,6 +521,7 @@ export function fileGenerator(): FileGenerator {
 
   function emptyGenerated(): Generated {
     return {
+      providerVersions: {},
       providers: [],
       resources: [],
       resourcesByName: {},
@@ -612,6 +631,23 @@ export function fileGenerator(): FileGenerator {
   function generateFile(generated: Generated) : string {
     const config : hcl2.ConfigFile = [];
 
+    const versions = Object.entries(generated.providerVersions);
+    if (versions.length > 0) {
+      const tf = hcl2.block(
+        'terraform', [], [
+          hcl2.block('required_providers', [],
+            versions.map(([key, version]) => {
+              return hcl2.attribute(key, hcl2.objectExpr([
+                { key: 'version', value: hcl2.stringLit(version.version) },
+                { key: 'source', value: hcl2.stringLit(version.source) },
+              ]));
+            })
+          ),
+        ]
+      );
+      config.push(tf);
+    }
+
     for (const p of generated.providers) {
       config.push(p);
     }
@@ -647,6 +683,16 @@ export function fileGenerator(): FileGenerator {
     resources.clearFiles();
     adhoc.clearFiles();
     backend.clearFiles();
+
+    // Generate terraform block
+    if (Object.keys(generated.providerVersions).length > 0) {
+      const terraform = new Manifest('terraform', outdir);
+      terraform.clearFiles();
+      const tf = emptyGenerated();
+      tf.providerVersions = generated.providerVersions;
+      terraform.writeFile("terraform.tf", generateFile(tf));
+      terraform.save();
+    }
 
     const fileResources = groupResourcesByFile();
     const fileProviders = groupProvidersByFile();

@@ -16,6 +16,13 @@ export function createProvider(
   return provider;
 }
 
+export function createProviderVersion(
+  tfgen: TF.Generator,
+  params: TF.ProviderVersion
+): void {
+  tfgen.createProviderVersion('aws', params);
+}
+
 export interface Provider extends TF.Provider {}
 
 export interface AwsParams {

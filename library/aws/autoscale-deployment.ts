@@ -291,6 +291,22 @@ export function createProcessorAutoScaleGroup(
     autoscaling_group_params
   );
 
+  // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_attachment#with-an-autoscaling-group-resource
+  //
+  // > Terraform currently provides both a standalone aws_autoscaling_attachment
+  // > resource (describing an ASG attached to an ELB or ALB), and an
+  // > aws_autoscaling_group with load_balancers and target_group_arns defined
+  // > in-line. These two methods are not mutually-exclusive. If
+  // > aws_autoscaling_attachment resources are used, either alone or with inline
+  // > load_balancers or target_group_arns, the aws_autoscaling_group resource
+  // > must be configured to ignore changes to the load_balancers and
+  // > target_group_arns arguments within a lifecycle configuration block.
+  //
+  // Because we are using aws_autoscaling_group_attachment ignore this
+  // changes as per doc.
+  tfgen.ignoreChanges(autoscaling_group, 'load_balancers');
+  tfgen.ignoreChanges(autoscaling_group, 'target_group_arns');
+
   return {
     autoscaling_group,
     instance_profile,

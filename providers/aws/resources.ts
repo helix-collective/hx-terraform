@@ -2637,30 +2637,50 @@ export function fieldsFromAutoscalingGroupTagParams(params: AutoscalingGroupTagP
 export interface AutoscalingGroupParams {
   name?: string;
   name_prefix?: string;
-  min_size: number;
-  desired_capacity?: number;
   max_size: number;
-  vpc_zone_identifier?: (SubnetId)[];
+  min_size: number;
+  capacity_rebalance?: boolean;
+  default_cooldown?: number;
   launch_configuration: string;
+  desired_capacity?: number;
+  force_delete?: boolean;
   load_balancers?: (string)[];
-  enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
-  tag?: (AutoscalingGroupTagParams)[];
+  vpc_zone_identifier?: (SubnetId)[];
+  target_group_arns?: (AT.ArnT<"LbTargetGroup">)[];
   termination_policies?: ('OldestInstance' | 'NewestInstance' | 'OldestLaunchConfiguration' | 'ClosestToNextInstanceHour' | 'OldestLaunchTemplate' | 'AllocationStrategy' | 'Default')[];
+  tag?: (AutoscalingGroupTagParams)[];
+  tags?: TF.TagsMap;
+  placement_group?: string;
+  enabled_metrics?: ('GroupMinSize' | 'GroupMaxSize' | 'GroupDesiredCapacity' | 'GroupInServiceInstances' | 'GroupPendingInstances' | 'GroupStandbyInstances' | 'GroupTerminatingInstances' | 'GroupTotalInstances')[];
+  min_elb_capacity?: number;
+  protect_from_scale_in?: boolean;
+  service_linked_role?: AT.ArnT<"IamRole">;
+  max_instance_lifetime?: number;
 }
 
 export function fieldsFromAutoscalingGroupParams(params: AutoscalingGroupParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
   TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addAttribute(fields, "min_size", params.min_size, TF.numberValue);
-  TF.addOptionalAttribute(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
   TF.addAttribute(fields, "max_size", params.max_size, TF.numberValue);
-  TF.addOptionalAttribute(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
+  TF.addAttribute(fields, "min_size", params.min_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "capacity_rebalance", params.capacity_rebalance, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "default_cooldown", params.default_cooldown, TF.numberValue);
   TF.addAttribute(fields, "launch_configuration", params.launch_configuration, TF.stringValue);
+  TF.addOptionalAttribute(fields, "desired_capacity", params.desired_capacity, TF.numberValue);
+  TF.addOptionalAttribute(fields, "force_delete", params.force_delete, TF.booleanValue);
   TF.addOptionalAttribute(fields, "load_balancers", params.load_balancers, TF.listValue(TF.stringValue));
-  TF.addOptionalAttribute(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
-  TF.addRepeatedBlock(fields, "tag", params.tag, fieldsFromAutoscalingGroupTagParams);
+  TF.addOptionalAttribute(fields, "vpc_zone_identifier", params.vpc_zone_identifier, TF.listValue(TF.resourceIdValue));
+  TF.addOptionalAttribute(fields, "target_group_arns", params.target_group_arns, TF.listValue(TF.resourceArnValue));
   TF.addOptionalAttribute(fields, "termination_policies", params.termination_policies, TF.listValue(TF.stringValue));
+  TF.addRepeatedBlock(fields, "tag", params.tag, fieldsFromAutoscalingGroupTagParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "placement_group", params.placement_group, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enabled_metrics", params.enabled_metrics, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "min_elb_capacity", params.min_elb_capacity, TF.numberValue);
+  TF.addOptionalAttribute(fields, "protect_from_scale_in", params.protect_from_scale_in, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "service_linked_role", params.service_linked_role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "max_instance_lifetime", params.max_instance_lifetime, TF.numberValue);
   return fields;
 }
 

@@ -675,7 +675,7 @@ export function fileGenerator(): FileGenerator {
   };
 }
 
-const VAR_REGEX = /\${([a-zA-Z0-9_.]+)}$/;
+const VAR_REGEX = /\${([a-zA-Z0-9-_.]+)}$/;
 const RAW_EXPR_PREFIX = 'TFRAWEXPR:';
 
 

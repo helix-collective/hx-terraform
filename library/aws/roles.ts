@@ -47,6 +47,17 @@ export function createIamRoleWithPolicies(
     name,
     JSON.stringify(assume_role_policy.policy, null, 2)
   );
+  // > If you use this resource's managed_policy_arns argument or inline_policy
+  // > configuration blocks, this resource will take over exclusive management of
+  // > the role's respective policy types (e.g., both policy types if both
+  // > arguments are used). These arguments are incompatible with other ways of
+  // > managing a role's policies, such as aws_iam_policy_attachment,
+  // > aws_iam_role_policy_attachment, and aws_iam_role_policy. If you attempt to
+  // > manage a role's policies by multiple means, you will get resource cycling
+  // > and/or errors.
+  tfgen.ignoreChanges(iamr, 'inline_policy');
+  tfgen.ignoreChanges(iamr, 'managed_policy_arns');
+
   TF.withLocalNameScope(tfgen, name, tfgen => {
     for (const policy of policies) {
       createIamRolePolicy(tfgen, iamr, policy);

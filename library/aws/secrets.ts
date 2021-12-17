@@ -5,7 +5,7 @@ import { SharedResources } from './shared.ts';
 
 export type ArnSecret = ArnT<'SecretsmanagerSecret'>;
 
-export interface JsonSecretParams {
+export type JsonSecretParams = Partial<AR.SecretsmanagerSecretParams> & {
   description?: string;
   initial_value?: {};
 }
@@ -21,6 +21,7 @@ export function createJsonSecret(
   params: JsonSecretParams
 ) {
   const secret = AR.createSecretsmanagerSecret(tfgen, name, {
+    ...params,
     name: tfgen
       .scopedName(name)
       .join('_')

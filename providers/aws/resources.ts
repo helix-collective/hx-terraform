@@ -5165,6 +5165,7 @@ export interface SecretsmanagerSecretParams {
   name_prefix?: string;
   description?: string;
   tags?: TF.TagsMap;
+  replica?: (SecretsmanagerSecretReplicaParams)[];
 }
 
 export function fieldsFromSecretsmanagerSecretParams(params: SecretsmanagerSecretParams) : TF.ResourceFieldMap {
@@ -5173,6 +5174,7 @@ export function fieldsFromSecretsmanagerSecretParams(params: SecretsmanagerSecre
   TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
   TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addRepeatedBlock(fields, "replica", params.replica, fieldsFromSecretsmanagerSecretReplicaParams);
   return fields;
 }
 
@@ -5189,6 +5191,18 @@ export function fieldsFromSecretsmanagerSecretVersionParams(params: Secretsmanag
   TF.addOptionalAttribute(fields, "secret_string", params.secret_string, TF.stringValue);
   TF.addOptionalAttribute(fields, "secret_binary", params.secret_binary, TF.stringValue);
   TF.addOptionalAttribute(fields, "version_stages", params.version_stages, TF.listValue(TF.stringValue));
+  return fields;
+}
+
+export interface SecretsmanagerSecretReplicaParams {
+  kms_key_id?: string;
+  region: string;
+}
+
+export function fieldsFromSecretsmanagerSecretReplicaParams(params: SecretsmanagerSecretReplicaParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "kms_key_id", params.kms_key_id, TF.stringValue);
+  TF.addAttribute(fields, "region", params.region, TF.stringValue);
   return fields;
 }
 

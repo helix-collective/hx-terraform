@@ -1868,6 +1868,14 @@ const wafv2_web_acl_association: RecordDecl = {
 }
 
 
+const secretsmanager_secret_replica: RecordDecl = {
+  name: 'secretsmanager_secret_replica',
+  fields: [
+    optionalField('kms_key_id', STRING),
+    requiredField('region', STRING),
+  ]
+}
+
 
 const secretsmanager_secret: RecordDecl = {
   name: 'secretsmanager_secret',
@@ -1876,6 +1884,7 @@ const secretsmanager_secret: RecordDecl = {
     optionalField('name_prefix', STRING),
     optionalField('description', STRING),
     optionalField('tags', TAGS_MAP),
+    optionalField('replica', repeatedBlockType(recordType(secretsmanager_secret_replica))),
   ],
 };
 
@@ -3897,6 +3906,7 @@ function generateAws(gen: Generator) {
 
   gen.generateParams(secretsmanager_secret);
   gen.generateParams(secretsmanager_secret_version);
+  gen.generateParams(secretsmanager_secret_replica);
   gen.generateParams(cloudfront_cookies);
   gen.generateParams(cloudfront_custom_origin_config);
   gen.generateParams(cloudfront_custom_error_response);

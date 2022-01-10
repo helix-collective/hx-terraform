@@ -2501,7 +2501,8 @@ export interface IngressRuleParams {
   from_port: number;
   to_port: number;
   protocol: 'tcp' | 'udp' | 'icmp' | '-1';
-  cidr_blocks: (AT.CidrBlock)[];
+  cidr_blocks?: (AT.CidrBlock)[];
+  security_groups?: (SecurityGroupId)[];
   description?: string;
 }
 
@@ -2510,7 +2511,8 @@ export function fieldsFromIngressRuleParams(params: IngressRuleParams) : TF.Reso
   TF.addField(fields, "from_port", params.from_port, TF.numberValue);
   TF.addField(fields, "to_port", params.to_port, TF.numberValue);
   TF.addField(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "cidr_blocks", params.cidr_blocks, TF.listValue(TF.stringAliasValue));
+  TF.addOptionalField(fields, "security_groups", params.security_groups, TF.listValue(TF.resourceIdValue));
   TF.addOptionalField(fields, "description", params.description, TF.stringValue);
   return fields;
 }

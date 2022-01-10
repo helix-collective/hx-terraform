@@ -189,7 +189,8 @@ const ingress_rule: RecordDecl = {
     requiredField('from_port', NUMBER),
     requiredField('to_port', NUMBER),
     requiredField('protocol', enumType(['tcp', 'udp', 'icmp', '-1'])),
-    requiredField('cidr_blocks', listType(stringAliasType('AT.CidrBlock'))),
+    optionalField('cidr_blocks', listType(stringAliasType('AT.CidrBlock'))),
+    optionalField('security_groups', listType(resourceIdType('SecurityGroupId'))),
     optionalField('description', STRING)
   ],
 };

@@ -3446,6 +3446,7 @@ export interface S3BucketParams {
   policy?: string;
   versioning?: BucketVersioningParams;
   lifecycle_rule?: (LifecycleRuleParams)[];
+  acceleration_status?: 'Enabled' | 'Suspended';
   cors_rule?: CorsRuleParams;
   server_side_encryption_configuration?: ServerSideEncryptionConfigurationParams;
   website?: WebsiteParams;
@@ -3459,6 +3460,7 @@ export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFi
   TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
   TF.addOptionalBlock(fields, "versioning", params.versioning, fieldsFromBucketVersioningParams);
   TF.addRepeatedBlock(fields, "lifecycle_rule", params.lifecycle_rule, fieldsFromLifecycleRuleParams);
+  TF.addOptionalAttribute(fields, "acceleration_status", params.acceleration_status, TF.stringValue);
   TF.addOptionalBlock(fields, "cors_rule", params.cors_rule, fieldsFromCorsRuleParams);
   TF.addOptionalBlock(fields, "server_side_encryption_configuration", params.server_side_encryption_configuration, fieldsFromServerSideEncryptionConfigurationParams);
   TF.addOptionalBlock(fields, "website", params.website, fieldsFromWebsiteParams);

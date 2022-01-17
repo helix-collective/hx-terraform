@@ -514,6 +514,7 @@ const s3_bucket: RecordDecl = {
     optionalField('policy', STRING),
     optionalField('versioning', recordType(bucket_versioning)),
     optionalField('lifecycle_rule', repeatedBlockType(recordType(lifecycle_rule))),
+    optionalField('acceleration_status', enumType(['Enabled', 'Suspended'])),
     optionalField('cors_rule', recordType(cors_rule)),
     optionalField('server_side_encryption_configuration', recordType(server_side_encryption_configuration)),
     optionalField('website', recordType(website)),

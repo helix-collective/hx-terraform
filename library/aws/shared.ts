@@ -559,8 +559,8 @@ export function dnsAliasRecord(
   dr: DomainResources,
   dnsname: string,
   alias: AR.Route53AliasParams
-) {
-  AR.createRoute53Record(tfgen, name, {
+) : AR.Route53Record {
+  return AR.createRoute53Record(tfgen, name, {
     alias,
     zone_id: dr.primary_dns_zone.zone_id,
     name: dnsname,

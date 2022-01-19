@@ -326,13 +326,15 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
     customize_http_listener?: Customize<AR.LbListenerParams>;
     customize_https_listener?: Customize<AR.LbListenerParams>;
     alb_name?: string;
+    internal?: boolean;
   } ): LoadBalancerAndListeners {
     const lbParams: AR.LbParams = {
       name: tfgen.scopedName(tfname).join('-'),
       load_balancer_type: 'application',
       tags: tfgen.tagsContext(),
       security_groups: [sr.load_balancer_security_group.id],
-      subnets: shared.externalSubnetIds(sr),
+      subnets: params.internal ? shared.internalSubnetIds(sr) : shared.externalSubnetIds(sr),
+      internal: params.internal,
     };
     const lb = AR.createLb(
       tfgen,

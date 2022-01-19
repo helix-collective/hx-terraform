@@ -396,7 +396,11 @@ export function createAutoscaleTargetGroup(
   sr: shared.SharedResources,
   lb: LoadBalancerAndListeners,
   autoscaling_group: AR.AutoscalingGroup,
-  params: AutoscaleFrontendParams,
+  params: {
+    endpoints: EndPoint[];
+    health_check: C.HealthCheckConfig;
+    target_group_generate_name?: boolean;
+  },
 ): TargetGroupResources {
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 

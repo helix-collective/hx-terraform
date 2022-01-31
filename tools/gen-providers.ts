@@ -640,6 +640,28 @@ const ecr_repository: RecordDecl = {
   ],
 };
 
+const ecr_public_repository_catalog_data: RecordDecl = {
+  name: 'ecr_public_repository_catalog_data',
+  fields: [
+    optionalField('about_text', STRING),
+    optionalField('architectures', listType(enumType(['ARM', 'ARM_64', 'x86', 'x86-64']))),
+    optionalField('description', STRING),
+    optionalField('logo_image_blob', STRING, [
+      'The base64-encoded repository logo payload. (Only visible for verified accounts) Note that drift detection is disabled for this attribute'
+    ]),
+    optionalField('operating_systems', listType(enumType(['Windows', 'Linux']))),
+    optionalField('usage_text', STRING),
+  ],
+};
+
+const ecr_public_repository: RecordDecl = {
+  name: 'ecrpublic_repository',
+  fields: [
+    requiredField('repository_name', STRING),
+    optionalField('catalog_data', recordType(ecr_public_repository_catalog_data)),
+  ],
+};
+
 const db_subnet_group: RecordDecl = {
   name: 'db_subnet_group',
   fields: [
@@ -3111,6 +3133,20 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an EC2 Container Registry Public Repository',
+    'https://www.terraform.io/docs/providers/aws/r/ecrpublic_repository.html',
+    ecr_public_repository,
+    [
+      stringAttr('id'),
+      stringAttr('registry_id'),
+      stringAttr('repository_url'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides an RDS DB subnet group resource.',
     'https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html',
     db_subnet_group,
@@ -3816,6 +3852,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(ecr_repository);
   gen.generateParams(ecr_repository_image_scanning_configuration);
   gen.generateParams(ecr_repository_encryption_configuration);
+  gen.generateParams(ecr_public_repository);
+  gen.generateParams(ecr_public_repository_catalog_data);
   gen.generateParams(db_subnet_group);
   gen.generateParams(cloudwatch_metric_alarm);
   gen.generateParams(iam_instance_profile);

@@ -997,6 +997,38 @@ export type EcrRepositoryId = {type:'EcrRepositoryId',value:string};
 export type EcrRepositoryArn = AT.ArnT<"EcrRepository">;
 
 /**
+ *  Provides an EC2 Container Registry Public Repository
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/ecrpublic_repository.html
+ */
+export function createEcrpublicRepository(tfgen: TF.Generator, rname: string, params: EcrpublicRepositoryParams): EcrpublicRepository {
+  const fields = fieldsFromEcrpublicRepositoryParams(params);
+  const resource = tfgen.createTypedResource('EcrpublicRepository', 'aws_ecrpublic_repository', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const registry_id: string =  TF.resourceAttribute(resource, "registry_id");
+  const repository_url: string =  TF.resourceAttribute(resource, "repository_url");
+  const arn: EcrpublicRepositoryArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EcrpublicRepository');
+
+  return {
+    ...resource,
+    id,
+    registry_id,
+    repository_url,
+    arn,
+  };
+}
+
+export interface EcrpublicRepository extends TF.ResourceT<'EcrpublicRepository'> {
+  id: string;
+  registry_id: string;
+  repository_url: string;
+  arn: EcrpublicRepositoryArn;
+}
+
+export type EcrpublicRepositoryId = {type:'EcrpublicRepositoryId',value:string};
+export type EcrpublicRepositoryArn = AT.ArnT<"EcrpublicRepository">;
+
+/**
  *  Provides an RDS DB subnet group resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/db_subnet_group.html
@@ -3681,6 +3713,41 @@ export function fieldsFromEcrRepositoryEncryptionConfigurationParams(params: Ecr
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "encryption_type", params.encryption_type, TF.stringValue);
   TF.addOptionalAttribute(fields, "kms_key", params.kms_key, TF.stringValue);
+  return fields;
+}
+
+export interface EcrpublicRepositoryParams {
+  repository_name: string;
+  catalog_data?: EcrPublicRepositoryCatalogDataParams;
+}
+
+export function fieldsFromEcrpublicRepositoryParams(params: EcrpublicRepositoryParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "repository_name", params.repository_name, TF.stringValue);
+  TF.addOptionalBlock(fields, "catalog_data", params.catalog_data, fieldsFromEcrPublicRepositoryCatalogDataParams);
+  return fields;
+}
+
+export interface EcrPublicRepositoryCatalogDataParams {
+  about_text?: string;
+  architectures?: ('ARM' | 'ARM_64' | 'x86' | 'x86-64')[];
+  description?: string;
+  /**
+  The base64-encoded repository logo payload. (Only visible for verified accounts) Note that drift detection is disabled for this attribute
+  */
+  logo_image_blob?: string;
+  operating_systems?: ('Windows' | 'Linux')[];
+  usage_text?: string;
+}
+
+export function fieldsFromEcrPublicRepositoryCatalogDataParams(params: EcrPublicRepositoryCatalogDataParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "about_text", params.about_text, TF.stringValue);
+  TF.addOptionalAttribute(fields, "architectures", params.architectures, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "logo_image_blob", params.logo_image_blob, TF.stringValue);
+  TF.addOptionalAttribute(fields, "operating_systems", params.operating_systems, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "usage_text", params.usage_text, TF.stringValue);
   return fields;
 }
 

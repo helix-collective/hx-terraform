@@ -616,7 +616,7 @@ function appUserOrDefault(app_user?: string): string {
 }
 
 function deployToolEndpoints(
-  sr: shared.SharedResources,
+  dr: shared.DomainResources,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};
@@ -624,7 +624,7 @@ function deployToolEndpoints(
     const fqdns: string[] = [];
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        fqdns.push(shared.fqdn(sr, url.dnsname));
+        fqdns.push(shared.fqdn(dr, url.dnsname));
         if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(pfqdns => {
             fqdns.push(pfqdns);
@@ -890,7 +890,7 @@ export interface BootScriptFactory {
 // Factory to build controller bootscripts
 class ControllerBootScriptFactory implements BootScriptFactory {
   constructor(
-    readonly sr: shared.SharedResources,
+    readonly dr: shared.DomainResources,
     readonly params: AutoscaleProcessorParams,
     readonly deployContexts: camus2.DeployContext[],
     readonly endpoints: EndPoint[],
@@ -908,7 +908,7 @@ class ControllerBootScriptFactory implements BootScriptFactory {
     const releases_s3 = this.params.releases_s3;
     const state_s3 = this.params.state_s3;
 
-    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+    const proxy_endpoints = deployToolEndpoints(this.dr, this.endpoints);
 
     return camus2.configureCamus2({
         username: app_user,
@@ -933,7 +933,7 @@ class ControllerBootScriptFactory implements BootScriptFactory {
 // Factory to build asg instance bootscripts
 class AsgBootScriptFactory implements BootScriptFactory {
   constructor(
-    readonly sr: shared.SharedResources,
+    readonly dr: shared.DomainResources,
     readonly params: AutoscaleProcessorParams,
     readonly endpoints: EndPoint[],
     readonly nginxDockerVersion: string,
@@ -950,7 +950,7 @@ class AsgBootScriptFactory implements BootScriptFactory {
     const state_s3 = this.params.state_s3;
     const deploy_contexts: camus2.DeployContext[] =
       this.params.appserver_deploy_contexts || [];
-    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+    const proxy_endpoints = deployToolEndpoints(this.dr, this.endpoints);
 
     return camus2.configureCamus2({
         username: app_user,
@@ -969,5 +969,4 @@ class AsgBootScriptFactory implements BootScriptFactory {
     bs.include(this.configure())
     return bs
   }
-};
-
+}

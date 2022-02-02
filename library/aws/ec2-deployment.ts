@@ -90,7 +90,7 @@ export function createInternalEc2Deployment(
 function addDNS(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  dr: shared.DomainResources,
   params: Ec2InstanceDeploymentParams,
   ip_address: AT.IpAddress,
   dns_name?: string,
@@ -102,7 +102,7 @@ function addDNS(
         shared.dnsARecord(
           tfgen,
           name + '_' + ep.name + '_' + i,
-          sr,
+          dr,
           url.dnsname,
           [ip_address],
           dns_ttl
@@ -115,7 +115,7 @@ function addDNS(
     shared.dnsARecord(
       tfgen,
       name,
-      sr,
+      dr,
       dns_name,
       [ip_address],
       dns_ttl
@@ -152,14 +152,14 @@ function createIamInstanceProfile(
  *
  */
 export function httpsFqdnsFromEndpoints(
-  sr: shared.SharedResources,
+  dr: shared.DomainResources,
   endpoints: EndPoint[]
 ): string[] {
   const https_fqdns: string[] = [];
   endpoints.forEach(ep => {
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        https_fqdns.push(shared.fqdn(sr, url.dnsname));
+        https_fqdns.push(shared.fqdn(dr, url.dnsname));
       } else if (url.kind === 'https-external') {
         https_fqdns.push(url.fqdnsname);
       }
@@ -169,12 +169,12 @@ export function httpsFqdnsFromEndpoints(
 }
 
 export function endpointUrl(
-  sr: shared.DomainResources,
+  dr: shared.DomainResources,
   url: EndPointUrl
 ): string {
   switch (url.kind) {
     case 'https':
-      return 'https://' + shared.fqdn(sr, url.dnsname);
+      return 'https://' + shared.fqdn(dr, url.dnsname);
     case 'https-external':
       return 'https://' + url.fqdnsname;
     case 'http':

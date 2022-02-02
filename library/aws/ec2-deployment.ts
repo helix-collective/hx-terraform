@@ -237,7 +237,7 @@ export interface Ec2ExternalDeploymentParams extends Ec2InstanceDeploymentParams
 export interface Ec2InternalDeploymentParams extends Ec2InstanceDeploymentParams {
   // The DNS name of the machine. Only required if we need to provide the client an unchanging DNS name
   // they can cname to (that is, one of the endpoints is https-external)
-  dns_name: string;
+  dns_name?: string;
 }
 
 export interface Ec2InstanceDeploymentParams {
@@ -258,7 +258,7 @@ export interface Ec2InstanceDeploymentParams {
   //    main:   ${dns_name}.${primary_dns_zone}
   //    test:   ${dns_name}-test.${primary_dns_zone}
   endpoints: EndPoint[];
-  // Specifies the AMI for the EC2 instance. 
+  // Specifies the AMI for the EC2 instance.
   ami: amis.AmiSelector;
   // The EC2 instance created is given an IAM profile with sufficient access policies to
   // log metrics, run the deploy tool and create SSL certificates. Additional policies
@@ -410,7 +410,7 @@ class Ec2BootscriptFactory implements BootScriptFactory {
   configure(): bootscript.BootScript {
     const app_user = this.params.app_user || 'app';
     const bs = bootscript.newBootscript();
-  
+
     let deploy_contexts: camus2.DeployContext[];
     if (this.params.deploy_contexts) {
       deploy_contexts = this.params.deploy_contexts;
@@ -441,5 +441,5 @@ class Ec2BootscriptFactory implements BootScriptFactory {
     bs.include(this.configure())
     return bs
   }
-  
+
 };

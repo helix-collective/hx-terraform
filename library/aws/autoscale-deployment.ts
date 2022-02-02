@@ -390,10 +390,11 @@ export type TargetGroupResources = {
   lb_https_listener: AR.LbListener;
 };
 
-export function createAutoscaleTargetGroup(
+export function createAutoscaleTargetGroupInVpc(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  vpc: AR.Vpc,
+  dr: shared.DomainResources,
   lb: LoadBalancerAndListeners,
   autoscaling_group: AR.AutoscalingGroup,
   params: {
@@ -402,13 +403,13 @@ export function createAutoscaleTargetGroup(
     target_group_generate_name?: boolean;
   },
 ): TargetGroupResources {
-  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(dr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
     name: params.target_group_generate_name ? tfgen.scopedName(name).join('-') : undefined,
     port: 80,
     protocol: 'HTTP',
-    vpc_id: sr.vpc.id,
+    vpc_id: vpc.id,
     health_check: {
       path: params.health_check.incomingPath,
     },
@@ -422,7 +423,7 @@ export function createAutoscaleTargetGroup(
 
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
-  const hosts: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  const hosts: string[] = httpsFqdnsFromEndpoints(dr, params.endpoints);
   const hosts_max5: string[][] = [];
   for (let i=0; i<hosts.length; i+=5) {
     hosts_max5.push(hosts.slice(i,i+5));
@@ -449,7 +450,7 @@ export function createAutoscaleTargetGroup(
         shared.dnsAliasRecord(
           tfgen,
           name + '_lb_' + ep.name + '_' + i,
-          sr,
+          dr,
           url.dnsname,
           {
             name: lb.lb.dns_name,
@@ -466,6 +467,21 @@ export function createAutoscaleTargetGroup(
     target_group: alb_target_group,
     lb_https_listener: lb.https_listener,
   };
+}
+
+export function createAutoscaleTargetGroup(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  lb: LoadBalancerAndListeners,
+  autoscaling_group: AR.AutoscalingGroup,
+  params: {
+    endpoints: EndPoint[];
+    health_check: C.HealthCheckConfig;
+    target_group_generate_name?: boolean;
+  },
+): TargetGroupResources {
+  return createAutoscaleTargetGroupInVpc(tfgen, name, sr.vpc, sr, lb, autoscaling_group, params);
 }
 
 function handleMakeAcmCertificateCases(tfgen: TF.Generator, sr: shared.SharedResources, endpoints: EndPoint[], src: AcmCertificateSource ) {

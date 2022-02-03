@@ -248,7 +248,7 @@ export interface Ec2InstanceDeploymentParams {
   // The subnet to be used
   subnet_id: AR.SubnetId,
   // The email address for SSL certificate admin and notification.
-  ssl_cert_email: string;
+  ssl_cert_email?: string;
   // The S3 location where hx-deploy-tool releases are stored.
   releases_s3: s3.S3Ref;
   // The name of the unprivileged user used to run application code.

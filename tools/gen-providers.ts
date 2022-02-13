@@ -1126,6 +1126,32 @@ const elasticsearch_domain_cognito_options: RecordDecl = {
   ],
 };
 
+const elasticsearch_domain_endpoint_options: RecordDecl = {
+  name: 'elasticsearch_domain_endpoint_options',
+  fields: [
+    optionalField('custom_endpoint_certificate_arn', arnType(acm_certificate)),
+    optionalField('custom_endpoint_enabled', BOOLEAN),
+    optionalField('custom_endpoint', STRING),
+    optionalField('enforce_https', BOOLEAN),
+    optionalField('tls_security_policy', STRING),
+  ],
+};
+
+const elasticsearch_node_to_node_encryption: RecordDecl = {
+  name: 'elasticsearch_node_to_node_encryption',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+  ],
+};
+
+const elasticsearch_encrypt_at_rest: RecordDecl = {
+  name: 'elasticsearch_encrypt_at_rest',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+    optionalField('kms_key_id', STRING),
+  ],
+};
+
 const elasticsearch_domain: RecordDecl = {
   name: 'elasticsearch_domain',
   fields: [
@@ -1144,6 +1170,18 @@ const elasticsearch_domain: RecordDecl = {
     optionalField(
       'cognito_options',
       recordType(elasticsearch_domain_cognito_options)
+    ),
+    optionalField(
+      'domain_endpoint_options',
+      recordType(elasticsearch_domain_endpoint_options)
+    ),
+    optionalField(
+      'encrypt_at_rest',
+      recordType(elasticsearch_encrypt_at_rest)
+    ),
+    optionalField(
+      'node_to_node_encryption',
+      recordType(elasticsearch_node_to_node_encryption)
     ),
     optionalField('vpc_options', recordType(elasticsearch_domain_vpc_options)),
     optionalField('elasticsearch_version', STRING),
@@ -3886,6 +3924,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_vpc_options);
   gen.generateParams(elasticsearch_domain_cognito_options);
   gen.generateParams(elasticsearch_domain_policy);
+  gen.generateParams(elasticsearch_domain_endpoint_options);
+  gen.generateParams(elasticsearch_encrypt_at_rest);
+  gen.generateParams(elasticsearch_node_to_node_encryption);
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);

@@ -123,6 +123,33 @@ export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string 
   };
 }
 
+
+export function s3BucketRequireSslPolicy(name: string, bucket: string) {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+            Action: "s3:*",
+            Effect: "Deny",
+            Resource: [
+                `arn:aws:s3:::${bucket}`,
+                `arn:aws:s3:::${bucket}/*`,
+            ],
+            Condition: {
+                Bool: {
+                     "aws:SecureTransport": "false"
+                }
+            },
+           Principal: "*"
+        }
+    ]
+    },
+  };
+}
+
+
 export function putLogsPolicy(name: string, log_group: AR.CloudwatchLogGroup) {
   return {
     name,

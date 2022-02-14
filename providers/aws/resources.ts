@@ -4258,6 +4258,9 @@ export interface ElasticsearchDomainParams {
   cluster_config?: ElasticsearchDomainClusterConfigParams;
   snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
   cognito_options?: ElasticsearchDomainCognitoOptionsParams;
+  domain_endpoint_options?: ElasticsearchDomainEndpointOptionsParams;
+  encrypt_at_rest?: ElasticsearchEncryptAtRestParams;
+  node_to_node_encryption?: ElasticsearchNodeToNodeEncryptionParams;
   vpc_options?: ElasticsearchDomainVpcOptionsParams;
   elasticsearch_version?: string;
   tags?: TF.TagsMap;
@@ -4272,6 +4275,9 @@ export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainP
   TF.addOptionalBlock(fields, "cluster_config", params.cluster_config, fieldsFromElasticsearchDomainClusterConfigParams);
   TF.addOptionalBlock(fields, "snapshot_options", params.snapshot_options, fieldsFromElasticsearchDomainSnapshotOptionsParams);
   TF.addOptionalBlock(fields, "cognito_options", params.cognito_options, fieldsFromElasticsearchDomainCognitoOptionsParams);
+  TF.addOptionalBlock(fields, "domain_endpoint_options", params.domain_endpoint_options, fieldsFromElasticsearchDomainEndpointOptionsParams);
+  TF.addOptionalBlock(fields, "encrypt_at_rest", params.encrypt_at_rest, fieldsFromElasticsearchEncryptAtRestParams);
+  TF.addOptionalBlock(fields, "node_to_node_encryption", params.node_to_node_encryption, fieldsFromElasticsearchNodeToNodeEncryptionParams);
   TF.addOptionalBlock(fields, "vpc_options", params.vpc_options, fieldsFromElasticsearchDomainVpcOptionsParams);
   TF.addOptionalAttribute(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
@@ -4361,6 +4367,46 @@ export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchD
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "access_policies", params.access_policies, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainEndpointOptionsParams {
+  custom_endpoint_certificate_arn?: AT.ArnT<"AcmCertificate">;
+  custom_endpoint_enabled?: boolean;
+  custom_endpoint?: string;
+  enforce_https?: boolean;
+  tls_security_policy?: string;
+}
+
+export function fieldsFromElasticsearchDomainEndpointOptionsParams(params: ElasticsearchDomainEndpointOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "custom_endpoint_certificate_arn", params.custom_endpoint_certificate_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "custom_endpoint_enabled", params.custom_endpoint_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "custom_endpoint", params.custom_endpoint, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enforce_https", params.enforce_https, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tls_security_policy", params.tls_security_policy, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchEncryptAtRestParams {
+  enabled: boolean;
+  kms_key_id?: string;
+}
+
+export function fieldsFromElasticsearchEncryptAtRestParams(params: ElasticsearchEncryptAtRestParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "kms_key_id", params.kms_key_id, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchNodeToNodeEncryptionParams {
+  enabled: boolean;
+}
+
+export function fieldsFromElasticsearchNodeToNodeEncryptionParams(params: ElasticsearchNodeToNodeEncryptionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
   return fields;
 }
 

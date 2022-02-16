@@ -10,7 +10,11 @@ export {
   fs,
   Task,
   TrackedFile,
-  TrackedFilesAsync
+  TrackedFilesAsync,
+} from 'https://deno.land/x/dnit@dnit-v1.12.4/mod.ts';
+
+export type {
+  TaskContext,
 } from 'https://deno.land/x/dnit@dnit-v1.12.4/mod.ts';
 
 // hx dnit-utils:

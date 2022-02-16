@@ -86,6 +86,7 @@ export type SplitAzResources = AvailabilityZone & AzResourcesExternalSubnet & Az
  */
 export type RegionResources = {
   vpc: AR.Vpc;
+  vpc_cidr_block: AT.CidrBlock;
   region: AT.Region;
   // internet_gateway: AR.InternetGateway;
 };
@@ -401,10 +402,14 @@ export function useDefaultNetworkResources(
     };
   });
 
+  // AWS default VPCs have this cidr block
+  const vpc_cidr_block =  AT.cidrBlock("172.31.0.0/16");
+
   // Cast default_vpc, default_subnet to a vpc, subnet
   return {
     region,
     vpc,
+    vpc_cidr_block,
     azs
   }
 }
@@ -527,7 +532,7 @@ export function createNetworkResources(
     });
   });
 
-  return { vpc, azs, region: network_config.region };
+  return { vpc, azs, region: network_config.region, vpc_cidr_block: network_config.cidr_block  };
 }
 
 /**

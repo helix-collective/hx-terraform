@@ -10,10 +10,15 @@ export class Manifest {
   }
 
   load() {
-    if (fs.existsSync(this.manifestFile)) {
-      const content = Deno.readFileSync(this.manifestFile);
-      const data : {file:string, hash:string}[] = JSON.parse(new TextDecoder().decode(content));
-      this.contents = data;
+    try {
+      if (fs.existsSync(this.manifestFile)) {
+        const content = Deno.readFileSync(this.manifestFile);
+        const data : {file:string, hash:string}[] = JSON.parse(new TextDecoder().decode(content));
+        this.contents = data;
+      }
+    }
+    catch(err) {
+      console.error(`Failer for load manifest file ${err}. Ignoring`);
     }
   }
 

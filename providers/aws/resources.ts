@@ -4700,6 +4700,7 @@ export interface LambdaFunctionParams {
   image_config?: LambdaFunctionImageConfigParams;
   image_uri?: string;
   memory_size?: number;
+  package_type?: string;
   runtime?: AT.LambdaRuntime;
   s3_bucket?: string;
   s3_key?: string;
@@ -4721,6 +4722,7 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addOptionalBlock(fields, "image_config", params.image_config, fieldsFromLambdaFunctionImageConfigParams);
   TF.addOptionalAttribute(fields, "image_uri", params.image_uri, TF.stringValue);
   TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "package_type", params.package_type, TF.stringValue);
   TF.addOptionalAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);

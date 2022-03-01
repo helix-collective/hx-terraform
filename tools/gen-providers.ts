@@ -1536,6 +1536,7 @@ const lambda_function: RecordDecl = {
     optionalField('image_config', recordType(lambda_function_image_config)),
     optionalField('image_uri', STRING),
     optionalField('memory_size', NUMBER),
+    optionalField('package_type', STRING),
     optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('s3_bucket', STRING),
     optionalField('s3_key', STRING),

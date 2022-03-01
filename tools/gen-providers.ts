@@ -3957,6 +3957,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(vpc_config);
   gen.generateParams(lambda_function);
   gen.generateParams(lambda_function_environment);
+  gen.generateParams(lambda_function_image_config);
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);

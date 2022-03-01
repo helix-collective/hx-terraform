@@ -4099,9 +4099,9 @@ export function fieldsFromLbListenerActionFixedResponseParams(params: LbListener
 export interface LbTargetGroupParams {
   name?: string;
   name_prefix?: string;
-  port: number;
-  protocol: 'TCP' | 'HTTP' | 'HTTPS';
-  vpc_id: VpcId;
+  port?: number;
+  protocol?: 'TCP' | 'HTTP' | 'HTTPS';
+  vpc_id?: VpcId;
   deregistration_delay?: number;
   slow_start?: number;
   proxy_protocol_v2?: boolean;
@@ -4115,9 +4115,9 @@ export function fieldsFromLbTargetGroupParams(params: LbTargetGroupParams) : TF.
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
   TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addAttribute(fields, "port", params.port, TF.numberValue);
-  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
   TF.addOptionalAttribute(fields, "slow_start", params.slow_start, TF.numberValue);
   TF.addOptionalAttribute(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
@@ -4691,35 +4691,45 @@ export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.Resource
 
 export interface LambdaFunctionParams {
   function_name: string;
+  role: AT.ArnT<"IamRole">;
+  architectures?: (string)[];
+  description?: string;
+  environment?: LambdaFunctionEnvironmentParams;
   filename?: string;
+  handler?: string;
+  image_config?: LambdaFunctionImageConfigParams;
+  image_uri?: string;
+  memory_size?: number;
+  package_type?: string;
+  runtime?: AT.LambdaRuntime;
   s3_bucket?: string;
   s3_key?: string;
   source_code_hash?: string;
-  role: AT.ArnT<"IamRole">;
-  handler: string;
-  runtime: AT.LambdaRuntime;
-  vpc_config?: VpcConfigParams;
-  environment?: LambdaFunctionEnvironmentParams;
-  timeout?: number;
-  memory_size?: number;
   tags?: TF.TagsMap;
+  timeout?: number;
+  vpc_config?: VpcConfigParams;
 }
 
 export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "architectures", params.architectures, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
   TF.addOptionalAttribute(fields, "filename", params.filename, TF.stringValue);
+  TF.addOptionalAttribute(fields, "handler", params.handler, TF.stringValue);
+  TF.addOptionalBlock(fields, "image_config", params.image_config, fieldsFromLambdaFunctionImageConfigParams);
+  TF.addOptionalAttribute(fields, "image_uri", params.image_uri, TF.stringValue);
+  TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "package_type", params.package_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);
   TF.addOptionalAttribute(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
-  TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
-  TF.addAttribute(fields, "handler", params.handler, TF.stringValue);
-  TF.addAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
-  TF.addOptionalBlock(fields, "vpc_config", params.vpc_config, fieldsFromVpcConfigParams);
-  TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
-  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
-  TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalBlock(fields, "vpc_config", params.vpc_config, fieldsFromVpcConfigParams);
   return fields;
 }
 
@@ -4730,6 +4740,20 @@ export interface LambdaFunctionEnvironmentParams {
 export function fieldsFromLambdaFunctionEnvironmentParams(params: LambdaFunctionEnvironmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "variables", params.variables, TF.tagsValue);
+  return fields;
+}
+
+export interface LambdaFunctionImageConfigParams {
+  command?: string;
+  entry_point?: string;
+  working_directory?: string;
+}
+
+export function fieldsFromLambdaFunctionImageConfigParams(params: LambdaFunctionImageConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "command", params.command, TF.stringValue);
+  TF.addOptionalAttribute(fields, "entry_point", params.entry_point, TF.stringValue);
+  TF.addOptionalAttribute(fields, "working_directory", params.working_directory, TF.stringValue);
   return fields;
 }
 

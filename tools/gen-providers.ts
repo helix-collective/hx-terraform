@@ -1514,22 +1514,34 @@ const lambda_function_environment: RecordDecl = {
   fields: [optionalField('variables', TAGS_MAP)],
 };
 
+const lambda_function_image_config: RecordDecl = {
+  name: 'lambda_function_image_config',
+  fields: [
+    optionalField('command', STRING),
+    optionalField('entry_point', STRING),
+    optionalField('working_directory', STRING),
+  ],
+};
+
 const lambda_function: RecordDecl = {
   name: 'lambda_function',
   fields: [
     requiredField('function_name', STRING),
+    requiredField('role', arnType(iam_role)),
+    optionalField('description', STRING),
+    optionalField('environment', recordType(lambda_function_environment)),
     optionalField('filename', STRING),
+    optionalField('handler', STRING),
+    optionalField('image_config', recordType(lambda_function_image_config)),
+    optionalField('image_uri', STRING),
+    optionalField('memory_size', NUMBER),
+    requiredField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('s3_bucket', STRING),
     optionalField('s3_key', STRING),
     optionalField('source_code_hash', STRING),
-    requiredField('role', arnType(iam_role)),
-    requiredField('handler', STRING),
-    requiredField('runtime', stringAliasType('AT.LambdaRuntime')),
-    optionalField('vpc_config', recordType(vpc_config)),
-    optionalField('environment', recordType(lambda_function_environment)),
-    optionalField('timeout', NUMBER),
-    optionalField('memory_size', NUMBER),
     optionalField('tags', TAGS_MAP),
+    optionalField('timeout', NUMBER),
+    optionalField('vpc_config', recordType(vpc_config)),
   ],
 };
 

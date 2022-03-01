@@ -4099,9 +4099,9 @@ export function fieldsFromLbListenerActionFixedResponseParams(params: LbListener
 export interface LbTargetGroupParams {
   name?: string;
   name_prefix?: string;
-  port: number;
-  protocol: 'TCP' | 'HTTP' | 'HTTPS';
-  vpc_id: VpcId;
+  port?: number;
+  protocol?: 'TCP' | 'HTTP' | 'HTTPS';
+  vpc_id?: VpcId;
   deregistration_delay?: number;
   slow_start?: number;
   proxy_protocol_v2?: boolean;
@@ -4115,9 +4115,9 @@ export function fieldsFromLbTargetGroupParams(params: LbTargetGroupParams) : TF.
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
   TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addAttribute(fields, "port", params.port, TF.numberValue);
-  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
   TF.addOptionalAttribute(fields, "slow_start", params.slow_start, TF.numberValue);
   TF.addOptionalAttribute(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
@@ -4692,6 +4692,7 @@ export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.Resource
 export interface LambdaFunctionParams {
   function_name: string;
   role: AT.ArnT<"IamRole">;
+  architectures?: (string)[];
   description?: string;
   environment?: LambdaFunctionEnvironmentParams;
   filename?: string;
@@ -4699,7 +4700,7 @@ export interface LambdaFunctionParams {
   image_config?: LambdaFunctionImageConfigParams;
   image_uri?: string;
   memory_size?: number;
-  runtime: AT.LambdaRuntime;
+  runtime?: AT.LambdaRuntime;
   s3_bucket?: string;
   s3_key?: string;
   source_code_hash?: string;
@@ -4712,6 +4713,7 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "function_name", params.function_name, TF.stringValue);
   TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "architectures", params.architectures, TF.listValue(TF.stringValue));
   TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
   TF.addOptionalAttribute(fields, "filename", params.filename, TF.stringValue);
@@ -4719,7 +4721,7 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addOptionalBlock(fields, "image_config", params.image_config, fieldsFromLambdaFunctionImageConfigParams);
   TF.addOptionalAttribute(fields, "image_uri", params.image_uri, TF.stringValue);
   TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
-  TF.addAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);
   TF.addOptionalAttribute(fields, "source_code_hash", params.source_code_hash, TF.stringValue);

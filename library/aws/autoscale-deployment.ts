@@ -432,11 +432,11 @@ export function createAutoscaleTargetGroupInVpc(
     const tfname = 'https' + (i === 0 ? '' : i+1);
     AR.createLbListenerRule(tfgen, tfname, {
       listener_arn: lb.https_listener.arn,
-      condition: {
+      condition: [{
         host_header: {
           values: hosts_max5[i],
         },
-      },
+      }],
       action: {
         type: 'forward',
         target_group_arn: alb_target_group.arn,

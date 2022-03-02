@@ -4186,7 +4186,7 @@ export interface LbListenerRuleParams {
   listener_arn: AT.ArnT<"LbListener">;
   priority?: number;
   action: LbListenerActionParams;
-  condition: LbListenerRuleConditionParams;
+  condition: (LbListenerRuleConditionParams)[];
 }
 
 export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : TF.ResourceFieldMap {
@@ -4194,7 +4194,7 @@ export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : T
   TF.addAttribute(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
   TF.addOptionalAttribute(fields, "priority", params.priority, TF.numberValue);
   TF.addBlock(fields, "action", params.action, fieldsFromLbListenerActionParams);
-  TF.addBlock(fields, "condition", params.condition, fieldsFromLbListenerRuleConditionParams);
+  TF.addRepeatedBlock(fields, "condition", params.condition, fieldsFromLbListenerRuleConditionParams);
   return fields;
 }
 

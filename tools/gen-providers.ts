@@ -981,7 +981,7 @@ const lb_listener_rule: RecordDecl = {
     requiredField('listener_arn', arnType(lb_listener)),
     optionalField('priority', NUMBER),
     requiredField('action', recordType(lb_listener_action)),
-    requiredField('condition', recordType(lb_listener_rule_condition)),
+    requiredField('condition', repeatedBlockType(recordType(lb_listener_rule_condition))),
   ],
 };
 

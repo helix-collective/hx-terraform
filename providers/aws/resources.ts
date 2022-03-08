@@ -3531,6 +3531,7 @@ export function fieldsFromWebsiteParams(params: WebsiteParams) : TF.ResourceFiel
 export interface S3BucketObjectParams {
   bucket: string;
   key: string;
+  acl?: AT.CannedAcl;
   source?: string;
   content?: string;
 }
@@ -3539,6 +3540,7 @@ export function fieldsFromS3BucketObjectParams(params: S3BucketObjectParams) : T
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
   TF.addAttribute(fields, "key", params.key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "acl", params.acl, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "source", params.source, TF.stringValue);
   TF.addOptionalAttribute(fields, "content", params.content, TF.stringValue);
   return fields;

@@ -535,6 +535,7 @@ const s3_bucket_object: RecordDecl = {
   fields: [
     requiredField('bucket', STRING),
     requiredField('key', STRING),
+    optionalField('acl', stringAliasType('AT.CannedAcl')),
     optionalField('source', STRING),
     optionalField('content', STRING),
   ],

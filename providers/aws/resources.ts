@@ -2506,6 +2506,32 @@ export type CognitoIdentityPoolId = {type:'CognitoIdentityPoolId',value:string};
 export type CognitoIdentityPoolArn = AT.ArnT<"CognitoIdentityPool">;
 
 /**
+ *  Provides an AWS Cognito Identity Provider.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_identity_provider
+ */
+export function createCognitoIdentityProvider(tfgen: TF.Generator, rname: string, params: CognitoIdentityProviderParams): CognitoIdentityProvider {
+  const fields = fieldsFromCognitoIdentityProviderParams(params);
+  const resource = tfgen.createTypedResource('CognitoIdentityProvider', 'aws_cognito_identity_provider', rname, fields);
+  const id: CognitoIdentityProviderId =  {type: 'CognitoIdentityProviderId', value: TF.resourceAttribute(resource, "id")};
+  const arn: CognitoIdentityProviderArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'CognitoIdentityProvider');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface CognitoIdentityProvider extends TF.ResourceT<'CognitoIdentityProvider'> {
+  id: CognitoIdentityProviderId;
+  arn: CognitoIdentityProviderArn;
+}
+
+export type CognitoIdentityProviderId = {type:'CognitoIdentityProviderId',value:string};
+export type CognitoIdentityProviderArn = AT.ArnT<"CognitoIdentityProvider">;
+
+/**
  *  Provides an AWS Cognito Identity Pool Roles Attachment.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool_roles_attachment.html
@@ -5862,13 +5888,13 @@ export function fieldsFromCognitoUserPoolDomainParams(params: CognitoUserPoolDom
   return fields;
 }
 
-export interface CognitoIdentityProviderParams {
+export interface CognitoIdentityProvidersParams {
   client_id?: CognitoUserPoolId;
   provider_name?: string;
   server_side_token_check?: boolean;
 }
 
-export function fieldsFromCognitoIdentityProviderParams(params: CognitoIdentityProviderParams) : TF.ResourceFieldMap {
+export function fieldsFromCognitoIdentityProvidersParams(params: CognitoIdentityProvidersParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "client_id", params.client_id, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "provider_name", params.provider_name, TF.stringValue);
@@ -5876,29 +5902,49 @@ export function fieldsFromCognitoIdentityProviderParams(params: CognitoIdentityP
   return fields;
 }
 
+export interface CognitoIdentityProviderParams {
+  user_pool_id: CognitoUserPoolId;
+  provider_name: string;
+  provider_type: 'SAML' | 'Facebook' | 'Google' | 'LoginWithAmazon' | 'SignInWithApple' | 'OIDC';
+  attribute_mapping?: TF.TagsMap;
+  idp_identifiers?: (string)[];
+  provider_details?: TF.TagsMap;
+}
+
+export function fieldsFromCognitoIdentityProviderParams(params: CognitoIdentityProviderParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "user_pool_id", params.user_pool_id, TF.resourceIdValue);
+  TF.addAttribute(fields, "provider_name", params.provider_name, TF.stringValue);
+  TF.addAttribute(fields, "provider_type", params.provider_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "attribute_mapping", params.attribute_mapping, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "idp_identifiers", params.idp_identifiers, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "provider_details", params.provider_details, TF.tagsValue);
+  return fields;
+}
+
 export interface CognitoIdentityPoolParams {
   identity_pool_name: string;
   allow_unauthenticated_identities: boolean;
-  cognito_identity_providers?: (CognitoIdentityProviderParams)[];
+  cognito_identity_providers?: (CognitoIdentityProvidersParams)[];
 }
 
 export function fieldsFromCognitoIdentityPoolParams(params: CognitoIdentityPoolParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "identity_pool_name", params.identity_pool_name, TF.stringValue);
   TF.addAttribute(fields, "allow_unauthenticated_identities", params.allow_unauthenticated_identities, TF.booleanValue);
-  TF.addRepeatedBlock(fields, "cognito_identity_providers", params.cognito_identity_providers, fieldsFromCognitoIdentityProviderParams);
+  TF.addRepeatedBlock(fields, "cognito_identity_providers", params.cognito_identity_providers, fieldsFromCognitoIdentityProvidersParams);
   return fields;
 }
 
 export interface CognitoIdentityPoolRolesAttachmentParams {
   identity_pool_id: CognitoIdentityPoolId;
-  roles: CognitoIdentityPoolRolesAttachmentRolesParams;
+  roles: TF.TagsMap;
 }
 
 export function fieldsFromCognitoIdentityPoolRolesAttachmentParams(params: CognitoIdentityPoolRolesAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "identity_pool_id", params.identity_pool_id, TF.resourceIdValue);
-  TF.addBlock(fields, "roles", params.roles, fieldsFromCognitoIdentityPoolRolesAttachmentRolesParams);
+  TF.addAttribute(fields, "roles", params.roles, TF.tagsValue);
   return fields;
 }
 

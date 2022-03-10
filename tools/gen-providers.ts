@@ -2365,6 +2365,25 @@ const cognito_user_pool_client: RecordDecl = {
   ],
 };
 
+const cognito_identity_provider: RecordDecl = {
+  name: 'cognito_identity_provider',
+  fields: [
+    requiredField('user_pool_id', resourceIdType('CognitoUserPoolId')),
+    requiredField('provider_name', STRING),
+    requiredField('provider_type', enumType([
+      'SAML',
+      'Facebook',
+      'Google',
+      'LoginWithAmazon',
+      'SignInWithApple',
+      'OIDC',
+    ])),
+    optionalField('attribute_mapping', TAGS_MAP),
+    optionalField('idp_identifiers', listType(STRING)),
+    optionalField('provider_details', TAGS_MAP),
+  ],
+};
+
 const cognito_user_pool_domain: RecordDecl = {
   name: 'cognito_user_pool_domain',
   fields: [
@@ -2374,8 +2393,8 @@ const cognito_user_pool_domain: RecordDecl = {
   ],
 };
 
-const cognito_identity_provider: RecordDecl = {
-  name: 'cognito_identity_provider',
+const cognito_identity_providers: RecordDecl = {
+  name: 'cognito_identity_providers',
   fields: [
     optionalField('client_id', resourceIdType('CognitoUserPoolId')),
     optionalField('provider_name', STRING),
@@ -2390,7 +2409,7 @@ const cognito_identity_pool: RecordDecl = {
     requiredField('allow_unauthenticated_identities', BOOLEAN),
     optionalField(
       'cognito_identity_providers',
-      repeatedBlockType(recordType(cognito_identity_provider))
+      repeatedBlockType(recordType(cognito_identity_providers))
     ),
     // TODO(timd): complete
   ],
@@ -2410,7 +2429,7 @@ const cognito_identity_pool_roles_attachment: RecordDecl = {
     requiredField('identity_pool_id', resourceIdType('CognitoIdentityPoolId')),
     requiredField(
       'roles',
-      recordType(cognito_identity_pool_roles_attachment_roles)
+      TAGS_MAP
     ),
   ],
 };
@@ -3777,6 +3796,16 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an AWS Cognito Identity Provider.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_identity_provider',
+    cognito_identity_provider,
+    [resourceIdAttr('id', cognito_identity_provider)],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides an AWS Cognito Identity Pool Roles Attachment.',
     'https://www.terraform.io/docs/providers/aws/r/cognito_identity_pool_roles_attachment.html',
     cognito_identity_pool_roles_attachment,
@@ -4034,6 +4063,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(cognito_user_pool);
   gen.generateParams(cognito_user_pool_client);
   gen.generateParams(cognito_user_pool_domain);
+  gen.generateParams(cognito_identity_providers);
   gen.generateParams(cognito_identity_provider);
   gen.generateParams(cognito_identity_pool);
   gen.generateParams(cognito_identity_pool_roles_attachment);

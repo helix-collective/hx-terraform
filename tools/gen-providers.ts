@@ -1076,6 +1076,24 @@ const aws_provider: RecordDecl = {
   fields: [optionalField('region', stringAliasType('AT.Region'))],
 };
 
+const elasticsearch_domain_advanced_security_options_master_user_options: RecordDecl = {
+  name: 'elasticsearch_domain_advanced_security_options_master_user_options',
+  fields: [
+    optionalField('master_user_arn', STRING),
+    optionalField('master_user_name', STRING),
+    optionalField('master_user_password', STRING),
+  ],
+};
+
+const elasticsearch_domain_advanced_security_options: RecordDecl = {
+  name: 'elasticsearch_domain_advanced_security_options',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+    optionalField('internal_user_database_enabled', BOOLEAN),
+    optionalField('master_user_options', recordType(elasticsearch_domain_advanced_security_options_master_user_options)),
+  ],
+};
+
 const elasticsearch_domain_ebs_options: RecordDecl = {
   name: 'elasticsearch_domain_ebs_options',
   fields: [
@@ -1159,6 +1177,7 @@ const elasticsearch_domain: RecordDecl = {
     requiredField('domain_name', STRING),
     optionalField('access_policies', STRING),
     optionalField('advanced_options', TAGS_MAP),
+    optionalField('advanced_security_options', recordType(elasticsearch_domain_advanced_security_options)),
     optionalField('ebs_options', recordType(elasticsearch_domain_ebs_options)),
     optionalField(
       'cluster_config',
@@ -1187,6 +1206,35 @@ const elasticsearch_domain: RecordDecl = {
     optionalField('vpc_options', recordType(elasticsearch_domain_vpc_options)),
     optionalField('elasticsearch_version', STRING),
     optionalField('tags', TAGS_MAP),
+  ],
+};
+
+const elasticsearch_domain_saml_options_saml_options_idp: RecordDecl = {
+  name: 'elasticsearch_domain_policy_saml_options_idp',
+  fields: [
+    requiredField('entity_id', STRING),
+    requiredField('metadata_content', STRING),
+  ],
+};
+
+const elasticsearch_domain_saml_options_saml_options: RecordDecl = {
+  name: 'elasticsearch_domain_policy_saml_options',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+    optionalField('idp', recordType(elasticsearch_domain_saml_options_saml_options_idp)),
+    optionalField('master_backend_role', STRING),
+    optionalField('master_user_name', STRING),
+    optionalField('roles_key', STRING),
+    optionalField('session_timeout_minutes', STRING),
+    optionalField('subject_key', STRING)
+  ],
+};
+
+const elasticsearch_domain_saml_options: RecordDecl = {
+  name: 'elasticsearch_domain_saml_options',
+  fields: [
+    requiredField('domain_name', STRING),
+    optionalField('saml_options', recordType(elasticsearch_domain_saml_options_saml_options)),
   ],
 };
 
@@ -3421,6 +3469,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Allows setting SAML access to Opensearch dashboards using the domain name',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticsearch_domain_saml_options',
+    elasticsearch_domain_saml_options,
+    [stringAttr('id')]
+  );
+
+  gen.generateResource(
     'Provides a CloudWatch Log Group resource.',
     'https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html',
     cloudwatch_log_group,
@@ -3971,6 +4026,11 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_endpoint_options);
   gen.generateParams(elasticsearch_encrypt_at_rest);
   gen.generateParams(elasticsearch_node_to_node_encryption);
+  gen.generateParams(elasticsearch_domain_advanced_security_options_master_user_options);
+  gen.generateParams(elasticsearch_domain_advanced_security_options);
+  gen.generateParams(elasticsearch_domain_saml_options);
+  gen.generateParams(elasticsearch_domain_saml_options_saml_options);
+  gen.generateParams(elasticsearch_domain_saml_options_saml_options_idp);
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);

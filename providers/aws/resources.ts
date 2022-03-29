@@ -1541,6 +1541,28 @@ export interface ElasticsearchDomainPolicy extends TF.ResourceT<'ElasticsearchDo
 export type ElasticsearchDomainPolicyId = {type:'ElasticsearchDomainPolicyId',value:string};
 
 /**
+ *  Allows setting SAML access to Opensearch dashboards using the domain name
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticsearch_domain_saml_options
+ */
+export function createElasticsearchDomainSamlOptions(tfgen: TF.Generator, rname: string, params: ElasticsearchDomainSamlOptionsParams): ElasticsearchDomainSamlOptions {
+  const fields = fieldsFromElasticsearchDomainSamlOptionsParams(params);
+  const resource = tfgen.createTypedResource('ElasticsearchDomainSamlOptions', 'aws_elasticsearch_domain_saml_options', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface ElasticsearchDomainSamlOptions extends TF.ResourceT<'ElasticsearchDomainSamlOptions'> {
+  id: string;
+}
+
+export type ElasticsearchDomainSamlOptionsId = {type:'ElasticsearchDomainSamlOptionsId',value:string};
+
+/**
  *  Provides a CloudWatch Log Group resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html
@@ -4282,6 +4304,7 @@ export interface ElasticsearchDomainParams {
   domain_name: string;
   access_policies?: string;
   advanced_options?: TF.TagsMap;
+  advanced_security_options?: ElasticsearchDomainAdvancedSecurityOptionsParams;
   ebs_options?: ElasticsearchDomainEbsOptionsParams;
   cluster_config?: ElasticsearchDomainClusterConfigParams;
   snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
@@ -4299,6 +4322,7 @@ export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainP
   TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "access_policies", params.access_policies, TF.stringValue);
   TF.addOptionalAttribute(fields, "advanced_options", params.advanced_options, TF.tagsValue);
+  TF.addOptionalBlock(fields, "advanced_security_options", params.advanced_security_options, fieldsFromElasticsearchDomainAdvancedSecurityOptionsParams);
   TF.addOptionalBlock(fields, "ebs_options", params.ebs_options, fieldsFromElasticsearchDomainEbsOptionsParams);
   TF.addOptionalBlock(fields, "cluster_config", params.cluster_config, fieldsFromElasticsearchDomainClusterConfigParams);
   TF.addOptionalBlock(fields, "snapshot_options", params.snapshot_options, fieldsFromElasticsearchDomainSnapshotOptionsParams);
@@ -4435,6 +4459,80 @@ export interface ElasticsearchNodeToNodeEncryptionParams {
 export function fieldsFromElasticsearchNodeToNodeEncryptionParams(params: ElasticsearchNodeToNodeEncryptionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainAdvancedSecurityOptionsMasterUserOptionsParams {
+  master_user_arn?: string;
+  master_user_name?: string;
+  master_user_password?: string;
+}
+
+export function fieldsFromElasticsearchDomainAdvancedSecurityOptionsMasterUserOptionsParams(params: ElasticsearchDomainAdvancedSecurityOptionsMasterUserOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "master_user_arn", params.master_user_arn, TF.stringValue);
+  TF.addOptionalAttribute(fields, "master_user_name", params.master_user_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "master_user_password", params.master_user_password, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainAdvancedSecurityOptionsParams {
+  enabled: boolean;
+  internal_user_database_enabled?: boolean;
+  master_user_options?: ElasticsearchDomainAdvancedSecurityOptionsMasterUserOptionsParams;
+}
+
+export function fieldsFromElasticsearchDomainAdvancedSecurityOptionsParams(params: ElasticsearchDomainAdvancedSecurityOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "internal_user_database_enabled", params.internal_user_database_enabled, TF.booleanValue);
+  TF.addOptionalBlock(fields, "master_user_options", params.master_user_options, fieldsFromElasticsearchDomainAdvancedSecurityOptionsMasterUserOptionsParams);
+  return fields;
+}
+
+export interface ElasticsearchDomainSamlOptionsParams {
+  domain_name: string;
+  saml_options?: ElasticsearchDomainPolicySamlOptionsParams;
+}
+
+export function fieldsFromElasticsearchDomainSamlOptionsParams(params: ElasticsearchDomainSamlOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
+  TF.addOptionalBlock(fields, "saml_options", params.saml_options, fieldsFromElasticsearchDomainPolicySamlOptionsParams);
+  return fields;
+}
+
+export interface ElasticsearchDomainPolicySamlOptionsParams {
+  enabled: boolean;
+  idp?: ElasticsearchDomainPolicySamlOptionsIdpParams;
+  master_backend_role?: string;
+  master_user_name?: string;
+  roles_key?: string;
+  session_timeout_minutes?: string;
+  subject_key?: string;
+}
+
+export function fieldsFromElasticsearchDomainPolicySamlOptionsParams(params: ElasticsearchDomainPolicySamlOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalBlock(fields, "idp", params.idp, fieldsFromElasticsearchDomainPolicySamlOptionsIdpParams);
+  TF.addOptionalAttribute(fields, "master_backend_role", params.master_backend_role, TF.stringValue);
+  TF.addOptionalAttribute(fields, "master_user_name", params.master_user_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "roles_key", params.roles_key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "session_timeout_minutes", params.session_timeout_minutes, TF.stringValue);
+  TF.addOptionalAttribute(fields, "subject_key", params.subject_key, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainPolicySamlOptionsIdpParams {
+  entity_id: string;
+  metadata_content: string;
+}
+
+export function fieldsFromElasticsearchDomainPolicySamlOptionsIdpParams(params: ElasticsearchDomainPolicySamlOptionsIdpParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "entity_id", params.entity_id, TF.stringValue);
+  TF.addAttribute(fields, "metadata_content", params.metadata_content, TF.stringValue);
   return fields;
 }
 

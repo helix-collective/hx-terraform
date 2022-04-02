@@ -5955,6 +5955,9 @@ export interface CognitoUserPoolClientParams {
   callback_urls?: (string)[];
   logout_urls?: (string)[];
   supported_identity_providers?: (string)[];
+  generate_secret?: boolean;
+  id_token_validity?: string;
+  refresh_token_validity?: string;
 }
 
 export function fieldsFromCognitoUserPoolClientParams(params: CognitoUserPoolClientParams) : TF.ResourceFieldMap {
@@ -5969,6 +5972,9 @@ export function fieldsFromCognitoUserPoolClientParams(params: CognitoUserPoolCli
   TF.addOptionalAttribute(fields, "callback_urls", params.callback_urls, TF.listValue(TF.stringValue));
   TF.addOptionalAttribute(fields, "logout_urls", params.logout_urls, TF.listValue(TF.stringValue));
   TF.addOptionalAttribute(fields, "supported_identity_providers", params.supported_identity_providers, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "generate_secret", params.generate_secret, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "id_token_validity", params.id_token_validity, TF.stringValue);
+  TF.addOptionalAttribute(fields, "refresh_token_validity", params.refresh_token_validity, TF.stringValue);
   return fields;
 }
 

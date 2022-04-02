@@ -2410,6 +2410,9 @@ const cognito_user_pool_client: RecordDecl = {
     optionalField('callback_urls', listType(STRING)),
     optionalField('logout_urls', listType(STRING)),
     optionalField('supported_identity_providers', listType(STRING)),
+    optionalField('generate_secret', BOOLEAN),
+    optionalField('id_token_validity', STRING),
+    optionalField('refresh_token_validity', STRING),
   ],
 };
 

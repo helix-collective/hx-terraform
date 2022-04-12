@@ -1498,6 +1498,7 @@ export function createElasticsearchDomain(tfgen: TF.Generator, rname: string, pa
   const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
   const domain_id: string =  TF.resourceAttribute(resource, "domain_id");
   const domain_name: string =  TF.resourceAttribute(resource, "domain_name");
+  const kibana_endpoint: string =  TF.resourceAttribute(resource, "kibana_endpoint");
   const endpoint: string =  TF.resourceAttribute(resource, "endpoint");
 
   return {
@@ -1505,6 +1506,7 @@ export function createElasticsearchDomain(tfgen: TF.Generator, rname: string, pa
     arn,
     domain_id,
     domain_name,
+    kibana_endpoint,
     endpoint,
   };
 }
@@ -1513,6 +1515,7 @@ export interface ElasticsearchDomain extends TF.ResourceT<'ElasticsearchDomain'>
   arn: AT.Arn;
   domain_id: string;
   domain_name: string;
+  kibana_endpoint: string;
   endpoint: string;
 }
 

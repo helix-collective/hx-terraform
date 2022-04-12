@@ -3460,6 +3460,7 @@ function generateAws(gen: Generator) {
       stringAliasAttr('arn', 'Arn', 'AT.Arn'),
       stringAttr('domain_id'),
       stringAttr('domain_name'),
+      stringAttr('kibana_endpoint'),
       stringAttr('endpoint'),
     ]
   );

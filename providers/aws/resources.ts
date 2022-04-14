@@ -1194,6 +1194,44 @@ export interface IamRolePolicyAttachment extends TF.ResourceT<'IamRolePolicyAtta
 export type IamRolePolicyAttachmentId = {type:'IamRolePolicyAttachmentId',value:string};
 
 /**
+ *  Creates a iam service linked role
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role
+ */
+export function createIamServiceLinkedRole(tfgen: TF.Generator, rname: string, params: IamServiceLinkedRoleParams): IamServiceLinkedRole {
+  const fields = fieldsFromIamServiceLinkedRoleParams(params);
+  const resource = tfgen.createTypedResource('IamServiceLinkedRole', 'aws_iam_service_linked_role', rname, fields);
+  const id: IamServiceLinkedRoleId =  {type: 'IamServiceLinkedRoleId', value: TF.resourceAttribute(resource, "id")};
+  const create_date: string =  TF.resourceAttribute(resource, "create_date");
+  const name: string =  TF.resourceAttribute(resource, "name");
+  const path: string =  TF.resourceAttribute(resource, "path");
+  const unique_id: string =  TF.resourceAttribute(resource, "unique_id");
+  const arn: IamServiceLinkedRoleArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'IamServiceLinkedRole');
+
+  return {
+    ...resource,
+    id,
+    create_date,
+    name,
+    path,
+    unique_id,
+    arn,
+  };
+}
+
+export interface IamServiceLinkedRole extends TF.ResourceT<'IamServiceLinkedRole'> {
+  id: IamServiceLinkedRoleId;
+  create_date: string;
+  name: string;
+  path: string;
+  unique_id: string;
+  arn: IamServiceLinkedRoleArn;
+}
+
+export type IamServiceLinkedRoleId = {type:'IamServiceLinkedRoleId',value:string};
+export type IamServiceLinkedRoleArn = AT.ArnT<"IamServiceLinkedRole">;
+
+/**
  *  Provides an IAM instance profile.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html
@@ -3968,6 +4006,22 @@ export function fieldsFromIamRolePolicyAttachmentParams(params: IamRolePolicyAtt
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "role", params.role, TF.stringValue);
   TF.addAttribute(fields, "policy_arn", params.policy_arn, TF.resourceArnValue);
+  return fields;
+}
+
+export interface IamServiceLinkedRoleParams {
+  aws_service_name: string;
+  custom_suffix?: string;
+  description?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromIamServiceLinkedRoleParams(params: IamServiceLinkedRoleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "aws_service_name", params.aws_service_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "custom_suffix", params.custom_suffix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

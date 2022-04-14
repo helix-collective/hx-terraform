@@ -780,6 +780,16 @@ const iam_role_policy: RecordDecl = {
   ],
 };
 
+const iam_service_linked_role: RecordDecl = {
+  name: 'iam_service_linked_role',
+  fields: [
+    requiredField('aws_service_name', STRING),
+    optionalField('custom_suffix', STRING),
+    optionalField('description', STRING),
+    optionalField('tags', TAGS_MAP)
+  ],
+};
+
 const sqs_queue: RecordDecl = {
   name: 'sqs_queue',
   fields: [
@@ -3332,6 +3342,22 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Creates a iam service linked role',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_service_linked_role',
+    iam_service_linked_role,
+    [
+      resourceIdAttr('id', iam_service_linked_role),
+      stringAttr('create_date'),
+      stringAttr('name'),
+      stringAttr('path'),
+      stringAttr('unique_id'),
+    ],
+    {
+      arn: true
+    }
+  );
+
+  gen.generateResource(
     'Provides an IAM instance profile.',
     'https://www.terraform.io/docs/providers/aws/r/iam_instance_profile.html',
     iam_instance_profile,
@@ -4002,6 +4028,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_role_policy);
   gen.generateParams(iam_policy);
   gen.generateParams(iam_role_policy_attachment);
+  gen.generateParams(iam_service_linked_role);
   gen.generateParams(sqs_queue);
   gen.generateParams(sqs_queue_policy);
   gen.generateParams(lb);

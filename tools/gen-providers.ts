@@ -1049,6 +1049,25 @@ const vpn_connection: RecordDecl = {
     requiredField('customer_gateway_id', resourceIdType('CustomerGatewayId')),
     requiredField('type', enumType(["ipsec.1"])),
     requiredField('static_routes_only', BOOLEAN),
+
+    optionalField('tunnel1_dpd_timeout_action', enumType(["clear", "none", "restart"])),
+    optionalField('tunnel1_ike_versions', listType(STRING)),//listType(enumType(["ikev1", "ikev2"]))),
+    optionalField('tunnel1_phase1_dh_group_numbers', listType(NUMBER)),//2 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24),
+    optionalField('tunnel1_phase1_encryption_algorithms', listType(STRING)), //AES128 | AES256 | AES128-GCM-16 | AES256-GCM-16
+    optionalField('tunnel1_phase1_integrity_algorithms', listType(STRING)), //SHA1 | SHA2-256 | SHA2-384 | SHA2-512
+    optionalField('tunnel1_phase2_dh_group_numbers', listType(NUMBER)),
+    optionalField('tunnel1_phase2_encryption_algorithms', listType(STRING)),
+    optionalField('tunnel1_phase2_integrity_algorithms', listType(STRING)),
+    optionalField('tunnel1_startup_action', enumType(["add", "start"])),
+    optionalField('tunnel2_dpd_timeout_action', enumType(["clear", "none", "restart"])),
+    optionalField('tunnel2_ike_versions', listType(STRING)),
+    optionalField('tunnel2_phase1_dh_group_numbers', listType(NUMBER)),
+    optionalField('tunnel2_phase1_encryption_algorithms', listType(STRING)),
+    optionalField('tunnel2_phase1_integrity_algorithms', listType(STRING)),
+    optionalField('tunnel2_phase2_dh_group_numbers', listType(NUMBER)),
+    optionalField('tunnel2_phase2_encryption_algorithms', listType(STRING)),
+    optionalField('tunnel2_phase2_integrity_algorithms', listType(STRING)),
+    optionalField('tunnel2_startup_action', enumType(["add", "start"])),
   ],
 };
 

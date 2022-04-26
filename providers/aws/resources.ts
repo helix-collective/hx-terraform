@@ -2800,6 +2800,24 @@ export interface VpnConnectionParams {
   customer_gateway_id: CustomerGatewayId;
   type: 'ipsec.1';
   static_routes_only: boolean;
+  tunnel1_dpd_timeout_action?: 'clear' | 'none' | 'restart';
+  tunnel1_ike_versions?: (string)[];
+  tunnel1_phase1_dh_group_numbers?: (number)[];
+  tunnel1_phase1_encryption_algorithms?: (string)[];
+  tunnel1_phase1_integrity_algorithms?: (string)[];
+  tunnel1_phase2_dh_group_numbers?: (number)[];
+  tunnel1_phase2_encryption_algorithms?: (string)[];
+  tunnel1_phase2_integrity_algorithms?: (string)[];
+  tunnel1_startup_action?: 'add' | 'start';
+  tunnel2_dpd_timeout_action?: 'clear' | 'none' | 'restart';
+  tunnel2_ike_versions?: (string)[];
+  tunnel2_phase1_dh_group_numbers?: (number)[];
+  tunnel2_phase1_encryption_algorithms?: (string)[];
+  tunnel2_phase1_integrity_algorithms?: (string)[];
+  tunnel2_phase2_dh_group_numbers?: (number)[];
+  tunnel2_phase2_encryption_algorithms?: (string)[];
+  tunnel2_phase2_integrity_algorithms?: (string)[];
+  tunnel2_startup_action?: 'add' | 'start';
 }
 
 export function fieldsFromVpnConnectionParams(params: VpnConnectionParams) : TF.ResourceFieldMap {
@@ -2808,6 +2826,24 @@ export function fieldsFromVpnConnectionParams(params: VpnConnectionParams) : TF.
   TF.addAttribute(fields, "customer_gateway_id", params.customer_gateway_id, TF.resourceIdValue);
   TF.addAttribute(fields, "type", params.type, TF.stringValue);
   TF.addAttribute(fields, "static_routes_only", params.static_routes_only, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tunnel1_dpd_timeout_action", params.tunnel1_dpd_timeout_action, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tunnel1_ike_versions", params.tunnel1_ike_versions, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase1_dh_group_numbers", params.tunnel1_phase1_dh_group_numbers, TF.listValue(TF.numberValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase1_encryption_algorithms", params.tunnel1_phase1_encryption_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase1_integrity_algorithms", params.tunnel1_phase1_integrity_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase2_dh_group_numbers", params.tunnel1_phase2_dh_group_numbers, TF.listValue(TF.numberValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase2_encryption_algorithms", params.tunnel1_phase2_encryption_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel1_phase2_integrity_algorithms", params.tunnel1_phase2_integrity_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel1_startup_action", params.tunnel1_startup_action, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tunnel2_dpd_timeout_action", params.tunnel2_dpd_timeout_action, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tunnel2_ike_versions", params.tunnel2_ike_versions, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase1_dh_group_numbers", params.tunnel2_phase1_dh_group_numbers, TF.listValue(TF.numberValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase1_encryption_algorithms", params.tunnel2_phase1_encryption_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase1_integrity_algorithms", params.tunnel2_phase1_integrity_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase2_dh_group_numbers", params.tunnel2_phase2_dh_group_numbers, TF.listValue(TF.numberValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase2_encryption_algorithms", params.tunnel2_phase2_encryption_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel2_phase2_integrity_algorithms", params.tunnel2_phase2_integrity_algorithms, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "tunnel2_startup_action", params.tunnel2_startup_action, TF.stringValue);
   return fields;
 }
 

@@ -500,27 +500,6 @@ const sse_rule: RecordDecl = {
   ],
 };
 
-const and: RecordDecl = {
-  name: 'and',
-  fields: [
-    optionalField("object_size_greater_than", STRING),
-    optionalField("object_size_less_than", STRING),
-    optionalField("prefix", STRING),
-    optionalField("tag", TAGS_MAP),
-  ]
-}
-
-const filter: RecordDecl = {
-  name: 'filter',
-  fields: [
-    optionalField("and", recordType(and)),
-    optionalField("object_size_greater_than", STRING),
-    optionalField("object_size_less_than", STRING),
-    optionalField("prefix", STRING),
-    optionalField("tag", TAGS_MAP),
-  ]
-}
-
 const server_side_encryption_configuration: RecordDecl = {
   name: 'server_side_encryption_configuration',
   fields: [
@@ -647,13 +626,33 @@ const s3_bucket_accelerate_configuration: RecordDecl = {
     requiredField('status', enumType(["Enabled", "Suspended"])),
   ]
 }
+const s3_bucket_lifecycle_configuration_rule_filter_and: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration_rule_filter_and',
+  fields: [
+    optionalField("object_size_greater_than", STRING),
+    optionalField("object_size_less_than", STRING),
+    optionalField("prefix", STRING),
+    optionalField("tag", TAGS_MAP),
+  ]
+}
+
+const s3_bucket_lifecycle_configuration_rule_filter: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration_rule_filter',
+  fields: [
+    optionalField("and", recordType(s3_bucket_lifecycle_configuration_rule_filter_and)),
+    optionalField("object_size_greater_than", STRING),
+    optionalField("object_size_less_than", STRING),
+    optionalField("prefix", STRING),
+    optionalField("tag", TAGS_MAP),
+  ]
+}
 
 const s3_bucket_lifecycle_configuration_rule: RecordDecl = {
   name: 's3_bucket_lifecycle_configuration_rule',
   fields: [
     requiredField('id', STRING),
     optionalField('prefix', STRING),
-    optionalField('filter', recordType(filter)),
+    optionalField('filter', recordType(s3_bucket_lifecycle_configuration_rule_filter)),
     requiredField('status', enumType(["Enabled", "Disabled"])),
     optionalField('expiration', recordType(expiration)),
     optionalField('transition', recordType(transition)),
@@ -4151,6 +4150,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_versioning_configuration);
   gen.generateParams(s3_bucket_cors_configuration_rule);
   gen.generateParams(s3_bucket_cors_configuration);
+  gen.generateParams(s3_bucket_lifecycle_configuration_rule_filter_and);
+  gen.generateParams(s3_bucket_lifecycle_configuration_rule_filter);
   gen.generateParams(s3_bucket_accelerate_configuration);
   gen.generateParams(s3_bucket_lifecycle_configuration_rule);
   gen.generateParams(s3_bucket_lifecycle_configuration);

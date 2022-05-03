@@ -3873,6 +3873,40 @@ export function fieldsFromS3BucketCorsConfigurationParams(params: S3BucketCorsCo
   return fields;
 }
 
+export interface S3BucketLifecycleConfigurationRuleFilterAndParams {
+  object_size_greater_than?: string;
+  object_size_less_than?: string;
+  prefix?: string;
+  tag?: TF.TagsMap;
+}
+
+export function fieldsFromS3BucketLifecycleConfigurationRuleFilterAndParams(params: S3BucketLifecycleConfigurationRuleFilterAndParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "object_size_greater_than", params.object_size_greater_than, TF.stringValue);
+  TF.addOptionalAttribute(fields, "object_size_less_than", params.object_size_less_than, TF.stringValue);
+  TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tag", params.tag, TF.tagsValue);
+  return fields;
+}
+
+export interface S3BucketLifecycleConfigurationRuleFilterParams {
+  and?: S3BucketLifecycleConfigurationRuleFilterAndParams;
+  object_size_greater_than?: string;
+  object_size_less_than?: string;
+  prefix?: string;
+  tag?: TF.TagsMap;
+}
+
+export function fieldsFromS3BucketLifecycleConfigurationRuleFilterParams(params: S3BucketLifecycleConfigurationRuleFilterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalBlock(fields, "and", params.and, fieldsFromS3BucketLifecycleConfigurationRuleFilterAndParams);
+  TF.addOptionalAttribute(fields, "object_size_greater_than", params.object_size_greater_than, TF.stringValue);
+  TF.addOptionalAttribute(fields, "object_size_less_than", params.object_size_less_than, TF.stringValue);
+  TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tag", params.tag, TF.tagsValue);
+  return fields;
+}
+
 export interface S3BucketAccelerateConfigurationParams {
   bucket: string;
   expected_bucket_owner?: string;
@@ -3890,7 +3924,7 @@ export function fieldsFromS3BucketAccelerateConfigurationParams(params: S3Bucket
 export interface S3BucketLifecycleConfigurationRuleParams {
   id: string;
   prefix?: string;
-  filter?: FilterParams;
+  filter?: S3BucketLifecycleConfigurationRuleFilterParams;
   status: 'Enabled' | 'Disabled';
   expiration?: ExpirationParams;
   transition?: TransitionParams;
@@ -3900,7 +3934,7 @@ export function fieldsFromS3BucketLifecycleConfigurationRuleParams(params: S3Buc
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "id", params.id, TF.stringValue);
   TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
-  TF.addOptionalBlock(fields, "filter", params.filter, fieldsFromFilterParams);
+  TF.addOptionalBlock(fields, "filter", params.filter, fieldsFromS3BucketLifecycleConfigurationRuleFilterParams);
   TF.addAttribute(fields, "status", params.status, TF.stringValue);
   TF.addOptionalBlock(fields, "expiration", params.expiration, fieldsFromExpirationParams);
   TF.addOptionalBlock(fields, "transition", params.transition, fieldsFromTransitionParams);

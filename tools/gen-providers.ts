@@ -1442,6 +1442,7 @@ const launch_template: RecordDecl = {
     // tag_specifications - The tags to apply to the resources during launch. See Tag Specifications below for more details.
     optionalField('tags', TAGS_MAP),  // - (Optional) A map of tags to assign to the launch template. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
     // user_data - The Base64-encoded user data to provide when launching the instance.
+    optionalField('user_data', STRING),
     // hibernation_options - The hibernation options for the instance. See Hibernation Options below for more details.
     // enclave_options - (Optional) Enable Nitro Enclaves on launched instances. See Enclave Options below for more details.
   ],

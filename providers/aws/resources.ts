@@ -4993,6 +4993,7 @@ export interface LaunchTemplateParams {
   ebs_optimized?: boolean;
   image_id?: AT.Ami;
   tags?: TF.TagsMap;
+  user_data?: string;
 }
 
 export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : TF.ResourceFieldMap {
@@ -5007,6 +5008,7 @@ export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : T
   TF.addOptionalAttribute(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalAttribute(fields, "image_id", params.image_id, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
   return fields;
 }
 

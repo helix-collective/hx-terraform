@@ -714,6 +714,34 @@ export type S3BucketId = {type:'S3BucketId',value:string};
 export type S3BucketArn = AT.ArnT<"S3Bucket">;
 
 /**
+ *  Provides a S3 object resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object
+ */
+export function createS3Object(tfgen: TF.Generator, rname: string, params: S3ObjectParams): S3Object {
+  const fields = fieldsFromS3ObjectParams(params);
+  const resource = tfgen.createTypedResource('S3Object', 'aws_s3_object', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const etag: string =  TF.resourceAttribute(resource, "etag");
+  const version_id: string =  TF.resourceAttribute(resource, "version_id");
+
+  return {
+    ...resource,
+    id,
+    etag,
+    version_id,
+  };
+}
+
+export interface S3Object extends TF.ResourceT<'S3Object'> {
+  id: string;
+  etag: string;
+  version_id: string;
+}
+
+export type S3ObjectId = {type:'S3ObjectId',value:string};
+
+/**
  *  Provides a S3 bucket policy resource.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
@@ -803,6 +831,94 @@ export interface S3BucketOwnershipControls extends TF.ResourceT<'S3BucketOwnersh
 }
 
 export type S3BucketOwnershipControlsId = {type:'S3BucketOwnershipControlsId',value:string};
+
+/**
+ *  Provides a resource to manage S3 Bucket versioning. For more information, see the S3 Developer Guide.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning
+ */
+export function createS3BucketVersioning(tfgen: TF.Generator, rname: string, params: S3BucketVersioningParams): S3BucketVersioning {
+  const fields = fieldsFromS3BucketVersioningParams(params);
+  const resource = tfgen.createTypedResource('S3BucketVersioning', 'aws_s3_bucket_versioning', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketVersioning extends TF.ResourceT<'S3BucketVersioning'> {
+  id: string;
+}
+
+export type S3BucketVersioningId = {type:'S3BucketVersioningId',value:string};
+
+/**
+ *  Provides a resource to manage S3 cors configuration. For more information, see the S3 Developer Guide.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_cors_configuration
+ */
+export function createS3BucketCorsConfiguration(tfgen: TF.Generator, rname: string, params: S3BucketCorsConfigurationParams): S3BucketCorsConfiguration {
+  const fields = fieldsFromS3BucketCorsConfigurationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketCorsConfiguration', 'aws_s3_bucket_cors_configuration', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketCorsConfiguration extends TF.ResourceT<'S3BucketCorsConfiguration'> {
+  id: string;
+}
+
+export type S3BucketCorsConfigurationId = {type:'S3BucketCorsConfigurationId',value:string};
+
+/**
+ *  Provides a resource to manage S3 accelerated configuration. For more information, see the S3 Developer Guide.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_accelerate_configuration
+ */
+export function createS3BucketAccelerateConfiguration(tfgen: TF.Generator, rname: string, params: S3BucketAccelerateConfigurationParams): S3BucketAccelerateConfiguration {
+  const fields = fieldsFromS3BucketAccelerateConfigurationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketAccelerateConfiguration', 'aws_s3_bucket_accelerate_configuration', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketAccelerateConfiguration extends TF.ResourceT<'S3BucketAccelerateConfiguration'> {
+  id: string;
+}
+
+export type S3BucketAccelerateConfigurationId = {type:'S3BucketAccelerateConfigurationId',value:string};
+
+/**
+ *  Provides a resource to manage S3 lifecycle configuration. For more information, see the S3 Developer Guide.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration
+ */
+export function createS3BucketLifecycleConfiguration(tfgen: TF.Generator, rname: string, params: S3BucketLifecycleConfigurationParams): S3BucketLifecycleConfiguration {
+  const fields = fieldsFromS3BucketLifecycleConfigurationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketLifecycleConfiguration', 'aws_s3_bucket_lifecycle_configuration', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface S3BucketLifecycleConfiguration extends TF.ResourceT<'S3BucketLifecycleConfiguration'> {
+  id: string;
+}
+
+export type S3BucketLifecycleConfigurationId = {type:'S3BucketLifecycleConfigurationId',value:string};
 
 /**
  *  Provides an SNS topic resource
@@ -2831,13 +2947,15 @@ export function fieldsFromAutoscalingScheduleParams(params: AutoscalingScheduleP
 
 export interface AutoscalingAttachmentParams {
   autoscaling_group_name: AutoscalingGroupId;
-  alb_target_group_arn: AT.ArnT<"LbTargetGroup">;
+  alb_target_group_arn?: AT.ArnT<"LbTargetGroup">;
+  lb_target_group_arn?: AT.ArnT<"LbTargetGroup">;
 }
 
 export function fieldsFromAutoscalingAttachmentParams(params: AutoscalingAttachmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "autoscaling_group_name", params.autoscaling_group_name, TF.resourceIdValue);
-  TF.addAttribute(fields, "alb_target_group_arn", params.alb_target_group_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "alb_target_group_arn", params.alb_target_group_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "lb_target_group_arn", params.lb_target_group_arn, TF.resourceArnValue);
   return fields;
 }
 
@@ -3045,6 +3163,7 @@ export interface DbInstanceParams {
   engine_version?: string;
   identifier?: string;
   name?: string;
+  db_name?: string;
   port?: number;
   publicly_accessible?: boolean;
   backup_retention_period?: number;
@@ -3078,6 +3197,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalAttribute(fields, "engine_version", params.engine_version, TF.stringValue);
   TF.addOptionalAttribute(fields, "identifier", params.identifier, TF.stringValue);
   TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "db_name", params.db_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
   TF.addOptionalAttribute(fields, "publicly_accessible", params.publicly_accessible, TF.booleanValue);
   TF.addOptionalAttribute(fields, "backup_retention_period", params.backup_retention_period, TF.numberValue);
@@ -3589,6 +3709,24 @@ export function fieldsFromS3BucketParams(params: S3BucketParams) : TF.ResourceFi
   return fields;
 }
 
+export interface S3ObjectParams {
+  bucket: string;
+  key: string;
+  acl?: AT.CannedAcl;
+  source?: string;
+  content?: string;
+}
+
+export function fieldsFromS3ObjectParams(params: S3ObjectParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addAttribute(fields, "key", params.key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "acl", params.acl, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "source", params.source, TF.stringValue);
+  TF.addOptionalAttribute(fields, "content", params.content, TF.stringValue);
+  return fields;
+}
+
 export interface S3BucketPolicyParams {
   bucket: string;
   policy?: string;
@@ -3672,6 +3810,114 @@ export interface S3BucketOwnershipControlsRuleParams {
 export function fieldsFromS3BucketOwnershipControlsRuleParams(params: S3BucketOwnershipControlsRuleParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "object_ownership", params.object_ownership, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketVersioningParams {
+  bucket: string;
+  versioning_configuration: S3BucketVersioningConfigurationParams;
+  expected_bucket_owner?: string;
+  mfa?: string;
+}
+
+export function fieldsFromS3BucketVersioningParams(params: S3BucketVersioningParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addBlock(fields, "versioning_configuration", params.versioning_configuration, fieldsFromS3BucketVersioningConfigurationParams);
+  TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
+  TF.addOptionalAttribute(fields, "mfa", params.mfa, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketVersioningConfigurationParams {
+  status: 'Enabled' | 'Suspended' | 'Disabled';
+  mfa_delete?: 'Enabled' | 'Disabled';
+}
+
+export function fieldsFromS3BucketVersioningConfigurationParams(params: S3BucketVersioningConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "status", params.status, TF.stringValue);
+  TF.addOptionalAttribute(fields, "mfa_delete", params.mfa_delete, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketCorsConfigurationRuleParams {
+  allowed_headers?: (string)[];
+  allowed_methods: (string)[];
+  allowed_origins: (string)[];
+  expose_headers?: (string)[];
+  max_age_seconds?: number;
+}
+
+export function fieldsFromS3BucketCorsConfigurationRuleParams(params: S3BucketCorsConfigurationRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "allowed_headers", params.allowed_headers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "allowed_methods", params.allowed_methods, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "allowed_origins", params.allowed_origins, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "expose_headers", params.expose_headers, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "max_age_seconds", params.max_age_seconds, TF.numberValue);
+  return fields;
+}
+
+export interface S3BucketCorsConfigurationParams {
+  bucket: string;
+  expected_bucket_owner?: string;
+  cors_rule: S3BucketCorsConfigurationRuleParams;
+}
+
+export function fieldsFromS3BucketCorsConfigurationParams(params: S3BucketCorsConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
+  TF.addBlock(fields, "cors_rule", params.cors_rule, fieldsFromS3BucketCorsConfigurationRuleParams);
+  return fields;
+}
+
+export interface S3BucketAccelerateConfigurationParams {
+  bucket: string;
+  expected_bucket_owner?: string;
+  status: 'Enabled' | 'Suspended';
+}
+
+export function fieldsFromS3BucketAccelerateConfigurationParams(params: S3BucketAccelerateConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
+  TF.addAttribute(fields, "status", params.status, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketLifecycleConfigurationRuleParams {
+  id: string;
+  prefix?: string;
+  filter?: FilterParams;
+  status: 'Enabled' | 'Disabled';
+  expiration?: ExpirationParams;
+  transition?: TransitionParams;
+}
+
+export function fieldsFromS3BucketLifecycleConfigurationRuleParams(params: S3BucketLifecycleConfigurationRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "id", params.id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addOptionalBlock(fields, "filter", params.filter, fieldsFromFilterParams);
+  TF.addAttribute(fields, "status", params.status, TF.stringValue);
+  TF.addOptionalBlock(fields, "expiration", params.expiration, fieldsFromExpirationParams);
+  TF.addOptionalBlock(fields, "transition", params.transition, fieldsFromTransitionParams);
+  return fields;
+}
+
+export interface S3BucketLifecycleConfigurationParams {
+  bucket: string;
+  expected_bucket_owner?: string;
+  rule: (S3BucketLifecycleConfigurationRuleParams)[];
+}
+
+export function fieldsFromS3BucketLifecycleConfigurationParams(params: S3BucketLifecycleConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
+  TF.addRepeatedBlock(fields, "rule", params.rule, fieldsFromS3BucketLifecycleConfigurationRuleParams);
   return fields;
 }
 

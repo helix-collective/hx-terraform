@@ -124,25 +124,29 @@ export function createS3Bucket(
   return AR.createS3Bucket(tfgen, name, params);
 }
 
-// CreateS3Bucket for newer versions of terraform
-export function createS3BucketV2(
-  tfgen: TF.Generator,
-  name: string,
+export interface CreateS3BucketV2Params {
   versioningEnabled: boolean,
   bucketParams: AR.S3BucketParams,
   corsParams?: AR.S3BucketCorsConfigurationParams,
   acceleratedParams?: AR.S3BucketAccelerateConfigurationParams,
   lifecycleParams?: AR.S3BucketLifecycleConfigurationParams
+}
+// CreateS3Bucket for newer versions of terraform
+export function createS3BucketV2(
+  tfgen: TF.Generator,
+  name: string,
+  params: CreateS3BucketV2Params
+  
 ): AR.S3Bucket {
   const _bucketParams = {
-    ...bucketParams,
+    ...params.bucketParams,
     tags: {
       ...tfgen.tagsContext(),
-      ...bucketParams.tags,
+      ...params.bucketParams.tags,
     }
   }
   const s3Bucket = AR.createS3Bucket(tfgen, name, _bucketParams);
-  if (versioningEnabled == true) {
+  if (params.versioningEnabled == true) {
     AR.createS3BucketVersioning(tfgen, `${name}-versioning`, {
       bucket: _bucketParams.bucket,
       versioning_configuration: {
@@ -150,14 +154,14 @@ export function createS3BucketV2(
       }
     })
   }
-  if (corsParams != undefined) {
-    AR.createS3BucketCorsConfiguration(tfgen, `${name}-cors`, corsParams)
+  if (params.corsParams != undefined) {
+    AR.createS3BucketCorsConfiguration(tfgen, `${name}-cors`, params.corsParams)
   }
-  if (acceleratedParams != undefined) {
-    AR.createS3BucketAccelerateConfiguration(tfgen, `${name}-accelerated`, acceleratedParams)
+  if (params.acceleratedParams != undefined) {
+    AR.createS3BucketAccelerateConfiguration(tfgen, `${name}-accelerated`, params.acceleratedParams)
   }
-  if (lifecycleParams != undefined) {
-    AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-lifecycle`, lifecycleParams)
+  if (params.lifecycleParams != undefined) {
+    AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-lifecycle`, params.lifecycleParams)
   }
   return s3Bucket
 }

@@ -124,6 +124,7 @@ const db_instance: RecordDecl = {
     optionalField('engine_version', STRING),
     optionalField('identifier', STRING),
     optionalField('name', STRING),
+    optionalField('db_name', STRING),
     optionalField('port', NUMBER),
     optionalField('publicly_accessible', BOOLEAN),
     optionalField('backup_retention_period', NUMBER),
@@ -522,6 +523,17 @@ const s3_bucket: RecordDecl = {
   ],
 };
 
+const s3_object: RecordDecl = {
+  name: 's3_object',
+  fields: [
+    requiredField('bucket', STRING),
+    requiredField('key', STRING),
+    optionalField('acl', stringAliasType('AT.CannedAcl')),
+    optionalField('source', STRING),
+    optionalField('content', STRING),
+  ],
+};
+
 const s3_bucket_policy: RecordDecl = {
   name: 's3_bucket_policy',
   fields: [
@@ -567,6 +579,94 @@ const s3_bucket_ownership_controls: RecordDecl = {
     requiredField('rule', recordType(s3_bucket_ownership_controls_rule)),
   ],
 };
+
+const s3_bucket_versioning_configuration: RecordDecl = {
+  name: 's3_bucket_versioning_configuration',
+  fields: [
+    requiredField('status', enumType(["Enabled", "Suspended", "Disabled"])),
+    optionalField('mfa_delete', enumType(["Enabled", "Disabled"]))
+  ]
+}
+
+const s3_bucket_versioning: RecordDecl = {
+  name: 's3_bucket_versioning',
+  fields: [
+    requiredField('bucket', STRING),
+    requiredField('versioning_configuration', recordType(s3_bucket_versioning_configuration)),
+    optionalField('expected_bucket_owner', STRING),
+    optionalField('mfa', STRING)
+  ]
+}
+
+const s3_bucket_cors_configuration_rule: RecordDecl = {
+  name: 's3_bucket_cors_configuration_rule',
+  fields: [
+    optionalField('allowed_headers', listType(STRING)),
+    requiredField('allowed_methods', listType(STRING)),
+    requiredField('allowed_origins', listType(STRING)),
+    optionalField('expose_headers', listType(STRING)),
+    optionalField('max_age_seconds', NUMBER),
+  ],
+}
+
+const s3_bucket_cors_configuration: RecordDecl = {
+  name: 's3_bucket_cors_configuration',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('expected_bucket_owner', STRING),
+    requiredField('cors_rule', recordType(s3_bucket_cors_configuration_rule)),
+  ]
+}
+
+const s3_bucket_accelerate_configuration: RecordDecl = {
+  name: 's3_bucket_accelerate_configuration',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('expected_bucket_owner', STRING),
+    requiredField('status', enumType(["Enabled", "Suspended"])),
+  ]
+}
+const s3_bucket_lifecycle_configuration_rule_filter_and: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration_rule_filter_and',
+  fields: [
+    optionalField("object_size_greater_than", STRING),
+    optionalField("object_size_less_than", STRING),
+    optionalField("prefix", STRING),
+    optionalField("tag", TAGS_MAP),
+  ]
+}
+
+const s3_bucket_lifecycle_configuration_rule_filter: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration_rule_filter',
+  fields: [
+    optionalField("and", recordType(s3_bucket_lifecycle_configuration_rule_filter_and)),
+    optionalField("object_size_greater_than", STRING),
+    optionalField("object_size_less_than", STRING),
+    optionalField("prefix", STRING),
+    optionalField("tag", TAGS_MAP),
+  ]
+}
+
+const s3_bucket_lifecycle_configuration_rule: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration_rule',
+  fields: [
+    requiredField('id', STRING),
+    optionalField('prefix', STRING),
+    optionalField('filter', recordType(s3_bucket_lifecycle_configuration_rule_filter)),
+    requiredField('status', enumType(["Enabled", "Disabled"])),
+    optionalField('expiration', recordType(expiration)),
+    optionalField('transition', recordType(transition)),
+  ],
+}
+
+const s3_bucket_lifecycle_configuration: RecordDecl = {
+  name: 's3_bucket_lifecycle_configuration',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('expected_bucket_owner', STRING),
+    requiredField('rule', repeatedBlockType(recordType(s3_bucket_lifecycle_configuration_rule))),
+  ]
+}
 
 
 const iam_user: RecordDecl = {
@@ -1021,7 +1121,8 @@ const autoscaling_attachment: RecordDecl = {
       'autoscaling_group_name',
       resourceIdType('AutoscalingGroupId')
     ),
-    requiredField('alb_target_group_arn', arnType(lb_target_group)),
+    optionalField('alb_target_group_arn', arnType(lb_target_group)),
+    optionalField('lb_target_group_arn', arnType(lb_target_group)),
   ],
 };
 
@@ -3166,6 +3267,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a S3 object resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object',
+    s3_object,
+    [stringAttr('id'), stringAttr('etag'), stringAttr('version_id')]
+  );
+
+  gen.generateResource(
     'Provides a S3 bucket policy resource.',
     'https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html',
     s3_bucket_policy,
@@ -3190,6 +3298,34 @@ function generateAws(gen: Generator) {
     'Provides a resource to manage S3 Bucket Ownership Controls. For more information, see the S3 Developer Guide.',
     'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_ownership_controls',
     s3_bucket_ownership_controls,
+    [stringAttr('id')]
+  );
+
+  gen.generateResource(
+    'Provides a resource to manage S3 Bucket versioning. For more information, see the S3 Developer Guide.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning',
+    s3_bucket_versioning,
+    [stringAttr('id')]
+  );
+  
+  gen.generateResource(
+    'Provides a resource to manage S3 cors configuration. For more information, see the S3 Developer Guide.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_cors_configuration',
+    s3_bucket_cors_configuration,
+    [stringAttr('id')]
+  );
+
+  gen.generateResource(
+    'Provides a resource to manage S3 accelerated configuration. For more information, see the S3 Developer Guide.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_accelerate_configuration',
+    s3_bucket_accelerate_configuration,
+    [stringAttr('id')]
+  );
+
+  gen.generateResource(
+    'Provides a resource to manage S3 lifecycle configuration. For more information, see the S3 Developer Guide.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration',
+    s3_bucket_lifecycle_configuration,
     [stringAttr('id')]
   );
 
@@ -4003,12 +4139,22 @@ function generateAws(gen: Generator) {
   gen.generateParams(sse_rule);
   gen.generateParams(server_side_encryption_configuration);
   gen.generateParams(s3_bucket);
+  gen.generateParams(s3_object);
   gen.generateParams(s3_bucket_policy);
   gen.generateParams(website);
   gen.generateParams(s3_bucket_object);
   gen.generateParams(s3_bucket_public_access_block);
   gen.generateParams(s3_bucket_ownership_controls);
   gen.generateParams(s3_bucket_ownership_controls_rule);
+  gen.generateParams(s3_bucket_versioning);
+  gen.generateParams(s3_bucket_versioning_configuration);
+  gen.generateParams(s3_bucket_cors_configuration_rule);
+  gen.generateParams(s3_bucket_cors_configuration);
+  gen.generateParams(s3_bucket_lifecycle_configuration_rule_filter_and);
+  gen.generateParams(s3_bucket_lifecycle_configuration_rule_filter);
+  gen.generateParams(s3_bucket_accelerate_configuration);
+  gen.generateParams(s3_bucket_lifecycle_configuration_rule);
+  gen.generateParams(s3_bucket_lifecycle_configuration);
   gen.generateParams(sns_topic);
   gen.generateParams(sns_sms_preferences);
   gen.generateParams(iam_user);

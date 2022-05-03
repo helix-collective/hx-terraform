@@ -276,6 +276,47 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
   };
 }
 
+// Create Shared bucket resources using updated terraform format
+export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : SharedBucketParams) : SharedBucketsResources {
+  const {s3_bucket_prefix} = params;
+
+  const deploy_bucket_name = s3_bucket_prefix + '-shared-deploy';
+  const deploy_bucket = AR.createS3Bucket(tfgen, 'deploy', {
+    bucket: deploy_bucket_name,
+    tags: tfgen.tagsContext(),
+    ...params.deploy,
+  });
+  AR.createS3BucketVersioning(tfgen, `${deploy_bucket_name}-versioning`, {
+    bucket:deploy_bucket_name,
+    versioning_configuration: {
+      status: "Enabled"
+    }
+  })
+  s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
+
+  const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
+  const backup_bucket = AR.createS3Bucket(tfgen, 'backup', {
+    bucket: backup_bucket_name,
+    tags: tfgen.tagsContext(),
+    ...params.backup,
+  });
+  AR.createS3BucketVersioning(tfgen, `${backup_bucket_name}-versioning`, {
+    bucket:backup_bucket_name,
+    versioning_configuration: {
+      status: "Enabled"
+    }
+  })
+  s3.blockPublicAccess(tfgen, 'backup', backup_bucket.id);
+
+  return {
+    s3_bucket_prefix,
+    deploy_bucket,
+    deploy_bucket_name,
+    backup_bucket,
+    backup_bucket_name
+  };
+}
+
 export type SharedSecurityGroupParams = {
   vpc: AR.Vpc;
 };

@@ -124,6 +124,48 @@ export function createS3Bucket(
   return AR.createS3Bucket(tfgen, name, params);
 }
 
+export interface CreateS3BucketV2Params {
+  versioningEnabled: boolean,
+  bucketParams: AR.S3BucketParams,
+  corsParams?: AR.S3BucketCorsConfigurationParams,
+  acceleratedParams?: AR.S3BucketAccelerateConfigurationParams,
+  lifecycleParams?: AR.S3BucketLifecycleConfigurationParams
+}
+// CreateS3Bucket for newer versions of terraform
+export function createS3BucketV2(
+  tfgen: TF.Generator,
+  name: string,
+  params: CreateS3BucketV2Params
+  
+): AR.S3Bucket {
+  const _bucketParams = {
+    ...params.bucketParams,
+    tags: {
+      ...tfgen.tagsContext(),
+      ...params.bucketParams.tags,
+    }
+  }
+  const s3Bucket = AR.createS3Bucket(tfgen, name, _bucketParams);
+  if (params.versioningEnabled == true) {
+    AR.createS3BucketVersioning(tfgen, `${name}-versioning`, {
+      bucket: _bucketParams.bucket,
+      versioning_configuration: {
+        status: 'Enabled'
+      }
+    })
+  }
+  if (params.corsParams != undefined) {
+    AR.createS3BucketCorsConfiguration(tfgen, `${name}-cors`, params.corsParams)
+  }
+  if (params.acceleratedParams != undefined) {
+    AR.createS3BucketAccelerateConfiguration(tfgen, `${name}-accelerated`, params.acceleratedParams)
+  }
+  if (params.lifecycleParams != undefined) {
+    AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-lifecycle`, params.lifecycleParams)
+  }
+  return s3Bucket
+}
+
 /**
  * Create a security group in the shared VPC
  */

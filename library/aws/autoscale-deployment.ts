@@ -18,7 +18,6 @@ import * as DC from '../../library/deploytool_legacy/adl-gen/config';
 
 import {
   EndPoint,
-  getDefaultAmi,
   httpsFqdnsFromEndpoints,
   ec2InstallScript,
 } from './ec2-deployment';
@@ -213,7 +212,7 @@ export function createController(
 
   const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
     instance_type: AT.t2_micro,
-    ami: params.controller_amis || getDefaultAmi,
+    ami: params.controller_amis,
     security_group: sr.bastion_security_group,
     key_name: params.key_name,
     customize_instance: (i: AR.InstanceParams) => {
@@ -327,9 +326,7 @@ export function createProcessorAutoScaleGroup(
   const launch_config_params = {
     name_prefix: tfgen.scopedName(name).join('-') + '-',
     key_name: params.key_name,
-    image_id: params.appserver_amis
-      ? params.appserver_amis(sr.network.region)
-      : getDefaultAmi(sr.network.region),
+    image_id: params.appserver_amis(sr.network.region),
     instance_type: params.appserver_instance_type,
     iam_instance_profile: instance_profile.id,
     security_groups: [sr.appserver_security_group.id],
@@ -727,7 +724,7 @@ export interface AutoscaleProcessorParams {
    * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI
    * for the appropriate region.
    */
-  controller_amis?(region: AT.Region): AT.Ami;
+  controller_amis(region: AT.Region): AT.Ami;
 
   /**
    * The context files are fetched from S3 and made available to the controller instance for
@@ -754,7 +751,7 @@ export interface AutoscaleProcessorParams {
    * Specifies the AMI for the EC2 instances. Defaults to an ubuntu 16.04 AMI
    * for the appropriate region.
    */
-  appserver_amis?(region: AT.Region): AT.Ami;
+  appserver_amis(region: AT.Region): AT.Ami;
 
   /**
    * The context files are fetched from S3 and made available to hx-deploy-tool for interpolation

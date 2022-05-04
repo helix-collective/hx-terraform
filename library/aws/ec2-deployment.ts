@@ -119,7 +119,7 @@ export function createEc2Deployment(
 
   const appserver = aws.createInstanceWithEip(tfgen, name, sr, params.subnet_id, {
     instance_type: params.instance_type,
-    ami: params.ami || getDefaultAmi,
+    ami: params.ami,
     security_group: sr.appserver_security_group,
     key_name: params.key_name,
     customize_instance: (i: AR.InstanceParams) => {
@@ -280,7 +280,7 @@ export interface Ec2DeploymentParams {
    * Specifies the AMI for the EC2 instance. Defaults to an ubuntu 16.04 AMI
    * for the appropriate region.
    */
-  ami?(region: AT.Region): AT.Ami;
+  ami(region: AT.Region): AT.Ami;
 
   /**
    * The EC2 instance created is given an IAM profile with sufficient access policies to
@@ -410,7 +410,7 @@ export interface Ec2Deployment {
  * (ubuntu xenial, hvm:ebs-ssd, EBS General purpose SSD, x86)
  *  https://cloud-images.ubuntu.com/locator/ec2/
  */
-export function getDefaultAmi(region: AT.Region): AT.Ami {
+ export function getUbuntu1604Ami(region: AT.Region): AT.Ami {
   if (region.value === AT.ap_southeast_2.value) {
     return AT.ami('ami-47c21a25');
   }
@@ -434,6 +434,20 @@ export function getDefaultAmi(region: AT.Region): AT.Ami {
   }
   if (region.value === AT.eu_central_1.value) {
     return AT.ami('ami-05ed2c1359acd8af6');
+  }
+  throw new Error('No AMI specified for region ' + region.value);
+}
+
+/**
+ * Standard ubuntu base AMIs.
+ *
+ * (ubuntu focal, hvm:ebs-ssd, EBS General purpose SSD, amd64)
+ *  https://cloud-images.ubuntu.com/locator/ec2/
+ */
+ export function getUbuntu2004Ami(region: AT.Region): AT.Ami {
+  if (region.value === AT.ap_southeast_2.value) {
+    // ap-southeast-2	focal	20.04 LTS	amd64	hvm:ebs-ssd	20220419	ami-0d539270873f66397	hvm
+    return AT.ami('ami-0d539270873f66397');
   }
   throw new Error('No AMI specified for region ' + region.value);
 }

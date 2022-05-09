@@ -1776,17 +1776,20 @@ export function createLaunchTemplate(tfgen: TF.Generator, rname: string, params:
   const resource = tfgen.createTypedResource('LaunchTemplate', 'aws_launch_template', rname, fields);
   const id: LaunchTemplateId =  {type: 'LaunchTemplateId', value: TF.resourceAttribute(resource, "id")};
   const name: string =  TF.resourceAttribute(resource, "name");
+  const latest_version: string =  TF.resourceAttribute(resource, "latest_version");
 
   return {
     ...resource,
     id,
     name,
+    latest_version,
   };
 }
 
 export interface LaunchTemplate extends TF.ResourceT<'LaunchTemplate'> {
   id: LaunchTemplateId;
   name: string;
+  latest_version: string;
 }
 
 export type LaunchTemplateId = {type:'LaunchTemplateId',value:string};
@@ -6554,14 +6557,14 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
 export interface BatchComputeEnvironmentComputeResourceLaunchTemplateParams {
   launch_template_id?: LaunchTemplateId;
   launch_template_name?: string;
-  version?: number;
+  version?: string;
 }
 
 export function fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams(params: BatchComputeEnvironmentComputeResourceLaunchTemplateParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "launch_template_id", params.launch_template_id, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "launch_template_name", params.launch_template_name, TF.stringValue);
-  TF.addOptionalAttribute(fields, "version", params.version, TF.numberValue);
+  TF.addOptionalAttribute(fields, "version", params.version, TF.stringValue);
   return fields;
 }
 

@@ -2661,7 +2661,7 @@ const batch_compute_environment_compute_resource_launch_template: RecordDecl = {
   fields: [
     optionalField('launch_template_id', resourceIdType('LaunchTemplateId')),
     optionalField('launch_template_name', STRING),
-    optionalField('version', NUMBER),
+    optionalField('version', STRING),
   ],
 };
 
@@ -3686,7 +3686,8 @@ function generateAws(gen: Generator) {
     launch_template,
     [
       resourceIdAttr('id', launch_template),
-      stringAttr('name')
+      stringAttr('name'),
+      stringAttr('latest_version')
     ]
   );
 

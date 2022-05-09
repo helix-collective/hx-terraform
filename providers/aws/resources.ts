@@ -4982,6 +4982,52 @@ export function fieldsFromLaunchTemplateBlockDeviceMappingParams(params: LaunchT
   return fields;
 }
 
+export interface LaunchTemplateBlockNetworkInterfacesParams {
+  associate_carrier_ip_address?: boolean;
+  associate_public_ip_address?: boolean;
+  delete_on_termination?: boolean;
+  description?: string;
+  device_index?: string;
+  interface_type?: string;
+  ipv4_prefix_count?: string;
+  ipv4_prefixes?: string;
+  ipv6_addresses?: string;
+  ipv6_adress_count?: string;
+  ipv6_prefix_count?: string;
+  ipv6_prefixes?: string;
+  network_interface_id?: string;
+  network_card_index?: string;
+  private_ip_address?: string;
+  ipv4_address_count?: string;
+  opv4_addresses?: string;
+  security_groups?: (string)[];
+  subnet_id?: string;
+}
+
+export function fieldsFromLaunchTemplateBlockNetworkInterfacesParams(params: LaunchTemplateBlockNetworkInterfacesParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "associate_carrier_ip_address", params.associate_carrier_ip_address, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "associate_public_ip_address", params.associate_public_ip_address, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "delete_on_termination", params.delete_on_termination, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "device_index", params.device_index, TF.stringValue);
+  TF.addOptionalAttribute(fields, "interface_type", params.interface_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv4_prefix_count", params.ipv4_prefix_count, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv4_prefixes", params.ipv4_prefixes, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv6_addresses", params.ipv6_addresses, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv6_adress_count", params.ipv6_adress_count, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv6_prefix_count", params.ipv6_prefix_count, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv6_prefixes", params.ipv6_prefixes, TF.stringValue);
+  TF.addOptionalAttribute(fields, "network_interface_id", params.network_interface_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "network_card_index", params.network_card_index, TF.stringValue);
+  TF.addOptionalAttribute(fields, "private_ip_address", params.private_ip_address, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipv4_address_count", params.ipv4_address_count, TF.stringValue);
+  TF.addOptionalAttribute(fields, "opv4_addresses", params.opv4_addresses, TF.stringValue);
+  TF.addOptionalAttribute(fields, "security_groups", params.security_groups, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "subnet_id", params.subnet_id, TF.stringValue);
+  return fields;
+}
+
 export interface LaunchTemplateParams {
   name?: string;
   name_prefix?: string;
@@ -4992,6 +5038,10 @@ export interface LaunchTemplateParams {
   disable_api_termination?: boolean;
   ebs_optimized?: boolean;
   image_id?: AT.Ami;
+  key_name?: string;
+  network_interfaces?: LaunchTemplateBlockNetworkInterfacesParams;
+  security_group_names?: (string)[];
+  vpc_security_group_ids?: (string)[];
   tags?: TF.TagsMap;
   user_data?: string;
 }
@@ -5007,6 +5057,10 @@ export function fieldsFromLaunchTemplateParams(params: LaunchTemplateParams) : T
   TF.addOptionalAttribute(fields, "disable_api_termination", params.disable_api_termination, TF.booleanValue);
   TF.addOptionalAttribute(fields, "ebs_optimized", params.ebs_optimized, TF.booleanValue);
   TF.addOptionalAttribute(fields, "image_id", params.image_id, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "key_name", params.key_name, TF.stringValue);
+  TF.addOptionalBlock(fields, "network_interfaces", params.network_interfaces, fieldsFromLaunchTemplateBlockNetworkInterfacesParams);
+  TF.addOptionalAttribute(fields, "security_group_names", params.security_group_names, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.stringValue));
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
   return fields;

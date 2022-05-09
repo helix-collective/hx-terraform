@@ -1408,6 +1408,31 @@ const launch_template_block_device_mapping: RecordDecl = {
   ],
 };
 
+const launch_template_block_network_interfaces: RecordDecl = {
+  name: 'launch_template_block_network_interfaces',
+  fields: [
+    optionalField('associate_carrier_ip_address', BOOLEAN),
+    optionalField('associate_public_ip_address', BOOLEAN),
+    optionalField('delete_on_termination', BOOLEAN),
+    optionalField('description', STRING),
+    optionalField('device_index', STRING),
+    optionalField('interface_type', STRING),
+    optionalField('ipv4_prefix_count', STRING),
+    optionalField('ipv4_prefixes', STRING),
+    optionalField('ipv6_addresses', STRING),
+    optionalField('ipv6_adress_count', STRING),
+    optionalField('ipv6_prefix_count', STRING),
+    optionalField('ipv6_prefixes', STRING),
+    optionalField('network_interface_id', STRING),
+    optionalField('network_card_index', STRING),
+    optionalField('private_ip_address', STRING),
+    optionalField('ipv4_address_count', STRING),
+    optionalField('opv4_addresses', STRING),
+    optionalField('security_groups', listType(STRING)),
+    optionalField('subnet_id', STRING),
+  ],
+};
+
 const launch_template: RecordDecl = {
   name: 'launch_template',
   fields: [
@@ -1430,15 +1455,15 @@ const launch_template: RecordDecl = {
     // instance_market_options - The market (purchasing) option for the instance. See Market Options below for details.
     // instance_type - The type of the instance.
     // kernel_id - The kernel ID.
-    // key_name - The key name to use for the instance.
+    optionalField('key_name', STRING),
     // license_specification - A list of license specifications to associate with. See License Specification below for more details.
     // metadata_options - (Optional) Customize the metadata options for the instance. See Metadata Options below for more details.
     // monitoring - The monitoring option for the instance. See Monitoring below for more details.
-    // network_interfaces - Customize network interfaces to be attached at instance boot time. See Network Interfaces below for more details.
+    optionalField('network_interfaces', recordType(launch_template_block_network_interfaces)),
     // placement - The placement of the instance. See Placement below for more details.
     // ram_disk_id - The ID of the RAM disk.
-    // security_group_names - A list of security group names to associate with. If you are creating Instances in a VPC, use vpc_security_group_ids instead.
-    // vpc_security_group_ids - A list of security group IDs to associate with. Conflicts with network_interfaces.security_groups
+    optionalField('security_group_names', listType(STRING)),
+    optionalField('vpc_security_group_ids', listType(STRING)),
     // tag_specifications - The tags to apply to the resources during launch. See Tag Specifications below for more details.
     optionalField('tags', TAGS_MAP),  // - (Optional) A map of tags to assign to the launch template. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.
     optionalField('user_data', STRING),
@@ -4214,6 +4239,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(launch_configuration);
   gen.generateParams(launch_template_block_device_mapping_ebs);
   gen.generateParams(launch_template_block_device_mapping);
+  gen.generateParams(launch_template_block_network_interfaces);
   gen.generateParams(launch_template);
   gen.generateParams(cloudwatch_logging_options);
   gen.generateParams(extended_s3_configuration);

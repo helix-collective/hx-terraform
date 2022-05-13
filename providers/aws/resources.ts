@@ -2860,6 +2860,104 @@ export interface BatchJobQueue extends TF.ResourceT<'BatchJobQueue'> {
 export type BatchJobQueueId = {type:'BatchJobQueueId',value:string};
 export type BatchJobQueueArn = AT.ArnT<"BatchJobQueue">;
 
+/**
+ *  Provides a Single Sign-On (SSO) Account Assignment resource
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_account_assignment
+ */
+export function createSsoadminAccountAssignment(tfgen: TF.Generator, rname: string, params: SsoadminAccountAssignmentParams): SsoadminAccountAssignment {
+  const fields = fieldsFromSsoadminAccountAssignmentParams(params);
+  const resource = tfgen.createTypedResource('SsoadminAccountAssignment', 'aws_ssoadmin_account_assignment', rname, fields);
+  const id: SsoadminAccountAssignmentId =  {type: 'SsoadminAccountAssignmentId', value: TF.resourceAttribute(resource, "id")};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface SsoadminAccountAssignment extends TF.ResourceT<'SsoadminAccountAssignment'> {
+  id: SsoadminAccountAssignmentId;
+}
+
+export type SsoadminAccountAssignmentId = {type:'SsoadminAccountAssignmentId',value:string};
+
+/**
+ *  Provides an IAM managed policy for a Single Sign-On (SSO) Permission Set resource
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_managed_policy_attachment
+ */
+export function createSsoadminManagedPolicyAttachment(tfgen: TF.Generator, rname: string, params: SsoadminManagedPolicyAttachmentParams): SsoadminManagedPolicyAttachment {
+  const fields = fieldsFromSsoadminManagedPolicyAttachmentParams(params);
+  const resource = tfgen.createTypedResource('SsoadminManagedPolicyAttachment', 'aws_ssoadmin_managed_policy_attachment', rname, fields);
+  const id: SsoadminManagedPolicyAttachmentId =  {type: 'SsoadminManagedPolicyAttachmentId', value: TF.resourceAttribute(resource, "id")};
+  const managed_policy_name: string =  TF.resourceAttribute(resource, "managed_policy_name");
+
+  return {
+    ...resource,
+    id,
+    managed_policy_name,
+  };
+}
+
+export interface SsoadminManagedPolicyAttachment extends TF.ResourceT<'SsoadminManagedPolicyAttachment'> {
+  id: SsoadminManagedPolicyAttachmentId;
+  managed_policy_name: string;
+}
+
+export type SsoadminManagedPolicyAttachmentId = {type:'SsoadminManagedPolicyAttachmentId',value:string};
+
+/**
+ *  Provides a Single Sign-On (SSO) Permission Set resource
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_permission_set
+ */
+export function createSsoadminPermissionSet(tfgen: TF.Generator, rname: string, params: SsoadminPermissionSetParams): SsoadminPermissionSet {
+  const fields = fieldsFromSsoadminPermissionSetParams(params);
+  const resource = tfgen.createTypedResource('SsoadminPermissionSet', 'aws_ssoadmin_permission_set', rname, fields);
+  const id: SsoadminPermissionSetId =  {type: 'SsoadminPermissionSetId', value: TF.resourceAttribute(resource, "id")};
+  const created_date: string =  TF.resourceAttribute(resource, "created_date");
+  const arn: SsoadminPermissionSetArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'SsoadminPermissionSet');
+
+  return {
+    ...resource,
+    id,
+    created_date,
+    arn,
+  };
+}
+
+export interface SsoadminPermissionSet extends TF.ResourceT<'SsoadminPermissionSet'> {
+  id: SsoadminPermissionSetId;
+  created_date: string;
+  arn: SsoadminPermissionSetArn;
+}
+
+export type SsoadminPermissionSetId = {type:'SsoadminPermissionSetId',value:string};
+export type SsoadminPermissionSetArn = AT.ArnT<"SsoadminPermissionSet">;
+
+/**
+ *  Provides an IAM inline policy for a Single Sign-On (SSO) Permission Set resource
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_permission_set_inline_policy
+ */
+export function createSsoadminPermissionSetInlinePolicy(tfgen: TF.Generator, rname: string, params: SsoadminPermissionSetInlinePolicyParams): SsoadminPermissionSetInlinePolicy {
+  const fields = fieldsFromSsoadminPermissionSetInlinePolicyParams(params);
+  const resource = tfgen.createTypedResource('SsoadminPermissionSetInlinePolicy', 'aws_ssoadmin_permission_set_inline_policy', rname, fields);
+  const id: SsoadminPermissionSetInlinePolicyId =  {type: 'SsoadminPermissionSetInlinePolicyId', value: TF.resourceAttribute(resource, "id")};
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface SsoadminPermissionSetInlinePolicy extends TF.ResourceT<'SsoadminPermissionSetInlinePolicy'> {
+  id: SsoadminPermissionSetInlinePolicyId;
+}
+
+export type SsoadminPermissionSetInlinePolicyId = {type:'SsoadminPermissionSetInlinePolicyId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -6641,6 +6739,74 @@ export function fieldsFromBatchJobQueueParams(params: BatchJobQueueParams) : TF.
   TF.addAttribute(fields, "priority", params.priority, TF.numberValue);
   TF.addAttribute(fields, "state", params.state, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SsoadminAccountAssignmentParams {
+  instance_arn: string;
+  permission_set_arn: string;
+  principal_id: string;
+  principal_type: 'USER' | 'GROUP';
+  target_id: string;
+  target_type?: 'AWS_ACCOUNT';
+}
+
+export function fieldsFromSsoadminAccountAssignmentParams(params: SsoadminAccountAssignmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "instance_arn", params.instance_arn, TF.stringValue);
+  TF.addAttribute(fields, "permission_set_arn", params.permission_set_arn, TF.stringValue);
+  TF.addAttribute(fields, "principal_id", params.principal_id, TF.stringValue);
+  TF.addAttribute(fields, "principal_type", params.principal_type, TF.stringValue);
+  TF.addAttribute(fields, "target_id", params.target_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "target_type", params.target_type, TF.stringValue);
+  return fields;
+}
+
+export interface SsoadminManagedPolicyAttachmentParams {
+  instance_arn: string;
+  managed_policy_arn: string;
+  permission_set_arn: string;
+}
+
+export function fieldsFromSsoadminManagedPolicyAttachmentParams(params: SsoadminManagedPolicyAttachmentParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "instance_arn", params.instance_arn, TF.stringValue);
+  TF.addAttribute(fields, "managed_policy_arn", params.managed_policy_arn, TF.stringValue);
+  TF.addAttribute(fields, "permission_set_arn", params.permission_set_arn, TF.stringValue);
+  return fields;
+}
+
+export interface SsoadminPermissionSetParams {
+  description?: string;
+  instance_arn: string;
+  name: string;
+  relay_state?: string;
+  session_duration?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromSsoadminPermissionSetParams(params: SsoadminPermissionSetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addAttribute(fields, "instance_arn", params.instance_arn, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "relay_state", params.relay_state, TF.stringValue);
+  TF.addOptionalAttribute(fields, "session_duration", params.session_duration, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface SsoadminPermissionSetInlinePolicyParams {
+  inline_policy: string;
+  instance_arn: string;
+  permission_set_arn: string;
+}
+
+export function fieldsFromSsoadminPermissionSetInlinePolicyParams(params: SsoadminPermissionSetInlinePolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "inline_policy", params.inline_policy, TF.stringValue);
+  TF.addAttribute(fields, "instance_arn", params.instance_arn, TF.stringValue);
+  TF.addAttribute(fields, "permission_set_arn", params.permission_set_arn, TF.stringValue);
   return fields;
 }
 

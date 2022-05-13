@@ -2753,6 +2753,48 @@ const batch_job_queue: RecordDecl = {
   ],
 };
 
+const ssoadmin_account_assignment: RecordDecl = {
+  name: 'ssoadmin_account_assignment',
+  fields: [
+    requiredField('instance_arn', STRING),
+    requiredField('permission_set_arn', STRING),
+    requiredField('principal_id', STRING),
+    requiredField('principal_type', enumType(['USER', 'GROUP'])),
+    requiredField('target_id', STRING),
+    optionalField('target_type', enumType(['AWS_ACCOUNT'])),
+  ]
+}
+
+const ssoadmin_managed_policy_attachment: RecordDecl = {
+  name: 'ssoadmin_managed_policy_attachment',
+  fields: [
+    requiredField('instance_arn', STRING),
+    requiredField('managed_policy_arn', STRING),
+    requiredField('permission_set_arn', STRING),
+  ]
+}
+
+const ssoadmin_permission_set: RecordDecl = {
+  name: 'ssoadmin_permission_set',
+  fields: [
+    optionalField('description', STRING),
+    requiredField('instance_arn', STRING),
+    requiredField('name', STRING),
+    optionalField('relay_state', STRING),
+    optionalField('session_duration', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
+const ssoadmin_permission_set_inline_policy: RecordDecl = {
+  name: 'ssoadmin_permission_set_inline_policy',
+  fields: [
+    requiredField('inline_policy', STRING),
+    requiredField('instance_arn', STRING),
+    requiredField('permission_set_arn', STRING),
+  ]
+}
+
 function autoscaling_policy(gen: Generator): ResourcesParams {
   // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#step_adjustment
   const step_adjustment: RecordDecl = {
@@ -4116,6 +4158,47 @@ function generateAws(gen: Generator) {
     }
   );
 
+  gen.generateResource(
+    'Provides a Single Sign-On (SSO) Account Assignment resource',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_account_assignment',
+    ssoadmin_account_assignment,
+    [
+      resourceIdAttr('id', ssoadmin_account_assignment),
+    ],
+  );
+
+  gen.generateResource(
+    'Provides an IAM managed policy for a Single Sign-On (SSO) Permission Set resource',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_managed_policy_attachment',
+    ssoadmin_managed_policy_attachment,
+    [
+      resourceIdAttr('id', ssoadmin_managed_policy_attachment),
+      stringAttr('managed_policy_name')
+    ],
+  );
+
+  gen.generateResource(
+    'Provides a Single Sign-On (SSO) Permission Set resource',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_permission_set',
+    ssoadmin_permission_set,
+    [
+      resourceIdAttr('id', ssoadmin_permission_set),
+      stringAttr('created_date')
+    ],
+    {
+      arn: true
+    }
+  );
+
+  gen.generateResource(
+    'Provides an IAM inline policy for a Single Sign-On (SSO) Permission Set resource',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssoadmin_permission_set_inline_policy',
+    ssoadmin_permission_set_inline_policy,
+    [
+      resourceIdAttr('id', ssoadmin_permission_set_inline_policy),
+    ],
+  );
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -4341,6 +4424,10 @@ function generateAws(gen: Generator) {
   gen.generateParams(batch_job_definition_timeout);
   gen.generateParams(batch_job_definition);
   gen.generateParams(batch_job_queue);
+  gen.generateParams(ssoadmin_account_assignment);
+  gen.generateParams(ssoadmin_managed_policy_attachment);
+  gen.generateParams(ssoadmin_permission_set);
+  gen.generateParams(ssoadmin_permission_set_inline_policy);
 
   autoscaling_policy(gen);
   amiDataSource(gen);

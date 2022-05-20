@@ -55,7 +55,7 @@ export function createPostgresInstance(
     customize?: Customize<AR.DbInstanceParams>;
     customize_securitygroup?: Customize<AR.SecurityGroupParams>;
     force_ssl?: boolean,
-    subnet_ids: AR.SubnetId[];
+    subnet_ids?: AR.SubnetId[];
   }
 ): DbInstance {
   if(!params.db_name.match(/^[A-Za-z][A-Za-z0-9]+$/)) {
@@ -75,10 +75,10 @@ export function createPostgresInstance(
   }
   const security_group = AR.createSecurityGroup(tfgen, name, sg_params);
 
-  const db_subnet_group = AR.createDbSubnetGroup(tfgen, name, {
+  const db_subnet_group = params.subnet_ids ? AR.createDbSubnetGroup(tfgen, name, {
     name: sname,
     subnet_ids: params.subnet_ids,
-  });
+  }) : undefined;
 
   const db_parameter_group = params.force_ssl == undefined ? undefined : AR.createDbParameterGroup(tfgen, name, {
     family: 'postgres11',
@@ -99,7 +99,7 @@ export function createPostgresInstance(
     publicly_accessible: false,
     backup_retention_period: 3,
     vpc_security_group_ids: [security_group.id],
-    db_subnet_group_name: db_subnet_group.name,
+    db_subnet_group_name: db_subnet_group ? db_subnet_group.name: undefined,
     tags: tfgen.tagsContext(),
     final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
     skip_final_snapshot: false,

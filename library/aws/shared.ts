@@ -143,7 +143,7 @@ export type SharedSecurityGroupResources = {
 export type SharedSnsTopicResources = {
   alert_topic: AR.SnsTopic;
   alarm_topic: AR.SnsTopic;
-  lowPriorityAlertTopic: AR.SnsTopic;
+  low_priority_alert_topic: AR.SnsTopic;
 };
 
 /**
@@ -386,13 +386,13 @@ export function createSharedSnsTopicsResources(tfgen: TF.Generator, {}) : Shared
     name: tfgen.scopedName('alerts').join('_'),
   });
 
-  const lowPriorityAlertTopic = AR.createSnsTopic(tfgen, 'lowPiorityAlerts', {
-    name: tfgen.scopedName('lowPiorityAlerts').join('_'),
+  const low_priority_alert_topic = AR.createSnsTopic(tfgen, 'low-piority-lerts', {
+    name: tfgen.scopedName('low-piority-lerts').join('_'),
   })
   return {
     alarm_topic,
     alert_topic,
-    lowPriorityAlertTopic,
+    low_priority_alert_topic,
   };
 }
 

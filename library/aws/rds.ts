@@ -99,7 +99,7 @@ export function createPostgresInstance(
     publicly_accessible: false,
     backup_retention_period: 3,
     vpc_security_group_ids: [security_group.id],
-    db_subnet_group_name: db_subnet_group ? db_subnet_group.name: undefined,
+    db_subnet_group_name: db_subnet_group?.name,
     tags: tfgen.tagsContext(),
     final_snapshot_identifier: sname.replace(/_/g, '-') + '-final',
     skip_final_snapshot: false,

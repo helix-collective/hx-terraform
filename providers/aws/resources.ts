@@ -3286,6 +3286,7 @@ export interface DbInstanceParams {
   iops?: number;
   snapshot_identifier?: string;
   monitoring_interval?: number;
+  monitoring_role_arn?: string;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -3320,6 +3321,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalAttribute(fields, "iops", params.iops, TF.numberValue);
   TF.addOptionalAttribute(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
   TF.addOptionalAttribute(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
+  TF.addOptionalAttribute(fields, "monitoring_role_arn", params.monitoring_role_arn, TF.stringValue);
   return fields;
 }
 

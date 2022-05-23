@@ -150,6 +150,7 @@ const db_instance: RecordDecl = {
     optionalField('snapshot_identifier', STRING),
     optionalField('monitoring_interval', NUMBER),
     optionalField('monitoring_role_arn', STRING),
+    optionalField('delete_automated_backups', BOOLEAN),
   ],
 };
 

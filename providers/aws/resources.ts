@@ -3287,6 +3287,7 @@ export interface DbInstanceParams {
   snapshot_identifier?: string;
   monitoring_interval?: number;
   monitoring_role_arn?: string;
+  delete_automated_backups?: boolean;
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -3322,6 +3323,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalAttribute(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
   TF.addOptionalAttribute(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
   TF.addOptionalAttribute(fields, "monitoring_role_arn", params.monitoring_role_arn, TF.stringValue);
+  TF.addOptionalAttribute(fields, "delete_automated_backups", params.delete_automated_backups, TF.booleanValue);
   return fields;
 }
 

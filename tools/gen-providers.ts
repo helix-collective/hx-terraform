@@ -4456,6 +4456,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(ssoadmin_managed_policy_attachment);
   gen.generateParams(ssoadmin_permission_set);
   gen.generateParams(ssoadmin_permission_set_inline_policy);
+  gen.generateParams(kms_key);
 
   autoscaling_policy(gen);
   amiDataSource(gen);

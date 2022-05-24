@@ -2797,6 +2797,22 @@ const ssoadmin_permission_set_inline_policy: RecordDecl = {
   ]
 }
 
+const kms_key: RecordDecl = {
+  name: 'kms_key',
+  fields: [
+    optionalField('description', STRING),
+    optionalField('key_usage', enumType(['ENCRYPT_DECRYPT', 'SIGN_VERIFY'])),
+    optionalField('customer_master_key_spec', enumType(['SYMMETRIC_DEFAULT', 'RSA_2048', 'RSA_3072', 'RSA_4096', 'HMAC_256', 'ECC_NIST_P256', 'ECC_NIST_P384', 'ECC_NIST_P521', 'ECC_SECG_P256K1'])),
+    optionalField('policy', STRING),
+    optionalField('bypass_policy_lockout_safety_check', BOOLEAN),
+    optionalField('deletion_window_in_days', NUMBER),
+    optionalField('is_enabled', BOOLEAN),
+    optionalField('enable_key_rotation', BOOLEAN),
+    optionalField('multi_region', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
+  ],
+}
+
 function autoscaling_policy(gen: Generator): ResourcesParams {
   // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#step_adjustment
   const step_adjustment: RecordDecl = {
@@ -4198,6 +4214,16 @@ function generateAws(gen: Generator) {
     ssoadmin_permission_set_inline_policy,
     [
       resourceIdAttr('id', ssoadmin_permission_set_inline_policy),
+    ],
+  );
+
+  gen.generateResource(
+    'Manages a single-Region or multi-Region primary KMS key.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key',
+    kms_key,
+    [
+      resourceIdAttr('key_id', kms_key),
+      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ],
   );
 

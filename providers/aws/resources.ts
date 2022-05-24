@@ -2961,6 +2961,31 @@ export interface SsoadminPermissionSetInlinePolicy extends TF.ResourceT<'Ssoadmi
 
 export type SsoadminPermissionSetInlinePolicyId = {type:'SsoadminPermissionSetInlinePolicyId',value:string};
 
+/**
+ *  Manages a single-Region or multi-Region primary KMS key.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key
+ */
+export function createKmsKey(tfgen: TF.Generator, rname: string, params: KmsKeyParams): KmsKey {
+  const fields = fieldsFromKmsKeyParams(params);
+  const resource = tfgen.createTypedResource('KmsKey', 'aws_kms_key', rname, fields);
+  const key_id: KmsKeyId =  {type: 'KmsKeyId', value: TF.resourceAttribute(resource, "key_id")};
+  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
+
+  return {
+    ...resource,
+    key_id,
+    arn,
+  };
+}
+
+export interface KmsKey extends TF.ResourceT<'KmsKey'> {
+  key_id: KmsKeyId;
+  arn: AT.Arn;
+}
+
+export type KmsKeyId = {type:'KmsKeyId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;

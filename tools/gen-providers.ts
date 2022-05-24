@@ -3376,7 +3376,7 @@ function generateAws(gen: Generator) {
     s3_bucket_versioning,
     [stringAttr('id')]
   );
-  
+
   gen.generateResource(
     'Provides a resource to manage S3 cors configuration. For more information, see the S3 Developer Guide.',
     'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_cors_configuration',
@@ -4126,7 +4126,7 @@ function generateAws(gen: Generator) {
     batch_compute_environment,
     [
       resourceIdAttr('id', batch_compute_environment),
-      // resourceArnAttr('ecs_cluster_arn', elastic_compute_service),
+      stringAliasAttr('ecs_cluster_arn', "Arn", "AT.Arn"),
       stringAttr('status'),
       stringAttr('status_reason'),
     ],

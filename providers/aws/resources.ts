@@ -2782,6 +2782,7 @@ export function createBatchComputeEnvironment(tfgen: TF.Generator, rname: string
   const fields = fieldsFromBatchComputeEnvironmentParams(params);
   const resource = tfgen.createTypedResource('BatchComputeEnvironment', 'aws_batch_compute_environment', rname, fields);
   const id: BatchComputeEnvironmentId =  {type: 'BatchComputeEnvironmentId', value: TF.resourceAttribute(resource, "id")};
+  const ecs_cluster_arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "ecs_cluster_arn")};
   const status: string =  TF.resourceAttribute(resource, "status");
   const status_reason: string =  TF.resourceAttribute(resource, "status_reason");
   const arn: BatchComputeEnvironmentArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'BatchComputeEnvironment');
@@ -2789,6 +2790,7 @@ export function createBatchComputeEnvironment(tfgen: TF.Generator, rname: string
   return {
     ...resource,
     id,
+    ecs_cluster_arn,
     status,
     status_reason,
     arn,
@@ -2797,6 +2799,7 @@ export function createBatchComputeEnvironment(tfgen: TF.Generator, rname: string
 
 export interface BatchComputeEnvironment extends TF.ResourceT<'BatchComputeEnvironment'> {
   id: BatchComputeEnvironmentId;
+  ecs_cluster_arn: AT.Arn;
   status: string;
   status_reason: string;
   arn: BatchComputeEnvironmentArn;

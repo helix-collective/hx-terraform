@@ -2970,7 +2970,7 @@ export function createKmsKey(tfgen: TF.Generator, rname: string, params: KmsKeyP
   const fields = fieldsFromKmsKeyParams(params);
   const resource = tfgen.createTypedResource('KmsKey', 'aws_kms_key', rname, fields);
   const key_id: KmsKeyId =  {type: 'KmsKeyId', value: TF.resourceAttribute(resource, "key_id")};
-  const arn: AT.Arn =  {type: 'Arn', value: TF.resourceAttribute(resource, "arn")};
+  const arn: KmsKeyArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'KmsKey');
 
   return {
     ...resource,
@@ -2981,10 +2981,11 @@ export function createKmsKey(tfgen: TF.Generator, rname: string, params: KmsKeyP
 
 export interface KmsKey extends TF.ResourceT<'KmsKey'> {
   key_id: KmsKeyId;
-  arn: AT.Arn;
+  arn: KmsKeyArn;
 }
 
 export type KmsKeyId = {type:'KmsKeyId',value:string};
+export type KmsKeyArn = AT.ArnT<"KmsKey">;
 
 export interface AutoscalingGroupTagParams {
   key: string;
@@ -6839,6 +6840,34 @@ export function fieldsFromSsoadminPermissionSetInlinePolicyParams(params: Ssoadm
   TF.addAttribute(fields, "inline_policy", params.inline_policy, TF.stringValue);
   TF.addAttribute(fields, "instance_arn", params.instance_arn, TF.stringValue);
   TF.addAttribute(fields, "permission_set_arn", params.permission_set_arn, TF.stringValue);
+  return fields;
+}
+
+export interface KmsKeyParams {
+  description?: string;
+  key_usage?: 'ENCRYPT_DECRYPT' | 'SIGN_VERIFY';
+  customer_master_key_spec?: 'SYMMETRIC_DEFAULT' | 'RSA_2048' | 'RSA_3072' | 'RSA_4096' | 'HMAC_256' | 'ECC_NIST_P256' | 'ECC_NIST_P384' | 'ECC_NIST_P521' | 'ECC_SECG_P256K1';
+  policy?: string;
+  bypass_policy_lockout_safety_check?: boolean;
+  deletion_window_in_days?: number;
+  is_enabled?: boolean;
+  enable_key_rotation?: boolean;
+  multi_region?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromKmsKeyParams(params: KmsKeyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "key_usage", params.key_usage, TF.stringValue);
+  TF.addOptionalAttribute(fields, "customer_master_key_spec", params.customer_master_key_spec, TF.stringValue);
+  TF.addOptionalAttribute(fields, "policy", params.policy, TF.stringValue);
+  TF.addOptionalAttribute(fields, "bypass_policy_lockout_safety_check", params.bypass_policy_lockout_safety_check, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "deletion_window_in_days", params.deletion_window_in_days, TF.numberValue);
+  TF.addOptionalAttribute(fields, "is_enabled", params.is_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "enable_key_rotation", params.enable_key_rotation, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "multi_region", params.multi_region, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }
 

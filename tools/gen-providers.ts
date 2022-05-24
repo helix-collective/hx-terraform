@@ -4223,8 +4223,10 @@ function generateAws(gen: Generator) {
     kms_key,
     [
       resourceIdAttr('key_id', kms_key),
-      stringAliasAttr('arn', 'Arn', 'AT.Arn'),
     ],
+    {
+      arn: true,
+    }
   );
 
   // Generate all of the parameter structures

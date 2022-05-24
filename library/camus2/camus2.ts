@@ -229,8 +229,7 @@ export function configureCamus2(params: Camus2Params): bootscript.BootScript {
     }
     return 0;
   }
-  const deployContextsSorted = params.deployContexts.sort(sortFunc)
-  deployContextsSorted.forEach(dc => {
+  params.deployContexts.sort(sortFunc).forEach(dc => {
     configSources[dc.name] = dc.source;
   });
 

@@ -48,17 +48,18 @@ export function createPostgresInstance(
   name: string,
   sr: shared.SharedResources,
   params: {
-    db_name: string;
+    db_name?: string;
     db_identifier?: string;
     db_instance_type: AT.DbInstanceType;
     password_to: PasswordStore;
     customize?: Customize<AR.DbInstanceParams>;
     customize_securitygroup?: Customize<AR.SecurityGroupParams>;
-    force_ssl?: boolean,
+    force_ssl?: boolean;
     subnet_ids?: AR.SubnetId[];
+    username?: string;
   }
 ): DbInstance {
-  if(!params.db_name.match(/^[A-Za-z][A-Za-z0-9]+$/)) {
+  if(params.db_name && !params.db_name.match(/^[A-Za-z][A-Za-z0-9]+$/)) {
     throw new Error('db_name must begin with a letter and contain only alphanumeric characters.');
   }
 
@@ -89,13 +90,11 @@ export function createPostgresInstance(
 
   const dbparams: AR.DbInstanceParams = {
     allocated_storage: 5, // The allocated storage size in gibibytes
-    engine: AT.postgres,
     instance_class: params.db_instance_type,
-    username: 'postgres',
+    username: params.username ? params.username : undefined,
     password: 'REPLACEME',
     identifier: params.db_identifier || sname.replace(/_/g, '-'),
-    name: params.db_name,
-    engine_version: '11.5',
+    name: params.db_name ? params.db_name : undefined,
     publicly_accessible: false,
     backup_retention_period: 3,
     vpc_security_group_ids: [security_group.id],

@@ -2987,6 +2987,60 @@ export interface KmsKey extends TF.ResourceT<'KmsKey'> {
 export type KmsKeyId = {type:'KmsKeyId',value:string};
 export type KmsKeyArn = AT.ArnT<"KmsKey">;
 
+/**
+ *  Generates a prometheus workspace
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/prometheus_workspace
+ */
+export function createPrometheusWorkspace(tfgen: TF.Generator, rname: string, params: PrometheusWorkspaceParams): PrometheusWorkspace {
+  const fields = fieldsFromPrometheusWorkspaceParams(params);
+  const resource = tfgen.createTypedResource('PrometheusWorkspace', 'aws_prometheus_workspace', rname, fields);
+  const id: PrometheusWorkspaceId =  {type: 'PrometheusWorkspaceId', value: TF.resourceAttribute(resource, "id")};
+  const prometheus_endpoint: string =  TF.resourceAttribute(resource, "prometheus_endpoint");
+
+  return {
+    ...resource,
+    id,
+    prometheus_endpoint,
+  };
+}
+
+export interface PrometheusWorkspace extends TF.ResourceT<'PrometheusWorkspace'> {
+  id: PrometheusWorkspaceId;
+  prometheus_endpoint: string;
+}
+
+export type PrometheusWorkspaceId = {type:'PrometheusWorkspaceId',value:string};
+
+/**
+ *  Generates a grafana workspace
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace
+ */
+export function createGrafanaWorkspace(tfgen: TF.Generator, rname: string, params: GrafanaWorkspaceParams): GrafanaWorkspace {
+  const fields = fieldsFromGrafanaWorkspaceParams(params);
+  const resource = tfgen.createTypedResource('GrafanaWorkspace', 'aws_grafana_workspace', rname, fields);
+  const endpoint: string =  TF.resourceAttribute(resource, "endpoint");
+  const grafana_version: string =  TF.resourceAttribute(resource, "grafana_version");
+  const arn: GrafanaWorkspaceArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'GrafanaWorkspace');
+
+  return {
+    ...resource,
+    endpoint,
+    grafana_version,
+    arn,
+  };
+}
+
+export interface GrafanaWorkspace extends TF.ResourceT<'GrafanaWorkspace'> {
+  endpoint: string;
+  grafana_version: string;
+  arn: GrafanaWorkspaceArn;
+}
+
+export type GrafanaWorkspaceId = {type:'GrafanaWorkspaceId',value:string};
+export type GrafanaWorkspaceArn = AT.ArnT<"GrafanaWorkspace">;
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -3286,9 +3340,9 @@ export function fieldsFromVolumeAttachmentParams(params: VolumeAttachmentParams)
 
 export interface DbInstanceParams {
   allocated_storage: number;
-  engine: AT.DbEngine;
+  engine?: AT.DbEngine;
   instance_class: AT.DbInstanceType;
-  username: string;
+  username?: string;
   password?: string;
   engine_version?: string;
   identifier?: string;
@@ -3322,9 +3376,9 @@ export interface DbInstanceParams {
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "allocated_storage", params.allocated_storage, TF.numberValue);
-  TF.addAttribute(fields, "engine", params.engine, TF.stringAliasValue);
+  TF.addOptionalAttribute(fields, "engine", params.engine, TF.stringAliasValue);
   TF.addAttribute(fields, "instance_class", params.instance_class, TF.stringAliasValue);
-  TF.addAttribute(fields, "username", params.username, TF.stringValue);
+  TF.addOptionalAttribute(fields, "username", params.username, TF.stringValue);
   TF.addOptionalAttribute(fields, "password", params.password, TF.stringValue);
   TF.addOptionalAttribute(fields, "engine_version", params.engine_version, TF.stringValue);
   TF.addOptionalAttribute(fields, "identifier", params.identifier, TF.stringValue);
@@ -6867,6 +6921,50 @@ export function fieldsFromKmsKeyParams(params: KmsKeyParams) : TF.ResourceFieldM
   TF.addOptionalAttribute(fields, "is_enabled", params.is_enabled, TF.booleanValue);
   TF.addOptionalAttribute(fields, "enable_key_rotation", params.enable_key_rotation, TF.booleanValue);
   TF.addOptionalAttribute(fields, "multi_region", params.multi_region, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface PrometheusWorkspaceParams {
+  alias?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromPrometheusWorkspaceParams(params: PrometheusWorkspaceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "alias", params.alias, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface GrafanaWorkspaceParams {
+  account_access_type: 'CURRENT_ACCOUNT' | 'ORGANIZATION';
+  authentication_providers: ('AWS_SSO' | 'SAML')[];
+  permission_type: 'SERVICE_MANAGED' | 'CUSTOMER_MANAGED';
+  data_sources?: ('AMAZON_OPENSEARCH_SERVICE' | 'CLOUDWATCH' | 'PROMETHEUS' | 'XRAY' | 'TIMESTREAM' | 'SITEWISE')[];
+  description?: string;
+  name?: string;
+  notification_destinations?: ('SNS')[];
+  organization_role_name?: string;
+  organizational_units?: (string)[];
+  role_arn?: AT.ArnT<"IamRole">;
+  stack_set_name?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromGrafanaWorkspaceParams(params: GrafanaWorkspaceParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "account_access_type", params.account_access_type, TF.stringValue);
+  TF.addAttribute(fields, "authentication_providers", params.authentication_providers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "permission_type", params.permission_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "data_sources", params.data_sources, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "notification_destinations", params.notification_destinations, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "organization_role_name", params.organization_role_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "organizational_units", params.organizational_units, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "stack_set_name", params.stack_set_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

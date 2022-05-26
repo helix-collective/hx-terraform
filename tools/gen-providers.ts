@@ -117,9 +117,9 @@ const db_instance: RecordDecl = {
   name: 'db_instance',
   fields: [
     requiredField('allocated_storage', NUMBER),
-    requiredField('engine', stringAliasType('AT.DbEngine')),
+    optionalField('engine', stringAliasType('AT.DbEngine')),
     requiredField('instance_class', stringAliasType('AT.DbInstanceType')),
-    requiredField('username', STRING),
+    optionalField('username', STRING),
     optionalField('password', STRING),
     optionalField('engine_version', STRING),
     optionalField('identifier', STRING),
@@ -2786,6 +2786,32 @@ const ssoadmin_permission_set: RecordDecl = {
     optionalField('session_duration', STRING),
     optionalField('tags', TAGS_MAP),
   ]
+};
+
+const prometheus_workspace: RecordDecl = {
+  name: 'prometheus_workspace',
+  fields: [
+    optionalField('alias', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
+const grafana_workspace: RecordDecl = {
+  name: 'grafana_workspace',
+  fields: [
+    requiredField('account_access_type', enumType(["CURRENT_ACCOUNT", "ORGANIZATION"])),
+    requiredField('authentication_providers', listType(enumType(["AWS_SSO", "SAML"]))),
+    requiredField('permission_type', enumType(["SERVICE_MANAGED", "CUSTOMER_MANAGED"])),
+    optionalField('data_sources', listType(enumType(["AMAZON_OPENSEARCH_SERVICE", "CLOUDWATCH", "PROMETHEUS", "XRAY", "TIMESTREAM", "SITEWISE"]))),
+    optionalField('description', STRING),
+    optionalField('name', STRING),
+    optionalField('notification_destinations', listType(enumType(["SNS"]))),
+    optionalField('organization_role_name', STRING),
+    optionalField('organizational_units', listType(STRING)),
+    optionalField('role_arn', arnType(iam_role)),
+    optionalField('stack_set_name', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
 }
 
 const ssoadmin_permission_set_inline_policy: RecordDecl = {
@@ -4201,7 +4227,7 @@ function generateAws(gen: Generator) {
     ssoadmin_permission_set,
     [
       resourceIdAttr('id', ssoadmin_permission_set),
-      stringAttr('created_date')
+      stringAttr('created_date'),
     ],
     {
       arn: true
@@ -4228,6 +4254,29 @@ function generateAws(gen: Generator) {
       arn: true,
     }
   );
+
+  gen.generateResource(
+    'Generates a prometheus workspace',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/prometheus_workspace',
+    prometheus_workspace,
+    [
+      resourceIdAttr('id', prometheus_workspace),
+      stringAttr('prometheus_endpoint')
+    ],
+  );
+  
+  gen.generateResource(
+    'Generates a grafana workspace',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace',
+    grafana_workspace,
+    [
+      stringAttr('endpoint'),
+      stringAttr('grafana_version'),
+    ],
+    {
+      arn: true
+    }
+  )
 
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
@@ -4459,6 +4508,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(ssoadmin_permission_set);
   gen.generateParams(ssoadmin_permission_set_inline_policy);
   gen.generateParams(kms_key);
+  gen.generateParams(prometheus_workspace);
+  gen.generateParams(grafana_workspace);
 
   autoscaling_policy(gen);
   amiDataSource(gen);

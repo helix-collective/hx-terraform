@@ -91,10 +91,10 @@ export function createPostgresInstance(
   const dbparams: AR.DbInstanceParams = {
     allocated_storage: 5, // The allocated storage size in gibibytes
     instance_class: params.db_instance_type,
-    username: params.username ? params.username : undefined,
+    username: params.username,
     password: 'REPLACEME',
     identifier: params.db_identifier || sname.replace(/_/g, '-'),
-    name: params.db_name ? params.db_name : undefined,
+    name: params.db_name,
     publicly_accessible: false,
     backup_retention_period: 3,
     vpc_security_group_ids: [security_group.id],

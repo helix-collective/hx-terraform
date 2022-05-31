@@ -624,21 +624,21 @@ function deployToolEndpoints(
     const fqdns: string[] = [];
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        fqdns.push(shared.fqdn(dr, url.dnsname));
+        fqdns.push(shared.fqdn(dr, url.dnsname.replace("TFRAWEXPR:\"","").replace("\"", "")));
         if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(pfqdns => {
-            fqdns.push(pfqdns);
+            fqdns.push(pfqdns.replace("TFRAWEXPR:\"","").replace("\"", ""));
           });
         }
       } else if (url.kind === 'https-external') {
-        fqdns.push(url.fqdnsname);
+        fqdns.push(url.fqdnsname.replace("TFRAWEXPR:\"","").replace("\"", ""));
         if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(pfqdns => {
             fqdns.push(pfqdns);
           });
         }
       } else if (url.kind === 'http') {
-        fqdns.push(url.fqdnsname);
+        fqdns.push(url.fqdnsname.replace("TFRAWEXPR:\"","").replace("\"", ""));
       }
     });
     endPointMap[ep.name] = camus2.httpProxyEndpoint(ep.name, fqdns);

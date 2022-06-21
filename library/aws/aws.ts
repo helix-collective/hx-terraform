@@ -88,7 +88,7 @@ export function createInstance(
   // Prevent changes to user_data script tainting the instance, (as
   // a developer convenience)
 
-  const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : true;
+  const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : false;
   if(ignoreUserDataChanges) {
     tfgen.ignoreChanges(ec2, 'user_data');
   }

@@ -218,7 +218,18 @@ export function configureCamus2(params: Camus2Params): bootscript.BootScript {
       throw Error(`proxy kind is unrecognised`);
   }
   const configSources: { [name: string]: C.JsonSource } = {};
-  params.deployContexts.forEach(dc => {
+  
+  // Avoid changes when the same list is build in different order
+  function sortFunc( a: DeployContext, b: DeployContext ) {
+    if ( a.name < b.name ){
+      return -1;
+    }
+    if ( a.name > b.name ){
+      return 1;
+    }
+    return 0;
+  }
+  params.deployContexts.sort(sortFunc).forEach(dc => {
     configSources[dc.name] = dc.source;
   });
 

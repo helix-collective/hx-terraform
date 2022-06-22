@@ -3280,6 +3280,7 @@ export interface InstanceParams {
   ebs_block_device?: (EbsBlockDeviceParams)[];
   ephemeral_block_device?: EphemeralBlockDeviceParams;
   user_data?: string;
+  user_data_replace_on_change?: boolean;
   iam_instance_profile?: IamInstanceProfileId;
   vpc_security_group_ids?: (SecurityGroupId)[];
   tags?: TF.TagsMap;
@@ -3300,6 +3301,7 @@ export function fieldsFromInstanceParams(params: InstanceParams) : TF.ResourceFi
   TF.addRepeatedBlock(fields, "ebs_block_device", params.ebs_block_device, fieldsFromEbsBlockDeviceParams);
   TF.addOptionalBlock(fields, "ephemeral_block_device", params.ephemeral_block_device, fieldsFromEphemeralBlockDeviceParams);
   TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
+  TF.addOptionalAttribute(fields, "user_data_replace_on_change", params.user_data_replace_on_change, TF.booleanValue);
   TF.addOptionalAttribute(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "vpc_security_group_ids", params.vpc_security_group_ids, TF.listValue(TF.resourceIdValue));
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);

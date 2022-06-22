@@ -81,6 +81,7 @@ const instance: RecordDecl = {
     optionalField('ebs_block_device', repeatedBlockType(recordType(ebs_block_device))),
     optionalField('ephemeral_block_device', recordType(ephemeral_block_device)),
     optionalField('user_data', STRING),
+    optionalField('user_data_replace_on_change', BOOLEAN),
     optionalField(
       'iam_instance_profile',
       resourceIdType('IamInstanceProfileId')

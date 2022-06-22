@@ -86,9 +86,7 @@ export function createInstance(
   // If user data is meant to be ignored, do not replace on change and ignore changes after creation
   const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : false;
 
-  if (!ignoreUserDataChanges){
-    instance_params.user_data_replace_on_change = true;
-  }
+  instance_params.user_data_replace_on_change = !ignoreUserDataChanges;
 
   const ec2 = AR.createInstance(tfgen, name, instance_params);
 

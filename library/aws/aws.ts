@@ -83,12 +83,15 @@ export function createInstance(
     params0.customize_instance(instance_params);
   }
 
+  // If user data is meant to be ignored, do not replace on change and ignore changes after creation
+  const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : false;
+
+  instance_params.user_data_replace_on_change = !ignoreUserDataChanges;
+
   const ec2 = AR.createInstance(tfgen, name, instance_params);
 
   // Prevent changes to user_data script tainting the instance, (as
   // a developer convenience)
-
-  const ignoreUserDataChanges = (params0.ignoreUserDataChanges !== undefined) ? params0.ignoreUserDataChanges : false;
   if(ignoreUserDataChanges) {
     tfgen.ignoreChanges(ec2, 'user_data');
   }

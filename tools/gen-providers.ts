@@ -191,6 +191,33 @@ const vpc: RecordDecl = {
   ],
 };
 
+const flow_log_destination_options: RecordDecl = {
+  name: 'flow_log_destination_options',
+  fields: [
+    optionalField('file_format', enumType(['plain-text', 'parquet'])),
+    optionalField('hive_compatible_partitions', BOOLEAN),
+    optionalField('per_hour_partition', BOOLEAN)
+  ]
+};
+
+const flow_log: RecordDecl = {
+  name: 'flow_log',
+  fields: [
+    requiredField('traffic_type', enumType(['ACCEPT', 'REJECT', 'ALL'])),
+    optionalField('eni_id', STRING),
+    optionalField('iam_role_arn', STRING),
+    optionalField('log_destination_type', enumType(['cloud-watch-logs', 's3'])),
+    optionalField('log_destination', STRING),
+    optionalField('log_group_name', STRING),
+    optionalField('subnet_id', STRING),
+    optionalField('vpc_id', STRING),
+    optionalField('log_format', STRING),
+    optionalField('max_aggregation_interval', enumType(['60', '600'])),
+    optionalField('destination_options', recordType(flow_log_destination_options)),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
 const default_vpc: RecordDecl = {
   name: 'default_vpc',
   fields: [
@@ -3263,6 +3290,18 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a flow log.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log',
+    flow_log,
+    [
+      resourceIdAttr('id', flow_log),
+    ],
+    {
+      arn: true
+    }
+  );
+
+  gen.generateResource(
     'Provides a resource to manage the default AWS VPC in the current region.',
     'https://www.terraform.io/docs/providers/aws/r/default_vpc.html',
     default_vpc,
@@ -4303,6 +4342,8 @@ function generateAws(gen: Generator) {
   gen.generateParams(db_parameter_group_parameter);
   gen.generateParams(eip);
   gen.generateParams(vpc);
+  gen.generateParams(flow_log_destination_options);
+  gen.generateParams(flow_log);
   gen.generateParams(default_vpc);
   gen.generateParams(subnet);
   gen.generateParams(default_subnet);

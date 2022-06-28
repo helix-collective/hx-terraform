@@ -405,6 +405,32 @@ export interface Vpc extends TF.ResourceT<'Vpc'> {
 export type VpcId = {type:'VpcId',value:string};
 
 /**
+ *  Provides a flow log.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log
+ */
+export function createFlowLog(tfgen: TF.Generator, rname: string, params: FlowLogParams): FlowLog {
+  const fields = fieldsFromFlowLogParams(params);
+  const resource = tfgen.createTypedResource('FlowLog', 'aws_flow_log', rname, fields);
+  const id: FlowLogId =  {type: 'FlowLogId', value: TF.resourceAttribute(resource, "id")};
+  const arn: FlowLogArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'FlowLog');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface FlowLog extends TF.ResourceT<'FlowLog'> {
+  id: FlowLogId;
+  arn: FlowLogArn;
+}
+
+export type FlowLogId = {type:'FlowLogId',value:string};
+export type FlowLogArn = AT.ArnT<"FlowLog">;
+
+/**
  *  Provides a resource to manage the default AWS VPC in the current region.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/default_vpc.html
@@ -3476,6 +3502,52 @@ export function fieldsFromVpcParams(params: VpcParams) : TF.ResourceFieldMap {
   TF.addOptionalAttribute(fields, "enable_dns_support", params.enable_dns_support, TF.booleanValue);
   TF.addOptionalAttribute(fields, "enable_dns_hostnames", params.enable_dns_hostnames, TF.booleanValue);
   TF.addOptionalAttribute(fields, "enable_classiclink", params.enable_classiclink, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface FlowLogDestinationOptionsParams {
+  file_format?: 'plain-text' | 'parquet';
+  hive_compatible_partitions?: boolean;
+  per_hour_partition?: boolean;
+}
+
+export function fieldsFromFlowLogDestinationOptionsParams(params: FlowLogDestinationOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "file_format", params.file_format, TF.stringValue);
+  TF.addOptionalAttribute(fields, "hive_compatible_partitions", params.hive_compatible_partitions, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "per_hour_partition", params.per_hour_partition, TF.booleanValue);
+  return fields;
+}
+
+export interface FlowLogParams {
+  traffic_type: 'ACCEPT' | 'REJECT' | 'ALL';
+  eni_id?: string;
+  iam_role_arn?: string;
+  log_destination_type?: 'cloud-watch-logs' | 's3';
+  log_destination?: string;
+  log_group_name?: string;
+  subnet_id?: string;
+  vpc_id?: string;
+  log_format?: string;
+  max_aggregation_interval?: '60' | '600';
+  destination_options?: FlowLogDestinationOptionsParams;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromFlowLogParams(params: FlowLogParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "traffic_type", params.traffic_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "eni_id", params.eni_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "iam_role_arn", params.iam_role_arn, TF.stringValue);
+  TF.addOptionalAttribute(fields, "log_destination_type", params.log_destination_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "log_destination", params.log_destination, TF.stringValue);
+  TF.addOptionalAttribute(fields, "log_group_name", params.log_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "subnet_id", params.subnet_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "vpc_id", params.vpc_id, TF.stringValue);
+  TF.addOptionalAttribute(fields, "log_format", params.log_format, TF.stringValue);
+  TF.addOptionalAttribute(fields, "max_aggregation_interval", params.max_aggregation_interval, TF.stringValue);
+  TF.addOptionalBlock(fields, "destination_options", params.destination_options, fieldsFromFlowLogDestinationOptionsParams);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

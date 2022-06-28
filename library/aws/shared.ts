@@ -491,12 +491,13 @@ export function createNetworkResources(
 
   if (network_config.enable_logs) {
     // Role to be able to push logs to CloudWatch
+    const prefix = tfgen.nameContext().join("_");
 
     const vpc_logs_role = AR.createIamRole(
       tfgen,
       "vpc_logs_role",
       {
-        name: "vpc_logs_role",
+        name: `${prefix}_vpc_logs_role`,
         assume_role_policy: JSON.stringify(
           {
             Version: "2012-10-17",
@@ -516,7 +517,7 @@ export function createNetworkResources(
   
     // Attach policy to role
     AR.createIamRolePolicy(tfgen, "vpc_logs_role_policy", {
-      name: "vpc_logs_role_policy",
+      name: `${prefix}_vpc_logs_role_policy`,
       role: vpc_logs_role.id,
       policy: JSON.stringify(
         {
@@ -538,20 +539,24 @@ export function createNetworkResources(
       ),
     });
 
+    // Log group where the logs are going to be written
+    const log_group = AR.createCloudwatchLogGroup(tfgen, "vpc_flow_logs_loggroup", {
+      name: `${prefix}_vpc_flow_logs_loggroup`,
+      retention_in_days: 60,
+      tags: tfgen.tagsContext()
+    })
+
     // vpc_flow_log
     // Logs are sent to cloud watch
     // They get aggregated max of 60 seconds per log record
-    // they are partitioned per hour so searchs are cheaper (scan smaller files)
     AR.createFlowLog(tfgen, "vpc_flow_log", {
       traffic_type: "ALL",
       iam_role_arn: vpc_logs_role.arn.value,
       log_destination_type: "cloud-watch-logs",
-      log_group_name: "vpc_flow_logs",
+      log_destination:log_group.arn.value,
       vpc_id: vpc.id.value,
       max_aggregation_interval: '60',
-      destination_options: {
-        per_hour_partition: true
-      }
+      tags: tfgen.tagsContext(),
     })
   
     

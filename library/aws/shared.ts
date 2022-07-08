@@ -250,7 +250,10 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     versioning: {
       enabled: true,
     },
-    tags: tfgen.tagsContext(),
+    tags: {
+      ...tfgen.tagsContext(),
+      bucketName: deploy_bucket_name,
+    },
     ...params.deploy,
   });
   s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
@@ -263,7 +266,10 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     versioning: {
       enabled: true,
     },
-    tags: tfgen.tagsContext(),
+    tags: {
+      ...tfgen.tagsContext(),
+      bucketName: backup_bucket_name,
+    },
     ...params.backup,
   });
   s3.blockPublicAccess(tfgen, 'backup', backup_bucket.id);
@@ -285,7 +291,10 @@ export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : Sha
   const deploy_bucket_name = s3_bucket_prefix + '-shared-deploy';
   const deploy_bucket = AR.createS3Bucket(tfgen, 'deploy', {
     bucket: deploy_bucket_name,
-    tags: tfgen.tagsContext(),
+    tags: {
+      ...tfgen.tagsContext(),
+      bucketName: deploy_bucket_name,
+    },
     ...params.deploy,
   });
   AR.createS3BucketVersioning(tfgen, `${deploy_bucket_name}-versioning`, {
@@ -299,7 +308,10 @@ export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : Sha
   const backup_bucket_name = s3_bucket_prefix + '-shared-backups';
   const backup_bucket = AR.createS3Bucket(tfgen, 'backup', {
     bucket: backup_bucket_name,
-    tags: tfgen.tagsContext(),
+    tags: {
+      ...tfgen.tagsContext(),
+      bucketName: backup_bucket_name,
+    },
     ...params.backup,
   });
   AR.createS3BucketVersioning(tfgen, `${backup_bucket_name}-versioning`, {

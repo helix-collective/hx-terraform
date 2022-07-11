@@ -158,7 +158,7 @@ export function createController(
   );
 
   const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
-    instance_type: AT.t2_micro,
+    instance_type: cparams.instance_type ? cparams.instance_type : AT.t2_micro,
     ami: cparams.amis,
     security_group: sr.bastion_security_group,
     key_name: pparams.key_name,
@@ -775,6 +775,11 @@ export interface ControllerParams {
     * Label the deploy master instance and associated resources for client convenience
     */
    label?: string;
+
+   /**
+    * Instance type of the controller
+    */
+   instance_type?: AT.InstanceType;
 };
 
 

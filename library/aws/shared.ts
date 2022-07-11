@@ -253,6 +253,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     tags: {
       ...tfgen.tagsContext(),
       bucketName: deploy_bucket_name,
+      Name: deploy_bucket_name,
     },
     ...params.deploy,
   });
@@ -269,6 +270,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     tags: {
       ...tfgen.tagsContext(),
       bucketName: backup_bucket_name,
+      Name: backup_bucket_name,
     },
     ...params.backup,
   });
@@ -294,6 +296,7 @@ export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : Sha
     tags: {
       ...tfgen.tagsContext(),
       bucketName: deploy_bucket_name,
+      Name: deploy_bucket_name,
     },
     ...params.deploy,
   });
@@ -311,6 +314,7 @@ export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : Sha
     tags: {
       ...tfgen.tagsContext(),
       bucketName: backup_bucket_name,
+      Name: backup_bucket_name,
     },
     ...params.backup,
   });

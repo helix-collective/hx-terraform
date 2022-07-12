@@ -352,6 +352,35 @@ export type DbParameterGroupId = {type:'DbParameterGroupId',value:string};
 export type DbParameterGroupArn = AT.ArnT<"DbParameterGroup">;
 
 /**
+ *  Provides a DB event subscription resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_event_subscription
+ */
+export function createDbEventSubscription(tfgen: TF.Generator, rname: string, params: DbEventSubscriptionParams): DbEventSubscription {
+  const fields = fieldsFromDbEventSubscriptionParams(params);
+  const resource = tfgen.createTypedResource('DbEventSubscription', 'aws_db_event_subscription', rname, fields);
+  const id: DbEventSubscriptionId =  {type: 'DbEventSubscriptionId', value: TF.resourceAttribute(resource, "id")};
+  const customer_aws_id: string =  TF.resourceAttribute(resource, "customer_aws_id");
+  const arn: DbEventSubscriptionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'DbEventSubscription');
+
+  return {
+    ...resource,
+    id,
+    customer_aws_id,
+    arn,
+  };
+}
+
+export interface DbEventSubscription extends TF.ResourceT<'DbEventSubscription'> {
+  id: DbEventSubscriptionId;
+  customer_aws_id: string;
+  arn: DbEventSubscriptionArn;
+}
+
+export type DbEventSubscriptionId = {type:'DbEventSubscriptionId',value:string};
+export type DbEventSubscriptionArn = AT.ArnT<"DbEventSubscription">;
+
+/**
  *  Provides an Elastic IP Address.
  *
  *  see https://www.terraform.io/docs/providers/aws/r/eip.html
@@ -3470,6 +3499,30 @@ export function fieldsFromDbParameterGroupParameterParams(params: DbParameterGro
   TF.addAttribute(fields, "name", params.name, TF.stringValue);
   TF.addAttribute(fields, "value", params.value, TF.stringValue);
   TF.addOptionalAttribute(fields, "apply_method", params.apply_method, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface DbEventSubscriptionParams {
+  name?: string;
+  name_prefix?: string;
+  sns_topic: string;
+  source_ids?: (string)[];
+  source_type?: 'db-instance' | 'db-security-group' | 'db-parameter-group' | 'db-snapshot' | 'db-cluster' | 'db-cluster-snapshot';
+  event_categories?: (string)[];
+  enabled?: boolean;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromDbEventSubscriptionParams(params: DbEventSubscriptionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
+  TF.addAttribute(fields, "sns_topic", params.sns_topic, TF.stringValue);
+  TF.addOptionalAttribute(fields, "source_ids", params.source_ids, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "source_type", params.source_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "event_categories", params.event_categories, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "enabled", params.enabled, TF.booleanValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

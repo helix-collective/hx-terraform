@@ -180,6 +180,20 @@ const db_parameter_group: RecordDecl = {
   ],
 };
 
+const db_event_subscription: RecordDecl = {
+  name: 'db_event_subscription',
+  fields: [
+    optionalField('name', STRING),
+    optionalField('name_prefix', STRING),
+    requiredField('sns_topic', STRING),
+    optionalField('source_ids',listType(STRING)),
+    optionalField('source_type',enumType(['db-instance', 'db-security-group', 'db-parameter-group', 'db-snapshot', 'db-cluster', 'db-cluster-snapshot'])),
+    optionalField('event_categories', listType(STRING)),
+    optionalField('enabled', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
+  ],
+};
+
 const vpc: RecordDecl = {
   name: 'vpc',
   fields: [
@@ -3270,6 +3284,19 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a DB event subscription resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_event_subscription',
+    db_event_subscription,
+    [
+      resourceIdAttr('id', db_event_subscription),
+      stringAttr('customer_aws_id'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+  gen.generateResource(
     'Provides an Elastic IP Address.',
     'https://www.terraform.io/docs/providers/aws/r/eip.html',
     eip,
@@ -4341,6 +4368,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(db_instance);
   gen.generateParams(db_parameter_group);
   gen.generateParams(db_parameter_group_parameter);
+  gen.generateParams(db_event_subscription);
   gen.generateParams(eip);
   gen.generateParams(vpc);
   gen.generateParams(flow_log_destination_options);

@@ -152,6 +152,7 @@ const db_instance: RecordDecl = {
     optionalField('monitoring_interval', NUMBER),
     optionalField('monitoring_role_arn', STRING),
     optionalField('delete_automated_backups', BOOLEAN),
+    optionalField('max_allocated_storage', NUMBER),
   ],
 };
 

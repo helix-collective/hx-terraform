@@ -253,6 +253,9 @@ export interface Ec2InstanceDeploymentParams {
   releases_s3: s3.S3Ref;
   // The name of the unprivileged user used to run application code.
   // Defaults to "app".
+
+  //The S3 location where hx-deploy-tool keeps it's state information
+  state_s3?: s3.S3Ref;
   app_user?: string;
   // The endpoints configured for http/https access. Defaults to
   //    main:   ${dns_name}.${primary_dns_zone}
@@ -419,12 +422,13 @@ class Ec2BootscriptFactory implements BootScriptFactory {
     }
     const proxy_endpoints = deployToolEndpoints(this.dr, this.params.endpoints);
     const health_check = undefined;
+    const camus_proxy = this.params.state_s3 ? camus2.remoteProxyMaster(proxy_endpoints, this.params.state_s3) : camus2.localProxy(proxy_endpoints, this.letsencrypt_challenge_type)
     bs.include(
       camus2.configureCamus2({
         username: app_user,
         releases: this.params.releases_s3,
         deployContexts: deploy_contexts,
-        proxy: camus2.localProxy(proxy_endpoints, this.letsencrypt_challenge_type),
+        proxy: camus_proxy,
         nginxDockerVersion: this.params.nginxDockerVersion === undefined
             ? DEFAULT_NGINX_DOCKER_VERSION : this.params.nginxDockerVersion,
         healthCheck: health_check,

@@ -422,7 +422,7 @@ class Ec2BootscriptFactory implements BootScriptFactory {
     }
     const proxy_endpoints = deployToolEndpoints(this.dr, this.params.endpoints);
     const health_check = undefined;
-    const camus_proxy = this.params.state_s3 ? camus2.remoteProxyMaster(proxy_endpoints, this.params.state_s3) : camus2.localProxy(proxy_endpoints, this.letsencrypt_challenge_type)
+    const camus_proxy = this.params.state_s3 ? camus2.remoteProxySlave(proxy_endpoints, this.params.state_s3) : camus2.localProxy(proxy_endpoints, this.letsencrypt_challenge_type)
     bs.include(
       camus2.configureCamus2({
         username: app_user,

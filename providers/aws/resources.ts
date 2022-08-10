@@ -1107,6 +1107,46 @@ export interface IamGroupPolicy extends TF.ResourceT<'IamGroupPolicy'> {
 export type IamGroupPolicyId = {type:'IamGroupPolicyId',value:string};
 
 /**
+ *  Provides an IAM user.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key
+ */
+export function createIamAccessKey(tfgen: TF.Generator, rname: string, params: IamAccessKeyParams): IamAccessKey {
+  const fields = fieldsFromIamAccessKeyParams(params);
+  const resource = tfgen.createTypedResource('IamAccessKey', 'aws_iam_access_key', rname, fields);
+  const create_date: string =  TF.resourceAttribute(resource, "create_date");
+  const encrypted_secret: string =  TF.resourceAttribute(resource, "encrypted_secret");
+  const encrypted_ses_smtp_password_v4: string =  TF.resourceAttribute(resource, "encrypted_ses_smtp_password_v4");
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const key_fingerprint: string =  TF.resourceAttribute(resource, "key_fingerprint");
+  const secret: string =  TF.resourceAttribute(resource, "secret");
+  const ses_smtp_password_v4: string =  TF.resourceAttribute(resource, "ses_smtp_password_v4");
+
+  return {
+    ...resource,
+    create_date,
+    encrypted_secret,
+    encrypted_ses_smtp_password_v4,
+    id,
+    key_fingerprint,
+    secret,
+    ses_smtp_password_v4,
+  };
+}
+
+export interface IamAccessKey extends TF.ResourceT<'IamAccessKey'> {
+  create_date: string;
+  encrypted_secret: string;
+  encrypted_ses_smtp_password_v4: string;
+  id: string;
+  key_fingerprint: string;
+  secret: string;
+  ses_smtp_password_v4: string;
+}
+
+export type IamAccessKeyId = {type:'IamAccessKeyId',value:string};
+
+/**
  *  Provides an EC2 Container Registry Repository
  *
  *  see https://www.terraform.io/docs/providers/aws/r/ecr_repository.html
@@ -4308,6 +4348,20 @@ export function fieldsFromIamGroupPolicyParams(params: IamGroupPolicyParams) : T
   TF.addAttribute(fields, "name", params.name, TF.stringValue);
   TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
   TF.addAttribute(fields, "group", params.group, TF.stringValue);
+  return fields;
+}
+
+export interface IamAccessKeyParams {
+  pgp_key?: string;
+  status?: 'Active' | 'Inactive';
+  user: string;
+}
+
+export function fieldsFromIamAccessKeyParams(params: IamAccessKeyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "pgp_key", params.pgp_key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "status", params.status, TF.stringValue);
+  TF.addAttribute(fields, "user", params.user, TF.stringValue);
   return fields;
 }
 

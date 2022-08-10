@@ -743,6 +743,15 @@ const iam_group_policy: RecordDecl = {
   ],
 };
 
+const iam_access_key: RecordDecl = {
+  name: 'iam_access_key',
+  fields: [
+    optionalField('pgp_key', STRING),
+    optionalField('status', enumType(['Active', 'Inactive'])),
+    requiredField('user', STRING),
+  ],
+};
+
 // AWS 3.x only
 const ecr_repository_encryption_configuration: RecordDecl = {
   name: 'ecr_repository_encryption_configuration',
@@ -3540,6 +3549,21 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an IAM user.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key',
+    iam_access_key,
+    [
+      stringAttr('create_date'), 
+      stringAttr('encrypted_secret'),
+      stringAttr('encrypted_ses_smtp_password_v4'),
+      stringAttr('id'),
+      stringAttr('key_fingerprint'),
+      stringAttr('secret'),
+      stringAttr('ses_smtp_password_v4'),
+    ]
+  );
+
+  gen.generateResource(
     'Provides an EC2 Container Registry Repository',
     'https://www.terraform.io/docs/providers/aws/r/ecr_repository.html',
     ecr_repository,
@@ -4393,6 +4417,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_user_policy_attachment);
   gen.generateParams(iam_group);
   gen.generateParams(iam_group_policy);
+  gen.generateParams(iam_access_key);
   gen.generateParams(ecr_repository);
   gen.generateParams(ecr_repository_image_scanning_configuration);
   gen.generateParams(ecr_repository_encryption_configuration);

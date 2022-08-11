@@ -158,7 +158,7 @@ export function createController(
   );
 
   const controller = aws.createInstanceWithEip(tfgen, controller_label, sr, shared.externalSubnetIds(sr)[0], {
-    instance_type: cparams.instance_type ? cparams.instance_type : AT.t3_nano,
+    instance_type: cparams.instance_type ? cparams.instance_type : AT.t3a_nano,
     ami: cparams.amis,
     security_group: sr.bastion_security_group,
     key_name: pparams.key_name,

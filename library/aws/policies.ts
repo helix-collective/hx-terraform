@@ -79,6 +79,27 @@ export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: strin
   };
 }
 
+export function s3ReadonlyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['s3:ListBucket'],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`),
+        },
+        {
+          Action: ['s3:GetObject'],
+          Effect: 'Allow',
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
+        },
+      ],
+    },
+  };
+}
+
 export function s3PublicReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
   return {
     name,
@@ -117,6 +138,34 @@ export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string 
           ],
           Effect: 'Allow',
           Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
+        },
+      ],
+    },
+  };
+}
+
+export function s3ModifyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
+
+  return {
+    name,
+    policy: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: ['s3:ListBucket'],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`)
+        },
+        {
+          Action: [
+            's3:PutObject',
+            's3:PutObjectAcl',
+            's3:GetObject',
+            's3:GetObjectAcl',
+            's3:DeleteObject',
+          ],
+          Effect: 'Allow',
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
         },
       ],
     },

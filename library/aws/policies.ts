@@ -59,6 +59,10 @@ export const publish_metrics_policy = {
 };
 
 export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
+  return s3ReadonlyPolicyMultipleBuckets(name, [bucket], key_prefix)
+}
+
+export function s3ReadonlyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
   return {
     name,
     policy: {
@@ -67,12 +71,12 @@ export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: strin
         {
           Effect: 'Allow',
           Action: ['s3:ListBucket'],
-          Resource: [`arn:aws:s3:::${bucket}`],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`),
         },
         {
           Action: ['s3:GetObject'],
           Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
         },
       ],
     },
@@ -97,6 +101,11 @@ export function s3PublicReadonlyPolicy(name: string, bucket: string, key_prefix:
 }
 
 export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string = '*') {
+  return s3ModifyPolicyMultipleBuckets(name, [bucket], key_prefix)
+}
+
+export function s3ModifyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
+
   return {
     name,
     policy: {
@@ -105,7 +114,7 @@ export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string 
         {
           Effect: 'Allow',
           Action: ['s3:ListBucket'],
-          Resource: [`arn:aws:s3:::${bucket}`],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`)
         },
         {
           Action: [
@@ -116,7 +125,7 @@ export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string 
             's3:DeleteObject',
           ],
           Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
+          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
         },
       ],
     },

@@ -59,24 +59,7 @@ export const publish_metrics_policy = {
 };
 
 export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['s3:ListBucket'],
-          Resource: [`arn:aws:s3:::${bucket}`],
-        },
-        {
-          Action: ['s3:GetObject'],
-          Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
-        },
-      ],
-    },
-  };
+  return s3ReadonlyPolicyMultipleBuckets(name, [bucket], key_prefix)
 }
 
 export function s3ReadonlyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
@@ -118,30 +101,7 @@ export function s3PublicReadonlyPolicy(name: string, bucket: string, key_prefix:
 }
 
 export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string = '*') {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['s3:ListBucket'],
-          Resource: [`arn:aws:s3:::${bucket}`],
-        },
-        {
-          Action: [
-            's3:PutObject',
-            's3:PutObjectAcl',
-            's3:GetObject',
-            's3:GetObjectAcl',
-            's3:DeleteObject',
-          ],
-          Effect: 'Allow',
-          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
-        },
-      ],
-    },
-  };
+  return s3ModifyPolicyMultipleBuckets(name, [bucket], key_prefix)
 }
 
 export function s3ModifyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {

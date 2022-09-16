@@ -73,7 +73,9 @@ export function createInstance(
    */
   const tags_to_ignore: Record<string, string> | undefined = {};
   params0.tags_to_ignore?.forEach((tag) => {
-    tags_to_ignore[tag] = ""
+    // https://github.com/hashicorp/terraform-provider-aws/issues/21896
+    // tags can't be empty, set a dummy value instead
+    tags_to_ignore[tag] = "dummy_removeme"
   })
   const instance_params: AR.InstanceParams = {
     ami: params0.ami(sr.region),

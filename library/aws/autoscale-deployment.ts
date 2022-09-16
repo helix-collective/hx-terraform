@@ -167,6 +167,7 @@ export function createController(
       i.iam_instance_profile = controller_instance_profile.id;
       i.subnet_id = subnetId;
     },
+    tags_to_ignore: cparams.tags_to_ignore,
   });
 
   const controller_route53 = shared.dnsARecord(
@@ -780,6 +781,11 @@ export interface ControllerParams {
     * Instance type of the controller
     */
    instance_type?: AT.InstanceType;
+
+   /**
+    * Tags to ignore
+    */
+   tags_to_ignore?: string[];
 };
 
 

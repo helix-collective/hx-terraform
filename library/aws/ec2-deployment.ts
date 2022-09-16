@@ -52,6 +52,7 @@ export function createEc2Deployment(
         params.customize(i);
       }
     },
+    tags_to_ignore: params.tags_to_ignore
   });
   addDNS(tfgen, name, sr, params, appserver.eip.public_ip, params.public_dns_name);
   return appserver;
@@ -288,6 +289,8 @@ export interface Ec2InstanceDeploymentParams {
   frontendproxy_nginx_conf_tpl?: string;
   // Nginx version to use for camus2
   nginxDockerVersion?: string,
+  // What tags hx-tf should ignore on instances
+  tags_to_ignore?: string[];
 }
 
 // An Endpoint consists of a name and one or more connected

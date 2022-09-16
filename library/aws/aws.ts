@@ -27,6 +27,7 @@ export interface InstanceParams {
   security_group: AR.SecurityGroup;
   key_name: AT.KeyName;
   ignoreUserDataChanges?: boolean,
+  tags_to_ignore?: string[];
   customize_instance?: Customize<AR.InstanceParams>;
 }
 
@@ -67,6 +68,13 @@ export function createInstance(
   subnet_id: AR.SubnetId,
   params0: InstanceParams
 ): AR.Instance {
+  /**
+   * To be able to ignore tags that are modified externally, they have to be created by terraform first, then ignore them
+   */
+  const tags_to_ignore: Record<string, string> | undefined = {};
+  params0.tags_to_ignore?.forEach((tag) => {
+    tags_to_ignore[tag] = ""
+  })
   const instance_params: AR.InstanceParams = {
     ami: params0.ami(sr.region),
     instance_type: params0.instance_type,
@@ -76,7 +84,10 @@ export function createInstance(
     root_block_device: {
       volume_size: 20,
     },
-    tags: contextTagsWithName(tfgen, name),
+    tags: {
+      ...contextTagsWithName(tfgen, name),
+      ...tags_to_ignore
+    }
   };
 
   if (params0.customize_instance) {
@@ -95,6 +106,10 @@ export function createInstance(
   if(ignoreUserDataChanges) {
     tfgen.ignoreChanges(ec2, 'user_data');
   }
+  // Ignore changes in the following tags
+  params0.tags_to_ignore?.forEach((tag) => {
+    tfgen.ignoreChanges(ec2, `tags.${tag}`)
+  })
 
   return ec2;
 }

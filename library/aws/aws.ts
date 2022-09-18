@@ -108,10 +108,13 @@ export function createInstance(
   if(ignoreUserDataChanges) {
     tfgen.ignoreChanges(ec2, 'user_data');
   }
+  // It seems named tags like in the documentation doesn't work
+  // TODO: (jon) open a ticket to terraform 
+  tfgen.ignoreChanges(ec2, "tags")
   // Ignore changes in the following tags
-  params0.tags_to_ignore?.forEach((tag) => {
-    tfgen.ignoreChanges(ec2, `tags.${tag}`)
-  })
+  // params0.tags_to_ignore?.forEach((tag) => {
+  //   tfgen.ignoreChanges(ec2, `tags.${tag}`)
+  // })
 
   return ec2;
 }

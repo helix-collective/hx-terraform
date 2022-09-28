@@ -699,6 +699,33 @@ const s3_bucket_lifecycle_configuration: RecordDecl = {
   ]
 }
 
+const s3_bucket_intelligent_tiering_configuration_tiering: RecordDecl = {
+  name: 's3_bucket_intelligent_tiering_configuration_tiering',
+  fields: [
+    requiredField('access_tier', enumType(["ARCHIVE_ACCESS", "DEEP_ARCHIVE_ACCESS"])),
+    requiredField('days', NUMBER),
+  ]
+}
+
+const s3_bucket_intelligent_tiering_configuration_filter: RecordDecl = {
+  name: 's3_bucket_intelligent_tiering_configuration_filter',
+  fields: [
+    optionalField('prefix', STRING),
+    optionalField('tags', TAGS_MAP),
+  ]
+}
+
+const s3_bucket_intelligent_tiering_configuration: RecordDecl = {
+  name: 's3_bucket_intelligent_tiering_configuration',
+  fields: [
+    requiredField('bucket', STRING),
+    requiredField('name', STRING),
+    optionalField('status', enumType(["Enabled", "Disabled"])),
+    optionalField('filter', recordType(s3_bucket_intelligent_tiering_configuration_filter)),
+    requiredField('tiering', recordType(s3_bucket_intelligent_tiering_configuration_tiering)),
+  ]
+}
+
 
 const iam_user: RecordDecl = {
   name: 'iam_user',
@@ -3491,6 +3518,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides an S3 Intelligent-Tiering configuration resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_intelligent_tiering_configuration',
+    s3_bucket_intelligent_tiering_configuration,
+    []
+  );
+
+  gen.generateResource(
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
@@ -4410,6 +4444,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_accelerate_configuration);
   gen.generateParams(s3_bucket_lifecycle_configuration_rule);
   gen.generateParams(s3_bucket_lifecycle_configuration);
+  gen.generateParams(s3_bucket_intelligent_tiering_configuration_tiering);
+  gen.generateParams(s3_bucket_intelligent_tiering_configuration_filter);
+  gen.generateParams(s3_bucket_intelligent_tiering_configuration);
   gen.generateParams(sns_topic);
   gen.generateParams(sns_sms_preferences);
   gen.generateParams(iam_user);

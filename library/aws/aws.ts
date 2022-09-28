@@ -135,7 +135,8 @@ export function createEcrRepository(tfgen: TF.Generator, name: string, params?: 
 export function createS3Bucket(
   tfgen: TF.Generator,
   name: string,
-  params0: AR.S3BucketParams
+  params0: AR.S3BucketParams,
+  enableIntelligentTiering?: boolean,
 ): AR.S3Bucket {
   const params = {
     ...params0,
@@ -144,7 +145,11 @@ export function createS3Bucket(
       ...params0.tags,
     }
   }
-  return AR.createS3Bucket(tfgen, name, params);
+  const bucket = AR.createS3Bucket(tfgen, name, params);
+  if (enableIntelligentTiering) {
+    enableS3IntelligentTiering(tfgen, params0.bucket, {bucketName: params0.bucket})
+  }
+  return bucket
 }
 
 export interface CreateS3BucketV2Params {
@@ -187,6 +192,37 @@ export function createS3BucketV2(
     AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-lifecycle`, params.lifecycleParams)
   }
   return s3Bucket
+}
+
+export interface EnableS3IntelligentTieringParams {
+  /**
+   * Bucket name to enable intelligent tiering to
+   */
+  bucketName: string,
+  /**
+   * How many days after object creation to enable intelligent tiering. Default 0
+   */
+  days?: number 
+}
+// Enable intelligent tiering to a bucket
+export function enableS3IntelligentTiering(
+  tfgen: TF.Generator,
+  name: string,
+  params: EnableS3IntelligentTieringParams
+  ) { 
+    AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-intelligent-tiering-lifecycle`, {
+      bucket: params.bucketName,
+      rule: [
+        {
+          id: "MoveToIntelligentTiering",
+          status: "Enabled",
+          transition: {
+            storage_class: "INTELLIGENT_TIERING",
+            days: params.days || 0
+          }
+        }
+      ]
+    })
 }
 
 /**

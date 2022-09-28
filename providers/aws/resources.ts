@@ -947,6 +947,25 @@ export interface S3BucketLifecycleConfiguration extends TF.ResourceT<'S3BucketLi
 export type S3BucketLifecycleConfigurationId = {type:'S3BucketLifecycleConfigurationId',value:string};
 
 /**
+ *  Provides an S3 Intelligent-Tiering configuration resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_intelligent_tiering_configuration
+ */
+export function createS3BucketIntelligentTieringConfiguration(tfgen: TF.Generator, rname: string, params: S3BucketIntelligentTieringConfigurationParams): S3BucketIntelligentTieringConfiguration {
+  const fields = fieldsFromS3BucketIntelligentTieringConfigurationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketIntelligentTieringConfiguration', 'aws_s3_bucket_intelligent_tiering_configuration', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface S3BucketIntelligentTieringConfiguration extends TF.ResourceT<'S3BucketIntelligentTieringConfiguration'> {
+}
+
+export type S3BucketIntelligentTieringConfigurationId = {type:'S3BucketIntelligentTieringConfigurationId',value:string};
+
+/**
  *  Provides an SNS topic resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/sns_topic.html
@@ -4256,6 +4275,48 @@ export function fieldsFromS3BucketLifecycleConfigurationParams(params: S3BucketL
   TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
   TF.addRepeatedBlock(fields, "rule", params.rule, fieldsFromS3BucketLifecycleConfigurationRuleParams);
+  return fields;
+}
+
+export interface S3BucketIntelligentTieringConfigurationTieringParams {
+  access_tier: 'ARCHIVE_ACCESS' | 'DEEP_ARCHIVE_ACCESS';
+  days: number;
+}
+
+export function fieldsFromS3BucketIntelligentTieringConfigurationTieringParams(params: S3BucketIntelligentTieringConfigurationTieringParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "access_tier", params.access_tier, TF.stringValue);
+  TF.addAttribute(fields, "days", params.days, TF.numberValue);
+  return fields;
+}
+
+export interface S3BucketIntelligentTieringConfigurationFilterParams {
+  prefix?: string;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromS3BucketIntelligentTieringConfigurationFilterParams(params: S3BucketIntelligentTieringConfigurationFilterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "prefix", params.prefix, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface S3BucketIntelligentTieringConfigurationParams {
+  bucket: string;
+  name: string;
+  status?: 'Enabled' | 'Disabled';
+  filter?: S3BucketIntelligentTieringConfigurationFilterParams;
+  tiering: S3BucketIntelligentTieringConfigurationTieringParams;
+}
+
+export function fieldsFromS3BucketIntelligentTieringConfigurationParams(params: S3BucketIntelligentTieringConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "status", params.status, TF.stringValue);
+  TF.addOptionalBlock(fields, "filter", params.filter, fieldsFromS3BucketIntelligentTieringConfigurationFilterParams);
+  TF.addBlock(fields, "tiering", params.tiering, fieldsFromS3BucketIntelligentTieringConfigurationTieringParams);
   return fields;
 }
 

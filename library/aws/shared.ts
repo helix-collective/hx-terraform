@@ -9,6 +9,7 @@ import * as AT from '../../providers/aws/types.ts';
 import * as AR from '../../providers/aws/resources.ts';
 import * as s3 from './s3.ts';
 import { Customize, ingressOnPort, egress_all, contextTagsWithName } from '../util.ts';
+import { enableS3IntelligentTiering} from './aws.ts';
 import { s3ModifyPolicy, ecr_modify_all_policy } from './policies.ts';
 
 /**
@@ -258,6 +259,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     ...params.deploy,
   });
   s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
+  enableS3IntelligentTiering(tfgen, deploy_bucket_name, {bucketName: deploy_bucket_name})
 
 
 
@@ -275,6 +277,7 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     ...params.backup,
   });
   s3.blockPublicAccess(tfgen, 'backup', backup_bucket.id);
+  enableS3IntelligentTiering(tfgen, backup_bucket_name, {bucketName: backup_bucket_name})
 
 
   return {
@@ -323,6 +326,19 @@ export function createSharedBucketsResourcesV2(tfgen: TF.Generator, params : Sha
     versioning_configuration: {
       status: "Enabled"
     }
+  })
+  AR.createS3BucketLifecycleConfiguration(tfgen, `${backup_bucket_name}-intelligent-tiering-lifecycle`, {
+    bucket: backup_bucket_name,
+    rule: [
+      {
+        id: "MoveToIntelligentTiering",
+        status: "Enabled",
+        transition: {
+          storage_class: "INTELLIGENT_TIERING",
+          days: 0
+        }
+      }
+    ]
   })
   s3.blockPublicAccess(tfgen, 'backup', backup_bucket.id);
 

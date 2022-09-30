@@ -259,7 +259,6 @@ export function createSharedBucketsResources(tfgen: TF.Generator, params : Share
     ...params.deploy,
   });
   s3.blockPublicAccess(tfgen, 'deploy', deploy_bucket.id);
-  enableS3IntelligentTiering(tfgen, deploy_bucket_name, {bucketName: deploy_bucket_name})
 
 
 

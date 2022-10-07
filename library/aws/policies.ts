@@ -299,6 +299,30 @@ export function secretReadOnlyPolicy(
   };
 }
 
+export function parameterStoreReadPolicy(name: string, arn: string) {
+  // TODO: un hardcode this
+  return {
+    name,
+    policy: {
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Sid": "VisualEditor0",
+              "Effect": "Allow",
+              "Action": "ssm:GetParameter*",
+              "Resource": "arn:aws:ssm:ap-southeast-2:716091652429:parameter/xsync_testing"
+          },
+          {
+              "Sid": "VisualEditor1",
+              "Effect": "Allow",
+              "Action": "ssm:DescribeParameters",
+              "Resource": "*"
+          }
+      ]
+  }
+  }
+}
+
 export const ses_all_actions_policy: NamedPolicy = {
   name: 'ses_full_access',
   policy: {

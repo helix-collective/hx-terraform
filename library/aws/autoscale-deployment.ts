@@ -42,14 +42,18 @@ export function createAutoscaleFrontend(
   nginxDockerVersion?: string,
 ): AutoscaleDeployment {
   return TF.withLocalNameScope(tfgen, name, tfgen => {
-    const controller = createController(
-      tfgen,
-      'controller',
-      sr,
-      params,
-      params.endpoints,
-      nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
-    );
+
+    if(params.controller_enable) {
+      const controller = createController(
+        tfgen,
+        'controller',
+        sr,
+        params,
+        params.endpoints,
+        nginxDockerVersion === undefined ? DEFAULT_NGINX_DOCKER_VERSION : nginxDockerVersion,
+      );
+    }
+
     const autoscale_processor = createProcessorAutoScaleGroup(
       tfgen,
       'asg',
@@ -392,11 +396,11 @@ export function createProcessorAutoScaleGroup(
 
 export interface LoadBalancerAndListeners {
   lb :  AR.Lb;
-  http_listener: AR.LbListener; 
+  http_listener: AR.LbListener;
   https_listener: AR.LbListener;
 };
 
-export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI, 
+export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shared.SharedResourcesNEI,
   params: {
     acm_certificate_arn: AT.ArnT<'AcmCertificate'>,
     customize_lb?: Customize<AR.LbParams>;
@@ -441,7 +445,7 @@ export function createLoadBalancer(tfgen: TF.Generator, tfname: string, sr: shar
       }
     },
   });
-  
+
   return {lb, http_listener: lb_http_listener, https_listener: lb_https_listener};
 }
 
@@ -463,6 +467,7 @@ export function createAutoscaleTargetGroup(
   const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
+    name: params.target_group_generate_name ? tfgen.scopedName(name).join('-') : undefined,
     port: 80,
     protocol: 'HTTP',
     vpc_id: sr.network.vpc.id,
@@ -476,18 +481,6 @@ export function createAutoscaleTargetGroup(
     autoscaling_group_name: autoscaling_group.id,
     alb_target_group_arn: alb_target_group.arn,
   });
-
-  // Create a new certificate if an existing certificate ARN isn't provided.
-  // When new domains are added, the certificate is deleted and re-created, in this situation,
-  // we need the certificate to be created first (as it can't be deleted while connectec to an ALB)
-  const acm_certificate_arn =
-    params.acm_certificate === undefined
-      ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-      : params.acm_certificate.kind === 'generate'
-        ? createAcmCertificate(tfgen, sr, https_fqdns, true)
-        : params.acm_certificate.kind === 'generate_with_manual_verify'
-          ? createAcmCertificate(tfgen, sr, https_fqdns, false)
-          : params.acm_certificate.arn;
 
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
@@ -681,6 +674,8 @@ export interface AutoscaleProcessorParams {
    */
   key_name: AT.KeyName;
 
+  controller_enable: boolean;
+
   /**
    * The DNS name of the controller machine. This is a prefix to the shared primary DNS zone.
    * (ie if the value is aaa and the primary dns zone is helix.com, then the final DNS entry
@@ -791,6 +786,20 @@ export interface AutoscaleProcessorParams {
    * Substitute the default nginx template used.
    */
   frontendproxy_nginx_conf_tpl?: string;
+
+  /**
+   * If true `tfgen.scopedName(name).join('-')` is used as the name.
+   * Else name is undefined and Terraform will assign a random, unique name.
+   *
+   * Note changing this for existing infra will forces new resource.
+   * see
+   * https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group#name
+   *
+   * This caused a PLP prod outage.
+   *
+   * Recommend using false for existing infra and true for new.
+   */
+   target_group_generate_name: boolean;
 
   /**
    * Health check config

@@ -300,7 +300,6 @@ export function secretReadOnlyPolicy(
 }
 
 export function parameterStoreReadPolicy(name: string, arn: string) {
-  // TODO: un hardcode this
   return {
     name,
     policy: {
@@ -310,7 +309,7 @@ export function parameterStoreReadPolicy(name: string, arn: string) {
               "Sid": "VisualEditor0",
               "Effect": "Allow",
               "Action": "ssm:GetParameter*",
-              "Resource": "arn:aws:ssm:ap-southeast-2:716091652429:parameter/xsync_testing"
+              "Resource": arn
           },
           {
               "Sid": "VisualEditor1",

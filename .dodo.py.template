@@ -9,7 +9,8 @@ from hx.dodo_infrastructure import run_dockerized_terraform, update_camus2, lamb
 
 # Use helix's packaged terraform and associated tools
 # from the image helixta/terraform at this version:
-TERRAFORM_IMAGE = 'helixta/terraform:2019-03-11'
+# (Actually now with patches - see dir tfimage)
+TERRAFORM_IMAGE = 'tfimage'
 
 HERE = Path('.')
 
@@ -28,6 +29,18 @@ tfplan = HERE / 'terraform/tfplan'
 # These are actually symlinked so they share package.json
 nodemodules = YarnNodeModules(HERE / 'typescript')
 hxtnodemodules = YarnNodeModules(HERE / 'typescript'/'hx-terraform')
+
+def task_terraform_image():
+  return {
+    'doc' : 'Generate patched terraform image',
+    'actions' : [
+      "(cd tfimage; docker build -t tfimage .)"
+    ],
+    "verbosity": 2,
+    'file_dep': [
+      HERE/'tfimage'/'Dockerfile'
+    ]
+  }
 
 def dockerized_terraform(cmd):
     return run_dockerized_terraform(TERRAFORM_IMAGE, cmd)
@@ -153,7 +166,10 @@ def task_plan():
                 "| grep --line-buffered -v 'terraform apply'",
             'echo "Review the above plan and run:\n  doit apply"'
         ],
-        'task_dep': [ 'terraform_init', ],
+        'task_dep': [
+          'terraform_image',
+          'terraform_init'
+        ],
         'file_dep':
             lambda_zipfiles() +
             [
@@ -179,6 +195,9 @@ def task_apply():
           dockerized_terraform(['apply', 'tfplan']),
           expire_plan   # invalidate the plan after using it
         ],
+      'task_dep': [
+        'terraform_image',
+      ],
       'file_dep': lambda_zipfiles(),       # no doit dependency back into tfplan - you have to run "doit plan" explicitly
       'verbosity' : 2,
       'uptodate': [False],
@@ -190,6 +209,9 @@ def task_refresh():
     return {
         'doc' : 'Run terraform refresh to update state from current deployed resources',
         'actions': [ dockerized_terraform(['refresh']) ],
+        'task_dep': [
+          'terraform_image',
+        ],
         'verbosity' : 2,
         'uptodate': [False],
     }
@@ -198,6 +220,9 @@ def task_output():
     return {
         'doc' : 'Run terraform to show terraform outputs',
         'actions': [ dockerized_terraform(['output']) ],
+        'task_dep': [
+          'terraform_image',
+        ],
         'verbosity' : 2,
         'uptodate': [False],
     }

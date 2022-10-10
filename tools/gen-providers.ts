@@ -39,7 +39,7 @@ type ResourcesParams = {
 const instance_root_block_device: RecordDecl = {
   name: 'instance_root_block_device',
   fields: [
-    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
+    optionalField('volume_type', enumType(["standard", "gp2", "gp3", "io1", "io2", "sc1", "st1"])),
     optionalField('volume_size', NUMBER),
     optionalField('iops', NUMBER),
     optionalField('delete_on_termination', BOOLEAN),
@@ -50,7 +50,7 @@ const ebs_block_device: RecordDecl = {
   name: 'ebs_block_device',
   fields: [
     requiredField('device_name', STRING, ["The name of the device to mount."]),
-    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
+    optionalField('volume_type', enumType(["standard", "gp2", "gp3", "io1", "io2", "sc1", "st1"])),
     optionalField('volume_size', NUMBER),
     optionalField('iops', NUMBER),
     optionalField('delete_on_termination', BOOLEAN),
@@ -100,7 +100,7 @@ const ebs_volume: RecordDecl = {
     requiredField('availability_zone', stringAliasType('AT.AvailabilityZone')),
     optionalField('iops', NUMBER),
     optionalField('size', NUMBER),
-    optionalField('type', enumType(["standard", "gp2", "io1", "sc1", "st1"])),
+    optionalField('type', enumType(["standard", "gp2", "gp3", "io1", "sc1", "st1"])),
     optionalField('tags', TAGS_MAP),
   ],
 };
@@ -1462,7 +1462,7 @@ const launch_template_block_device_mapping_ebs: RecordDecl = {
     // kms_key_id
     optionalField('snapshot_id', STRING),
     optionalField('throughput', NUMBER),
-    optionalField('volume_type', enumType(["standard", "gp2", "io1", "io2", "sc1", "st1"])),
+    optionalField('volume_type', enumType(["standard", "gp2", "gp3", "io1", "io2", "sc1", "st1"])),
     optionalField('volume_size', NUMBER),
   ],
 };
@@ -3587,7 +3587,7 @@ function generateAws(gen: Generator) {
     'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_access_key',
     iam_access_key,
     [
-      stringAttr('create_date'), 
+      stringAttr('create_date'),
       stringAttr('encrypted_secret'),
       stringAttr('encrypted_ses_smtp_password_v4'),
       stringAttr('id'),
@@ -4363,7 +4363,7 @@ function generateAws(gen: Generator) {
       stringAttr('prometheus_endpoint')
     ],
   );
-  
+
   gen.generateResource(
     'Generates a grafana workspace',
     'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace',

@@ -3300,7 +3300,7 @@ export function fieldsFromVpnConnectionRouteParams(params: VpnConnectionRoutePar
 }
 
 export interface InstanceRootBlockDeviceParams {
-  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
+  volume_type?: 'standard' | 'gp2' | 'gp3' | 'io1' | 'io2' | 'sc1' | 'st1';
   volume_size?: number;
   iops?: number;
   delete_on_termination?: boolean;
@@ -3320,7 +3320,7 @@ export interface EbsBlockDeviceParams {
   The name of the device to mount.
   */
   device_name: string;
-  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
+  volume_type?: 'standard' | 'gp2' | 'gp3' | 'io1' | 'io2' | 'sc1' | 'st1';
   volume_size?: number;
   iops?: number;
   delete_on_termination?: boolean;
@@ -3397,7 +3397,7 @@ export interface EbsVolumeParams {
   availability_zone: AT.AvailabilityZone;
   iops?: number;
   size?: number;
-  type?: 'standard' | 'gp2' | 'io1' | 'sc1' | 'st1';
+  type?: 'standard' | 'gp2' | 'gp3' | 'io1' | 'sc1' | 'st1';
   tags?: TF.TagsMap;
 }
 
@@ -5334,7 +5334,7 @@ export interface LaunchTemplateBlockDeviceMappingEbsParams {
   iops?: number;
   snapshot_id?: string;
   throughput?: number;
-  volume_type?: 'standard' | 'gp2' | 'io1' | 'io2' | 'sc1' | 'st1';
+  volume_type?: 'standard' | 'gp2' | 'gp3' | 'io1' | 'io2' | 'sc1' | 'st1';
   volume_size?: number;
 }
 

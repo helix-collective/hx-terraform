@@ -5593,15 +5593,20 @@ export interface LambdaFunctionParams {
   architectures?: (string)[];
   description?: string;
   environment?: LambdaFunctionEnvironmentParams;
+  ephemeral_storage?: LambdaFunctionEphemeralStorageParams;
   filename?: string;
   handler?: string;
   image_config?: LambdaFunctionImageConfigParams;
   image_uri?: string;
+  kms_key_arn?: AT.ArnT<"KmsKey">;
   memory_size?: number;
   package_type?: string;
+  publish?: boolean;
+  reserved_concurrent_executions?: number;
   runtime?: AT.LambdaRuntime;
   s3_bucket?: string;
   s3_key?: string;
+  s3_object_version?: string;
   source_code_hash?: string;
   tags?: TF.TagsMap;
   timeout?: number;
@@ -5615,15 +5620,20 @@ export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : T
   TF.addOptionalAttribute(fields, "architectures", params.architectures, TF.listValue(TF.stringValue));
   TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
   TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
+  TF.addOptionalBlock(fields, "ephemeral_storage", params.ephemeral_storage, fieldsFromLambdaFunctionEphemeralStorageParams);
   TF.addOptionalAttribute(fields, "filename", params.filename, TF.stringValue);
   TF.addOptionalAttribute(fields, "handler", params.handler, TF.stringValue);
   TF.addOptionalBlock(fields, "image_config", params.image_config, fieldsFromLambdaFunctionImageConfigParams);
   TF.addOptionalAttribute(fields, "image_uri", params.image_uri, TF.stringValue);
+  TF.addOptionalAttribute(fields, "kms_key_arn", params.kms_key_arn, TF.resourceArnValue);
   TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
   TF.addOptionalAttribute(fields, "package_type", params.package_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "publish", params.publish, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "reserved_concurrent_executions", params.reserved_concurrent_executions, TF.numberValue);
   TF.addOptionalAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);
+  TF.addOptionalAttribute(fields, "s3_object_version", params.s3_object_version, TF.stringValue);
   TF.addOptionalAttribute(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
@@ -5652,6 +5662,20 @@ export function fieldsFromLambdaFunctionImageConfigParams(params: LambdaFunction
   TF.addOptionalAttribute(fields, "command", params.command, TF.stringValue);
   TF.addOptionalAttribute(fields, "entry_point", params.entry_point, TF.stringValue);
   TF.addOptionalAttribute(fields, "working_directory", params.working_directory, TF.stringValue);
+  return fields;
+}
+
+export interface LambdaFunctionEphemeralStorageParams {
+  /**
+  The size of the Lambda function Ephemeral storage(/tmp) represented in MB.
+  The minimum supported ephemeral_storage value defaults to 512MB and the maximum supported value is 10240MB.
+  */
+  size: number;
+}
+
+export function fieldsFromLambdaFunctionEphemeralStorageParams(params: LambdaFunctionEphemeralStorageParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "size", params.size, TF.numberValue);
   return fields;
 }
 

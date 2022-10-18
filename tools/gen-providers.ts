@@ -1761,6 +1761,22 @@ const vpc_config: RecordDecl = {
   ],
 };
 
+const kms_key: RecordDecl = {
+  name: 'kms_key',
+  fields: [
+    optionalField('description', STRING),
+    optionalField('key_usage', enumType(['ENCRYPT_DECRYPT', 'SIGN_VERIFY'])),
+    optionalField('customer_master_key_spec', enumType(['SYMMETRIC_DEFAULT', 'RSA_2048', 'RSA_3072', 'RSA_4096', 'HMAC_256', 'ECC_NIST_P256', 'ECC_NIST_P384', 'ECC_NIST_P521', 'ECC_SECG_P256K1'])),
+    optionalField('policy', STRING),
+    optionalField('bypass_policy_lockout_safety_check', BOOLEAN),
+    optionalField('deletion_window_in_days', NUMBER),
+    optionalField('is_enabled', BOOLEAN),
+    optionalField('enable_key_rotation', BOOLEAN),
+    optionalField('multi_region', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
+  ],
+}
+
 const lambda_function_environment: RecordDecl = {
   name: 'lambda_function_environment',
   fields: [optionalField('variables', TAGS_MAP)],
@@ -1775,26 +1791,47 @@ const lambda_function_image_config: RecordDecl = {
   ],
 };
 
+const lambda_function_ephemeral_storage: RecordDecl = {
+  name: 'lambda_function_ephemeral_storage',
+  fields: [
+    requiredField('size', NUMBER, [
+      'The size of the Lambda function Ephemeral storage(/tmp) represented in MB.',
+      'The minimum supported ephemeral_storage value defaults to 512MB and the maximum supported value is 10240MB.',
+    ]),
+  ],
+};
+
 const lambda_function: RecordDecl = {
   name: 'lambda_function',
   fields: [
     requiredField('function_name', STRING),
     requiredField('role', arnType(iam_role)),
+
     optionalField('architectures', listType(STRING)),
+    // code_signing_config_arn
+    // dead_letter_config
     optionalField('description', STRING),
     optionalField('environment', recordType(lambda_function_environment)),
+    optionalField('ephemeral_storage', recordType(lambda_function_ephemeral_storage)),
+    // file_system_config
     optionalField('filename', STRING),
     optionalField('handler', STRING),
     optionalField('image_config', recordType(lambda_function_image_config)),
     optionalField('image_uri', STRING),
+    optionalField('kms_key_arn', arnType(kms_key)),
+    // optionalField('layers', listType(arnType(lambda_layer))),
     optionalField('memory_size', NUMBER),
     optionalField('package_type', STRING),
+    optionalField('publish', BOOLEAN),
+    optionalField('reserved_concurrent_executions', NUMBER),
     optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('s3_bucket', STRING),
     optionalField('s3_key', STRING),
+    optionalField('s3_object_version', STRING),
     optionalField('source_code_hash', STRING),
     optionalField('tags', TAGS_MAP),
     optionalField('timeout', NUMBER),
+    // tracing_config
     optionalField('vpc_config', recordType(vpc_config)),
   ],
 };
@@ -2886,22 +2923,6 @@ const ssoadmin_permission_set_inline_policy: RecordDecl = {
     requiredField('instance_arn', STRING),
     requiredField('permission_set_arn', STRING),
   ]
-}
-
-const kms_key: RecordDecl = {
-  name: 'kms_key',
-  fields: [
-    optionalField('description', STRING),
-    optionalField('key_usage', enumType(['ENCRYPT_DECRYPT', 'SIGN_VERIFY'])),
-    optionalField('customer_master_key_spec', enumType(['SYMMETRIC_DEFAULT', 'RSA_2048', 'RSA_3072', 'RSA_4096', 'HMAC_256', 'ECC_NIST_P256', 'ECC_NIST_P384', 'ECC_NIST_P521', 'ECC_SECG_P256K1'])),
-    optionalField('policy', STRING),
-    optionalField('bypass_policy_lockout_safety_check', BOOLEAN),
-    optionalField('deletion_window_in_days', NUMBER),
-    optionalField('is_enabled', BOOLEAN),
-    optionalField('enable_key_rotation', BOOLEAN),
-    optionalField('multi_region', BOOLEAN),
-    optionalField('tags', TAGS_MAP),
-  ],
 }
 
 function autoscaling_policy(gen: Generator): ResourcesParams {
@@ -4521,6 +4542,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(lambda_function);
   gen.generateParams(lambda_function_environment);
   gen.generateParams(lambda_function_image_config);
+  gen.generateParams(lambda_function_ephemeral_storage);
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);

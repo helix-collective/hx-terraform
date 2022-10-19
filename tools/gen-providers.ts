@@ -2991,7 +2991,6 @@ const ecs_cluster_setting: RecordDecl = {
   fields: [
     requiredField('name', STRING),
     requiredField('value', enumType(['enabled', 'disabled'])),
-
   ],
 }
 
@@ -3002,8 +3001,6 @@ const ecs_cluster: RecordDecl = {
     requiredField('name', STRING),
     optionalField('setting', recordType(ecs_cluster_setting)),
     optionalField('tags', TAGS_MAP),
-
-
   ],
 }
 

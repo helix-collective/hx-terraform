@@ -1836,6 +1836,40 @@ const lambda_function: RecordDecl = {
   ],
 };
 
+
+const cloudwatch_event_rule_ecs_target_capacity_provider_strategy = {
+  name: 'cloudwatch_event_rule_ecs_target_capacity_provider_strategy',
+  fields: [
+    optionalField('base', STRING),
+    requiredField('capacity_provider', STRING),
+    requiredField('weight', STRING),
+  ],
+};
+
+const cloudwatch_event_rule_ecs_target_network_configuration = {
+  name: 'cloudwatch_event_rule_ecs_target_network_configuration',
+  fields: [
+    requiredField('subnets', listType(STRING)),
+    optionalField('security_groups', listType(STRING)),
+    optionalField('assign_public_ip', enumType(['true', 'false'])),
+  ],
+};
+
+const cloudwatch_event_rule_ecs_target = {
+  name: 'cloudwatch_event_rule_ecs_target',
+  fields: [
+    optionalField('capacity_provider_strategy', recordType(cloudwatch_event_rule_ecs_target_capacity_provider_strategy)),
+    optionalField('group', STRING),
+    optionalField('launch_type', enumType(['EC2', 'EXTERNAL', 'FARGATE'])),
+    optionalField('network_configuration', recordType(cloudwatch_event_rule_ecs_target_network_configuration)),
+    optionalField('platform_version', STRING),
+    optionalField('task_count', STRING),
+    requiredField('task_definition_arn', STRING),
+    optionalField('tags', TAGS_MAP),
+    optionalField('propagate_tags', BOOLEAN)
+  ],
+};
+
 const cloudwatch_event_rule = {
   name: 'cloudwatch_event_rule',
   fields: [
@@ -1948,7 +1982,7 @@ const cloudwatch_event_target = {
     optionalField('input_path', STRING),
     optionalField('role_arn', arnType(iam_role)),
     optionalField('run_command_target', recordType(cloudwatch_event_target_run_command_targets)),
-    // optionalField('ecs_target', recordType()),
+    optionalField('ecs_target', recordType(cloudwatch_event_rule_ecs_target)),
     // optionalField('batch_target', recordType()),
     optionalField('kinesis_target', recordType(cloudwatch_event_target_kinesis_target)),
     optionalField('sqs_target', recordType(cloudwatch_event_target_sqs_target)),
@@ -2925,6 +2959,97 @@ const ssoadmin_permission_set_inline_policy: RecordDecl = {
   ]
 }
 
+const ecs_cluster_configuration_execute_command_configuration_log_configuration: RecordDecl = {
+  name: 'ecs_cluster_configuration_execute_command_configuration_log_configuration',
+  fields: [
+    optionalField('cloud_watch_encryption_enabled', BOOLEAN),
+    optionalField('cloud_watch_log_group_name', STRING),
+    optionalField('s3_bucket_name', STRING),
+    optionalField('s3_bucket_encryption_enabled', BOOLEAN),
+    optionalField('s3_key_prefix', STRING),
+  ]
+}
+
+const ecs_cluster_configuration_execute_command_configuration: RecordDecl = {
+  name: 'ecs_cluster_configuration_execute_command_configuration',
+  fields: [
+    optionalField('kms_key_id', STRING),
+    optionalField('log_configuration', recordType(ecs_cluster_configuration_execute_command_configuration_log_configuration)),
+    optionalField('logging', enumType(['NONE', 'DEFAULT', 'OVERRIDE'])),
+  ]
+}
+
+const ecs_cluster_configuration: RecordDecl = {
+  name: 'ecs_cluster_configuration',
+  fields: [
+    optionalField('execute_command_configuration', recordType(ecs_cluster_configuration_execute_command_configuration)),
+  ]
+}
+
+const ecs_cluster_setting: RecordDecl = {
+  name: 'ecs_cluster_setting',
+  fields: [
+    requiredField('name', STRING),
+    requiredField('value', enumType(['enabled', 'disabled'])),
+  ],
+}
+
+const ecs_cluster: RecordDecl = {
+  name: 'ecs_cluster',
+  fields: [
+    optionalField('configuration', recordType(ecs_cluster_configuration)),
+    requiredField('name', STRING),
+    optionalField('setting', recordType(ecs_cluster_setting)),
+    optionalField('tags', TAGS_MAP),
+  ],
+}
+
+
+const ecs_task_definition_runtime_platform: RecordDecl = {
+  name: 'ecs_task_definition_runtime_platform',
+  fields: [
+    optionalField('operating_system_family', STRING),
+    optionalField('cpu_architecture', enumType(['X86_64', 'ARM64']))
+  ]
+}
+
+const ecs_task_definition: RecordDecl = {
+  name: 'ecs_task_definition',
+  fields: [
+    requiredField('container_definitions', STRING),
+    requiredField('family', STRING),
+    optionalField('cpu', STRING),
+    optionalField('execution_role_arn', STRING),
+    optionalField('ipc_mode', enumType(['host', 'task', 'none'])),
+    optionalField('memory', STRING),
+    optionalField('network_mode', enumType(['none', 'bridge', 'awsvpc', 'host'])),
+    optionalField('runtime_platform', recordType(ecs_task_definition_runtime_platform)),
+    optionalField('pid_mode', enumType(['host', 'task'])),
+    optionalField('ephemeral_storage', STRING),
+    optionalField('requires_compatibilities', listType(enumType(['EC2', 'FARGATE']))),
+    optionalField('skip_destroy', BOOLEAN),
+    optionalField('tags', TAGS_MAP),
+    optionalField('task_role_arn', STRING),
+  ]
+}
+
+const ecs_cluster_capacity_providers_default_capacity_provider_strategy: RecordDecl = {
+  name: 'ecs_cluster_capacity_providers_default_capacity_provider_strategy',
+  fields: [
+    optionalField('capacity_provider', STRING),
+    requiredField('weight', STRING),
+    optionalField('base', STRING),
+  ]
+}
+
+const ecs_cluster_capacity_providers: RecordDecl = {
+  name: 'ecs_cluster_capacity_providers',
+  fields: [
+    optionalField('capacity_providers', listType(STRING)),
+    requiredField('cluster_name', STRING),
+    optionalField('default_capacity_provider_strategy', recordType(ecs_cluster_capacity_providers_default_capacity_provider_strategy)),
+  ]
+}
 function autoscaling_policy(gen: Generator): ResourcesParams {
   // https://www.terraform.io/docs/providers/aws/r/autoscaling_policy.html#step_adjustment
   const step_adjustment: RecordDecl = {
@@ -4398,6 +4523,39 @@ function generateAws(gen: Generator) {
     }
   )
 
+  gen.generateResource(
+    'Generates a ECS cluster',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster',
+    ecs_cluster,
+    [
+      stringAttr('id'),
+    ],
+    {
+      arn: true
+    }
+  )
+
+  gen.generateResource(
+    'Generates a ECS task definition',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition',
+    ecs_task_definition,
+    [
+      stringAttr('revision'),
+    ],
+    {
+      arn: true
+    }
+  )
+
+  gen.generateResource(
+    'Generates a ECS cluster capacity providers',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers',
+    ecs_cluster_capacity_providers,
+    [
+      stringAttr('id'),
+    ],
+  )
+
   // Generate all of the parameter structures
   gen.generateParams(autoscaling_group_tag);
   gen.generateParams(autoscaling_group);
@@ -4544,6 +4702,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(lambda_function_image_config);
   gen.generateParams(lambda_function_ephemeral_storage);
   gen.generateParams(lambda_permission);
+  gen.generateParams(cloudwatch_event_rule_ecs_target_capacity_provider_strategy);
+  gen.generateParams(cloudwatch_event_rule_ecs_target_network_configuration);
+  gen.generateParams(cloudwatch_event_rule_ecs_target);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);
   gen.generateParams(cloudwatch_event_target_run_command_targets);
@@ -4637,6 +4798,15 @@ function generateAws(gen: Generator) {
   gen.generateParams(kms_key);
   gen.generateParams(prometheus_workspace);
   gen.generateParams(grafana_workspace);
+  gen.generateParams(ecs_cluster_configuration_execute_command_configuration_log_configuration);
+  gen.generateParams(ecs_cluster_configuration_execute_command_configuration);
+  gen.generateParams(ecs_cluster_configuration);
+  gen.generateParams(ecs_cluster_setting);
+  gen.generateParams(ecs_cluster);
+  gen.generateParams(ecs_task_definition_runtime_platform);
+  gen.generateParams(ecs_task_definition);
+  gen.generateParams(ecs_cluster_capacity_providers_default_capacity_provider_strategy);
+  gen.generateParams(ecs_cluster_capacity_providers);
 
   autoscaling_policy(gen);
   amiDataSource(gen);

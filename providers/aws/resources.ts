@@ -3126,6 +3126,80 @@ export interface GrafanaWorkspace extends TF.ResourceT<'GrafanaWorkspace'> {
 export type GrafanaWorkspaceId = {type:'GrafanaWorkspaceId',value:string};
 export type GrafanaWorkspaceArn = AT.ArnT<"GrafanaWorkspace">;
 
+/**
+ *  Generates a ECS cluster
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster
+ */
+export function createEcsCluster(tfgen: TF.Generator, rname: string, params: EcsClusterParams): EcsCluster {
+  const fields = fieldsFromEcsClusterParams(params);
+  const resource = tfgen.createTypedResource('EcsCluster', 'aws_ecs_cluster', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+  const arn: EcsClusterArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EcsCluster');
+
+  return {
+    ...resource,
+    id,
+    arn,
+  };
+}
+
+export interface EcsCluster extends TF.ResourceT<'EcsCluster'> {
+  id: string;
+  arn: EcsClusterArn;
+}
+
+export type EcsClusterId = {type:'EcsClusterId',value:string};
+export type EcsClusterArn = AT.ArnT<"EcsCluster">;
+
+/**
+ *  Generates a ECS task definition
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition
+ */
+export function createEcsTaskDefinition(tfgen: TF.Generator, rname: string, params: EcsTaskDefinitionParams): EcsTaskDefinition {
+  const fields = fieldsFromEcsTaskDefinitionParams(params);
+  const resource = tfgen.createTypedResource('EcsTaskDefinition', 'aws_ecs_task_definition', rname, fields);
+  const revision: string =  TF.resourceAttribute(resource, "revision");
+  const arn: EcsTaskDefinitionArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EcsTaskDefinition');
+
+  return {
+    ...resource,
+    revision,
+    arn,
+  };
+}
+
+export interface EcsTaskDefinition extends TF.ResourceT<'EcsTaskDefinition'> {
+  revision: string;
+  arn: EcsTaskDefinitionArn;
+}
+
+export type EcsTaskDefinitionId = {type:'EcsTaskDefinitionId',value:string};
+export type EcsTaskDefinitionArn = AT.ArnT<"EcsTaskDefinition">;
+
+/**
+ *  Generates a ECS cluster capacity providers
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster_capacity_providers
+ */
+export function createEcsClusterCapacityProviders(tfgen: TF.Generator, rname: string, params: EcsClusterCapacityProvidersParams): EcsClusterCapacityProviders {
+  const fields = fieldsFromEcsClusterCapacityProvidersParams(params);
+  const resource = tfgen.createTypedResource('EcsClusterCapacityProviders', 'aws_ecs_cluster_capacity_providers', rname, fields);
+  const id: string =  TF.resourceAttribute(resource, "id");
+
+  return {
+    ...resource,
+    id,
+  };
+}
+
+export interface EcsClusterCapacityProviders extends TF.ResourceT<'EcsClusterCapacityProviders'> {
+  id: string;
+}
+
+export type EcsClusterCapacityProvidersId = {type:'EcsClusterCapacityProvidersId',value:string};
+
 export interface AutoscalingGroupTagParams {
   key: string;
   value: string;
@@ -5695,6 +5769,60 @@ export function fieldsFromLambdaPermissionParams(params: LambdaPermissionParams)
   return fields;
 }
 
+export interface CloudwatchEventRuleEcsTargetCapacityProviderStrategyParams {
+  base?: string;
+  capacity_provider: string;
+  weight: string;
+}
+
+export function fieldsFromCloudwatchEventRuleEcsTargetCapacityProviderStrategyParams(params: CloudwatchEventRuleEcsTargetCapacityProviderStrategyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "base", params.base, TF.stringValue);
+  TF.addAttribute(fields, "capacity_provider", params.capacity_provider, TF.stringValue);
+  TF.addAttribute(fields, "weight", params.weight, TF.stringValue);
+  return fields;
+}
+
+export interface CloudwatchEventRuleEcsTargetNetworkConfigurationParams {
+  subnets: (string)[];
+  security_groups?: (string)[];
+  assign_public_ip?: 'true' | 'false';
+}
+
+export function fieldsFromCloudwatchEventRuleEcsTargetNetworkConfigurationParams(params: CloudwatchEventRuleEcsTargetNetworkConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "subnets", params.subnets, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "security_groups", params.security_groups, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "assign_public_ip", params.assign_public_ip, TF.stringValue);
+  return fields;
+}
+
+export interface CloudwatchEventRuleEcsTargetParams {
+  capacity_provider_strategy?: CloudwatchEventRuleEcsTargetCapacityProviderStrategyParams;
+  group?: string;
+  launch_type?: 'EC2' | 'EXTERNAL' | 'FARGATE';
+  network_configuration?: CloudwatchEventRuleEcsTargetNetworkConfigurationParams;
+  platform_version?: string;
+  task_count?: string;
+  task_definition_arn: string;
+  tags?: TF.TagsMap;
+  propagate_tags?: boolean;
+}
+
+export function fieldsFromCloudwatchEventRuleEcsTargetParams(params: CloudwatchEventRuleEcsTargetParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalBlock(fields, "capacity_provider_strategy", params.capacity_provider_strategy, fieldsFromCloudwatchEventRuleEcsTargetCapacityProviderStrategyParams);
+  TF.addOptionalAttribute(fields, "group", params.group, TF.stringValue);
+  TF.addOptionalAttribute(fields, "launch_type", params.launch_type, TF.stringValue);
+  TF.addOptionalBlock(fields, "network_configuration", params.network_configuration, fieldsFromCloudwatchEventRuleEcsTargetNetworkConfigurationParams);
+  TF.addOptionalAttribute(fields, "platform_version", params.platform_version, TF.stringValue);
+  TF.addOptionalAttribute(fields, "task_count", params.task_count, TF.stringValue);
+  TF.addAttribute(fields, "task_definition_arn", params.task_definition_arn, TF.stringValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "propagate_tags", params.propagate_tags, TF.booleanValue);
+  return fields;
+}
+
 export interface CloudwatchEventRuleParams {
   name?: string;
   name_prefix?: string;
@@ -5726,6 +5854,7 @@ export interface CloudwatchEventTargetParams {
   input_path?: string;
   role_arn?: AT.ArnT<"IamRole">;
   run_command_target?: RunCommandTargetsParams;
+  ecs_target?: CloudwatchEventRuleEcsTargetParams;
   kinesis_target?: KinesisTargetParams;
   sqs_target?: SqsTargetParams;
   http_target?: HttpTargetParams;
@@ -5742,6 +5871,7 @@ export function fieldsFromCloudwatchEventTargetParams(params: CloudwatchEventTar
   TF.addOptionalAttribute(fields, "input_path", params.input_path, TF.stringValue);
   TF.addOptionalAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
   TF.addOptionalBlock(fields, "run_command_target", params.run_command_target, fieldsFromRunCommandTargetsParams);
+  TF.addOptionalBlock(fields, "ecs_target", params.ecs_target, fieldsFromCloudwatchEventRuleEcsTargetParams);
   TF.addOptionalBlock(fields, "kinesis_target", params.kinesis_target, fieldsFromKinesisTargetParams);
   TF.addOptionalBlock(fields, "sqs_target", params.sqs_target, fieldsFromSqsTargetParams);
   TF.addOptionalBlock(fields, "http_target", params.http_target, fieldsFromHttpTargetParams);
@@ -7181,6 +7311,152 @@ export function fieldsFromGrafanaWorkspaceParams(params: GrafanaWorkspaceParams)
   TF.addOptionalAttribute(fields, "role_arn", params.role_arn, TF.resourceArnValue);
   TF.addOptionalAttribute(fields, "stack_set_name", params.stack_set_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface EcsClusterConfigurationExecuteCommandConfigurationLogConfigurationParams {
+  cloud_watch_encryption_enabled?: boolean;
+  cloud_watch_log_group_name?: string;
+  s3_bucket_name?: string;
+  s3_bucket_encryption_enabled?: boolean;
+  s3_key_prefix?: string;
+}
+
+export function fieldsFromEcsClusterConfigurationExecuteCommandConfigurationLogConfigurationParams(params: EcsClusterConfigurationExecuteCommandConfigurationLogConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "cloud_watch_encryption_enabled", params.cloud_watch_encryption_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "cloud_watch_log_group_name", params.cloud_watch_log_group_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "s3_bucket_name", params.s3_bucket_name, TF.stringValue);
+  TF.addOptionalAttribute(fields, "s3_bucket_encryption_enabled", params.s3_bucket_encryption_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "s3_key_prefix", params.s3_key_prefix, TF.stringValue);
+  return fields;
+}
+
+export interface EcsClusterConfigurationExecuteCommandConfigurationParams {
+  kms_key_id?: string;
+  log_configuration?: EcsClusterConfigurationExecuteCommandConfigurationLogConfigurationParams;
+  logging?: 'NONE' | 'DEFAULT' | 'OVERRIDE';
+}
+
+export function fieldsFromEcsClusterConfigurationExecuteCommandConfigurationParams(params: EcsClusterConfigurationExecuteCommandConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "kms_key_id", params.kms_key_id, TF.stringValue);
+  TF.addOptionalBlock(fields, "log_configuration", params.log_configuration, fieldsFromEcsClusterConfigurationExecuteCommandConfigurationLogConfigurationParams);
+  TF.addOptionalAttribute(fields, "logging", params.logging, TF.stringValue);
+  return fields;
+}
+
+export interface EcsClusterConfigurationParams {
+  execute_command_configuration?: EcsClusterConfigurationExecuteCommandConfigurationParams;
+}
+
+export function fieldsFromEcsClusterConfigurationParams(params: EcsClusterConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalBlock(fields, "execute_command_configuration", params.execute_command_configuration, fieldsFromEcsClusterConfigurationExecuteCommandConfigurationParams);
+  return fields;
+}
+
+export interface EcsClusterSettingParams {
+  name: string;
+  value: 'enabled' | 'disabled';
+}
+
+export function fieldsFromEcsClusterSettingParams(params: EcsClusterSettingParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "value", params.value, TF.stringValue);
+  return fields;
+}
+
+export interface EcsClusterParams {
+  configuration?: EcsClusterConfigurationParams;
+  name: string;
+  setting?: EcsClusterSettingParams;
+  tags?: TF.TagsMap;
+}
+
+export function fieldsFromEcsClusterParams(params: EcsClusterParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalBlock(fields, "configuration", params.configuration, fieldsFromEcsClusterConfigurationParams);
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addOptionalBlock(fields, "setting", params.setting, fieldsFromEcsClusterSettingParams);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  return fields;
+}
+
+export interface EcsTaskDefinitionRuntimePlatformParams {
+  operating_system_family?: string;
+  cpu_architecture?: 'X86_64' | 'ARM64';
+}
+
+export function fieldsFromEcsTaskDefinitionRuntimePlatformParams(params: EcsTaskDefinitionRuntimePlatformParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "operating_system_family", params.operating_system_family, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cpu_architecture", params.cpu_architecture, TF.stringValue);
+  return fields;
+}
+
+export interface EcsTaskDefinitionParams {
+  container_definitions: string;
+  family: string;
+  cpu?: string;
+  execution_role_arn?: string;
+  ipc_mode?: 'host' | 'task' | 'none';
+  memory?: string;
+  network_mode?: 'none' | 'bridge' | 'awsvpc' | 'host';
+  runtime_platform?: EcsTaskDefinitionRuntimePlatformParams;
+  pid_mode?: 'host' | 'task';
+  ephemeral_storage?: string;
+  requires_compatibilities?: ('EC2' | 'FARGATE')[];
+  skip_destroy?: boolean;
+  tags?: TF.TagsMap;
+  task_role_arn?: string;
+}
+
+export function fieldsFromEcsTaskDefinitionParams(params: EcsTaskDefinitionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "container_definitions", params.container_definitions, TF.stringValue);
+  TF.addAttribute(fields, "family", params.family, TF.stringValue);
+  TF.addOptionalAttribute(fields, "cpu", params.cpu, TF.stringValue);
+  TF.addOptionalAttribute(fields, "execution_role_arn", params.execution_role_arn, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ipc_mode", params.ipc_mode, TF.stringValue);
+  TF.addOptionalAttribute(fields, "memory", params.memory, TF.stringValue);
+  TF.addOptionalAttribute(fields, "network_mode", params.network_mode, TF.stringValue);
+  TF.addOptionalBlock(fields, "runtime_platform", params.runtime_platform, fieldsFromEcsTaskDefinitionRuntimePlatformParams);
+  TF.addOptionalAttribute(fields, "pid_mode", params.pid_mode, TF.stringValue);
+  TF.addOptionalAttribute(fields, "ephemeral_storage", params.ephemeral_storage, TF.stringValue);
+  TF.addOptionalAttribute(fields, "requires_compatibilities", params.requires_compatibilities, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "skip_destroy", params.skip_destroy, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "task_role_arn", params.task_role_arn, TF.stringValue);
+  return fields;
+}
+
+export interface EcsClusterCapacityProvidersDefaultCapacityProviderStrategyParams {
+  capacity_provider?: string;
+  weight: string;
+  base?: string;
+}
+
+export function fieldsFromEcsClusterCapacityProvidersDefaultCapacityProviderStrategyParams(params: EcsClusterCapacityProvidersDefaultCapacityProviderStrategyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "capacity_provider", params.capacity_provider, TF.stringValue);
+  TF.addAttribute(fields, "weight", params.weight, TF.stringValue);
+  TF.addOptionalAttribute(fields, "base", params.base, TF.stringValue);
+  return fields;
+}
+
+export interface EcsClusterCapacityProvidersParams {
+  capacity_providers?: (string)[];
+  cluster_name: string;
+  default_capacity_provider_strategy?: EcsClusterCapacityProvidersDefaultCapacityProviderStrategyParams;
+}
+
+export function fieldsFromEcsClusterCapacityProvidersParams(params: EcsClusterCapacityProvidersParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "capacity_providers", params.capacity_providers, TF.listValue(TF.stringValue));
+  TF.addAttribute(fields, "cluster_name", params.cluster_name, TF.stringValue);
+  TF.addOptionalBlock(fields, "default_capacity_provider_strategy", params.default_capacity_provider_strategy, fieldsFromEcsClusterCapacityProvidersDefaultCapacityProviderStrategyParams);
   return fields;
 }
 

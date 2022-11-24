@@ -160,7 +160,7 @@ export class BootScript {
       `docker run --rm \\`,
       `  -v ${ledir}/etc/letsencrypt:/etc/letsencrypt \\`,
       `  -v ${ledir}/var/lib/letsencrypt:/var/lib/letsencrypt \\`,
-      `  certbot/dns-route53 \\`,
+      `  certbot/dns-route53:v2.0.0 \\`,
       `  certonly --dns-route53 \\`,
       `  ${certnamearg} \\`,
       `  -m ${contact_email} -n --agree-tos \\`,

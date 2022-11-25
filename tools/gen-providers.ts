@@ -105,6 +105,7 @@ const db_instance: RecordDecl = {
     optionalField('iops', NUMBER),
     optionalField('snapshot_identifier', STRING),
     optionalField('monitoring_interval', NUMBER),
+    optionalField('enabled_cloudwatch_logs_exports', listType(STRING))
   ],
 };
 

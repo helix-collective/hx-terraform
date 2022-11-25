@@ -2299,6 +2299,7 @@ export interface DbInstanceParams {
   iops?: number;
   snapshot_identifier?: string;
   monitoring_interval?: number;
+  enabled_cloudwatch_logs_exports?: (string)[];
 }
 
 export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.ResourceFieldMap {
@@ -2332,6 +2333,7 @@ export function fieldsFromDbInstanceParams(params: DbInstanceParams) : TF.Resour
   TF.addOptionalField(fields, "iops", params.iops, TF.numberValue);
   TF.addOptionalField(fields, "snapshot_identifier", params.snapshot_identifier, TF.stringValue);
   TF.addOptionalField(fields, "monitoring_interval", params.monitoring_interval, TF.numberValue);
+  TF.addOptionalField(fields, "enabled_cloudwatch_logs_exports", params.enabled_cloudwatch_logs_exports, TF.listValue(TF.stringValue));
   return fields;
 }
 

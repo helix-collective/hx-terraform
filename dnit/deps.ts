@@ -1,7 +1,7 @@
 // task execution tool - dnit:
 export {
   task,
-  execCli as dnitExecCli,
+  main as dnitMain,
   trackFile,
   asyncFiles,
   runAlways,
@@ -11,11 +11,11 @@ export {
   Task,
   TrackedFile,
   TrackedFilesAsync,
-} from 'https://deno.land/x/dnit@dnit-v1.12.4/mod.ts';
+} from 'https://deno.land/x/dnit@dnit-v1.14.0/mod.ts';
 
 export type {
   TaskContext,
-} from 'https://deno.land/x/dnit@dnit-v1.12.4/mod.ts';
+} from 'https://deno.land/x/dnit@dnit-v1.14.0/mod.ts';
 
 // hx dnit-utils:
 export {

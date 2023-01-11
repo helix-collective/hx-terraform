@@ -8,11 +8,15 @@ import * as roles from './roles.ts';
 import * as shared from './shared.ts';
 import * as s3 from './s3.ts';
 import * as bootscript from '../bootscript.ts';
-import * as policies from './policies.ts';
+import * as policies from './policies_v2.ts';
+
 import * as docker from '../docker.ts';
 import * as camus2 from '../camus2/camus2.ts';
 import * as C from '../../library/camus2/adl-gen/config.ts';
 import * as amis from './amis.ts';
+
+import {newNamedPolicy, combineNamedPolicies, NamedPolicy} from './policies_v2.ts';
+
 
 import {
   EndPoint,
@@ -145,11 +149,18 @@ export function createController(
    ? cparams.bootscript(bsf)
    : bsf.installAndConfigure();
 
-  let controller_iampolicies: policies.NamedPolicy[] = [aws.s3DeployBucketModifyPolicy(sr)];
+  let  default_iampolicies: NamedPolicy[] = [
+    newNamedPolicy('modifys3deploy', policies.s3ModifyBuckets([sr.deploy_bucket_name])),
+  ];
 
-  if (cparams.extra_policies) {
-    controller_iampolicies = controller_iampolicies.concat(cparams.extra_policies);
+  if (cparams.use_combined_default_policy) {
+    default_iampolicies = [combineNamedPolicies('controller', default_iampolicies)];
   }
+
+  const controller_iampolicies = [
+    ...default_iampolicies,
+    ...cparams.extra_policies || [],
+  ];
 
   const controller_instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
@@ -205,26 +216,29 @@ export function createProcessorAutoScaleGroup(
 
   const asgName = tfgen.scopedName(name).join('-');
 
-  let appserver_iampolicies = [
-    policies.publish_metrics_policy,
-    aws.s3DeployBucketModifyPolicy(sr),
-    policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
-    policies.ecr_readonly_policy,
+  let  default_policies: NamedPolicy[] = [
+    newNamedPolicy('publishmetrics', policies.publishMetrics()),
+    newNamedPolicy('modifys3deploy', policies.s3ModifyBuckets([sr.deploy_bucket_name])),
+    newNamedPolicy('modifydns', policies.route53ModifyZone(sr.primary_dns_zone)),
+    newNamedPolicy('ecrreadonly', policies.ecrReadonly()),
 
     // due to cyclic dependency we dont know the final asg ARN yet
     // cycle is autoscaling_group -depends-on-> launch_config -depends-on-> appserver_iampolicies -depends-on-> arn of the asg
     // break cycle by using partially wildcarded arn string
-    policies.autoscalingGroupEnableSetInstanceProtection(
-      'modifyasginstanceprotection',
+    newNamedPolicy('modifyasginstanceprotection', policies.autoscalingGroupEnableSetInstanceProtection(
       `arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/${asgName}`
-    ),
+    )),
   ];
-  if (params.appserver_extra_policies) {
-    appserver_iampolicies = appserver_iampolicies.concat(
-      params.appserver_extra_policies
-    );
+
+  if (params.appserver_use_combined_default_policy) {
+    default_policies = [combineNamedPolicies('asg', default_policies)]
   }
 
+  const appserver_iampolicies = [
+    ...default_policies,
+    ...params.appserver_extra_policies || []
+  ];
+  
   const instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
     name,
@@ -698,6 +712,7 @@ export interface AutoscaleProcessorParams {
    * can be specified here.
    */
   appserver_extra_policies?: policies.NamedPolicy[];
+  appserver_use_combined_default_policy?: boolean;
 
   /** Lower bound of EC2 instances for the Autoscaling group */
   min_size?: number;
@@ -759,6 +774,7 @@ export interface ControllerParams {
    * Additional controller IAM policies can be specified here.
    */
    extra_policies?: policies.NamedPolicy[];
+   use_combined_default_policy?: boolean;
 
    /**
     * Specifies the AMI for the controller. Defaults to an ubuntu 16.04 AMI

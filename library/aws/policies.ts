@@ -1,103 +1,35 @@
-import * as TF from '../../core/core.ts';
 import * as AR from '../../providers/aws/resources.ts';
 import { ArnSecret } from './secrets.ts';
+import {assumeServiceRole, autoscalingGroupEnableSetInstanceProtection as autoscalingGroupEnableSetInstanceProtectionStatements, ecrModifyAll, ecrReadonly, edModify, firehosePutRecord, lambdaInVpc, NamedPolicy, newNamedPolicy, publishMetrics, putLogs, putAnyLogs, route53ModifyZone, s3ModifyBuckets, s3PublicReadonly, s3ReadonlyBuckets, secretReadOnly, sesAllActions, snsFullAccess, snsPostSms, sqsQueueModify, Statement} from './policies_v2.ts';
+export type { NamedPolicy, Statement } from './policies_v2.ts';
 
-export interface NamedPolicy {
-  name: string;
-  policy: {};
-}
+/** 
+ * Legacy functions to create s3 policies.
+ * The preferred approach is to use the functions in policies_v2 to construct statements,
+ * and compose them as required into policies.
+ */
 
-export const assume_role_policy = {
-  name: 'assumerole',
-  policy: {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Action: 'sts:AssumeRole',
-        Principal: { Service: 'ec2.amazonaws.com' },
-        Effect: 'Allow',
-        Sid: '',
-      },
-      {
-        Action: 'sts:AssumeRole',
-        Principal: { Service: 'lambda.amazonaws.com' },
-        Effect: 'Allow',
-        Sid: '',
-      },
-      {
-        Action: 'sts:AssumeRole',
-        Principal: { Service: 'firehose.amazonaws.com' },
-        Effect: 'Allow',
-        Sid: '',
-      },
-      {
-        Action: 'sts:AssumeRole',
-        Principal: { Service: 'apigateway.amazonaws.com' },
-        Effect: 'Allow',
-        Sid: '',
-      },
-    ],
-  },
-};
+export const assume_role_policy = newNamedPolicy('assumerole', [
+    ...assumeServiceRole("ec2.amazonaws.com"),
+    ...assumeServiceRole("lambda.amazonaws.com"),
+    ...assumeServiceRole("firehose.amazonaws.com"),
+    ...assumeServiceRole("apigateway.amazonaws.com"),
+]);
 
-export const publish_metrics_policy = {
-  name: 'publishmetrics',
-  policy: {
-    Statement: [
-      {
-        Action: [
-          'cloudwatch:GetMetricStatistics',
-          'cloudwatch:ListMetrics',
-          'cloudwatch:PutMetricData',
-          'ec2:DescribeTags',
-        ],
-        Effect: 'Allow',
-        Resource: '*',
-      },
-    ],
-  },
-};
+export const publish_metrics_policy = newNamedPolicy('publishmetrics', [
+  ...publishMetrics()
+]);
 
 export function s3ReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
   return s3ReadonlyPolicyMultipleBuckets(name, [bucket], key_prefix)
 }
 
 export function s3ReadonlyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['s3:ListBucket'],
-          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`),
-        },
-        {
-          Action: ['s3:GetObject'],
-          Effect: 'Allow',
-          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, s3ReadonlyBuckets(buckets, key_prefix));
 }
 
 export function s3PublicReadonlyPolicy(name: string, bucket: string, key_prefix: string = '*') {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: ['s3:GetObject'],
-          Effect: 'Allow',
-          Principal: '*',
-          Resource: [`arn:aws:s3:::${bucket}/${key_prefix}`],
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, s3PublicReadonly(bucket, key_prefix));
 }
 
 export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string = '*') {
@@ -105,260 +37,80 @@ export function s3ModifyPolicy(name: string, bucket: string, key_prefix: string 
 }
 
 export function s3ModifyPolicyMultipleBuckets(name: string, buckets: string[], key_prefix: string = '*') {
-
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['s3:ListBucket'],
-          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}`)
-        },
-        {
-          Action: [
-            's3:PutObject',
-            's3:PutObjectAcl',
-            's3:GetObject',
-            's3:GetObjectAcl',
-            's3:DeleteObject',
-          ],
-          Effect: 'Allow',
-          Resource: buckets.map(bucket => `arn:aws:s3:::${bucket}/${key_prefix}`),
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, s3ModifyBuckets(buckets, key_prefix));
 }
 
 export function putLogsPolicy(name: string, log_group: AR.CloudwatchLogGroup) {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: [
-            'logs:CreateLogGroup',
-            'logs:CreateLogStream',
-            'logs:DescribeLogStreams',
-            'logs:PutLogEvents',
-          ],
-          Resource: [`${log_group.arn.value}`],
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, putLogs(log_group));
 }
 
 export function putAnyLogsPolicy(name: string) {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: [
-            'logs:CreateLogGroup',
-            'logs:CreateLogStream',
-            'logs:DescribeLogStreams',
-            'logs:PutLogEvents',
-          ],
-          Resource: ['arn:aws:logs:*:*:*'],
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, putAnyLogs());
 }
 
 export function route53ModifyZonePolicy(
   name: string,
   zone: AR.Route53Zone
 ): NamedPolicy {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: ['route53:*'],
-          Effect: 'Allow',
-          Resource: [`arn:aws:route53:::hostedzone/${zone.zone_id.value}`],
-        },
-        {
-          Action: ['route53:ListHostedZones', 'route53:GetChange'],
-          Effect: 'Allow',
-          Resource: ['*'],
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, route53ModifyZone(zone));
 }
 
 export function sqsQueueModifyPolicy(
   name: string,
   queue: AR.SqsQueue
 ): NamedPolicy {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: 'sqs:*',
-          Effect: 'Allow',
-          Resource: queue.arn.value,
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, sqsQueueModify(queue));
 }
 
-export const ecr_readonly_policy: NamedPolicy = {
-  name: 'ecrreadonly',
-  policy: {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Action: [
-          'ecr:GetAuthorizationToken',
-          'ecr:BatchCheckLayerAvailability',
-          'ecr:GetDownloadUrlForLayer',
-          'ecr:GetRepositoryPolicy',
-          'ecr:DescribeRepositories',
-          'ecr:ListImages',
-          'ecr:DescribeImages',
-          'ecr:BatchGetImage',
-        ],
-        Resource: '*',
-      },
-    ],
-  },
-};
+export const ecr_readonly_policy: NamedPolicy = newNamedPolicy(
+  'ecrreadonly',
+  ecrReadonly()
+);
 
-export const ecr_modify_all_policy: NamedPolicy = {
-  name: 'ecrmodifyall',
-  policy: {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Action: ['ecr:*'],
-        Resource: '*',
-      },
-    ],
-  },
-};
+export const ecr_modify_all_policy: NamedPolicy = 
+newNamedPolicy(
+  'ecrmodifyall',
+  ecrModifyAll()
+);
 
-export const lambda_in_vpc_policy: NamedPolicy = {
-  name: 'vpclambda',
-  policy: {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Action: [
-          'ec2:CreateNetworkInterface',
-          'ec2:DescribeNetworkInterfaces',
-          'ec2:DeleteNetworkInterface',
-        ],
-        Resource: '*',
-      },
-    ],
-  },
-};
+export const lambda_in_vpc_policy: NamedPolicy = newNamedPolicy(
+  'vpclambda',
+  lambdaInVpc()
+);
 
 export function edModifyPolicy(
   name: string,
   esdomain: AR.ElasticsearchDomain
 ): NamedPolicy {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['es:*'],
-          Resource: `${esdomain.arn.value}/*`,
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, edModify(esdomain));
 }
 
 export function secretReadOnlyPolicy(
   name: string,
   arn: ArnSecret
 ): NamedPolicy {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: {
-        Effect: 'Allow',
-        Action: 'secretsmanager:GetSecretValue',
-        Resource: `${arn.value}`,
-      },
-    },
-  };
+  return newNamedPolicy(name, [
+    ...secretReadOnly(arn),
+  ]);
 }
 
-export const ses_all_actions_policy: NamedPolicy = {
-  name: 'ses_full_access',
-  policy: {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Action: ['ses:*'],
-        Resource: '*',
-      },
-    ],
-  },
-};
+export const ses_all_actions_policy: NamedPolicy =  newNamedPolicy(
+  'ses_full_access',
+  sesAllActions()
+);
 
 export function firehosePutRecordPolicy(
   name: string,
   stream: AR.KinesisFirehoseDeliveryStream
 ): NamedPolicy {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Effect: 'Allow',
-          Action: ['firehose:PutRecord', 'firehose:PutRecordBatch'],
-          Resource: stream.arn.value,
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, firehosePutRecord(stream));
 }
 
 export function autoscalingGroupEnableSetInstanceProtection(
   name: string,
   Resource: string
 ) {
-  return {
-    name,
-    policy: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          // Customise Resource to restrict access
-          Resource,
-          Effect: 'Allow',
-          Action: 'autoscaling:SetInstanceProtection',
-        },
-      ],
-    },
-  };
+  return newNamedPolicy(name, autoscalingGroupEnableSetInstanceProtectionStatements(Resource));
 }
 
 /**
@@ -366,44 +118,15 @@ export function autoscalingGroupEnableSetInstanceProtection(
  *
  * https://stackoverflow.com/questions/38871201/authorization-when-sending-a-text-message-using-amazonsnsclient
  */
-export const snsPostSmsPolicy: NamedPolicy = {
-  name: 'snspostsms',
-  policy: {
-    Version: "2012-10-17",
-    Statement: [
-        {
-            Effect: "Deny",
-            Action: [
-                "sns:Publish"
-            ],
-            Resource: "arn:aws:sns:*:*:*"
-        },
-        {
-            Effect: "Allow",
-            Action: [
-                "sns:Publish"
-            ],
-            Resource: "*"
-        }
-    ]
-},
-};
+export const snsPostSmsPolicy: NamedPolicy = newNamedPolicy(
+  'snspostsms',
+  snsPostSms()
+);
 
 /**
  * Full access to SNS
  */
-export const snsFullAccessPolicy: NamedPolicy = {
-  name: 'snsfullaccess',
-  policy: {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Action": [
-                "sns:*"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-        }
-    ]
-  },
-};
+export const snsFullAccessPolicy: NamedPolicy =  newNamedPolicy(
+  'snsfullaccess',
+  snsFullAccess()
+);

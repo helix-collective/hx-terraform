@@ -712,6 +712,8 @@ export interface AutoscaleProcessorParams {
    * can be specified here.
    */
   appserver_extra_policies?: policies.NamedPolicy[];
+
+  /** If true, the internal default policies will be combined into a single one */
   appserver_use_combined_default_policy?: boolean;
 
   /** Lower bound of EC2 instances for the Autoscaling group */
@@ -774,6 +776,8 @@ export interface ControllerParams {
    * Additional controller IAM policies can be specified here.
    */
    extra_policies?: policies.NamedPolicy[];
+
+   /** If true, the internal default policies will be combined into a single one */
    use_combined_default_policy?: boolean;
 
    /**

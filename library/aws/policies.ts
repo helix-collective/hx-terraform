@@ -3,7 +3,7 @@ import { ArnSecret } from './secrets.ts';
 import {assumeServiceRole, autoscalingGroupEnableSetInstanceProtection as autoscalingGroupEnableSetInstanceProtectionStatements, ecrModifyAll, ecrReadonly, edModify, firehosePutRecord, lambdaInVpc, NamedPolicy, newNamedPolicy, publishMetrics, putLogs, putAnyLogs, route53ModifyZone, s3ModifyBuckets, s3PublicReadonly, s3ReadonlyBuckets, secretReadOnly, sesAllActions, snsFullAccess, snsPostSms, sqsQueueModify, Statement} from './policies_v2.ts';
 export type { NamedPolicy, Statement } from './policies_v2.ts';
 
-/** 
+/* 
  * Legacy functions to create s3 policies.
  * The preferred approach is to use the functions in policies_v2 to construct statements,
  * and compose them as required into policies.

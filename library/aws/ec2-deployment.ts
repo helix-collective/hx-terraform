@@ -5,7 +5,8 @@ import * as AR from '../../providers/aws/resources.ts';
 
 import * as aws from './aws.ts';
 import * as roles from './roles.ts';
-import * as policies from './policies.ts';
+import * as policies from './policies_v2.ts';
+
 import * as shared from './shared.ts';
 import * as util from '../util.ts';
 import * as s3 from './s3.ts';
@@ -14,6 +15,9 @@ import * as docker from '../docker.ts';
 import * as camus2 from '../camus2/camus2.ts';
 import * as C from '../../library/camus2/adl-gen/config.ts';
 import * as amis from './amis.ts';
+
+import {newNamedPolicy, combineNamedPolicies, NamedPolicy} from './policies_v2.ts';
+
 
 /**
  *  Creates a logical deployment on a single publicly addressable EC2 instance, including:
@@ -130,19 +134,27 @@ function createIamInstanceProfile(
   sr: shared.SharedResources,
   params: Ec2InstanceDeploymentParams,
 ): AR.IamInstanceProfile {
-  let iampolicies = [
-    policies.publish_metrics_policy,
-    aws.s3DeployBucketReadOnlyPolicy(sr),
-    policies.route53ModifyZonePolicy('modifydns', sr.primary_dns_zone),
-    policies.ecr_readonly_policy,
+
+  let default_policies: NamedPolicy[] = [
+    newNamedPolicy('publishmetrics', policies.publishMetrics()),
+    newNamedPolicy('reads3deploy', policies.s3ReadonlyBuckets([sr.deploy_bucket_name])),
+    newNamedPolicy('modifydns', policies.route53ModifyZone(sr.primary_dns_zone)),
+    newNamedPolicy('ecrreadonly', policies.ecrReadonly()),
   ];
-  if (params.extra_policies) {
-    iampolicies = iampolicies.concat(params.extra_policies);
+
+  if (params.use_combined_default_policy) {
+    default_policies = [combineNamedPolicies('instance', default_policies)]
   }
+
+  let  instance_policies: policies.NamedPolicy[] = [
+    ...default_policies,
+    ...params.extra_policies || [],
+  ];
+
   const instance_profile = roles.createInstanceProfileWithPolicies(
     tfgen,
     name,
-    iampolicies
+    instance_policies,
   );
   return instance_profile;
 }
@@ -265,9 +277,12 @@ export interface Ec2InstanceDeploymentParams {
   // Specifies the AMI for the EC2 instance.
   ami: amis.AmiSelector;
   // The EC2 instance created is given an IAM profile with sufficient access policies to
-  // log metrics, run the deploy tool and create SSL certificates. Additional policies
-  // can be specified here.
+  // log metrics, run the deploy tool and create SSL certificates. Additional policies can be specified here.
   extra_policies?: policies.NamedPolicy[];
+
+  // If true, the internal default policies will be combined into a single one
+  use_combined_default_policy?: boolean,
+
   // The context files are fetched from S3 and made available to hx-deploy-tool for interpolation
   // into the deployed application configuration.
   deploy_contexts?: { name: string; source: C.JsonSource }[];

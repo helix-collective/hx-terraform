@@ -7052,8 +7052,8 @@ export interface BatchComputeEnvironmentComputeResourceParams {
   desired_vcpus?: number;
   ec2_key_pair?: AT.KeyName;
   image_id?: AT.Ami;
-  instance_role: AT.ArnT<"IamInstanceProfile">;
-  instance_type: (string)[];
+  instance_role?: AT.ArnT<"IamInstanceProfile">;
+  instance_type?: (string)[];
   launch_template?: BatchComputeEnvironmentComputeResourceLaunchTemplateParams;
   max_vcpus: number;
   min_vcpus: number;
@@ -7061,7 +7061,7 @@ export interface BatchComputeEnvironmentComputeResourceParams {
   spot_iam_fleet_role?: AT.ArnT<"IamRole">;
   subnets: (SubnetId)[];
   tags?: TF.TagsMap;
-  type: 'EC2' | 'SPOT';
+  type: 'EC2' | 'SPOT' | 'FARGATE' | 'FARGATE_SPOT';
 }
 
 export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: BatchComputeEnvironmentComputeResourceParams) : TF.ResourceFieldMap {
@@ -7071,8 +7071,8 @@ export function fieldsFromBatchComputeEnvironmentComputeResourceParams(params: B
   TF.addOptionalAttribute(fields, "desired_vcpus", params.desired_vcpus, TF.numberValue);
   TF.addOptionalAttribute(fields, "ec2_key_pair", params.ec2_key_pair, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "image_id", params.image_id, TF.stringAliasValue);
-  TF.addAttribute(fields, "instance_role", params.instance_role, TF.resourceArnValue);
-  TF.addAttribute(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "instance_role", params.instance_role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "instance_type", params.instance_type, TF.listValue(TF.stringValue));
   TF.addOptionalBlock(fields, "launch_template", params.launch_template, fieldsFromBatchComputeEnvironmentComputeResourceLaunchTemplateParams);
   TF.addAttribute(fields, "max_vcpus", params.max_vcpus, TF.numberValue);
   TF.addAttribute(fields, "min_vcpus", params.min_vcpus, TF.numberValue);

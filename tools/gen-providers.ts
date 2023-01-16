@@ -2815,8 +2815,8 @@ const batch_compute_environment_compute_resource: RecordDecl = {
     optionalField('desired_vcpus', NUMBER),
     optionalField('ec2_key_pair', stringAliasType('AT.KeyName')),
     optionalField('image_id', stringAliasType('AT.Ami')),
-    requiredField('instance_role', arnType(iam_instance_profile)),
-    requiredField('instance_type', listType(STRING)),
+    optionalField('instance_role', arnType(iam_instance_profile)),
+    optionalField('instance_type', listType(STRING)),
     optionalField('launch_template', recordType(batch_compute_environment_compute_resource_launch_template)),
     requiredField('max_vcpus', NUMBER),
     requiredField('min_vcpus', NUMBER),
@@ -2824,7 +2824,7 @@ const batch_compute_environment_compute_resource: RecordDecl = {
     optionalField('spot_iam_fleet_role', arnType(iam_role)),
     requiredField('subnets', listType(resourceIdType('SubnetId'))),
     optionalField('tags', TAGS_MAP),
-    requiredField('type', enumType(['EC2', 'SPOT'])),
+    requiredField('type', enumType(['EC2', 'SPOT', 'FARGATE', 'FARGATE_SPOT'])),
   ],
 };
 

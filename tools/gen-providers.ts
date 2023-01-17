@@ -65,6 +65,16 @@ const ephemeral_block_device: RecordDecl = {
   ],
 };
 
+const metadata_options: RecordDecl = {
+  name: 'metadata_options',
+  fields: [
+    optionalField('http_endpoint', enumType(["enabled", "disabled"])),
+    optionalField('http_put_response_hop_limit ', NUMBER),
+    optionalField('http_tokens', enumType(["optional", "required"] )),
+    optionalField('instance_metadata_tags', enumType(["enabled", "disabled"])),
+  ],
+};
+
 const instance: RecordDecl = {
   name: 'instance',
   fields: [
@@ -80,6 +90,7 @@ const instance: RecordDecl = {
     optionalField('root_block_device', recordType(instance_root_block_device)),
     optionalField('ebs_block_device', repeatedBlockType(recordType(ebs_block_device))),
     optionalField('ephemeral_block_device', recordType(ephemeral_block_device)),
+    optionalField('metadata_options', recordType(metadata_options)),
     optionalField('user_data', STRING),
     optionalField('user_data_replace_on_change', BOOLEAN),
     optionalField(
@@ -4572,6 +4583,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(instance_root_block_device);
   gen.generateParams(ebs_block_device);
   gen.generateParams(ephemeral_block_device);
+  gen.generateParams(metadata_options);
   gen.generateParams(instance);
   gen.generateParams(ebs_volume);
   gen.generateParams(volume_attachment);

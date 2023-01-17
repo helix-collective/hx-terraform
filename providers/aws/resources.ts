@@ -3425,6 +3425,22 @@ export function fieldsFromEphemeralBlockDeviceParams(params: EphemeralBlockDevic
   return fields;
 }
 
+export interface MetadataOptionsParams {
+  http_endpoint?: 'enabled' | 'disabled';
+  http_put_response_hop_limit ?: number;
+  http_tokens?: 'optional' | 'required';
+  instance_metadata_tags?: 'enabled' | 'disabled';
+}
+
+export function fieldsFromMetadataOptionsParams(params: MetadataOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "http_endpoint", params.http_endpoint, TF.stringValue);
+  TF.addOptionalAttribute(fields, "http_put_response_hop_limit ", params.http_put_response_hop_limit , TF.numberValue);
+  TF.addOptionalAttribute(fields, "http_tokens", params.http_tokens, TF.stringValue);
+  TF.addOptionalAttribute(fields, "instance_metadata_tags", params.instance_metadata_tags, TF.stringValue);
+  return fields;
+}
+
 export interface InstanceParams {
   ami: AT.Ami;
   instance_type: AT.InstanceType;
@@ -3438,6 +3454,7 @@ export interface InstanceParams {
   root_block_device?: InstanceRootBlockDeviceParams;
   ebs_block_device?: (EbsBlockDeviceParams)[];
   ephemeral_block_device?: EphemeralBlockDeviceParams;
+  metadata_options?: MetadataOptionsParams;
   user_data?: string;
   user_data_replace_on_change?: boolean;
   iam_instance_profile?: IamInstanceProfileId;
@@ -3459,6 +3476,7 @@ export function fieldsFromInstanceParams(params: InstanceParams) : TF.ResourceFi
   TF.addOptionalBlock(fields, "root_block_device", params.root_block_device, fieldsFromInstanceRootBlockDeviceParams);
   TF.addRepeatedBlock(fields, "ebs_block_device", params.ebs_block_device, fieldsFromEbsBlockDeviceParams);
   TF.addOptionalBlock(fields, "ephemeral_block_device", params.ephemeral_block_device, fieldsFromEphemeralBlockDeviceParams);
+  TF.addOptionalBlock(fields, "metadata_options", params.metadata_options, fieldsFromMetadataOptionsParams);
   TF.addOptionalAttribute(fields, "user_data", params.user_data, TF.stringValue);
   TF.addOptionalAttribute(fields, "user_data_replace_on_change", params.user_data_replace_on_change, TF.booleanValue);
   TF.addOptionalAttribute(fields, "iam_instance_profile", params.iam_instance_profile, TF.resourceIdValue);

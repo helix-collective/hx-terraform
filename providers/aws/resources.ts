@@ -1198,6 +1198,35 @@ export type EcrRepositoryId = {type:'EcrRepositoryId',value:string};
 export type EcrRepositoryArn = AT.ArnT<"EcrRepository">;
 
 /**
+ *  Manages an ECR repository lifecycle policy.
+ *
+ *  see https://www.terraform.io/docs/providers/aws/r/ecr_lifecycle_policy.html
+ */
+export function createEcrLifecyclePolicy(tfgen: TF.Generator, rname: string, params: EcrLifecyclePolicyParams): EcrLifecyclePolicy {
+  const fields = fieldsFromEcrLifecyclePolicyParams(params);
+  const resource = tfgen.createTypedResource('EcrLifecyclePolicy', 'aws_ecr_lifecycle_policy', rname, fields);
+  const repository: string =  TF.resourceAttribute(resource, "repository");
+  const registry_id: string =  TF.resourceAttribute(resource, "registry_id");
+  const arn: EcrLifecyclePolicyArn = AT.arnT(TF.resourceAttribute(resource, "arn"), 'EcrLifecyclePolicy');
+
+  return {
+    ...resource,
+    repository,
+    registry_id,
+    arn,
+  };
+}
+
+export interface EcrLifecyclePolicy extends TF.ResourceT<'EcrLifecyclePolicy'> {
+  repository: string;
+  registry_id: string;
+  arn: EcrLifecyclePolicyArn;
+}
+
+export type EcrLifecyclePolicyId = {type:'EcrLifecyclePolicyId',value:string};
+export type EcrLifecyclePolicyArn = AT.ArnT<"EcrLifecyclePolicy">;
+
+/**
  *  Provides an EC2 Container Registry Public Repository
  *
  *  see https://www.terraform.io/docs/providers/aws/r/ecrpublic_repository.html
@@ -4515,6 +4544,24 @@ export function fieldsFromIamAccessKeyParams(params: IamAccessKeyParams) : TF.Re
   TF.addOptionalAttribute(fields, "pgp_key", params.pgp_key, TF.stringValue);
   TF.addOptionalAttribute(fields, "status", params.status, TF.stringValue);
   TF.addAttribute(fields, "user", params.user, TF.stringValue);
+  return fields;
+}
+
+export interface EcrLifecyclePolicyParams {
+  /**
+  Name of the repository to apply the policy.
+  */
+  name: string;
+  /**
+  The policy document. This is a JSON formatted string. See more details about Policy Parameters in the official AWS docs.
+  */
+  policy: string;
+}
+
+export function fieldsFromEcrLifecyclePolicyParams(params: EcrLifecyclePolicyParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }
 

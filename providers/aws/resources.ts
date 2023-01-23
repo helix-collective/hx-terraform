@@ -4551,7 +4551,7 @@ export interface EcrLifecyclePolicyParams {
   /**
   Name of the repository to apply the policy.
   */
-  name: string;
+  repository: string;
   /**
   The policy document. This is a JSON formatted string. See more details about Policy Parameters in the official AWS docs.
   */
@@ -4560,7 +4560,7 @@ export interface EcrLifecyclePolicyParams {
 
 export function fieldsFromEcrLifecyclePolicyParams(params: EcrLifecyclePolicyParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
-  TF.addAttribute(fields, "name", params.name, TF.stringValue);
+  TF.addAttribute(fields, "repository", params.repository, TF.stringValue);
   TF.addAttribute(fields, "policy", params.policy, TF.stringValue);
   return fields;
 }

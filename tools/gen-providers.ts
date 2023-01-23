@@ -807,6 +807,14 @@ const ecr_repository_image_scanning_configuration: RecordDecl = {
   ],
 };
 
+const ecr_lifecycle_policy: RecordDecl = {
+  name: 'ecr_lifecycle_policy',
+  fields: [
+    requiredField('name', STRING, ['Name of the repository to apply the policy.']),
+    requiredField('policy', STRING, ['The policy document. This is a JSON formatted string. See more details about Policy Parameters in the official AWS docs.']),
+  ],
+};
+
 const ecr_repository: RecordDecl = {
   name: 'ecr_repository',
   fields: [
@@ -3769,6 +3777,20 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Manages an ECR repository lifecycle policy.',
+    'https://www.terraform.io/docs/providers/aws/r/ecr_lifecycle_policy.html',
+    ecr_lifecycle_policy,
+    [
+      stringAttr('repository'),
+      stringAttr('registry_id'),
+    ],
+    {
+      arn: true,
+    }
+  );
+
+
+  gen.generateResource(
     'Provides an EC2 Container Registry Public Repository',
     'https://www.terraform.io/docs/providers/aws/r/ecrpublic_repository.html',
     ecr_public_repository,
@@ -4646,6 +4668,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(iam_group);
   gen.generateParams(iam_group_policy);
   gen.generateParams(iam_access_key);
+  gen.generateParams(ecr_lifecycle_policy);
   gen.generateParams(ecr_repository);
   gen.generateParams(ecr_repository_image_scanning_configuration);
   gen.generateParams(ecr_repository_encryption_configuration);

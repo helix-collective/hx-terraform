@@ -810,7 +810,7 @@ const ecr_repository_image_scanning_configuration: RecordDecl = {
 const ecr_lifecycle_policy: RecordDecl = {
   name: 'ecr_lifecycle_policy',
   fields: [
-    requiredField('name', STRING, ['Name of the repository to apply the policy.']),
+    requiredField('repository', STRING, ['Name of the repository to apply the policy.']),
     requiredField('policy', STRING, ['The policy document. This is a JSON formatted string. See more details about Policy Parameters in the official AWS docs.']),
   ],
 };

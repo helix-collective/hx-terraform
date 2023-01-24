@@ -48,6 +48,7 @@ export function createEc2Alarms(
   createEc2HighCpuAlarm(tfgen, topic, ec2);
   createEc2HighDiskAlarm(tfgen, topic, ec2, filesystem);
   createEc2HighMemAlarm(tfgen, topic, ec2);
+  createEc2CheckFailureAlarm(tfgen, topic, ec2);
 }
 
 /**
@@ -148,6 +149,29 @@ export function createScalingLowHostsAlarm(
   });
 }
 
+export function createScalingStatusCheckFailedAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  autoscaling_group: AR.AutoscalingGroup
+) {
+  const name = 'status-check-failed';
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanOrEqualToThreshold',
+    evaluation_periods: 1,
+    metric_name: 'StatusCheckFailed',
+    namespace: 'AWS/EC2',
+    period: 120,
+    statistic: 'Maximum',
+    threshold: 1,
+    dimensions: {
+      AutoScalingGroupName: autoscaling_group.name,
+    },
+    alarm_description: 'Sustained status check failed across an autoscaling group',
+    alarm_actions: [topic.arn],
+  });
+}
+
 export type AlarmRootFilesystem = `/dev/${string}`;
 
 /**
@@ -237,6 +261,29 @@ export function createEc2HighMemAlarm(
       InstanceId: ec2.id.value,
     },
     alarm_description: `Sustained high memory for ${tfgen.nameContext().join('_')}`,
+    alarm_actions: [topic.arn],
+  });
+}
+
+export function createEc2StatusCheckFailureAlarm(
+  tfgen: TF.Generator,
+  topic: AR.SnsTopic,
+  ec2: AR.Instance,
+) {
+  const name = 'check-failure';
+  return AR.createCloudwatchMetricAlarm(tfgen, name, {
+    alarm_name: tfgen.scopedName(name).join('_'),
+    comparison_operator: 'GreaterThanOrEqualToThreshold',
+    evaluation_periods: 1,
+    metric_name: 'StatusCheckFailed',
+    namespace: 'AWS/EC2',
+    period: 120,
+    statistic: 'Maximum',
+    threshold: 1,
+    dimensions: {
+      InstanceId: ec2.id.value,
+    },
+    alarm_description: `Sustained status check failures for ${tfgen.nameContext().join('_')}`,
     alarm_actions: [topic.arn],
   });
 }

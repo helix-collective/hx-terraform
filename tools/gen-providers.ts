@@ -737,6 +737,30 @@ const s3_bucket_intelligent_tiering_configuration: RecordDecl = {
   ]
 }
 
+const s3_bucket_server_side_encryption_configuration_rule_apply_server_side_encryption_by_default: RecordDecl = {
+  name: 's3_bucket_server_side_encryption_configuration_rule_apply_server_side_encryption_by_default',
+  fields: [
+    requiredField('sse_algorithm', enumType(["AES256", "aws:kms"])),
+    optionalField('kms_master_key_id', STRING),
+  ]
+}
+const s3_bucket_server_side_encryption_configuration_rule: RecordDecl = {
+  name: 's3_bucket_server_side_encryption_configuration_rule',
+  fields: [
+    optionalField('apply_server_side_encryption_by_default', recordType(s3_bucket_server_side_encryption_configuration_rule_apply_server_side_encryption_by_default)),
+    optionalField('bucket_key_enabled', BOOLEAN),
+  ]
+}
+
+const s3_bucket_server_side_encryption_configuration: RecordDecl = {
+  name: 's3_bucket_server_side_encryption_configuration',
+  fields: [
+    requiredField('bucket', STRING),
+    optionalField('expected_bucket_owner', STRING),
+    requiredField('rule', recordType(s3_bucket_server_side_encryption_configuration_rule))
+  ]
+}
+
 
 const iam_user: RecordDecl = {
   name: 'iam_user',
@@ -3690,6 +3714,13 @@ function generateAws(gen: Generator) {
   );
 
   gen.generateResource(
+    'Provides a S3 bucket server-side encryption configuration resource.',
+    'https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration',
+    s3_bucket_server_side_encryption_configuration,
+    []
+  );
+
+  gen.generateResource(
     'Provides an SNS topic resource',
     'https://www.terraform.io/docs/providers/aws/r/sns_topic.html',
     sns_topic,
@@ -4659,7 +4690,10 @@ function generateAws(gen: Generator) {
   gen.generateParams(s3_bucket_lifecycle_configuration);
   gen.generateParams(s3_bucket_intelligent_tiering_configuration_tiering);
   gen.generateParams(s3_bucket_intelligent_tiering_configuration_filter);
+  gen.generateParams(s3_bucket_server_side_encryption_configuration_rule_apply_server_side_encryption_by_default);
+  gen.generateParams(s3_bucket_server_side_encryption_configuration_rule);
   gen.generateParams(s3_bucket_intelligent_tiering_configuration);
+  gen.generateParams(s3_bucket_server_side_encryption_configuration);
   gen.generateParams(sns_topic);
   gen.generateParams(sns_sms_preferences);
   gen.generateParams(iam_user);

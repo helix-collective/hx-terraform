@@ -157,7 +157,8 @@ export interface CreateS3BucketV2Params {
   bucketParams: AR.S3BucketParams,
   corsParams?: AR.S3BucketCorsConfigurationParams,
   acceleratedParams?: AR.S3BucketAccelerateConfigurationParams,
-  lifecycleParams?: AR.S3BucketLifecycleConfigurationParams
+  lifecycleParams?: AR.S3BucketLifecycleConfigurationParams,
+  serverEncryptionParams?: AR.S3BucketServerSideEncryptionConfigurationParams,
 }
 // CreateS3Bucket for newer versions of terraform
 export function createS3BucketV2(
@@ -190,6 +191,9 @@ export function createS3BucketV2(
   }
   if (params.lifecycleParams != undefined) {
     AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-lifecycle`, params.lifecycleParams)
+  }
+  if (params.serverEncryptionParams != undefined) {
+    AR.createS3BucketServerSideEncryptionConfiguration(tfgen, `${name}-server-encryption`, params.serverEncryptionParams)
   }
   return s3Bucket
 }

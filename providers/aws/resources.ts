@@ -966,6 +966,25 @@ export interface S3BucketIntelligentTieringConfiguration extends TF.ResourceT<'S
 export type S3BucketIntelligentTieringConfigurationId = {type:'S3BucketIntelligentTieringConfigurationId',value:string};
 
 /**
+ *  Provides a S3 bucket server-side encryption configuration resource.
+ *
+ *  see https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration
+ */
+export function createS3BucketServerSideEncryptionConfiguration(tfgen: TF.Generator, rname: string, params: S3BucketServerSideEncryptionConfigurationParams): S3BucketServerSideEncryptionConfiguration {
+  const fields = fieldsFromS3BucketServerSideEncryptionConfigurationParams(params);
+  const resource = tfgen.createTypedResource('S3BucketServerSideEncryptionConfiguration', 'aws_s3_bucket_server_side_encryption_configuration', rname, fields);
+
+  return {
+    ...resource,
+  };
+}
+
+export interface S3BucketServerSideEncryptionConfiguration extends TF.ResourceT<'S3BucketServerSideEncryptionConfiguration'> {
+}
+
+export type S3BucketServerSideEncryptionConfigurationId = {type:'S3BucketServerSideEncryptionConfigurationId',value:string};
+
+/**
  *  Provides an SNS topic resource
  *
  *  see https://www.terraform.io/docs/providers/aws/r/sns_topic.html
@@ -4423,6 +4442,30 @@ export function fieldsFromS3BucketIntelligentTieringConfigurationFilterParams(pa
   return fields;
 }
 
+export interface S3BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultParams {
+  sse_algorithm: 'AES256' | 'aws:kms';
+  kms_master_key_id?: string;
+}
+
+export function fieldsFromS3BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultParams(params: S3BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "sse_algorithm", params.sse_algorithm, TF.stringValue);
+  TF.addOptionalAttribute(fields, "kms_master_key_id", params.kms_master_key_id, TF.stringValue);
+  return fields;
+}
+
+export interface S3BucketServerSideEncryptionConfigurationRuleParams {
+  apply_server_side_encryption_by_default?: S3BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultParams;
+  bucket_key_enabled?: boolean;
+}
+
+export function fieldsFromS3BucketServerSideEncryptionConfigurationRuleParams(params: S3BucketServerSideEncryptionConfigurationRuleParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalBlock(fields, "apply_server_side_encryption_by_default", params.apply_server_side_encryption_by_default, fieldsFromS3BucketServerSideEncryptionConfigurationRuleApplyServerSideEncryptionByDefaultParams);
+  TF.addOptionalAttribute(fields, "bucket_key_enabled", params.bucket_key_enabled, TF.booleanValue);
+  return fields;
+}
+
 export interface S3BucketIntelligentTieringConfigurationParams {
   bucket: string;
   name: string;
@@ -4438,6 +4481,20 @@ export function fieldsFromS3BucketIntelligentTieringConfigurationParams(params: 
   TF.addOptionalAttribute(fields, "status", params.status, TF.stringValue);
   TF.addOptionalBlock(fields, "filter", params.filter, fieldsFromS3BucketIntelligentTieringConfigurationFilterParams);
   TF.addBlock(fields, "tiering", params.tiering, fieldsFromS3BucketIntelligentTieringConfigurationTieringParams);
+  return fields;
+}
+
+export interface S3BucketServerSideEncryptionConfigurationParams {
+  bucket: string;
+  expected_bucket_owner?: string;
+  rule: S3BucketServerSideEncryptionConfigurationRuleParams;
+}
+
+export function fieldsFromS3BucketServerSideEncryptionConfigurationParams(params: S3BucketServerSideEncryptionConfigurationParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "bucket", params.bucket, TF.stringValue);
+  TF.addOptionalAttribute(fields, "expected_bucket_owner", params.expected_bucket_owner, TF.stringValue);
+  TF.addBlock(fields, "rule", params.rule, fieldsFromS3BucketServerSideEncryptionConfigurationRuleParams);
   return fields;
 }
 

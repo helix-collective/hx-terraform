@@ -4099,9 +4099,9 @@ export function fieldsFromLbListenerActionFixedResponseParams(params: LbListener
 export interface LbTargetGroupParams {
   name?: string;
   name_prefix?: string;
-  port: number;
-  protocol: 'TCP' | 'HTTP' | 'HTTPS';
-  vpc_id: VpcId;
+  port?: number;
+  protocol?: 'TCP' | 'HTTP' | 'HTTPS';
+  vpc_id?: VpcId;
   deregistration_delay?: number;
   slow_start?: number;
   proxy_protocol_v2?: boolean;
@@ -4115,9 +4115,9 @@ export function fieldsFromLbTargetGroupParams(params: LbTargetGroupParams) : TF.
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "name", params.name, TF.stringValue);
   TF.addOptionalAttribute(fields, "name_prefix", params.name_prefix, TF.stringValue);
-  TF.addAttribute(fields, "port", params.port, TF.numberValue);
-  TF.addAttribute(fields, "protocol", params.protocol, TF.stringValue);
-  TF.addAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
+  TF.addOptionalAttribute(fields, "port", params.port, TF.numberValue);
+  TF.addOptionalAttribute(fields, "protocol", params.protocol, TF.stringValue);
+  TF.addOptionalAttribute(fields, "vpc_id", params.vpc_id, TF.resourceIdValue);
   TF.addOptionalAttribute(fields, "deregistration_delay", params.deregistration_delay, TF.numberValue);
   TF.addOptionalAttribute(fields, "slow_start", params.slow_start, TF.numberValue);
   TF.addOptionalAttribute(fields, "proxy_protocol_v2", params.proxy_protocol_v2, TF.booleanValue);
@@ -4186,7 +4186,7 @@ export interface LbListenerRuleParams {
   listener_arn: AT.ArnT<"LbListener">;
   priority?: number;
   action: LbListenerActionParams;
-  condition: LbListenerRuleConditionParams;
+  condition: (LbListenerRuleConditionParams)[];
 }
 
 export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : TF.ResourceFieldMap {
@@ -4194,7 +4194,7 @@ export function fieldsFromLbListenerRuleParams(params: LbListenerRuleParams) : T
   TF.addAttribute(fields, "listener_arn", params.listener_arn, TF.resourceArnValue);
   TF.addOptionalAttribute(fields, "priority", params.priority, TF.numberValue);
   TF.addBlock(fields, "action", params.action, fieldsFromLbListenerActionParams);
-  TF.addBlock(fields, "condition", params.condition, fieldsFromLbListenerRuleConditionParams);
+  TF.addRepeatedBlock(fields, "condition", params.condition, fieldsFromLbListenerRuleConditionParams);
   return fields;
 }
 
@@ -4258,6 +4258,9 @@ export interface ElasticsearchDomainParams {
   cluster_config?: ElasticsearchDomainClusterConfigParams;
   snapshot_options?: ElasticsearchDomainSnapshotOptionsParams;
   cognito_options?: ElasticsearchDomainCognitoOptionsParams;
+  domain_endpoint_options?: ElasticsearchDomainEndpointOptionsParams;
+  encrypt_at_rest?: ElasticsearchEncryptAtRestParams;
+  node_to_node_encryption?: ElasticsearchNodeToNodeEncryptionParams;
   vpc_options?: ElasticsearchDomainVpcOptionsParams;
   elasticsearch_version?: string;
   tags?: TF.TagsMap;
@@ -4272,6 +4275,9 @@ export function fieldsFromElasticsearchDomainParams(params: ElasticsearchDomainP
   TF.addOptionalBlock(fields, "cluster_config", params.cluster_config, fieldsFromElasticsearchDomainClusterConfigParams);
   TF.addOptionalBlock(fields, "snapshot_options", params.snapshot_options, fieldsFromElasticsearchDomainSnapshotOptionsParams);
   TF.addOptionalBlock(fields, "cognito_options", params.cognito_options, fieldsFromElasticsearchDomainCognitoOptionsParams);
+  TF.addOptionalBlock(fields, "domain_endpoint_options", params.domain_endpoint_options, fieldsFromElasticsearchDomainEndpointOptionsParams);
+  TF.addOptionalBlock(fields, "encrypt_at_rest", params.encrypt_at_rest, fieldsFromElasticsearchEncryptAtRestParams);
+  TF.addOptionalBlock(fields, "node_to_node_encryption", params.node_to_node_encryption, fieldsFromElasticsearchNodeToNodeEncryptionParams);
   TF.addOptionalBlock(fields, "vpc_options", params.vpc_options, fieldsFromElasticsearchDomainVpcOptionsParams);
   TF.addOptionalAttribute(fields, "elasticsearch_version", params.elasticsearch_version, TF.stringValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
@@ -4361,6 +4367,46 @@ export function fieldsFromElasticsearchDomainPolicyParams(params: ElasticsearchD
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "domain_name", params.domain_name, TF.stringValue);
   TF.addOptionalAttribute(fields, "access_policies", params.access_policies, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchDomainEndpointOptionsParams {
+  custom_endpoint_certificate_arn?: AT.ArnT<"AcmCertificate">;
+  custom_endpoint_enabled?: boolean;
+  custom_endpoint?: string;
+  enforce_https?: boolean;
+  tls_security_policy?: string;
+}
+
+export function fieldsFromElasticsearchDomainEndpointOptionsParams(params: ElasticsearchDomainEndpointOptionsParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "custom_endpoint_certificate_arn", params.custom_endpoint_certificate_arn, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "custom_endpoint_enabled", params.custom_endpoint_enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "custom_endpoint", params.custom_endpoint, TF.stringValue);
+  TF.addOptionalAttribute(fields, "enforce_https", params.enforce_https, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "tls_security_policy", params.tls_security_policy, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchEncryptAtRestParams {
+  enabled: boolean;
+  kms_key_id?: string;
+}
+
+export function fieldsFromElasticsearchEncryptAtRestParams(params: ElasticsearchEncryptAtRestParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "kms_key_id", params.kms_key_id, TF.stringValue);
+  return fields;
+}
+
+export interface ElasticsearchNodeToNodeEncryptionParams {
+  enabled: boolean;
+}
+
+export function fieldsFromElasticsearchNodeToNodeEncryptionParams(params: ElasticsearchNodeToNodeEncryptionParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addAttribute(fields, "enabled", params.enabled, TF.booleanValue);
   return fields;
 }
 
@@ -4645,35 +4691,45 @@ export function fieldsFromVpcConfigParams(params: VpcConfigParams) : TF.Resource
 
 export interface LambdaFunctionParams {
   function_name: string;
+  role: AT.ArnT<"IamRole">;
+  architectures?: (string)[];
+  description?: string;
+  environment?: LambdaFunctionEnvironmentParams;
   filename?: string;
+  handler?: string;
+  image_config?: LambdaFunctionImageConfigParams;
+  image_uri?: string;
+  memory_size?: number;
+  package_type?: string;
+  runtime?: AT.LambdaRuntime;
   s3_bucket?: string;
   s3_key?: string;
   source_code_hash?: string;
-  role: AT.ArnT<"IamRole">;
-  handler: string;
-  runtime: AT.LambdaRuntime;
-  vpc_config?: VpcConfigParams;
-  environment?: LambdaFunctionEnvironmentParams;
-  timeout?: number;
-  memory_size?: number;
   tags?: TF.TagsMap;
+  timeout?: number;
+  vpc_config?: VpcConfigParams;
 }
 
 export function fieldsFromLambdaFunctionParams(params: LambdaFunctionParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addAttribute(fields, "function_name", params.function_name, TF.stringValue);
+  TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
+  TF.addOptionalAttribute(fields, "architectures", params.architectures, TF.listValue(TF.stringValue));
+  TF.addOptionalAttribute(fields, "description", params.description, TF.stringValue);
+  TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
   TF.addOptionalAttribute(fields, "filename", params.filename, TF.stringValue);
+  TF.addOptionalAttribute(fields, "handler", params.handler, TF.stringValue);
+  TF.addOptionalBlock(fields, "image_config", params.image_config, fieldsFromLambdaFunctionImageConfigParams);
+  TF.addOptionalAttribute(fields, "image_uri", params.image_uri, TF.stringValue);
+  TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
+  TF.addOptionalAttribute(fields, "package_type", params.package_type, TF.stringValue);
+  TF.addOptionalAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
   TF.addOptionalAttribute(fields, "s3_bucket", params.s3_bucket, TF.stringValue);
   TF.addOptionalAttribute(fields, "s3_key", params.s3_key, TF.stringValue);
   TF.addOptionalAttribute(fields, "source_code_hash", params.source_code_hash, TF.stringValue);
-  TF.addAttribute(fields, "role", params.role, TF.resourceArnValue);
-  TF.addAttribute(fields, "handler", params.handler, TF.stringValue);
-  TF.addAttribute(fields, "runtime", params.runtime, TF.stringAliasValue);
-  TF.addOptionalBlock(fields, "vpc_config", params.vpc_config, fieldsFromVpcConfigParams);
-  TF.addOptionalBlock(fields, "environment", params.environment, fieldsFromLambdaFunctionEnvironmentParams);
-  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
-  TF.addOptionalAttribute(fields, "memory_size", params.memory_size, TF.numberValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
+  TF.addOptionalAttribute(fields, "timeout", params.timeout, TF.numberValue);
+  TF.addOptionalBlock(fields, "vpc_config", params.vpc_config, fieldsFromVpcConfigParams);
   return fields;
 }
 
@@ -4684,6 +4740,20 @@ export interface LambdaFunctionEnvironmentParams {
 export function fieldsFromLambdaFunctionEnvironmentParams(params: LambdaFunctionEnvironmentParams) : TF.ResourceFieldMap {
   const fields: TF.ResourceFieldMap = [];
   TF.addOptionalAttribute(fields, "variables", params.variables, TF.tagsValue);
+  return fields;
+}
+
+export interface LambdaFunctionImageConfigParams {
+  command?: string;
+  entry_point?: string;
+  working_directory?: string;
+}
+
+export function fieldsFromLambdaFunctionImageConfigParams(params: LambdaFunctionImageConfigParams) : TF.ResourceFieldMap {
+  const fields: TF.ResourceFieldMap = [];
+  TF.addOptionalAttribute(fields, "command", params.command, TF.stringValue);
+  TF.addOptionalAttribute(fields, "entry_point", params.entry_point, TF.stringValue);
+  TF.addOptionalAttribute(fields, "working_directory", params.working_directory, TF.stringValue);
   return fields;
 }
 

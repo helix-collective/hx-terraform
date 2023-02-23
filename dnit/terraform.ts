@@ -1,6 +1,6 @@
 // Tasks for running terraform itself:
 
-import { confirmation, asyncFiles, runAlways, Task, TrackedFile, trackFile, path, task } from './deps.ts'
+import { confirmation, asyncFiles, runAlways, Task, TrackedFile, trackFile, path, task, TaskContext } from './deps.ts'
 import { fileAgeMs, removeIfExists, rglobfiles } from './filesystem.ts';
 import { runTerraform } from './docker.ts';
 import { HxTerraformTasks } from './hx-terraform.ts';
@@ -19,12 +19,29 @@ export interface TerraformTasks extends TasksObject {
   };
 
   generatedTerraformPlan: TrackedFile;
-};
+}
 
 export interface TerraformDeps extends GroupsTasksObject {
   lambda: LambdaTasks,
   hxTerraform: HxTerraformTasks
-};
+}
+
+/**
+ * Convert dnit args to terraform args
+ *
+ * E.g. `dnit plan --refresh=false` will produce `-refresh=false` accepted by terraform
+ */
+function constructExtraArgs(ctx: TaskContext) : string[] {
+  // Convert value args. E.g. --foo=bar
+  const extraArgs : string[] = Object.entries(ctx.args)
+    .filter(([k]) => k !== '_')
+    .map(([k, v]) => `-${k}=${v}`);
+
+  // Convert flag args
+  extraArgs.concat(ctx.args._.map(v => `-${v}`));
+
+  return extraArgs;
+}
 
 export async function makeTerraformTasks(deps: TerraformDeps) : Promise<TerraformTasks> {
   const terraformInit = task({
@@ -46,8 +63,9 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
     name: 'plan',
     description:
       'Execute terraform plan to show pending infrastructure changes and save the plan',
-    action: async () => {
-      await runTerraform(['plan', '-parallelism=20', '-out=tfplan']);
+    action: async ctx => {
+      const extraArgs = constructExtraArgs(ctx);
+      await runTerraform(['plan', '-parallelism=20', '-out=tfplan'].concat(extraArgs));
     },
     deps: [
       terraformInit,
@@ -95,7 +113,8 @@ export async function makeTerraformTasks(deps: TerraformDeps) : Promise<Terrafor
           throw new Error('Apply aborted');
         }
 
-        await runTerraform(['apply', 'tfplan']);
+        const extraArgs = constructExtraArgs(ctx);
+        await runTerraform(['apply', 'tfplan'].concat(extraArgs));
       }
       finally {
         // remove the former plan after use or error

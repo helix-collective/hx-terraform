@@ -434,6 +434,12 @@ export const m4_4xlarge_elasticsearch = esInstanceType(
 export const m4_10xlarge_elasticsearch = esInstanceType(
   'm4.10xlarge.elasticsearch'
 );
+export const m6g_xlarge_elasticsearch = esInstanceType(
+  'm6g.xlarge.elasticsearch'
+);
+export const m6g_large_elasticsearch = esInstanceType(
+  'm6g.large.elasticsearch'
+);
 export const c4_large_elasticsearch = esInstanceType('c4.large.elasticsearch');
 export const c4_xlarge_elasticsearch = esInstanceType(
   'c4.xlarge.elasticsearch'

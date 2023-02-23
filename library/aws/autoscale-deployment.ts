@@ -390,10 +390,11 @@ export type TargetGroupResources = {
   lb_https_listener: AR.LbListener;
 };
 
-export function createAutoscaleTargetGroup(
+export function createAutoscaleTargetGroupInVpc(
   tfgen: TF.Generator,
   name: string,
-  sr: shared.SharedResources,
+  vpc: AR.Vpc,
+  dr: shared.DomainResources,
   lb: LoadBalancerAndListeners,
   autoscaling_group: AR.AutoscalingGroup,
   params: {
@@ -402,13 +403,13 @@ export function createAutoscaleTargetGroup(
     target_group_generate_name?: boolean;
   },
 ): TargetGroupResources {
-  const https_fqdns: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  const https_fqdns: string[] = httpsFqdnsFromEndpoints(dr, params.endpoints);
 
   const alb_target_group = AR.createLbTargetGroup(tfgen, 'tg80', {
     name: params.target_group_generate_name ? tfgen.scopedName(name).join('-') : undefined,
     port: 80,
     protocol: 'HTTP',
-    vpc_id: sr.vpc.id,
+    vpc_id: vpc.id,
     health_check: {
       path: params.health_check.incomingPath,
     },
@@ -422,7 +423,7 @@ export function createAutoscaleTargetGroup(
 
   // An ALB listener rule can only have a maxmium of 5 hosts names. So
   // split into groups of 5 and create a rule for each.
-  const hosts: string[] = httpsFqdnsFromEndpoints(sr, params.endpoints);
+  const hosts: string[] = httpsFqdnsFromEndpoints(dr, params.endpoints);
   const hosts_max5: string[][] = [];
   for (let i=0; i<hosts.length; i+=5) {
     hosts_max5.push(hosts.slice(i,i+5));
@@ -431,11 +432,11 @@ export function createAutoscaleTargetGroup(
     const tfname = 'https' + (i === 0 ? '' : i+1);
     AR.createLbListenerRule(tfgen, tfname, {
       listener_arn: lb.https_listener.arn,
-      condition: {
+      condition: [{
         host_header: {
           values: hosts_max5[i],
         },
-      },
+      }],
       action: {
         type: 'forward',
         target_group_arn: alb_target_group.arn,
@@ -449,7 +450,7 @@ export function createAutoscaleTargetGroup(
         shared.dnsAliasRecord(
           tfgen,
           name + '_lb_' + ep.name + '_' + i,
-          sr,
+          dr,
           url.dnsname,
           {
             name: lb.lb.dns_name,
@@ -466,6 +467,21 @@ export function createAutoscaleTargetGroup(
     target_group: alb_target_group,
     lb_https_listener: lb.https_listener,
   };
+}
+
+export function createAutoscaleTargetGroup(
+  tfgen: TF.Generator,
+  name: string,
+  sr: shared.SharedResources,
+  lb: LoadBalancerAndListeners,
+  autoscaling_group: AR.AutoscalingGroup,
+  params: {
+    endpoints: EndPoint[];
+    health_check: C.HealthCheckConfig;
+    target_group_generate_name?: boolean;
+  },
+): TargetGroupResources {
+  return createAutoscaleTargetGroupInVpc(tfgen, name, sr.vpc, sr, lb, autoscaling_group, params);
 }
 
 function handleMakeAcmCertificateCases(tfgen: TF.Generator, sr: shared.SharedResources, endpoints: EndPoint[], src: AcmCertificateSource ) {
@@ -600,7 +616,7 @@ function appUserOrDefault(app_user?: string): string {
 }
 
 function deployToolEndpoints(
-  sr: shared.SharedResources,
+  dr: shared.DomainResources,
   endpoints: EndPoint[]
 ): camus2.EndPointMap {
   const endPointMap: camus2.EndPointMap = {};
@@ -608,7 +624,7 @@ function deployToolEndpoints(
     const fqdns: string[] = [];
     ep.urls.forEach(url => {
       if (url.kind === 'https') {
-        fqdns.push(shared.fqdn(sr, url.dnsname));
+        fqdns.push(shared.fqdn(dr, url.dnsname));
         if (url.proxied_from !== undefined) {
           url.proxied_from.forEach(pfqdns => {
             fqdns.push(pfqdns);
@@ -874,7 +890,7 @@ export interface BootScriptFactory {
 // Factory to build controller bootscripts
 class ControllerBootScriptFactory implements BootScriptFactory {
   constructor(
-    readonly sr: shared.SharedResources,
+    readonly dr: shared.DomainResources,
     readonly params: AutoscaleProcessorParams,
     readonly deployContexts: camus2.DeployContext[],
     readonly endpoints: EndPoint[],
@@ -892,7 +908,7 @@ class ControllerBootScriptFactory implements BootScriptFactory {
     const releases_s3 = this.params.releases_s3;
     const state_s3 = this.params.state_s3;
 
-    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+    const proxy_endpoints = deployToolEndpoints(this.dr, this.endpoints);
 
     return camus2.configureCamus2({
         username: app_user,
@@ -917,7 +933,7 @@ class ControllerBootScriptFactory implements BootScriptFactory {
 // Factory to build asg instance bootscripts
 class AsgBootScriptFactory implements BootScriptFactory {
   constructor(
-    readonly sr: shared.SharedResources,
+    readonly dr: shared.DomainResources,
     readonly params: AutoscaleProcessorParams,
     readonly endpoints: EndPoint[],
     readonly nginxDockerVersion: string,
@@ -934,7 +950,7 @@ class AsgBootScriptFactory implements BootScriptFactory {
     const state_s3 = this.params.state_s3;
     const deploy_contexts: camus2.DeployContext[] =
       this.params.appserver_deploy_contexts || [];
-    const proxy_endpoints = deployToolEndpoints(this.sr, this.endpoints);
+    const proxy_endpoints = deployToolEndpoints(this.dr, this.endpoints);
 
     return camus2.configureCamus2({
         username: app_user,
@@ -953,5 +969,4 @@ class AsgBootScriptFactory implements BootScriptFactory {
     bs.include(this.configure())
     return bs
   }
-};
-
+}

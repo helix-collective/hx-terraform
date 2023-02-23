@@ -889,9 +889,9 @@ const lb_target_group: RecordDecl = {
   fields: [
     optionalField('name', STRING),
     optionalField('name_prefix', STRING),
-    requiredField('port', NUMBER),
-    requiredField('protocol', enumType(['TCP', 'HTTP', 'HTTPS'])),
-    requiredField('vpc_id', resourceIdType('VpcId')),
+    optionalField('port', NUMBER),
+    optionalField('protocol', enumType(['TCP', 'HTTP', 'HTTPS'])),
+    optionalField('vpc_id', resourceIdType('VpcId')),
     optionalField('deregistration_delay', NUMBER),
     optionalField('slow_start', NUMBER),
     optionalField('proxy_protocol_v2', BOOLEAN),
@@ -981,7 +981,7 @@ const lb_listener_rule: RecordDecl = {
     requiredField('listener_arn', arnType(lb_listener)),
     optionalField('priority', NUMBER),
     requiredField('action', recordType(lb_listener_action)),
-    requiredField('condition', recordType(lb_listener_rule_condition)),
+    requiredField('condition', repeatedBlockType(recordType(lb_listener_rule_condition))),
   ],
 };
 
@@ -1126,6 +1126,32 @@ const elasticsearch_domain_cognito_options: RecordDecl = {
   ],
 };
 
+const elasticsearch_domain_endpoint_options: RecordDecl = {
+  name: 'elasticsearch_domain_endpoint_options',
+  fields: [
+    optionalField('custom_endpoint_certificate_arn', arnType(acm_certificate)),
+    optionalField('custom_endpoint_enabled', BOOLEAN),
+    optionalField('custom_endpoint', STRING),
+    optionalField('enforce_https', BOOLEAN),
+    optionalField('tls_security_policy', STRING),
+  ],
+};
+
+const elasticsearch_node_to_node_encryption: RecordDecl = {
+  name: 'elasticsearch_node_to_node_encryption',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+  ],
+};
+
+const elasticsearch_encrypt_at_rest: RecordDecl = {
+  name: 'elasticsearch_encrypt_at_rest',
+  fields: [
+    requiredField('enabled', BOOLEAN),
+    optionalField('kms_key_id', STRING),
+  ],
+};
+
 const elasticsearch_domain: RecordDecl = {
   name: 'elasticsearch_domain',
   fields: [
@@ -1144,6 +1170,18 @@ const elasticsearch_domain: RecordDecl = {
     optionalField(
       'cognito_options',
       recordType(elasticsearch_domain_cognito_options)
+    ),
+    optionalField(
+      'domain_endpoint_options',
+      recordType(elasticsearch_domain_endpoint_options)
+    ),
+    optionalField(
+      'encrypt_at_rest',
+      recordType(elasticsearch_encrypt_at_rest)
+    ),
+    optionalField(
+      'node_to_node_encryption',
+      recordType(elasticsearch_node_to_node_encryption)
     ),
     optionalField('vpc_options', recordType(elasticsearch_domain_vpc_options)),
     optionalField('elasticsearch_version', STRING),
@@ -1476,22 +1514,36 @@ const lambda_function_environment: RecordDecl = {
   fields: [optionalField('variables', TAGS_MAP)],
 };
 
+const lambda_function_image_config: RecordDecl = {
+  name: 'lambda_function_image_config',
+  fields: [
+    optionalField('command', STRING),
+    optionalField('entry_point', STRING),
+    optionalField('working_directory', STRING),
+  ],
+};
+
 const lambda_function: RecordDecl = {
   name: 'lambda_function',
   fields: [
     requiredField('function_name', STRING),
+    requiredField('role', arnType(iam_role)),
+    optionalField('architectures', listType(STRING)),
+    optionalField('description', STRING),
+    optionalField('environment', recordType(lambda_function_environment)),
     optionalField('filename', STRING),
+    optionalField('handler', STRING),
+    optionalField('image_config', recordType(lambda_function_image_config)),
+    optionalField('image_uri', STRING),
+    optionalField('memory_size', NUMBER),
+    optionalField('package_type', STRING),
+    optionalField('runtime', stringAliasType('AT.LambdaRuntime')),
     optionalField('s3_bucket', STRING),
     optionalField('s3_key', STRING),
     optionalField('source_code_hash', STRING),
-    requiredField('role', arnType(iam_role)),
-    requiredField('handler', STRING),
-    requiredField('runtime', stringAliasType('AT.LambdaRuntime')),
-    optionalField('vpc_config', recordType(vpc_config)),
-    optionalField('environment', recordType(lambda_function_environment)),
-    optionalField('timeout', NUMBER),
-    optionalField('memory_size', NUMBER),
     optionalField('tags', TAGS_MAP),
+    optionalField('timeout', NUMBER),
+    optionalField('vpc_config', recordType(vpc_config)),
   ],
 };
 
@@ -3886,6 +3938,9 @@ function generateAws(gen: Generator) {
   gen.generateParams(elasticsearch_domain_vpc_options);
   gen.generateParams(elasticsearch_domain_cognito_options);
   gen.generateParams(elasticsearch_domain_policy);
+  gen.generateParams(elasticsearch_domain_endpoint_options);
+  gen.generateParams(elasticsearch_encrypt_at_rest);
+  gen.generateParams(elasticsearch_node_to_node_encryption);
   gen.generateParams(acm_certificate);
   gen.generateParams(acm_certificate_validation);
   gen.generateParams(lb_listener_certificate);
@@ -3904,6 +3959,7 @@ function generateAws(gen: Generator) {
   gen.generateParams(vpc_config);
   gen.generateParams(lambda_function);
   gen.generateParams(lambda_function_environment);
+  gen.generateParams(lambda_function_image_config);
   gen.generateParams(lambda_permission);
   gen.generateParams(cloudwatch_event_rule);
   gen.generateParams(cloudwatch_event_target);

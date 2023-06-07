@@ -29,6 +29,7 @@ export interface AwsParams {
   region?: AT.Region;
   version?: string;
   alias?: string;
+  profile?: string;
   // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/resource-tagging#ignoring-changes-in-all-resources
   // mapped to
   // ignore_tags {
@@ -47,6 +48,9 @@ export function fieldsFromAwsParams(params: AwsParams): hcl2.BodyItem[] {
   }
   if (params.alias) {
     fields.push(hcl2.attribute('alias', hcl2.stringLit(params.alias)));
+  }
+  if (params.profile) {
+    fields.push(hcl2.attribute('profile', hcl2.stringLit(params.profile)));
   }
   if (params.ignoreTagPrefixes) {
     const prefixes = params.ignoreTagPrefixes.map((p) => hcl2.stringLit(p));

@@ -4892,6 +4892,7 @@ export interface SqsQueueParams {
   redrive_policy?: string;
   fifo_queue?: boolean;
   content_based_deduplication?: boolean;
+  sqs_managed_sse_enabled?: boolean;
   tags?: TF.TagsMap;
 }
 
@@ -4908,6 +4909,7 @@ export function fieldsFromSqsQueueParams(params: SqsQueueParams) : TF.ResourceFi
   TF.addOptionalAttribute(fields, "redrive_policy", params.redrive_policy, TF.stringValue);
   TF.addOptionalAttribute(fields, "fifo_queue", params.fifo_queue, TF.booleanValue);
   TF.addOptionalAttribute(fields, "content_based_deduplication", params.content_based_deduplication, TF.booleanValue);
+  TF.addOptionalAttribute(fields, "sqs_managed_sse_enabled", params.sqs_managed_sse_enabled, TF.booleanValue);
   TF.addOptionalAttribute(fields, "tags", params.tags, TF.tagsValue);
   return fields;
 }

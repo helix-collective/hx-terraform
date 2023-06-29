@@ -1014,6 +1014,7 @@ const sqs_queue: RecordDecl = {
     optionalField('redrive_policy', STRING),
     optionalField('fifo_queue', BOOLEAN),
     optionalField('content_based_deduplication', BOOLEAN),
+    optionalField('sqs_managed_sse_enabled', BOOLEAN),
     optionalField('tags', TAGS_MAP),
   ],
 };

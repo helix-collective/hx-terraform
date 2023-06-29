@@ -109,7 +109,7 @@ export function createInstance(
     tfgen.ignoreChanges(ec2, 'user_data');
   }
   // It seems named tags like in the documentation doesn't work
-  // TODO: (jon) open a ticket to terraform 
+  // TODO: (jon) open a ticket to terraform
   tfgen.ignoreChanges(ec2, "tags")
   // Ignore changes in the following tags
   // params0.tags_to_ignore?.forEach((tag) => {
@@ -165,7 +165,7 @@ export function createS3BucketV2(
   tfgen: TF.Generator,
   name: string,
   params: CreateS3BucketV2Params
-  
+
 ): AR.S3Bucket {
   const _bucketParams = {
     ...params.bucketParams,
@@ -206,14 +206,14 @@ export interface EnableS3IntelligentTieringParams {
   /**
    * How many days after object creation to enable intelligent tiering. Default 0
    */
-  days?: number 
+  days?: number
 }
 // Enable intelligent tiering to a bucket
 export function enableS3IntelligentTiering(
   tfgen: TF.Generator,
   name: string,
   params: EnableS3IntelligentTieringParams
-  ) { 
+  ) {
     AR.createS3BucketLifecycleConfiguration(tfgen, `${name}-intelligent-tiering-lifecycle`, {
       bucket: params.bucketName,
       rule: [
@@ -261,6 +261,7 @@ export function createSqsQueue(
   const sname = tfgen.scopedName(name).join('_');
   const params: AR.SqsQueueParams = {
     name: sname,
+    sqs_managed_sse_enabled: true,
     tags: tfgen.tagsContext(),
   };
   customize(params);
